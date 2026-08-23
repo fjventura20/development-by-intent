@@ -118,6 +118,12 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [experiment protocol](docs
 
 The immediate goal is not adoption. It is **validation, falsification, and co-development**.
 
+### Maintenance model
+
+This repository is maintained on a **best-effort research basis**. There is no support SLA, fixed release schedule, or guarantee that every issue or pull request will receive a response. Evidence-bearing reports and reproducible experiments receive priority over feature requests or general support questions.
+
+The project is intentionally structured to remain lightweight for its maintainer. Contributors should treat the repository as a public laboratory notebook and experimental testbed, not as a supported software product.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
