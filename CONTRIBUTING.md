@@ -48,3 +48,9 @@ Negative results are welcome.
 ## Scope discipline
 
 This repository is studying a software-development methodology. Avoid broad claims about AI replacing software engineering unless directly supported by reproducible evidence.
+
+## Maintainer expectations
+
+This is a best-effort research project, not a supported product. Opening an issue or pull request does not create an obligation for the maintainer to respond, review, merge, or provide technical support.
+
+To keep the project sustainable, priority is given to contributions that add reproducible evidence, challenge a specific claim, improve an experiment, or materially clarify the methodology. General feature requests and open-ended support requests may be closed without action.
