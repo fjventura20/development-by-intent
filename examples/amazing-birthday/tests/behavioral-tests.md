@@ -2,9 +2,19 @@
 
 These tests are intended to determine whether the reconstructed application preserves behavior rather than merely replaying a development example.
 
-## Important status
+## Test-set status
 
-The fixed dates below are **provisional until the verbatim development transcript is imported and checked**. A canonical withheld test date must not appear as a development example in the source transcript. If any candidate appears there, replace it before the first public scored run and commit that change before testing.
+**Frozen test set: v1.0 — 2026-08-24**
+
+The authoritative development transcript was checked before freezing these dates. The transcript's demonstrated birthdates are:
+
+- December 7, 1951
+- February 20, 1952
+- August 24, 1931
+
+None of the three fixed test dates below appears in the development transcript. They are therefore suitable as withheld/new-input tests for the first public scored reconstruction run.
+
+Do not change these dates after observing a reconstruction result. Any future test-set revision should receive a new version and preserve the prior results.
 
 ## Test 1 — Strong exact-date anchor
 
