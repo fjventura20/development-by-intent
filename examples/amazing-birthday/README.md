@@ -33,7 +33,7 @@ The historical Amazing Birthday experiment completed that cycle successfully for
 The example deliberately separates three classes of material:
 
 1. **Original evidence** — verbatim development conversation and any preserved artifacts actually produced during the historical experiment.
-2. **Derived artifacts** — behavioral baselines, test criteria, and explanatory documents created from the original evidence.
+2. **Derived artifacts** — behavioral baselines, test criteria, traceability maps, and explanatory documents created from the original evidence.
 3. **Public reproduction artifacts** — instructions and packages created to let an independent developer repeat the experiment today.
 
 A recreated artifact must never be labeled as an original historical artifact.
@@ -46,7 +46,9 @@ amazing-birthday/
 ├── TUTORIAL.md
 ├── 01-original-intent.md
 ├── 02-development-transcript/
-│   └── README.md
+│   ├── README.md
+│   ├── amazing_birthday_transcript.txt
+│   └── behavior-derivation.md
 ├── 03-behavioral-baseline.md
 ├── 04-durable-package/
 │   ├── README.md
@@ -76,6 +78,12 @@ Amazing Birthday [date]
 
 For a supplied date including year, the application creates an engaging historical birthday story rather than an exhaustive "on this day" list. It selects a small number of strong connections, explains why they matter, distinguishes exact-date events from nearby context, and places the person's birth within the larger historical and technological arc of a lifetime.
 
+## Inspect the original development evidence
+
+The preserved word-for-word development record is in [`02-development-transcript/amazing_birthday_transcript.txt`](02-development-transcript/amazing_birthday_transcript.txt). Its provenance and checksum are recorded in [`02-development-transcript/README.md`](02-development-transcript/README.md).
+
+The separate [`behavior-derivation.md`](02-development-transcript/behavior-derivation.md) shows how the derived behavioral baseline traces back to explicit requirements and demonstrated behavior without modifying the transcript.
+
 ## Why Amazing Birthday is a useful specimen
 
 It exercises capabilities that already exist in a general-purpose AI system rather than asking the developer to implement them one by one:
@@ -96,10 +104,10 @@ Use the repository-wide [experiment protocol](../../docs/experiment-protocol.md)
 
 The most important rule is isolation: the reconstructing environment should receive only the artifact set declared for that experiment. Do not silently rely on prior Amazing Birthday context or memory.
 
-Then run the withheld/new-input tests in [tests/behavioral-tests.md](tests/behavioral-tests.md) and score the result using [06-validation.md](06-validation.md).
+Then run the frozen v1.0 withheld/new-input tests in [tests/behavioral-tests.md](tests/behavioral-tests.md) and score the result using [06-validation.md](06-validation.md).
 
 ## Current publication status
 
-The public example structure and behavioral specification are being assembled from the completed experiment. The verbatim original development transcript is intentionally not reconstructed from memory; it will be committed only from the preserved word-for-word source.
+The authoritative word-for-word development transcript has now been imported and its provenance recorded. The derived behavioral baseline has been checked against that transcript, and the first public withheld test set is frozen as v1.0 using dates that do not appear in the development record.
 
-That limitation is evidence hygiene, not a missing-design shortcut.
+The example is therefore ready for an independent clean-room reproduction run. Historical reconstruction outputs should only be added to `results/` when original evidence is available; recreated outputs must be labeled as new reproduction results, not historical artifacts.
