@@ -1,8 +1,8 @@
-# Fair Price — Canonical Example
+# Fair Price — Planned Follow-on Example
 
 **Status: being rebuilt for publication**
 
-Fair Price is intended to be the first fully reproducible Development by Intent example.
+Fair Price is intended to be the second canonical Development by Intent example, following the smaller Amazing Birthday worked example.
 
 ## Application purpose
 
@@ -14,7 +14,7 @@ A normal result should emphasize a recommended budget and a defensible fair-pric
 
 ## Why this example
 
-Fair Price is useful as a research specimen because it combines:
+Fair Price is useful as a follow-on research specimen because it combines:
 
 - current external research
 - judgment rather than simple retrieval
@@ -24,6 +24,8 @@ Fair Price is useful as a research specimen because it combines:
 - behavior that can be tested by examples
 
 while remaining small enough for independent reconstruction.
+
+Compared with Amazing Birthday, Fair Price moves the research program from a narrative/research micro-app toward a decision-oriented application with practical budgeting consequences.
 
 ## Planned publication artifacts
 
