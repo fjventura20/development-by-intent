@@ -78,23 +78,40 @@ See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
 │   ├── terminology.md
 │   └── experiment-protocol.md
 ├── examples/
+│   ├── amazing-birthday/
+│   │   ├── README.md
+│   │   ├── 01-original-intent.md
+│   │   ├── 02-development-transcript/
+│   │   ├── 03-behavioral-baseline.md
+│   │   ├── 04-durable-package/
+│   │   ├── 05-reconstruction/
+│   │   ├── 06-validation.md
+│   │   ├── tests/
+│   │   └── results/
 │   └── fair-price/
-│       ├── README.md
-│       ├── original-transcript/
-│       ├── preserved-artifacts/
-│       ├── reconstruction/
-│       └── tests/
 └── experiments/
     └── README.md
 ```
 
-## First canonical example: Fair Price
+## First canonical example: Amazing Birthday
 
-The first planned canonical example is **Fair Price**, a small conversational application that researches current market information and answers a practical budgeting question for a homeowners association: *What should we reasonably expect to pay for this service or project?*
+The first canonical worked example is **[Amazing Birthday](examples/amazing-birthday/README.md)**, a small conversational application that turns an exact birthdate into a selective historical birthday story.
 
-It is intentionally small enough to reconstruct and test, while still requiring research, judgment, output constraints, and iterative behavioral refinement.
+It is useful as a first specimen because the application is easy to understand but its behavior is not a simple lookup. It requires research, relevance judgment, exact-date discipline, narrative synthesis, and the ability to generalize the same behavioral pattern to a date not used during development.
 
-The original development transcript will be preserved alongside derived artifacts so contributors can compare multiple reconstruction strategies.
+The historical experiment completed the full lifecycle:
+
+`Develop → Preserve → Isolate → Reconstruct → Test → Continue`
+
+The repository example separates original evidence from derived artifacts and provides a protocol another developer can use to attempt the reconstruction independently.
+
+The goal is not to reproduce identical prose. The goal is to determine whether the **behavior that makes Amazing Birthday recognizably the same application** survives reconstruction.
+
+## Next planned example: Fair Price
+
+**[Fair Price](examples/fair-price/README.md)** is the next planned example. It adds current market research, budgeting judgment, domain constraints, and practical recommendations for homeowners-association services and projects.
+
+If Amazing Birthday tests conversational development and durability in a research-and-narrative micro-app, Fair Price asks whether the method extends to a more decision-oriented application.
 
 ## How to participate
 
