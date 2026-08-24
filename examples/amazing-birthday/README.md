@@ -6,6 +6,20 @@ Amazing Birthday is the first canonical worked example for Development by Intent
 
 The purpose of this example is not to showcase a birthday report. It is to make the DbI claim inspectable and reproducible.
 
+## Try it yourself first
+
+If you want to **experience Development by Intent before studying the experiment**, start with [`TUTORIAL.md`](TUTORIAL.md).
+
+The tutorial begins with a simple intent, not the finished behavioral specification. You will generate a first attempt, judge it, refine the behavior conversationally, test it on another date, establish a short trigger, and then see how durability and reconstruction enter the lifecycle.
+
+This distinction is deliberate:
+
+- the **tutorial** teaches the development method;
+- the **development transcript** preserves what historically happened;
+- the **reconstruction artifacts** test whether the application can survive its original context.
+
+Do not use the tutorial as input to a clean-room reconstruction experiment; doing so exposes development decisions and contaminates the test.
+
 ## What this example demonstrates
 
 The lifecycle under test is:
@@ -29,6 +43,7 @@ A recreated artifact must never be labeled as an original historical artifact.
 ```text
 amazing-birthday/
 ├── README.md
+├── TUTORIAL.md
 ├── 01-original-intent.md
 ├── 02-development-transcript/
 │   └── README.md
