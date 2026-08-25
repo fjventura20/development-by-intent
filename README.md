@@ -61,6 +61,7 @@ Those are research questions.
 8. Can intent, examples, tests, and governance replace meaningful portions of application-specific code?
 9. How much faster are development, debugging, and modification cycles in practice?
 10. Which behaviors arise from explicit intent versus one-time generation artifacts?
+11. Can a durability package preserve enough governed intent for a different AI platform to reconstruct the same application behavior using its own implementation mechanism?
 
 See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
 
@@ -123,7 +124,15 @@ The [Grok reconstruction record](experiments/2026-08-25-amazing-birthday-grok-re
 
 These observations provide preliminary evidence that governed behavioral intent can survive a change of AI provider and implementation mechanism. They do **not** yet establish exact equivalence, deterministic portability, or readiness for transactional and regulated enterprise systems.
 
-A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
+This leads to a stronger working hypothesis: **the portable invariant may be application behavior rather than implementation**. One AI platform may realize an application conversationally, another may generate code, and another may create a platform-native skill. If each implementation satisfies the same governed behavioral contract and acceptance criteria, the application may remain recognizably the same despite a different technical realization.
+
+A candidate AI-native portability path is:
+
+`conversational development → durability package → different AI platform → platform-selected implementation → validated application behavior`
+
+We refer to this provisionally as **behavioral portability** or **intent portability**. If repeated experiments support the hypothesis across more complex applications, a durability package could become an **AI-native application portability layer**: instead of porting source code, a receiving AI reconstructs and validates the intended behavior.
+
+A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, provenance, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
 
 ## Next planned example: Fair Price
 
