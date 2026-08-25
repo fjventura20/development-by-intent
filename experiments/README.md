@@ -6,6 +6,16 @@ Recommended naming:
 
 `YYYY-MM-DD-short-experiment-name`
 
+## Active
+
+### Amazing Birthday — Hermes-operated Claude portability 001
+
+**Status: PREREGISTERED AND DISPATCHED.**
+
+Hermes is operating a clean cross-provider reconstruction against Anthropic Claude using only the same frozen Amazing Birthday artifact-only package used by the prior ChatGPT clean-room experiment. The three v1.0 behavioral witnesses remain withheld from the Claude target until reconstruction is frozen. Hermes will preserve raw outputs and perform preliminary scoring; ChatGPT will independently review the returned evidence before the experiment status is finalized.
+
+See [`2026-08-25-amazing-birthday-hermes-operated-claude-001/`](2026-08-25-amazing-birthday-hermes-operated-claude-001/).
+
 ## Completed
 
 ### Amazing Birthday — artifact-only clean-room reconstruction 001
@@ -28,7 +38,7 @@ See [`2026-08-25-amazing-birthday-grok-reconstruction-001/`](2026-08-25-amazing-
 
 ## Suggested next experiments
 
-1. Amazing Birthday — preregistered cross-provider artifact-only reconstruction
+1. Amazing Birthday — repeat cross-provider artifact-only reconstruction
 2. Amazing Birthday — repeat artifact-only reconstruction in another fresh run
 3. Amazing Birthday — full-transcript reconstruction comparison
 4. Amazing Birthday — minimum recovery-floor / artifact-removal experiment
