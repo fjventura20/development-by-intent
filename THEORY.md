@@ -49,6 +49,22 @@ Therefore a central DbI research problem is:
 
 > What must be preserved so that another capable system can reconstruct the intended application with acceptable behavioral fidelity?
 
+## The behavioral portability hypothesis
+
+Early cross-platform reconstruction experiments suggest a stronger possibility than recovery within one AI environment: a durable package may preserve enough governed intent for a different AI platform to reconstruct recognizably equivalent application behavior using a different implementation mechanism.
+
+The proposed invariant is therefore **behavior**, not source code or runtime structure.
+
+A candidate portability path is:
+
+`conversational development → governed behavioral contract → durability package → different AI platform → platform-selected implementation → validated application behavior`
+
+Under this hypothesis, the durable asset is the application's governed behavioral contract: intent, constraints, examples, acceptance criteria, tests, provenance, and evidence. Generated code, skills, workflows, prompts, and integrations may be deployment artifacts selected or recreated by the receiving AI system.
+
+This is provisionally termed **behavioral portability** or **intent portability**. If repeated experiments support it across more complex applications, durability packages could function as an AI-native application portability layer: applications would be migrated by reconstructing validated behavior rather than by porting a particular implementation.
+
+This remains a research hypothesis. Current evidence does not establish exact equivalence, deterministic portability, or suitability for transactional, regulated, safety-critical, or high-assurance systems.
+
 ## The generation-artifact hypothesis
 
 A failed reconstruction does not automatically prove that a derived specification omitted information from the original conversation. At least three explanations exist:
