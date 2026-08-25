@@ -90,7 +90,9 @@ See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
 │   │   └── results/
 │   └── fair-price/
 └── experiments/
-    └── README.md
+    ├── README.md
+    ├── 2026-08-24-amazing-birthday-clean-room-001/
+    └── 2026-08-25-amazing-birthday-grok-reconstruction-001/
 ```
 
 ## First canonical example: Amazing Birthday
@@ -106,6 +108,22 @@ The historical experiment completed the full lifecycle:
 The repository example separates original evidence from derived artifacts and provides a protocol another developer can use to attempt the reconstruction independently.
 
 The goal is not to reproduce identical prose. The goal is to determine whether the **behavior that makes Amazing Birthday recognizably the same application** survives reconstruction.
+
+### Cross-platform reconstruction evidence
+
+Amazing Birthday has now produced recognizable reconstructed behavior in independent AI environments using different implementation mechanisms:
+
+| Environment | Implementation mechanism | Current evidence status |
+|---|---|---|
+| ChatGPT | Reconstructed conversational behavior | Preregistered clean-room PASS |
+| Claude | AI-selected generated application code | Observed behavioral reconstruction |
+| Grok | Platform-native skill | Preliminary behavioral PASS |
+
+The [Grok reconstruction record](experiments/2026-08-25-amazing-birthday-grok-reconstruction-001/) documents the inputs, timing, generated output, limitations, and assessment.
+
+These observations provide preliminary evidence that governed behavioral intent can survive a change of AI provider and implementation mechanism. They do **not** yet establish exact equivalence, deterministic portability, or readiness for transactional and regulated enterprise systems.
+
+A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
 
 ## Next planned example: Fair Price
 
