@@ -19,7 +19,7 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-CHATGPT-001 | Amazing Birthday | ChatGPT → fresh ChatGPT environment | Frozen behavioral baseline + reconstruction prompt | Reconstructed conversational behavior | Preregistered replication | **PASS — 60/60** | Same provider; does not by itself establish cross-provider portability |
 | BP-AB-CLAUDE-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Claude | Original transcript + durability package | Claude-generated application code | Observational demonstration | Recognizable reconstruction | Not preregistered; implementation was evaluated observationally rather than against the frozen three-test rubric |
 | BP-AB-GROK-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Grok | Original transcript + durability package | Grok platform-native skill | Observational demonstration | **Preliminary behavioral PASS** | Factual regression not independently verified; not a preregistered clean-room run |
-| BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt; tests withheld until freeze | Claude-selected | Preregistered replication | **ACTIVE — dispatched 2026-08-25** | Result pending; Hermes operator score will require independent ChatGPT review |
+| BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt; tests withheld until freeze | Claude-selected | Preregistered replication | **ACTIVE — live-dispatched 2026-08-25** | Result pending; initial transport package was stranded on default `main`; corrected v0.2 transfer is live on `mailbox/main` |
 
 ## Evidence records
 
@@ -93,7 +93,13 @@ Frozen design:
 - Hermes performs preliminary scoring;
 - ChatGPT independently reviews the raw evidence before final classification.
 
-Status: **ACTIVE / DISPATCHED**.
+Operational record:
+
+- initial transfer `20260825T205300Z-behavioral-portability-001` was mistakenly staged on the repository default `main` branch and therefore did not reach the live Hermes watcher;
+- the scientific design and frozen payload were left unchanged;
+- corrected protocol-v0.2 transfer `20260825T213058Z-behavioral-portability-claude-001` was dispatched with `READY` on the live `mailbox/main` branch.
+
+Status: **ACTIVE / LIVE-DISPATCHED**. Execution evidence has not yet been returned.
 
 ## Current support for the Behavioral Portability hypothesis
 
