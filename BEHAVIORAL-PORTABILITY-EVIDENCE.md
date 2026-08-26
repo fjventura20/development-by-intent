@@ -20,6 +20,7 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-CLAUDE-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Claude | Original transcript + durability package | Observational demonstration | Recognizable reconstruction | Not preregistered |
 | BP-AB-GROK-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Grok | Original transcript + durability package | Observational demonstration | **Preliminary behavioral PASS** | Not preregistered; factual regression not independently verified |
 | BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → fresh Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt | Preregistered design; execution evidence defect | **INDETERMINATE formal / strong behavioral PASS signal** | First reconstruction and Test 1 were not captured immutably on first invocation |
+| BP-AB-CLAUDE-REP-002 | Amazing Birthday | Same frozen package → fresh Claude, operated by Hermes | Same two artifacts; identical tests/rubric | Preregistered clean replication | **ACTIVE — dispatched 2026-08-25** | Awaiting first-call-captured execution evidence |
 
 ## BP-AB-CHATGPT-001 — artifact-only clean-room reconstruction
 
@@ -100,28 +101,27 @@ Supported claim from this run:
 
 > In a fresh isolated Claude Code environment given only the frozen Amazing Birthday behavioral baseline and reconstruction prompt, Claude produced strongly conforming Amazing Birthday behavior on all three withheld dates. A first-run capture defect prevents counting this particular execution as a clean preregistered cross-provider PASS.
 
-### Immediate next experiment
+## BP-AB-CLAUDE-REP-002 — clean evidence-capture replication
 
-Repeat the same Claude experiment once with the scientific design frozen and only the evidence procedure corrected:
+Record: [`experiments/2026-08-25-amazing-birthday-hermes-operated-claude-replication-002/`](experiments/2026-08-25-amazing-birthday-hermes-operated-claude-replication-002/)
 
-- pre-fetch and verify frozen source;
-- capture every first inference atomically to disk;
-- prohibit re-issue for evidence capture;
-- retain the same Phase A artifacts, no-tools isolation, test dates, and rubric.
+Live transfer on `mailbox/main`: `20260826T002800Z-behavioral-portability-claude-replication-002`.
 
-A clean replication directly resolves the only formal uncertainty before moving to a new provider such as Gemini.
+This replication holds the application, source commit, two target artifacts, provider family, no-tools isolation posture, freeze rule, tests, rubric, and no-repair rule constant. The only intended change is evidence procedure: reconstruction and every test must be captured atomically on the first inference; no re-issue may substitute for a lost first output. Any capture loss forces INDETERMINATE.
+
+Status: **ACTIVE / LIVE-DISPATCHED**.
 
 ## Current support for Behavioral Portability
 
-The evidence supports a stronger but still bounded statement than before:
+The evidence supports a stronger but still bounded statement:
 
-> Governed Amazing Birthday behavior has survived reconstruction across multiple AI environments and distinct implementation mechanisms. A same-provider artifact-only clean-room reconstruction has a clean preregistered PASS. A fresh Claude cross-provider run produced passing behavior on all three withheld tests, but its first-run evidence capture was imperfect, so that run is formally INDETERMINATE pending a clean replication.
+> Governed Amazing Birthday behavior has survived reconstruction across multiple AI environments and distinct implementation mechanisms. A same-provider artifact-only clean-room reconstruction has a clean preregistered PASS. A fresh Claude cross-provider run produced passing behavior on all three withheld tests, but its first-run evidence capture was imperfect, so that execution is formally INDETERMINATE. A same-Claude clean replication is now active to resolve that evidence question without changing the scientific design.
 
 It remains premature to claim universal portability across providers, models, upgrades, or application classes.
 
 ## Highest-value unresolved questions
 
-1. Can the Claude artifact-only experiment produce a clean preregistered PASS/FAIL when every first inference is captured immutably?
+1. Can Claude replication 002 produce a clean preregistered PASS/FAIL with immutable first-call evidence?
 2. Does the same frozen package pass on a different provider family such as Gemini?
 3. How much run-to-run variance appears under identical reconstruction conditions?
 4. Does a durability package outperform the original transcript alone as a portability input?
