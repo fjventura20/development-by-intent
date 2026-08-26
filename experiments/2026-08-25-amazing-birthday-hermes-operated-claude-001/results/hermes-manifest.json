@@ -1,0 +1,30 @@
+{
+  "protocol_version": "0.2",
+  "transfer_id": "20260825T234500Z-behavioral-portability-claude-result-001",
+  "direction": "hermes-to-chatgpt",
+  "kind": "response",
+  "application": "behavioral-portability-research",
+  "operation": "execute-cross-provider-clean-room-001-result",
+  "created_by": "Hermes Agent",
+  "created_at": "2026-08-25T23:45:00Z",
+  "source_transfer_id": "20260825T213058Z-behavioral-portability-claude-001",
+  "status": "PASS",
+  "files": [
+    {"path":"artifact-record.md","sha256":"a9d481f724a80f5f9aaff845b861bafdb6bdd5bf248e4e99c61b69742921eec5"},
+    {"path":"environment.md","sha256":"5aee0d99ca156e8f147fd9b45a78ba4565489d58221ae7c62a5897d9b92c6a5c"},
+    {"path":"failures.md","sha256":"29b013e5f5e9cc6ef64f0a13678b879868048c8200cead6f7ef161653b824ace"},
+    {"path":"implementation.md","sha256":"8b82c0aa8e401ec3ead54ad6ce325c3bc760b5117d4ada89346cafd605e9a7cd"},
+    {"path":"next-experiment.md","sha256":"ff84f3837b972b2ddb1688288d6c40ef597595ff1088cf0421f41a70cdb3566b"},
+    {"path":"reconstruction.first-run.md","sha256":"89c5e0d8f21f04bde9cdeb4220a5c094a3abbb5b41380bea7225b00d611390b2"},
+    {"path":"reconstruction.json","sha256":"3bae9719757bed67a6b60439c605b61542c59c8100325630fc8fc5445d829567"},
+    {"path":"reconstruction.md","sha256":"3f46026aa1bd906a30ffddcb09c01b2be1bd6f2c31c3e02b7ab3a66c402c489b"},
+    {"path":"score-operator.md","sha256":"fa0a583b9ae276ef0abb0c62abd04b3b20d902c8e27608690775334c7b0f8274"},
+    {"path":"test-1-output.first-run.md","sha256":"34af28e29876cb3489c864bfd982b14bd5ebe52422d759c387960b73c554c1b3"},
+    {"path":"test-1-output.json","sha256":"3b6cdd6b64dd5eafb26796f02b1e40c69e8bb064aba3f51f73c72758d1f2ac60"},
+    {"path":"test-1-output.md","sha256":"d90462a3c20ae28b6ce17c33527197eb1deae4a1b35f7574a73b42872e5c2aca"},
+    {"path":"test-2-output.json","sha256":"1827ed94697374da9f8878eefa0eeff8d1b84972982ef199be343ca290f49966"},
+    {"path":"test-2-output.md","sha256":"56f49e0cdc1cc3281e16f2de3d4a5163b4086b0225e72de6fa7eeda86f569157"},
+    {"path":"test-3-output.json","sha256":"c0471d131ecab13750a9da10d869b6d274bce43f45a628ef52100e8f4e84a50b"},
+    {"path":"test-3-output.md","sha256":"34f8c9aee02194cd722f2e258e569a14148bcefee7580105e97446d2ee417c61"}
+  ]
+}
