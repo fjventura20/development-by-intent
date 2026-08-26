@@ -1,141 +1,121 @@
 # Amazing Birthday — Hermes-Operated Claude Portability 001
 
-**Status:** PREREGISTERED  
+**Status:** **INDETERMINATE — strong behavioral PASS signal; first-run evidence-capture defect**  
 **Mode:** cross-provider, artifact-only reconstruction  
 **Application:** Amazing Birthday  
 **Operator:** Hermes Agent  
-**Target provider:** Anthropic Claude via a fresh Claude Code session  
+**Target provider:** Anthropic Claude via fresh Claude Code session  
 **Independent reviewer:** ChatGPT  
 **Frozen source commit:** `c369215024c9f8a849daf11bd4b872d7ee566a7a`  
-**Preregistration date:** 2026-08-25
+**Preregistration date:** 2026-08-25  
+**Execution date:** 2026-08-25
+
+## Final result
+
+Hermes successfully operated a fresh Claude Code 2.1.170 / `claude-sonnet-4-6` reconstruction using only the two frozen Phase A artifacts before freeze. Claude then produced recognizable Amazing Birthday behavior on all three withheld dates.
+
+Independent behavioral scoring:
+
+| Test | Score | Behavioral result |
+|---|---:|---|
+| `Birthdate November 9, 1989` | 19/20 | PASS |
+| `Birthdate February 29, 1960` | 18/20 | PASS |
+| `Birthdate June 23, 1956` | 19/20 | PASS |
+
+Both critical requirements—**exact-date integrity** and **generalization**—PASS on all three.
+
+Hermes's operator classification is **PASS**. ChatGPT's independent experiment-level classification is **INDETERMINATE** because the preregistration required the first outputs to be evidence, while the first reconstruction response and first Test 1 response were not captured to immutable raw files when generated. Test 1 was re-issued for disk capture, and the reported first response was later reconstructed from terminal scrollback/operator memory. This is an evidence-capture defect, not a behavioral failure.
+
+The scorer disagreement is intentionally preserved:
+
+- **Hermes:** PASS — capture re-issues did not alter behavior or repair the application.
+- **ChatGPT:** INDETERMINATE — behavioral PASS signal is strong, but the first-run provenance does not meet the frozen evidence standard for a clean preregistered PASS.
+
+See [`results/score-independent.md`](results/score-independent.md), [`results/score-operator.md`](results/score-operator.md), and [`results/failures.md`](results/failures.md).
 
 ## Research question
 
 > Can Hermes autonomously operate a clean Claude reconstruction using only the frozen Amazing Birthday artifact-only package, withhold the behavioral witnesses until reconstruction is frozen, execute the three v1.0 tests without repair, and preserve enough evidence for independent scoring?
 
-This experiment tests two things simultaneously but records them separately:
-
-1. **Behavioral Portability:** whether the frozen Amazing Birthday behavioral package reconstructs acceptably equivalent behavior on an independent AI provider.
-2. **Autonomous experiment operation:** whether Hermes can execute the governed protocol and return an auditable evidence package without human intervention.
-
-## Hypothesis
-
-The Claude target will reconstruct enough of Amazing Birthday's behavioral identity from the two frozen artifacts to satisfy the existing v1.0 rubric on withheld inputs, despite being free to choose a Claude-native implementation mechanism.
-
-A PASS is useful evidence. A PARTIAL, FAIL, BLOCKED, timeout, or contamination finding is equally valid evidence and must be preserved.
+Answer: **the behavioral portion succeeded; the evidence-capture portion was not clean enough for a final preregistered PASS.**
 
 ## Frozen target artifact set
 
-Before the reconstruction is frozen, the Claude target may receive **only** these files from commit `c369215024c9f8a849daf11bd4b872d7ee566a7a`:
+Before reconstruction freeze, Claude was allowed only:
 
 1. `examples/amazing-birthday/03-behavioral-baseline.md`
 2. `examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md`
 
-The Claude target must not receive before freeze:
+It was not allowed the original transcript, prior outputs, frozen test dates, validation rubric, behavioral tests, Grok/ChatGPT results, or repair instructions.
 
-- the original Amazing Birthday transcript;
-- prior Amazing Birthday outputs;
-- the three withheld test dates;
-- `06-validation.md`;
-- `tests/behavioral-tests.md`;
-- Grok or ChatGPT reconstruction results;
-- any repair instructions.
+Post-run verification found the two Phase A artifacts byte-identical to the frozen source commit. See [`results/artifact-record.md`](results/artifact-record.md).
 
-Hermes may possess the operator-only witnesses, but must not expose them to Claude until Claude has completed reconstruction and stated that Amazing Birthday is ready.
+## Isolation
 
-## Isolation requirement
+Claude ran in a fresh temporary working directory. The two allowed artifacts were inlined into the system prompt, and Claude was launched with `--allowedTools ''`, denying Read, Write, Bash, WebFetch, and WebSearch. The same new target session was resumed across reconstruction and the three tests. No material target contamination was identified.
 
-Hermes must launch a genuinely fresh Claude Code session in a new temporary working directory prepared for this experiment.
+## Frozen test sequence
 
-The target directory should contain only the two frozen target artifacts plus files Claude itself creates during reconstruction.
-
-Do not resume an earlier Claude session. Do not intentionally expose the `development-by-intent` repository, the Hermes durability directory, prior Amazing Birthday conversations, or other project context to the Claude target.
-
-Record the Claude Code version, model if reported, working-directory arrangement, permissions/tool access, and any reason to suspect contamination.
-
-If Hermes cannot establish a reasonably isolated Claude target, it must record **BLOCKED/CONTAMINATED** rather than silently substituting a non-clean run.
-
-## Freeze point
-
-The reconstruction freezes when Claude has:
-
-1. received only the two allowed artifacts;
-2. established whatever reusable conversational/application behavior it chooses;
-3. stated that Amazing Birthday is ready for a test invocation.
-
-After that point, do not change Claude's application instructions until all three first-run outputs have been captured.
-
-## Frozen v1.0 test sequence
-
-After freeze, Hermes supplies these invocations to the same reconstructed Claude environment, in this order:
+After freeze, the same session received, in order:
 
 1. `Birthdate November 9, 1989`
 2. `Birthdate February 29, 1960`
 3. `Birthdate June 23, 1956`
 
-No hinting, correction, regeneration, or repair is permitted between test outputs.
+No behavioral correction or repair was supplied between tests.
 
-The first outputs are evidence.
+## Frozen scoring rule
 
-## Frozen scoring rubric
-
-After all raw outputs have been preserved, score each against the files frozen at source commit `c369215024c9f8a849daf11bd4b872d7ee566a7a`:
-
-- `examples/amazing-birthday/06-validation.md`
-- `examples/amazing-birthday/tests/behavioral-tests.md`
-
-Each output has a maximum score of 20.
-
-Classification per output:
-
-- PASS: 17–20 and both critical requirements satisfied
-- PARTIAL: 12–16 and both critical requirements satisfied
-- FAIL: 0–11 or a critical requirement fails
-- INDETERMINATE: insufficient evidence
-
-Critical requirements:
+Each output is scored 0–20 across ten dimensions. PASS requires 17–20 plus both critical requirements:
 
 1. exact-date integrity;
-2. generalization to withheld input.
+2. generalization.
 
-The experiment-level result is:
+Experiment-level rules frozen before execution:
 
-- **PASS** if all three outputs PASS and there is no material contamination or repair;
-- **PARTIAL** if at least one output is PARTIAL but none FAIL, with no material contamination;
-- **FAIL** if any output FAILS because of application behavior;
-- **INDETERMINATE** if isolation, evidence capture, or execution defects prevent reliable interpretation;
-- **BLOCKED** if the independent Claude target cannot be executed.
+- PASS — all three outputs PASS and no material contamination/repair;
+- PARTIAL — at least one PARTIAL but none FAIL, no material contamination;
+- FAIL — any behavioral FAIL;
+- INDETERMINATE — isolation, evidence-capture, or execution defects prevent reliable interpretation;
+- BLOCKED — target cannot be executed.
 
-## Required evidence
+## Evidence-capture deviation
 
-Hermes must return raw evidence before interpretation:
+The preregistration states: **“The first outputs are evidence.”**
 
-```text
-results/
-├── environment.md
-├── artifact-record.md
-├── reconstruction.md
-├── implementation.md
-├── test-1-output.md
-├── test-2-output.md
-├── test-3-output.md
-├── score-operator.md
-├── failures.md
-└── next-experiment.md
-```
+The first reconstruction call and first Test 1 call were not piped to files on their first invocation. Hermes re-issued both prompts for capture. The second Test 1 output was independently verifiable but was not the first sample and differed in prose from the reported first response. Hermes later preserved a `test-1-output.first-run.md` reconstructed from terminal scrollback/operator memory.
 
-`implementation.md` should describe or preserve any platform-native mechanism Claude chooses. Implementation differences are evidence, not failures, unless they prevent required behavior.
+That record is valuable evidence but not equivalent to a contemporaneous SHA-bound raw inference artifact. The independent review therefore declines to label the run a clean preregistered PASS.
 
-## Independent review
+## Public evidence
 
-Hermes's score is preliminary. ChatGPT will independently score the preserved raw outputs against the same frozen rubric before the public experiment status is finalized.
+The public results directory preserves:
 
-Disagreements between operator and reviewer must be preserved rather than averaged away.
+- Hermes result manifest and hashes;
+- environment/isolation record;
+- artifact provenance;
+- implementation description;
+- the reported first Test 1 output with provenance warning;
+- raw first-run Tests 2 and 3;
+- operator failure record;
+- operator preliminary score;
+- independent score and final disposition.
 
-## Interpretation limit
+The original Hermes response is transfer `20260825T234500Z-behavioral-portability-claude-result-001`, initially committed at `abd881162c5984b01e0921eb6b7f8f027fec2dab`; operator-side F1/F3/F4 resolution was committed at `5f59b5a8738bc844f03203783b291ec1a2938fd9`.
 
-A PASS supports only this bounded claim:
+## What this run supports
 
-> In the recorded Hermes-operated Claude environment, the frozen Amazing Birthday artifact-only package preserved enough behavioral identity to satisfy the preregistered v1.0 acceptance criteria on three withheld inputs without human repair.
+> In a fresh, isolated Claude Code environment given only the frozen Amazing Birthday behavioral baseline and reconstruction prompt, Claude produced strongly conforming Amazing Birthday behavior on three withheld dates. The run is strong positive evidence for cross-provider Behavioral Portability, but a first-run evidence-capture defect prevents counting this particular execution as a clean preregistered PASS.
 
-It would strengthen, but not by itself prove, the broader Behavioral Portability hypothesis.
+It does **not** establish universal portability, deterministic reproduction, or portability of stateful/tool-dependent applications.
+
+## Immediate replication requirement
+
+The next experiment should repeat this same Claude protocol before moving to a new provider. Keep the scientific variables frozen and change only the operator evidence procedure:
+
+- fetch and verify the frozen source commit before target launch;
+- capture reconstruction and every test response atomically on the first call;
+- prohibit any re-issue for evidence capture;
+- preserve the same two Phase A artifacts, same three v1.0 tests, same scoring rubric, same no-tools isolation posture.
+
+A clean replication directly resolves the only issue preventing a formal PASS/FAIL classification.
