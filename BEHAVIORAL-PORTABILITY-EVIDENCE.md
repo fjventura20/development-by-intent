@@ -21,7 +21,7 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-GROK-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Grok | Original transcript + durability package | Observational demonstration | **Preliminary behavioral PASS** | Not preregistered; factual regression not independently verified |
 | BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → fresh Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt | Preregistered design; execution evidence defect | **INDETERMINATE formal / strong behavioral PASS signal** | First reconstruction and Test 1 were not captured immutably on first invocation |
 | BP-AB-CLAUDE-REP-002 | Amazing Birthday | Same frozen package → fresh Claude, operated by Hermes | Same two artifacts; identical tests/rubric | Preregistered clean replication | **PASS — independent 19/20, 19/20, 17/20** | Single application and Claude target; factual variance remains |
-| BP-AB-GEMINI-003 | Amazing Birthday | Same frozen package → fresh Gemini, operated by Hermes | Same two artifacts; same v1.0 tests/rubric | Preregistered cross-provider-family replication | **ACTIVE — dispatched on `mailbox/main`** | Preflight may BLOCK if existing Gemini auth/isolation/no-tools target unavailable |
+| BP-AB-GEMINI-003 | Amazing Birthday | Same frozen package → fresh Gemini, operated by Hermes | Same two artifacts; same v1.0 tests/rubric | Preregistered cross-provider-family replication | **TRANSPORT REJECTED; corrected retry ACTIVE** | Original protocol-v0.2 manifest omitted required `files`; Gemini was not invoked |
 
 ## BP-AB-CHATGPT-001 — artifact-only clean-room reconstruction
 
@@ -75,15 +75,21 @@ Supported bounded claim:
 
 ## BP-AB-GEMINI-003 — provider-family portability test
 
-Preregistration: [`experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/`](experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/)
+Record: [`experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/`](experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/)
 
-Live protocol-v0.2 transfer on `mailbox/main`: `20260826T023700Z-behavioral-portability-gemini-003`.
+Original live protocol-v0.2 transfer: `20260826T023700Z-behavioral-portability-gemini-003`.
 
-This experiment changes the receiving provider family to Google Gemini while freezing the Amazing Birthday source commit, two Phase A artifacts/hashes, v1.0 tests, rubric, no-repair rule, and atomic first-call capture discipline.
+At `2026-08-26T11:43:21Z`, the exchange rejected that inbound package before Hermes/Gemini execution because its manifest omitted the required top-level `files` inventory. The raw response reports `status: REJECTED`, `hermes_exit_code: null`, and `manifest missing required field: files`.
 
-The exact Gemini model is selected by a preregistered preflight rule: use the already-authenticated CLI default resolved and recorded before reconstruction; do not fallback after target execution begins.
+This is recorded as an **infrastructure/protocol packaging failure**, not as PASS/PARTIAL/FAIL/INDETERMINATE/BLOCKED behavioral evidence. No Gemini invocation occurred and there is nothing to score under the frozen rubric.
 
-The run must return **BLOCKED** without experimental target execution if Hermes cannot demonstrate, using existing credentials only:
+Raw rejection evidence is preserved in the experiment's `raw/` directory. The failure is not erased or substituted by a later run.
+
+A transport-corrected retry was separately preregistered before dispatch in `RETRY-001.md`. The only change is exchange packaging: the manifest now contains the required `files` inventory and SHA-256 hashes. Scientific variables remain frozen.
+
+Corrected retry transfer: `20260826T123000Z-behavioral-portability-gemini-003-retry-001` — **ACTIVE / READY on `mailbox/main`** at last inspection.
+
+The run must still return **BLOCKED** without experimental target execution if Hermes cannot demonstrate, using existing credentials only:
 
 - installed Gemini CLI and existing non-interactive authentication;
 - fresh target context without unrelated Gemini memory/context;
@@ -96,11 +102,11 @@ No login/OAuth, new API key, purchase, subscription change, weakened isolation, 
 
 ## Current support for Behavioral Portability
 
-The evidence now supports a stronger but still bounded statement:
+The evidence supports a strong but bounded statement:
 
 > Governed Amazing Birthday behavioral intent has survived artifact-only reconstruction in a fresh same-provider environment and in a fresh Claude target under a preregistered clean-room protocol. The clean Claude replication passed all three withheld tests with immutable first-call evidence despite substantial prose variance and factual-care errors.
 
-This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary. The active Gemini experiment now tests whether that result survives a second independent provider family.
+This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary. The Gemini provider-family question remains unresolved because the first Gemini transfer failed at exchange validation before target execution; the transport-corrected retry is active.
 
 It remains premature to claim universal portability across providers, models, upgrades, or application classes.
 
