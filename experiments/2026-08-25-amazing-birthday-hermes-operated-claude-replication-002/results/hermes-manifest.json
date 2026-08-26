@@ -1,0 +1,27 @@
+{
+  "protocol_version": "0.2",
+  "transfer_id": "20260826T013000Z-behavioral-portability-claude-replication-002-result-001",
+  "direction": "hermes-to-chatgpt",
+  "kind": "response",
+  "application": "behavioral-portability-research",
+  "operation": "execute-cross-provider-clean-room-replication-002-result",
+  "created_by": "Hermes Agent",
+  "created_at": "2026-08-26T01:30:00Z",
+  "source_transfer_id": "20260826T002800Z-behavioral-portability-claude-replication-002",
+  "status": "PASS",
+  "files": [
+    {"path":"artifact-record.md","sha256":"541306ba057b7bff30b8c4f501928e428fc75d51bee3e5154e99ad57848affcb"},
+    {"path":"environment.md","sha256":"dff07d834936596dfd620b3a05fb40bd42bddee42a01a89f6f434a5c240839fc"},
+    {"path":"failures.md","sha256":"e01d9b497f520607ac61131445aae27bec0622ad7a27686e838eb07b176a8881"},
+    {"path":"next-experiment.md","sha256":"d388f810ac8d8b4b520df2d56420996d194afa13c81af3a3c3526635b26b22e2"},
+    {"path":"reconstruction.json","sha256":"612fe7b33cf4874e0073b1cb714777dc07bd2e64695b5fb1ca97075a7b2e2201"},
+    {"path":"reconstruction.md","sha256":"6fb9c4b48870bb91fee7e7378826a0f329b3eca1d5a39b58c8ec1096d327a6c6"},
+    {"path":"score-operator.md","sha256":"48cce4b94dd458494023999353b5fa393f1690ae35a1decfee6413c4f4a3d01a"},
+    {"path":"test-1-output.json","sha256":"c9adea927245f7a561a95b9a62f4a1ec37255cdddc31c69753f38b9bc7d28b2f"},
+    {"path":"test-1-output.md","sha256":"e9a369d39b08a64410a2530c96b1d67038123b225c73ef8d37f2e8f3f359b467"},
+    {"path":"test-2-output.json","sha256":"4075710a5c6e64d64922533b7930635781fc1029ce8c0d21cdcee401ca5aad4f"},
+    {"path":"test-2-output.md","sha256":"feb902212c3862f60e283ea5a7df75da95e9c5c8c661823d5e3df64f90e258ee"},
+    {"path":"test-3-output.json","sha256":"6373bbba054e0b10f335f5da91956150ff2cc96f0177b29e4ff38359e560e07f"},
+    {"path":"test-3-output.md","sha256":"c9181a73be2e38b8d847e6d25e23d161d0d2537fa6c1ca01770c4f76db506c5a"}
+  ]
+}
