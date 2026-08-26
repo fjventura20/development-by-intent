@@ -1,0 +1,12 @@
+{
+  "completed_at": "2026-08-26T11:43:21Z",
+  "errors": [
+    "manifest missing required field: files"
+  ],
+  "hermes_exit_code": null,
+  "protocol_version": "0.1",
+  "started_at": "2026-08-26T11:43:21Z",
+  "status": "REJECTED",
+  "summary": "Inbound package rejected: manifest missing required field: files",
+  "transfer_id": "20260826T023700Z-behavioral-portability-gemini-003"
+}
