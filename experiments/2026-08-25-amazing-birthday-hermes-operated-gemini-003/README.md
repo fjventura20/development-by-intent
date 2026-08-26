@@ -1,12 +1,26 @@
 # Amazing Birthday — Hermes-Operated Gemini Portability 003
 
-**Status:** PREREGISTERED — pending dispatch  
+**Status:** TRANSPORT REJECTED — no Gemini invocation; transport-corrected retry preregistered  
 **Experiment ID:** BP-AB-GEMINI-003  
 **Mode:** cross-provider-family clean-room, artifact-only  
 **Operator:** Hermes Agent  
 **Target provider family:** Google Gemini via Gemini CLI  
 **Independent reviewer:** ChatGPT  
 **Frozen source:** `c369215024c9f8a849daf11bd4b872d7ee566a7a`
+
+## Transport result — original dispatch
+
+Original transfer `20260826T023700Z-behavioral-portability-gemini-003` was rejected by the exchange at `2026-08-26T11:43:21Z` before Hermes or Gemini executed the experimental procedure.
+
+The rejection was:
+
+> `Inbound package rejected: manifest missing required field: files`
+
+The outbound manifest identified protocol v0.2 and the frozen experimental metadata but omitted the exchange-required top-level `files` inventory. This is an **infrastructure/protocol packaging failure**, not a Gemini behavioral result. No Gemini target call occurred, no first-call behavioral evidence exists, and no rubric score is assigned.
+
+Raw rejection evidence is preserved in `raw/transport-rejection-result.json` and `raw/transport-rejection-manifest.json`.
+
+A transport-only retry is preregistered in `RETRY-001.md`. It changes only the exchange manifest packaging by adding the required file inventory/hashes; all scientific variables and failure rules below remain frozen.
 
 ## Research question
 
