@@ -21,7 +21,7 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-GROK-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Grok | Original transcript + durability package | Observational demonstration | **Preliminary behavioral PASS** | Not preregistered; factual regression not independently verified |
 | BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → fresh Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt | Preregistered design; execution evidence defect | **INDETERMINATE formal / strong behavioral PASS signal** | First reconstruction and Test 1 were not captured immutably on first invocation |
 | BP-AB-CLAUDE-REP-002 | Amazing Birthday | Same frozen package → fresh Claude, operated by Hermes | Same two artifacts; identical tests/rubric | Preregistered clean replication | **PASS — independent 19/20, 19/20, 17/20** | Single application and Claude target; factual variance remains |
-| BP-AB-GEMINI-003 | Amazing Birthday | Same frozen package → fresh Gemini, operated by Hermes | Same two artifacts; same v1.0 tests/rubric | Preregistered cross-provider-family replication | **TRANSPORT REJECTED; corrected retry ACTIVE** | Original protocol-v0.2 manifest omitted required `files`; Gemini was not invoked |
+| BP-AB-GEMINI-003 | Amazing Birthday | Same frozen package → intended fresh Gemini, operated by Hermes | Same two artifacts; same v1.0 tests/rubric | Preregistered cross-provider-family replication | **BLOCKED at preflight — no Gemini invocation** | Required Gemini CLI absent on Hermes host; protocol forbade installing or substituting runtime |
 
 ## BP-AB-CHATGPT-001 — artifact-only clean-room reconstruction
 
@@ -77,28 +77,33 @@ Supported bounded claim:
 
 Record: [`experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/`](experiments/2026-08-25-amazing-birthday-hermes-operated-gemini-003/)
 
-Original live protocol-v0.2 transfer: `20260826T023700Z-behavioral-portability-gemini-003`.
+Original protocol-v0.2 transfer: `20260826T023700Z-behavioral-portability-gemini-003`.
 
 At `2026-08-26T11:43:21Z`, the exchange rejected that inbound package before Hermes/Gemini execution because its manifest omitted the required top-level `files` inventory. The raw response reports `status: REJECTED`, `hermes_exit_code: null`, and `manifest missing required field: files`.
 
-This is recorded as an **infrastructure/protocol packaging failure**, not as PASS/PARTIAL/FAIL/INDETERMINATE/BLOCKED behavioral evidence. No Gemini invocation occurred and there is nothing to score under the frozen rubric.
+This first failure is an **infrastructure/protocol packaging failure**, not behavioral evidence. No Gemini invocation occurred and there was nothing to score under the frozen rubric. Raw rejection evidence remains preserved in the experiment's `raw/` directory.
 
-Raw rejection evidence is preserved in the experiment's `raw/` directory. The failure is not erased or substituted by a later run.
+A transport-corrected retry was separately preregistered before dispatch in `RETRY-001.md`. The only scientific change was none: exchange packaging was corrected by adding the required `files` inventory and SHA-256 hashes while the application, artifacts, tests, rubric, preflight, no-repair rule, and first-call evidence discipline remained frozen.
 
-A transport-corrected retry was separately preregistered before dispatch in `RETRY-001.md`. The only change is exchange packaging: the manifest now contains the required `files` inventory and SHA-256 hashes. Scientific variables remain frozen.
+Corrected retry transfer: `20260826T123000Z-behavioral-portability-gemini-003-retry-001`.
 
-Corrected retry transfer: `20260826T123000Z-behavioral-portability-gemini-003-retry-001` — **ACTIVE / READY on `mailbox/main`** at last inspection.
+The retry reached Hermes and completed its preregistered preflight at `2026-08-26T19:02:25Z`. Hermes stopped with substantive disposition **BLOCKED** because the Hermes host does not have a Gemini CLI binary installed. The protocol explicitly prohibited installing a missing prerequisite, initiating login/OAuth, creating a key, purchasing/changing a subscription, weakening isolation, or substituting a different Gemini access path.
 
-The run must still return **BLOCKED** without experimental target execution if Hermes cannot demonstrate, using existing credentials only:
+Observed gate status:
 
-- installed Gemini CLI and existing non-interactive authentication;
-- fresh target context without unrelated Gemini memory/context;
-- supported full system-prompt override;
-- genuine no-tools target (not merely sandboxed tools);
-- pre-launch frozen-source and Phase A hash verification;
-- exact model identifier frozen before reconstruction.
+- Gemini CLI installed: **FAIL**;
+- existing authentication exercised end-to-end: cascade-blocked;
+- fresh isolated Gemini target context: cascade-blocked;
+- full `GEMINI_SYSTEM_MD` system-prompt override: cascade-blocked;
+- genuine catch-all no-tools target: cascade-blocked;
+- frozen source and Phase A hashes: **PASS**;
+- exact Gemini model identifier freeze: cascade-blocked.
 
-No login/OAuth, new API key, purchase, subscription change, weakened isolation, or provider substitution is permitted.
+Hermes reported that OAuth credential material exists on disk, but it could not be exercised without the absent CLI. Hermes' built-in Gemini adapter was not accepted as a substitute because that would not demonstrate the preregistered system-prompt, no-tools, and fresh-context controls.
+
+No Gemini target invocation occurred. No reconstruction or withheld test was sent to a model. No first-call behavioral evidence exists, no rubric score is assigned, and there is no contamination to reinterpret. The correct experimental disposition is therefore **BLOCKED**, not FAIL or INDETERMINATE.
+
+The bridge response wrapper recorded `ERROR / MISSING_TASK_DISPOSITION` because it did not parse Hermes' human-readable `DISPOSITION: BLOCKED`; this transport/parser defect does not change the substantive preregistered experiment result. The raw wrapper result is preserved as `raw/preflight-blocked-result.json`.
 
 ## Current support for Behavioral Portability
 
@@ -106,13 +111,13 @@ The evidence supports a strong but bounded statement:
 
 > Governed Amazing Birthday behavioral intent has survived artifact-only reconstruction in a fresh same-provider environment and in a fresh Claude target under a preregistered clean-room protocol. The clean Claude replication passed all three withheld tests with immutable first-call evidence despite substantial prose variance and factual-care errors.
 
-This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary. The Gemini provider-family question remains unresolved because the first Gemini transfer failed at exchange validation before target execution; the transport-corrected retry is active.
+This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary. The Google Gemini provider-family boundary remains **unresolved**: the corrected experiment reached its preregistered preflight but could not run because the required Gemini CLI runtime was absent on the Hermes host.
 
 It remains premature to claim universal portability across providers, models, upgrades, or application classes.
 
 ## Highest-value unresolved questions
 
-1. Does the same frozen package pass on Gemini under the same clean protocol?
+1. Does the same frozen package pass on Gemini under the same clean protocol once an eligible pre-existing Gemini CLI environment is available?
 2. How much run-to-run variance appears under identical reconstruction conditions, especially in factual care?
 3. Does a durability package outperform the original transcript alone as a portability input?
 4. Which durability-package components are necessary versus redundant?
