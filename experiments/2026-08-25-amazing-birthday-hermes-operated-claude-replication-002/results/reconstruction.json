@@ -1,0 +1,32 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "api_error_status": null,
+  "duration_ms": 14318,
+  "duration_api_ms": 15796,
+  "ttft_ms": 11731,
+  "ttft_stream_ms": 2550,
+  "time_to_request_ms": 26,
+  "num_turns": 1,
+  "result": "**Amazing Birthday** is now established in this environment.\n\nWhen you supply a trigger — `Birthdate [date including year]` or `Amazing Birthday [date including year]` — I will:\n\n- Open by placing you in the historical world of that exact day\n- Select roughly 5–10 standout connections, chosen for narrative value rather than completeness\n- Distinguish strictly between events on the exact date, events nearby (clearly labeled as such), and broader historical context\n- Explain why each selected connection matters — no bare lists\n- Weave in the arc of the lifetime that followed, connecting the birthdate to the world the person would grow up to inhabit\n- Close with a synthesis of what kind of world they entered and how dramatically it changed\n- Calculate any current-age or elapsed-time figures against today's actual date (2026-08-25)\n\nThe behavior is selective by design: a curated, meaningful narrative, not an exhaustive dump.\n\nAmazing Birthday is ready for a test invocation.",
+  "stop_reason": "end_turn",
+  "session_id": "b1f41015-a416-44cc-b5eb-35abc83274de",
+  "total_cost_usd": 0.039933500000000004,
+  "usage": {
+    "input_tokens": 3,
+    "cache_creation_input_tokens": 7534,
+    "cache_read_input_tokens": 11370,
+    "output_tokens": 516,
+    "server_tool_use": {"web_search_requests": 0,"web_fetch_requests": 0},
+    "service_tier": "standard"
+  },
+  "modelUsage": {
+    "claude-haiku-4-5-20251001": {"inputTokens":446,"outputTokens":15,"cacheReadInputTokens":0,"cacheCreationInputTokens":0,"webSearchRequests":0,"costUSD":0.000521,"contextWindow":200000,"maxOutputTokens":32000},
+    "claude-sonnet-4-6": {"inputTokens":3,"outputTokens":516,"cacheReadInputTokens":11370,"cacheCreationInputTokens":7534,"webSearchRequests":0,"costUSD":0.0394125,"contextWindow":200000,"maxOutputTokens":32000}
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "uuid": "9045a12b-61c5-4113-ac6e-6e130eb0fc08"
+}
