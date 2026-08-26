@@ -1,12 +1,26 @@
 # Amazing Birthday — Hermes-Operated Gemini Portability 003
 
-**Status:** TRANSPORT REJECTED — no Gemini invocation; transport-corrected retry preregistered  
+**Status:** BLOCKED at preregistered preflight — no Gemini target invocation  
 **Experiment ID:** BP-AB-GEMINI-003  
 **Mode:** cross-provider-family clean-room, artifact-only  
 **Operator:** Hermes Agent  
 **Target provider family:** Google Gemini via Gemini CLI  
 **Independent reviewer:** ChatGPT  
 **Frozen source:** `c369215024c9f8a849daf11bd4b872d7ee566a7a`
+
+## Final disposition
+
+The original transfer `20260826T023700Z-behavioral-portability-gemini-003` was rejected by the exchange before Hermes/Gemini execution because its protocol-v0.2 manifest omitted the required top-level `files` inventory. That transport failure remains preserved and is not treated as behavioral evidence.
+
+A transport-only retry was preregistered as `20260826T123000Z-behavioral-portability-gemini-003-retry-001`, changing only the exchange packaging while keeping the scientific protocol frozen.
+
+The retry reached Hermes and completed preflight at `2026-08-26T19:02:25Z`. It is formally **BLOCKED** under the preregistered gate because no Gemini CLI binary is installed on the Hermes host. Hermes verified the frozen payload hashes, but the absence of the CLI prevented demonstration of existing non-interactive authentication, fresh Gemini context isolation, `GEMINI_SYSTEM_MD` system-prompt override, catch-all no-tools policy, and exact model-identifier freeze.
+
+No Gemini model was invoked. No reconstruction or withheld test prompt reached a target. No first-call behavioral evidence exists and no rubric score is assigned. This is therefore a prerequisite/environment blocker, not PASS/PARTIAL/FAIL/INDETERMINATE behavioral evidence.
+
+Hermes also reported that OAuth credential material exists on disk, but the experiment rules prohibit initiating login, installing a missing prerequisite, creating a key, purchasing/changing a subscription, weakening isolation, or substituting Hermes' built-in Gemini adapter. The run correctly stopped rather than improvising.
+
+Raw bridge evidence is preserved in `raw/preflight-blocked-result.json`. The bridge wrapper itself misclassified the returned result as `ERROR / MISSING_TASK_DISPOSITION` because it failed to parse the human-readable `DISPOSITION: BLOCKED`; the substantive Hermes preflight record is unambiguous and governs the experiment interpretation.
 
 ## Transport result — original dispatch
 
@@ -20,11 +34,13 @@ The outbound manifest identified protocol v0.2 and the frozen experimental metad
 
 Raw rejection evidence is preserved in `raw/transport-rejection-result.json` and `raw/transport-rejection-manifest.json`.
 
-A transport-only retry is preregistered in `RETRY-001.md`. It changes only the exchange manifest packaging by adding the required file inventory/hashes; all scientific variables and failure rules below remain frozen.
+The transport-only retry is preregistered in `RETRY-001.md`. It changed only the exchange manifest packaging by adding the required file inventory/hashes; all scientific variables and failure rules below remained frozen.
 
 ## Research question
 
 > Can a fresh isolated Gemini CLI target, given only the same two frozen Amazing Birthday artifacts used in the clean Claude replication, reconstruct the behavioral contract and pass the same frozen v1.0 withheld tests without repair?
+
+This question remains unresolved because the required target runtime was unavailable.
 
 ## Intended independent variable
 
@@ -50,12 +66,24 @@ Before any experimental target invocation, Hermes must:
 1. verify `gemini` is already installed and record `gemini --version`;
 2. verify usable existing non-interactive authentication without initiating login, browser OAuth, credential creation, purchase, or subscription changes;
 3. verify a fresh target directory can be used without loading unrelated project context;
-4. verify a full custom system prompt can be supplied using the installed CLI's supported mechanism (current official mechanism is `GEMINI_SYSTEM_MD`);
+4. verify a full custom system prompt can be supplied using the installed CLI's supported mechanism (`GEMINI_SYSTEM_MD`);
 5. verify all model tools can be excluded from the target's tool memory using the installed CLI's supported policy/config mechanism; a catch-all `toolName = "*"`, `decision = "deny"` policy is acceptable when supported;
 6. fetch the frozen source and verify both Phase A SHA-256 values before target launch;
 7. determine and freeze the exact Gemini model identifier before reconstruction.
 
 If any of these cannot be established with existing credentials/configuration and bounded local changes, return **BLOCKED**. Do not install paid services, initiate authentication, weaken isolation, or substitute another provider.
+
+### Observed preflight
+
+| Step | Result |
+|---|---|
+| Gemini CLI installed | **FAIL** — no `gemini` binary available |
+| Existing authentication exercised end-to-end | cascade-blocked |
+| Fresh isolated target context | cascade-blocked |
+| Full system-prompt override | cascade-blocked |
+| Global no-tools target | cascade-blocked |
+| Frozen source / Phase A hashes | **PASS** |
+| Exact model identifier freeze | cascade-blocked |
 
 ## Isolation
 
@@ -81,9 +109,9 @@ These witnesses must not be revealed before freeze.
 
 ## First-call evidence rule
 
-Every target invocation—reconstruction and each of the three tests—must be atomically captured on the **first call** before interpretation. Use the installed Gemini CLI's structured output/response-recording capability and/or shell `tee` so the first model response is durably written before any re-issue.
+Every target invocation—reconstruction and each of the three tests—must be atomically captured on the **first call** before interpretation. No prompt may be re-issued for capture. Missing/truncated/non-verifiable first-call evidence makes the experiment **INDETERMINATE**.
 
-No prompt may be re-issued for capture. Missing/truncated/non-verifiable first-call evidence makes the experiment **INDETERMINATE**.
+Because preflight blocked before target invocation, this rule was never entered and no synthetic or re-issued output is substituted.
 
 ## Frozen rubric
 
@@ -103,10 +131,6 @@ Critical requirements:
 
 Experiment-level PASS requires all three first outputs PASS and no material contamination, repair, provider/model fallback, or evidence-capture defect.
 
-## Required evidence
-
-Return environment/model/auth-isolation metadata; exact supplied artifact hashes; custom-system-prompt hash; tool-denial evidence; first-call structured reconstruction response; first-call structured/prose outputs for all three tests; operator score; failures/contamination record; and next-experiment recommendation.
-
 ## Interpretation limit
 
-A PASS supports only that the recorded frozen Amazing Birthday package preserved enough behavioral identity to pass the v1.0 criteria in the recorded Gemini environment. It does not establish universal portability or portability for other application classes.
+This BLOCKED result says nothing about Gemini's ability to reproduce Amazing Birthday behavior. It establishes only that the preregistered Gemini arm could not be executed on the recorded Hermes host without adding a missing runtime prerequisite, which the protocol explicitly forbade.
