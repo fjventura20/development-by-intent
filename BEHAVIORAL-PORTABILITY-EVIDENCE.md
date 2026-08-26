@@ -1,7 +1,7 @@
 # Behavioral Portability — Evidence Ledger
 
 **Purpose:** maintain a compact, auditable record of evidence relevant to the Behavioral Portability hypothesis.  
-**Last updated:** 2026-08-25
+**Last updated:** 2026-08-26
 
 This ledger deliberately separates preregistered experiments from observational demonstrations. A recognizable reconstruction is useful evidence, but it is not automatically equivalent to a clean-room, frozen-rubric replication.
 
@@ -20,7 +20,7 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-CLAUDE-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Claude | Original transcript + durability package | Observational demonstration | Recognizable reconstruction | Not preregistered |
 | BP-AB-GROK-OBS-001 | Amazing Birthday | ChatGPT-origin artifacts → Grok | Original transcript + durability package | Observational demonstration | **Preliminary behavioral PASS** | Not preregistered; factual regression not independently verified |
 | BP-AB-CLAUDE-EXP-001 | Amazing Birthday | Frozen package → fresh Claude, operated by Hermes | Frozen behavioral baseline + reconstruction prompt | Preregistered design; execution evidence defect | **INDETERMINATE formal / strong behavioral PASS signal** | First reconstruction and Test 1 were not captured immutably on first invocation |
-| BP-AB-CLAUDE-REP-002 | Amazing Birthday | Same frozen package → fresh Claude, operated by Hermes | Same two artifacts; identical tests/rubric | Preregistered clean replication | **ACTIVE — dispatched 2026-08-25** | Awaiting first-call-captured execution evidence |
+| BP-AB-CLAUDE-REP-002 | Amazing Birthday | Same frozen package → fresh Claude, operated by Hermes | Same two artifacts; identical tests/rubric | Preregistered clean replication | **PASS — independent 19/20, 19/20, 17/20** | Single application and Claude target; factual variance remains |
 
 ## BP-AB-CHATGPT-001 — artifact-only clean-room reconstruction
 
@@ -46,84 +46,58 @@ Grok autonomously selected a platform-native skill structure and produced recogn
 
 Record: [`experiments/2026-08-25-amazing-birthday-hermes-operated-claude-001/`](experiments/2026-08-25-amazing-birthday-hermes-operated-claude-001/)
 
-### Frozen design
-
-- Hermes = operator; Claude = reconstruction target; ChatGPT = independent reviewer.
-- Fresh isolated Claude environment.
-- Before freeze Claude receives only `03-behavioral-baseline.md` and `RECONSTRUCTION-PROMPT.md` from frozen source commit `c369215024c9f8a849daf11bd4b872d7ee566a7a`.
-- Test dates and rubric withheld until freeze.
-- Tests: Nov 9 1989; Feb 29 1960; Jun 23 1956.
-- First outputs are evidence; no repair/regeneration.
-- PASS requires all three outputs to pass and no material contamination/repair.
-- INDETERMINATE applies when isolation, evidence capture, or execution defects prevent reliable interpretation.
-
-### Transport record
-
-- Initial transfer `20260825T205300Z-behavioral-portability-001` was mistakenly staged on repository default `main` and did not reach the live watcher.
-- Scientific design and frozen payload remained unchanged.
-- Corrected v0.2 transfer `20260825T213058Z-behavioral-portability-claude-001` was dispatched on `mailbox/main`.
-
-### Execution
-
-Hermes ran a fresh Claude Code 2.1.170 session using substantive model `claude-sonnet-4-6`. The target had no tools and received only the two Phase A artifacts before freeze. The same new session was resumed for all tests. Post-run source verification found the Phase A artifacts byte-identical to the frozen source and confirmed no overlap between development-example dates and frozen test dates.
-
-Hermes result transfer: `20260825T234500Z-behavioral-portability-claude-result-001`.
-
-Operator preliminary scores:
-
-- Test 1: 19/20 PASS
-- Test 2: 20/20 PASS
-- Test 3: 19/20 PASS
-- Operator experiment disposition: **PASS**
-
-Independent scores:
-
-- Test 1: 19/20 PASS
-- Test 2: 18/20 PASS
-- Test 3: 19/20 PASS
-- Exact-date integrity: PASS all three
-- Generalization: PASS all three
-
-### Why the independent final result is INDETERMINATE
-
-The first reconstruction response and first Test 1 response were displayed in the operator terminal but not written to immutable raw files when generated. Hermes re-issued both prompts for disk capture. The re-issued Test 1 was behaviorally strong but differed in prose from the reported first response. Hermes later preserved a first-response transcript reconstructed from terminal scrollback/operator memory.
-
-This does not indicate application repair; both observed Test 1 variants behave like valid Amazing Birthday reports. But the preregistration explicitly states that **the first outputs are evidence**. The true first Test 1 sample is not independently SHA-verifiable, while the SHA-verifiable sample is the second inference. Under the frozen rule that evidence-capture defects can make a run INDETERMINATE, ChatGPT does not classify this execution as a clean preregistered PASS.
-
-The disagreement is preserved rather than averaged away:
-
-- **Hermes:** PASS; re-issues were capture passes, not repair.
-- **ChatGPT independent reviewer:** INDETERMINATE formal; behavioral PASS signal is strong, but first-run evidence provenance is insufficient for a clean experimental PASS.
-
-One operator factual-care concern was independently corrected: German federal-government historical records confirm Schabowski's decisive press conference occurred on November 9, 1989, not November 6. Test 1's central exact-date association therefore stands.
-
-Supported claim from this run:
-
-> In a fresh isolated Claude Code environment given only the frozen Amazing Birthday behavioral baseline and reconstruction prompt, Claude produced strongly conforming Amazing Birthday behavior on all three withheld dates. A first-run capture defect prevents counting this particular execution as a clean preregistered cross-provider PASS.
+Hermes ran a fresh Claude Code 2.1.170 session using `claude-sonnet-4-6`, with only the two frozen Phase A artifacts and no target tools. All three withheld outputs showed passing behavior. However, the true first reconstruction response and true first Test 1 response were not immutably captured on first invocation; prompts were re-issued for disk capture. The independent formal disposition therefore remains **INDETERMINATE**, with a strong behavioral PASS signal.
 
 ## BP-AB-CLAUDE-REP-002 — clean evidence-capture replication
 
 Record: [`experiments/2026-08-25-amazing-birthday-hermes-operated-claude-replication-002/`](experiments/2026-08-25-amazing-birthday-hermes-operated-claude-replication-002/)
 
-Live transfer on `mailbox/main`: `20260826T002800Z-behavioral-portability-claude-replication-002`.
+Request transfer: `20260826T002800Z-behavioral-portability-claude-replication-002`.  
+Result transfer: `20260826T013000Z-behavioral-portability-claude-replication-002-result-001`.
 
-This replication holds the application, source commit, two target artifacts, provider family, no-tools isolation posture, freeze rule, tests, rubric, and no-repair rule constant. The only intended change is evidence procedure: reconstruction and every test must be captured atomically on the first inference; no re-issue may substitute for a lost first output. Any capture loss forces INDETERMINATE.
+Replication 002 held the application, frozen source, target artifacts, Claude target family, no-tools isolation posture, freeze rule, tests, rubric, and no-repair rule constant. It changed only the evidence procedure.
 
-Status: **ACTIVE / LIVE-DISPATCHED**.
+Execution evidence shows:
+
+- frozen source commit fetched before target launch;
+- both Phase A hashes verified byte-for-byte before launch;
+- fresh Claude session `b1f41015-a416-44cc-b5eb-35abc83274de`;
+- target denied read/write/shell/web tools;
+- reconstruction plus all three tests captured atomically on first invocation via `tee`;
+- no prompt re-issued for capture;
+- no material contamination or repair documented.
+
+Hermes preliminary score: 20/20 on all three; operator disposition PASS.
+
+ChatGPT independent score:
+
+- November 9, 1989: **19/20 PASS**;
+- February 29, 1960: **19/20 PASS**;
+- June 23, 1956: **17/20 PASS**;
+- exact-date integrity: PASS all three;
+- generalization: PASS all three;
+- experiment disposition: **PASS**.
+
+Independent scoring preserves several factual-care disagreements. Test 1 incorrectly frames November 9 as a deliberately selected symbolic Wall-opening date; Test 2 incorrectly calls Squaw Valley 1960 the first televised Winter Olympics and overstates 1960 as the beginning of U.S. military involvement in Vietnam; Test 3 contains several explicit age-calculation errors in its lifetime arc. None causes a critical-requirement failure, and all three outputs remain at or above the frozen 17-point PASS threshold.
+
+Supported bounded claim:
+
+> In the recorded fresh Claude Code environment, the frozen two-artifact Amazing Birthday package reconstructed behavior that passed the preregistered v1.0 rubric on all three withheld inputs, with immutable first-call evidence and no human repair.
+
+This is the first clean preregistered cross-provider PASS in the current Amazing Birthday evidence series.
 
 ## Current support for Behavioral Portability
 
-The evidence supports a stronger but still bounded statement:
+The evidence now supports a stronger but still bounded statement:
 
-> Governed Amazing Birthday behavior has survived reconstruction across multiple AI environments and distinct implementation mechanisms. A same-provider artifact-only clean-room reconstruction has a clean preregistered PASS. A fresh Claude cross-provider run produced passing behavior on all three withheld tests, but its first-run evidence capture was imperfect, so that execution is formally INDETERMINATE. A same-Claude clean replication is now active to resolve that evidence question without changing the scientific design.
+> Governed Amazing Birthday behavioral intent has survived artifact-only reconstruction in a fresh same-provider environment and in a fresh Claude target under a preregistered clean-room protocol. The Claude replication passed all three withheld tests with immutable first-call evidence despite substantial prose variance and some factual-care errors.
 
-It remains premature to claim universal portability across providers, models, upgrades, or application classes.
+This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary. It does not establish universal portability across providers, models, upgrades, or application classes.
 
 ## Highest-value unresolved questions
 
-1. Can Claude replication 002 produce a clean preregistered PASS/FAIL with immutable first-call evidence?
-2. Does the same frozen package pass on a different provider family such as Gemini?
-3. How much run-to-run variance appears under identical reconstruction conditions?
-4. Does a durability package outperform the original transcript alone as a portability input?
-5. Which durability-package components are necessary versus redundant?
-6. Does Behavioral Portability survive decision-oriented, stateful, structured-data, tool-dependent, and process-cluster applications?
+1. Does the same frozen package pass on a different provider family such as Gemini under the same clean protocol?
+2. How much run-to-run variance appears under identical reconstruction conditions, especially in factual care?
+3. Does a durability package outperform the original transcript alone as a portability input?
+4. Which durability-package components are necessary versus redundant?
+5. Does Behavioral Portability survive decision-oriented, stateful, structured-data, tool-dependent, and process-cluster applications?
