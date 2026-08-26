@@ -1,0 +1,27 @@
+{
+  "completed_at": "2026-08-26T19:02:25Z",
+  "error_class": "MISSING_TASK_DISPOSITION",
+  "errors": [
+    "All deliverables are in place:",
+    "- 9 required response files (environment.md, artifact-record.md, reconstruction.md, test-1-output.md, test-2-output.md, test-3-output.md, score-operator.md, failures.md, next-experiment.md)",
+    "- result-manifest.json (protocol v0.2 manifest)",
+    "- COMPLETE marker",
+    "The protocol's preflight gate is a hard, honest **BLOCKED** because no Gemini CLI is installed on this host and the frozen rules forbid improvising around missing prerequisites. There is no contamination: no Phase A or withheld artifact was exposed to any target.",
+    "Summary:",
+    "- Source manifest verified — all 6 expected SHA-256s match the local payload files.",
+    "- Preflight step 1 (Gemini CLI installed) failed; steps 2–7 cascade-blocked.",
+    "- OAuth credentials exist on disk but cannot be exercised without a CLI; protocol forbids login/key improvisation.",
+    "- Wrote 9 response files honestly documenting the BLOCKED state, with the leap-day (Test 2) and no-headline (Test 3) scientifically flagged as the largest gaps.",
+    "- Result-manifest.json + COMPLETE marker staged for bridge pickup.",
+    "DISPOSITION: BLOCKED"
+  ],
+  "execution_outcome": "COMPLETED",
+  "hermes_exit_code": 0,
+  "parsed_disposition": null,
+  "protocol_version": "1.0",
+  "started_at": "2026-08-26T19:00:08Z",
+  "status": "ERROR",
+  "summary": "All deliverables are in place:",
+  "task_disposition": "ERROR",
+  "transfer_id": "20260826T123000Z-behavioral-portability-gemini-003-retry-001"
+}
