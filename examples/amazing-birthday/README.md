@@ -38,29 +38,46 @@ The example deliberately separates three classes of material:
 
 A recreated artifact must never be labeled as an original historical artifact.
 
+## Quick orientation
+
+- Want a one-paragraph claim and the bottom-line evidence? Read
+  [`SUMMARY.md`](SUMMARY.md).
+- Want every public reconstruction result in one table? Read
+  [`RESULTS-INDEX.md`](RESULTS-INDEX.md).
+- Want to **experience** Development by Intent before studying the experiment? Start
+  with [`TUTORIAL.md`](TUTORIAL.md).
+
 ## Directory map
 
 ```text
 amazing-birthday/
 ├── README.md
-├── TUTORIAL.md
+├── SUMMARY.md                    # public-facing claim + evidence summary
+├── RESULTS-INDEX.md              # every public reconstruction result, with links
+├── TUTORIAL.md                   # hands-on DbI experience
 ├── 01-original-intent.md
 ├── 02-development-transcript/
 │   ├── README.md
-│   ├── amazing_birthday_transcript.txt
-│   └── behavior-derivation.md
-├── 03-behavioral-baseline.md
+│   ├── amazing_birthday_transcript.txt   # canonical, SHA-256 in README
+│   └── behavior-derivation.md            # traceability, NOT original evidence
+├── 03-behavioral-baseline.md             # frozen behavioral contract (v1.0)
 ├── 04-durable-package/
 │   ├── README.md
 │   └── RECONSTRUCTION-PROMPT.md
 ├── 05-reconstruction/
-│   └── README.md
-├── 06-validation.md
+│   └── README.md                  # isolation / freeze / test / score procedure
+├── 06-validation.md               # scoring rubric (v1.0 frozen)
 ├── tests/
-│   └── behavioral-tests.md
+│   └── behavioral-tests.md        # withheld/new-input tests (v1.0 frozen)
 └── results/
-    └── README.md
+    └── README.md                  # result-layout spec; actual results in experiments/
 ```
+
+**Note on `results/`:** the actual reconstruction evidence (raw outputs, scoring,
+environment records, failures) lives under [`experiments/`](../../experiments/) at the
+repository root, organized by date and protocol. This is intentional: each experiment
+is a self-contained reproducible unit with its own frozen source commit, MANIFEST, and
+audit trail. See [`RESULTS-INDEX.md`](RESULTS-INDEX.md) for the canonical list.
 
 ## The application
 
