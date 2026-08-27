@@ -1,12 +1,12 @@
 # Amazing Birthday — Transcript-Only Claude Replication 005
 
-**Status:** **EXECUTED — PASS** (clean evidence-capture replication of 004, pending ChatGPT independent review)
+**Status:** **INDETERMINATE formal / strong behavioral PASS signal** — clean v0.2 first-call capture, but independent review found the preregistered reconstruction-readiness freeze was not reached before testing. Hermes operator disposition remains PASS and is preserved separately.  
 **Experiment ID:** BP-AB-TRANSCRIPT-CLAUDE-REP-005  
 **Transfer:** `20260827T081500Z-behavioral-portability-transcript-only-claude-replication-005` (proposed; pending exchange pickup)  
 **Mode:** clean evidence-capture replication of `BP-AB-TRANSCRIPT-CLAUDE-004`  
 **Operator:** Hermes Agent (under new DBI Research Manager mandate adopted 2026-08-27)  
 **Target:** fresh Claude environment  
-**Independent reviewer:** ChatGPT (Frank-as-relay required)  
+**Independent reviewer:** ChatGPT  
 **Frozen source commit:** `c369215024c9f8a849daf11bd4b872d7ee566a7a`
 
 ## Research question
@@ -19,13 +19,13 @@ And (joint, paired with replication 002):
 
 ## Why this experiment
 
-Experiment 004 ran the scientific design correctly and produced a strong behavioral PASS signal across all three withheld tests — but the formal disposition was **INDETERMINATE** because two of four raw JSON captures (`test-2-raw.json`, `test-3-raw.json`) were byte-truncated at 8,192 bytes. The capture defect was operator-side: the pipeline `claude ... | tee FILE | head -c 200` had a non-blocking head consumer that closed after 200 bytes; SIGPIPE rippled upstream; Claude Code's streaming JSON serializer emitted a partial write at the kernel pipe-buffer boundary.
+Experiment 004 ran the scientific design and produced a strong behavioral PASS signal across all three withheld tests, but the formal disposition was **INDETERMINATE** because two of four raw JSON captures (`test-2-raw.json`, `test-3-raw.json`) were byte-truncated at 8,192 bytes. The capture defect was operator-side: the pipeline `claude ... | tee FILE | head -c 200` had a non-blocking head consumer that closed after 200 bytes; SIGPIPE rippled upstream; Claude Code's streaming JSON serializer emitted a partial write at the kernel pipe-buffer boundary.
 
-This is exactly the same class of evidence-capture defect that affected upstream replication 001 → 002 (paired ablation). The upstream pattern is decisive: **a clean capture-discipline replication is the documented fix.** This experiment carries that fix.
+This experiment changes only the capture discipline relative to 004.
 
 ## Independence variable vs. replication 002
 
-Same input class as 004 (transcript-only). Same target family, fresh session, same withheld tests in the same order with the same rubric and the same no-tools posture. Only the **capture discipline** changes; the scientific design is held fixed.
+Same input class as 004 (transcript-only). Same target family, fresh session, same withheld tests in the same order with the same rubric and the same no-tools posture. Only the **capture discipline** changes from 004; only the **preservation input** changes relative to replication 002.
 
 | Aspect | Replication 002 | 004 (INDETERMINATE) | 005 (this) |
 |---|---|---|---|
@@ -35,10 +35,9 @@ Same input class as 004 (transcript-only). Same target family, fresh session, sa
 | Withheld tests | `(Nov 9 1989, Feb 29 1960, Jun 23 1956)` | same | same |
 | No-tools posture | `--allowedTools ''` | `--allowedTools ''` | `--allowedTools ''` |
 | No-repair rule | held | held | held |
-| First-call capture discipline | `tee` without head consumption (clean) | `tee ... | head -c 200` (SIGPIPE-truncated) | **`tee` without head consumption; `claude` invoked with stdout to file via shell redirect (no head consumer)** |
-| Formal disposition | PASS | INDETERMINATE | target: PASS |
-
-The scientific design is invariant across 002 ↔ 004 ↔ 005. Only the capture method changes between 004 and 005; only the input class changes between 002 and 005.
+| First-call capture discipline | clean | truncated in 004 | **clean v0.2 shell redirect** |
+| Operator disposition | PASS | INDETERMINATE | PASS |
+| ChatGPT independent disposition | PASS | INDETERMINATE | **INDETERMINATE** |
 
 ## Phase A target input
 
@@ -59,8 +58,6 @@ After freeze only:
 - `examples/amazing-birthday/06-validation.md` — SHA-256 `cb3299e4bf4ab110b8b88dd67127586f16f5b53a21a6c60e4dd88cba23fd223d`
 - `examples/amazing-birthday/tests/behavioral-tests.md` — SHA-256 `35d87d8725f30a620e2a97ff14a51cc38a31453a18aa6a8dea889ed6a90a26a1`
 
-These SHA-256 values are the canonical content hashes at the frozen source commit, established on 2026-08-27 in the v0.1.1 amendment (see `experiments/2026-08-26-amazing-birthday-transcript-only-claude-004/README.md` § "Protocol amendment: v0.1.1, 2026-08-27").
-
 Frozen test order:
 
 1. `Birthdate November 9, 1989`
@@ -71,98 +68,70 @@ No behavioral correction or repair is supplied between tests.
 
 ## Frozen scoring rule
 
-Each output is scored 0–20 across ten dimensions:
+Each output is scored 0–20 across ten dimensions: historical opening, selectivity, exact-date discipline, significance, narrative coherence, lifetime framing, breadth, factual care, ending synthesis, and trigger behavior.
 
-1. historical opening
-2. selectivity
-3. exact-date discipline *(critical)*
-4. significance
-5. narrative coherence
-6. lifetime framing
-7. breadth
-8. factual care
-9. ending synthesis
-10. trigger behavior
-
-Per-output PASS requires 17–20 plus both critical requirements:
-
-1. exact-date integrity;
-2. generalization to withheld input.
+Per-output PASS requires 17–20 plus both critical requirements: exact-date integrity and generalization to withheld input.
 
 Experiment-level rules:
 
-- PASS — all three outputs PASS and no material contamination/repair/fallback/evidence-capture defect;
+- PASS — all three outputs PASS and no material contamination/repair/fallback/evidence-capture or execution defect;
 - PARTIAL — at least one PARTIAL but none FAIL, no material contamination;
 - FAIL — any behavioral FAIL;
-- INDETERMINATE — isolation, evidence-capture, or execution defects prevent reliable interpretation;
+- INDETERMINATE — isolation, evidence-capture, or execution defects prevent a clean formal interpretation;
 - BLOCKED — target cannot be executed.
 
-## Capture-discipline fix (v0.2 protocol)
+## Capture-discipline fix (v0.2)
 
-The single scientific change from 004 is the capture method. 004 used:
-
-```text
-claude [flags] 2>stderr | tee FILE | head -c 200
-```
-
-which truncates because the consumer (`head`) closes early, SIGPIPEs the producer, and Claude Code's JSON serializer's stream-rendering encounters the kernel pipe-buffer boundary mid-envelope.
-
-**005 uses a shell-redirection capture with no intermediate head consumer**, and verifies capture integrity post-hoc:
+004 used a pipeline with an early-closing `head` consumer. 005 instead used direct shell redirection:
 
 ```text
 claude [flags] > FILE 2>stderr
-# After each turn, verify:
-jq . FILE      # JSON must parse cleanly
-sha256sum FILE # record hash
+jq empty FILE
+sha256sum FILE
 ```
 
-The producer (Claude Code's `--output-format json` mode) writes the complete envelope to the file before any consumer reads. No pipe, no head, no truncation surface.
+All four first-call captures passed the v0.2 integrity gate. The evidence-capture defect from 004 is therefore eliminated.
 
-A second capture approach is permitted as a fallback if shell redirection proves incompatible with `--append-system-prompt-file`:
+## Preflight
 
-```text
-claude [flags] --output-format stream-json 2>stderr | python3 capture.py FILE
-# where capture.py reads the entire stream into FILE before exiting
-```
-
-Either approach must produce a JSON envelope that parses cleanly via `jq .` immediately after the call returns. A run-time check `jq empty FILE || exit` after every turn gates continuation.
-
-If the chosen capture method fails the `jq empty FILE` check on any turn, the protocol defaults to BLOCKED rather than patching the capture inline. A surface-to-operator rule holds.
-
-## Preflight (mirrors 004 v0.1.1)
-
-Before any target call Hermes must demonstrate using existing credentials/configuration only:
-
-1. usable Claude CLI/Claude Code and existing authentication;
-2. fresh isolated target context with no prior Amazing Birthday memory/context;
-3. genuine no-tools target for reconstruction and tests;
-4. frozen-source verification of transcript blob SHA and withheld test/rubric hashes;
-5. exact target model identifier frozen before reconstruction;
-6. **post-fix: capture-pipeline smoke test.** Run `claude --model claude-sonnet-4-6 --output-format json --print 'ping' > /tmp/smoke.json 2>&1` and confirm `jq empty /tmp/smoke.json` exits 0, the file exceeds 1 KB, and `wc -c` is non-multiple of 8192 (no pipe-buffer boundary pattern).
-
-If any requirement cannot be demonstrated, return BLOCKED. Do not initiate login, install paid services, create credentials, purchase/change subscriptions, weaken isolation, or substitute providers/models.
+Before any target call Hermes demonstrated existing Claude CLI/authentication, a fresh isolated target context, no-tools posture, frozen-source verification, exact model pinning, and a capture-pipeline smoke test. No login, purchase, model/provider fallback, or weakened isolation was used.
 
 ## Freeze / first-call / no-repair rules
 
-Freeze when the target has reconstructed reusable Amazing Birthday behavior from the transcript alone and states readiness for testing. No application instruction changes after freeze.
+The preregistered rule was:
 
-Atomically preserve the **first** reconstruction response and first response to each test, **with verified-clean JSON envelope per `jq .` immediate post-call**, before any extraction step. No prompt may be re-issued for evidence capture. Lost/truncated/re-issued first-call evidence makes the run **INDETERMINATE**.
+> Freeze when the target has reconstructed reusable Amazing Birthday behavior from the transcript alone and states readiness for testing.
 
-No correction, hint, regeneration, clarification, prompt repair, model fallback, or provider fallback is allowed before all raw first outputs are preserved.
+Atomically preserve the first reconstruction response and first response to each test. No prompt may be re-issued for evidence capture. Lost/truncated/re-issued first-call evidence makes the run INDETERMINATE. No correction, hint, regeneration, clarification, prompt repair, model fallback, or provider fallback is allowed before all raw first outputs are preserved.
+
+## Independent review — 2026-08-27
+
+The v0.2 capture repair worked, but the first reconstruction response did **not** satisfy the freeze rule. The target attempted a `Write` tool call; the no-tools posture correctly denied it. The returned first-call result then asked the operator to approve saving the transcript and said it would confirm readiness afterward. The operator supplied no approval or repair, but proceeded directly to the withheld tests.
+
+Because the target had not stated readiness, the preregistered freeze state was never established. Later passing behavior cannot retroactively create that freeze. The denied tool call is not contamination because it did not execute, but it is material evidence that the raw historical transcript contained an operational instruction that the target treated as a current command.
+
+Therefore the independent formal disposition is **INDETERMINATE**, not PASS.
+
+Independent behavioral scores on the three clean first-call test outputs:
+
+- November 9, 1989: **19/20 PASS-strength**;
+- February 29, 1960: **18/20 PASS-strength**;
+- June 23, 1956: **17/20 PASS-strength**.
+
+Hermes operator scores remain preserved as **20/20, 20/20, 20/20**. Full rationale: [`results/score-independent.md`](results/score-independent.md).
 
 ## Comparator
 
-Both 004 and replication 002 are NOT rerun or rescored. Their frozen comparator states remain:
+Replication 002 is not rerun or rescored. Its frozen comparator remains:
 
-- **Replication 002 (artifact-only):** ChatGPT independent 19/20, 19/20, 17/20 → final disposition PASS.
-- **004 (transcript-only):** operator 20/20, 20/20, 20/20 on visible content → final disposition INDETERMINATE (evidence-capture defect).
+- Hermes operator: **20/20, 20/20, 20/20**;
+- ChatGPT independent: **19/20, 19/20, 17/20**;
+- final disposition: **PASS**.
 
-The paired comparison from a clean 005 against replication 002 answers the agenda's open question on durability-package causal work.
-
-## Required evidence
-
-Preserve environment/model/isolation metadata, exact source verification, raw first reconstruction, all three raw first test outputs (each JSON-parseable, sha256-verified), operator scoring, failures/contamination, a transcript-only-vs-artifact-only paired comparison against replication 002, and an independent ChatGPT review.
+004 remains **INDETERMINATE** because its first-call evidence was truncated. 005 removes that capture defect but independently reveals a second transcript-only problem: the target did not reach the preregistered reconstruction-readiness freeze.
 
 ## Interpretation limit
 
-A PASS in 005 supports the narrower claim that **a transcript-only input, in a single fresh Claude Sonnet 4-6 session under this frozen protocol, is sufficient to satisfy the v1.0 withheld-test rubric.** It does not generalize cross-provider, cross-application, or to the durability package's necessity. The paired comparison with replication 002 is directional on artifact-dependence and not a universality claim.
+005 supports the narrower claim that the canonical transcript alone can evoke PASS-strength Amazing Birthday behavior on withheld triggers in the recorded Claude Sonnet 4-6 environment. It does **not** establish a clean matched transcript-only formal PASS against replication 002.
+
+The paired evidence now suggests a concrete causal advantage of the structured durability package in this application: the artifact-only replication 002 cleanly established reusable application readiness before testing, whereas the raw transcript-only runs exposed historical operational instructions that could be interpreted as live commands.
