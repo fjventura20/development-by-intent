@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fjventura20/development-by-intent/experiments/2026-08-27-amazing-birthday-transcript-only-claude-replication-005/MANIFEST.schema.json",
+  "experiment_id": "BP-AB-TRANSCRIPT-CLAUDE-REP-005",
+  "transfer_proposed": "20260827T081500Z-behavioral-portability-transcript-only-claude-replication-005",
+  "preregistration_date": "2026-08-27",
+  "operator": "Hermes Agent (DBI Research Manager)",
+  "independent_reviewer": "ChatGPT (via Frank-as-relay per new operating model)",
+  "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+  "phase_a_target_inputs": [
+    {
+      "path": "examples/amazing-birthday/02-development-transcript/amazing_birthday_transcript.txt",
+      "git_blob_sha1_at_frozen_source": "bab34913805c625b9bae46b54169b6decc447cd6",
+      "expected_staged_sha256": null,
+      "byte_verification_command": "git hash-object <staged-file>; must equal bab34913805c625b9bae46b54169b6decc447cd6"
+    }
+  ],
+  "withheld_until_freeze": [
+    {
+      "path": "examples/amazing-birthday/06-validation.md",
+      "expected_sha256_content": "cb3299e4bf4ab110b8b88dd67127586f16f5b53a21a6c60e4dd88cba23fd223d"
+    },
+    {
+      "path": "examples/amazing-birthday/tests/behavioral-tests.md",
+      "expected_sha256_content": "35d87d8725f30a620e2a97ff14a51cc38a31453a18aa6a8dea889ed6a90a26a1"
+    }
+  ],
+  "target_environment": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model_pinned": "claude-sonnet-4-6",
+    "model_pinned_via": "claude --model claude-sonnet-4-6",
+    "isolation": "--allowedTools '' on every turn",
+    "session_lifecycle": "fresh --session-id <uuid> at turn 1; --resume for turns 2-4",
+    "auth_method_required": "claude.ai firstParty (existing operator credentials only; no new auth)"
+  },
+  "test_sequence": [
+    {"turn": 1, "role": "reconstruction", "prompt": "Reconstruct the application per the system prompt. When you are ready, state that you are ready.", "withheld_until_freeze": true},
+    {"turn": 2, "role": "withheld_test_1", "prompt": "Birthdate November 9, 1989"},
+    {"turn": 3, "role": "withheld_test_2", "prompt": "Birthdate February 29, 1960"},
+    {"turn": 4, "role": "withheld_test_3", "prompt": "Birthdate June 23, 1956"}
+  ],
+  "capture_discipline_v02": {
+    "primary": "claude [flags] > FILE 2>stderr; post-call jq . FILE && jq empty FILE; sha256sum FILE; size must exceed 1 KB and must NOT be a multiple of 8192",
+    "fallback": "claude --output-format stream-json [flags] 2>stderr | python3 capture.py FILE; capture.py reads entire stream into FILE",
+    "rationale": "004 captured via 'tee FILE | head -c 200' which produced SIGPIPE truncation at 8 KiB kernel pipe-buffer boundary on tests 2 and 3; this v0.2 capture discipline eliminates the pipe-consumer surface",
+    "gate_per_turn": "jq . FILE must succeed before extraction step; jq failure defaults to BLOCKED",
+    "audit_chain": "experiments/2026-08-26-amazing-birthday-transcript-only-claude-004/results/failures.md"
+  },
+  "scoring_rule": {
+    "dimensions": ["historical opening","selectivity","exact-date discipline","significance","narrative coherence","lifetime framing","breadth","factual care","ending synthesis","trigger behavior"],
+    "dimension_max_score": 2,
+    "per_test_max_score": 20,
+    "critical_requirements": ["exact-date integrity", "generalization to withheld input"],
+    "per_test_pass_threshold": ">=17 AND both critical requirements met",
+    "experiment_level_dispositions": {
+      "PASS": "all three per-test PASS AND no material contamination/repair/fallback/evidence-capture defect",
+      "PARTIAL": ">=1 PARTIAL but none FAIL, no material contamination",
+      "FAIL": "any behavioral FAIL",
+      "INDETERMINATE": "isolation, evidence-capture, or execution defects prevent reliable interpretation",
+      "BLOCKED": "target cannot be executed per protocol's BLOCKED rule"
+    }
+  },
+  "preflight_checklist": [
+    {"item": 1, "requirement": "Usable Claude CLI/Code + existing auth"},
+    {"item": 2, "requirement": "Fresh isolated target context, no prior Amazing Birthday memory"},
+    {"item": 3, "requirement": "Genuine no-tools target"},
+    {"item": 4, "requirement": "Frozen-source verification of transcript blob and withheld test/rubric hashes"},
+    {"item": 5, "requirement": "Exact target model identifier frozen before reconstruction"},
+    {"item": 6, "requirement": "Capture-pipeline smoke test: jq . accepts one-shot test envelope of >=1 KB non-multiple-of-8192 bytes"}
+  ],
+  "preflight_blocked_rule": "If any requirement cannot be demonstrated, return BLOCKED. Do not initiate login, install paid services, create credentials, purchase/change subscriptions, weaken isolation, or substitute providers/models.",
+  "freeze_no_repair_rules": [
+    "Freeze when target reconstructs reusable behavior from transcript and states readiness.",
+    "Atomically preserve first reconstruction and first response to each test, with jq-verified JSON envelope, before any extraction.",
+    "No correction, hint, regeneration, clarification, prompt repair, model fallback, or provider fallback before all raw first outputs are preserved.",
+    "Lost/truncated/re-issued first-call evidence makes the run INDETERMINATE."
+  ],
+  "comparator_paired_with_replication_002": {
+    "replication_002_id": "BP-AB-CLAUDE-REP-002",
+    "replication_002_input_class": "artifact-only (Phase A: 03-behavioral-baseline + RECONSTRUCTION-PROMPT)",
+    "replication_002_chatgpt_independent_score": [19, 19, 17],
+    "replication_002_final_disposition": "PASS",
+    "004_id": "BP-AB-TRANSCRIPT-CLAUDE-004",
+    "004_input_class": "transcript-only",
+    "004_operator_score_on_visible_content": [20, 20, 20],
+    "004_final_disposition": "INDETERMINATE (evidence-capture defect)",
+    "pairing_question": "Does the canonical transcript alone preserve enough behavioral identity to pass the same frozen v1.0 withheld tests that the two-artifact durability package passed at 19/19/17 in replication 002?"
+  },
+  "interpretation_limit": "A PASS in 005 supports only the narrower claim that a transcript-only input is sufficient in the recorded Claude environment under this frozen protocol. It does not generalize cross-provider, cross-application, or to the durability package's necessity. The paired comparison with replication 002 is directional on artifact-dependence and not a universality claim."
+}
