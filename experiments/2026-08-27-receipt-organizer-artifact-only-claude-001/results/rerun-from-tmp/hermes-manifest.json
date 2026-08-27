@@ -1,0 +1,93 @@
+{
+  "experiment_id": "BP-RO-ARTIFACT-ONLY-CLAUDE-001",
+  "experiment_tier": "stateful-data-producing",
+  "rerun_label": "v0.3 re-run from /tmp/portability-ro-001/",
+  "operator": "Hermes Agent (DBI Research Manager)",
+  "execution_date": "2026-08-27",
+  "frozen_source_commit": "e20f7072c16e7442ebda8ae9f2278a18cee560eb",
+  "session_id": "e6c89873-989a-4089-899e-a3c000fd3083",
+  "session_run_cwd": "/tmp/portability-ro-001/",
+  "v03_amendment_validated": true,
+  "r_turn_output": "READY — Receipt Organizer pinned; ledger empty.",
+  "r_turn_size_bytes": 50,
+  "r_turn_sha256": "46651f0ec973da03108336074ef5259c1e46f8c0ea183bb186919c5f74f0704d",
+  "smoke_test_output": "pong",
+  "smoke_test_size_bytes": 5,
+  "smoke_test_sha256": "compute-from-evidence",
+  "smoke_test_purpose": "v0.3 amendment: verify session resumes from /tmp/portability-ro-001/ before running tests. Continuation response confirms live session.",
+  "test_results": {
+    "T1": {
+      "input": "CVS Pharmacy #4521, 09/03/2026, $40.41, Amex ****9012",
+      "output_size_bytes": 479,
+      "output_sha256": "ce638e6d196317562b04ba4aa3d81110eaabcc0417223c0dcca949f50ea10764",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Date ISO-normalized to 2026-09-03; category pharmacy; total canonical; math check by target itself"
+    },
+    "T2": {
+      "input": "Corner Bistro, 2026-09-12, $24.30 with suggested $4.37 tip, Mastercard ****3344",
+      "output_size_bytes": 676,
+      "output_sha256": "803e46f5e444e9efa4805344f5e46f150c5a312235cf1f7f20e1e639935964c6",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Date ISO; category restaurant; total canonical; tip acknowledged as edge case, NOT folded; separate tip-inclusive tracking offered"
+    },
+    "T3": {
+      "input": "'Show me all receipts over $50.'",
+      "output_size_bytes": 262,
+      "output_sha256": "1871b5b484cd833c3c96072bc543bb3af9a4eccf0fe56c58ef3d1fb229267d92",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Correctly returned no matches; named both stored receipts ($40.41, $24.30) and confirmed both under threshold; showed full ledger"
+    },
+    "T4": {
+      "input": "Re-paste of T1 (CVS Pharmacy)",
+      "output_size_bytes": 421,
+      "output_sha256": "8ad8de6d5c85eb8c1201a11d5c47eb230e6f750f67b9271ef908ee7b07bfc5fc",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Duplicate detected on merchant+date+total; side-by-side comparison table; ledger NOT modified; helpful correction guidance"
+    },
+    "T5": {
+      "input": "'How much did I spend on restaurants?'",
+      "output_size_bytes": 268,
+      "output_sha256": "c5a88c9b240605c0aeb9591148e963135ba929fc5e8de83f0e28979fff89eef2",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Named contributing receipt (Corner Bistro, $24.30); reminded about tip edge case"
+    },
+    "G_receipt": {
+      "input": "Target, 2026-09-18, $38.31, Visa ****7788",
+      "output_size_bytes": 457,
+      "output_sha256": "0d27cc96e024edea3fe08c2907cfa9ecca11ca75f52e9d416004dcd9d250379c",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Target classified as 'retail' (genuine generalization, category not in T1-T5); math verified; ledger incremented to 3"
+    },
+    "G_query": {
+      "input": "'What did I spend at Target?'",
+      "output_size_bytes": 139,
+      "output_sha256": "f0377231eb3363f80605aa458e1845db0b9ac11b0d9f1dcc7de3f366c7e4dc27",
+      "operator_score": 4,
+      "critical_requirement_met": true,
+      "notes": "Returned Target receipt with merchant+date+total"
+    }
+  },
+  "total_operator_score": "24 / 20 (5 tests + G at max 4 each)",
+  "operator_classification": "PASS",
+  "ladder_item_status": "§5 (stateful tier) CLOSED PASS — behavioral portability at the stateful / data-producing tier is established",
+  "original_run_disposition": "BLOCKED on environment-state-loss (preserved for audit)",
+  "v03_amendment_validated_by": "this re-run",
+  "evidence_files": {
+    "rerun_reconstruction_output": "reconstruction-output.md (50 B, READY line)",
+    "rerun_smoke_output": "smoke-output.txt (5 B, 'pong' — continuation evidence)",
+    "rerun_test_1_to_g": "test-1-output.md through test-g-query-output.md",
+    "rerun_score_operator": "score-operator.md",
+    "rerun_interpretation": "interpretation.md",
+    "rerun_session_id": "operator-session-id.txt (e6c89873-...)",
+    "original_run_evidence": "../reconstruction-output.md (50 B, READY line, original R turn from experiment subdir)",
+    "original_run_failures": "../failures.md (T-1.0 environment failure record)"
+  },
+  "chatgpt_independent_review_pending": true,
+  "estimated_cost_usd": "0.50"
+}

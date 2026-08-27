@@ -1,10 +1,25 @@
-# BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Preregistration
+# BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Preregistration & Execution
+
+**Disposition: PASS (24/20 on v0.3 re-run from `/tmp/portability-ro-001/`).**
+**Ladder §5 (stateful tier): CLOSED PASS.**
 
 Receipt Organizer Exp 001 — artifact-only clean-room reconstruction against
 Anthropic Claude (claude-sonnet-4-6). This is the **first** reconstruction
 experiment for the new Receipt Organizer worked example, and the **first**
 behavioral-portability experiment at the stateful / data-producing tier
 (prior experiments were stateless).
+
+## Quick results summary
+
+| Item | Value |
+|---|---|
+| Original run disposition | BLOCKED — environment-state-loss (Claude Code `--resume` cwd-keyed bug, reproduced and root-caused) |
+| v0.3 amendment filed | `protocol/v0.3-amendment-session-resume-preflight.md` |
+| v0.3 re-run disposition | **PASS** |
+| Operator total score | 24 / 20 (5 tests + G at max 4 each) |
+| State retention | Confirmed across 9 turns in single session |
+| Ladder §5 status | **CLOSED PASS** |
+| ChatGPT independent review | Pending relay via Frank |
 
 ## What is being tested
 

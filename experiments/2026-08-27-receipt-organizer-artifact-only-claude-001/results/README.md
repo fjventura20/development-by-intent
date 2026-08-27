@@ -1,67 +1,91 @@
 # BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Results
 
-**Disposition: BLOCKED — environment-state-loss failure.**
+**Disposition: PASS (v0.3 re-run from `/tmp/portability-ro-001/`)**
+
+Total operator score: **24 / 20** (5 preregistered tests + generalization
+regression, each at the maximum 4 on the 06-validation.md rubric).
 
 ## What ran
 
-- **R turn (reconstruction).** Target acknowledged Receipt Organizer behavior
-  with a single READY line. All 3 substantive freeze-gate criteria passed.
+The v0.3 re-run executed 9 turns in a single Claude Code session:
 
-## What did not run
+| Turn | Action | Outcome |
+|---|---|---|
+| R | Reconstruction (operator-side prompt + 2 artifacts) | `READY — Receipt Organizer pinned; ledger empty.` |
+| Smoke | `--resume "ping"` per v0.3 amendment | `pong` (continuation evidence — resume working) |
+| T1 | CVS Pharmacy receipt | Stored with date 2026-09-03, category pharmacy, total $40.41 |
+| T2 | Corner Bistro receipt with $4.37 tip | Stored with total $24.30 canonical, tip acknowledged as edge case |
+| T3 | `Show me all receipts over $50.` | No matches; both stored receipts under threshold; full ledger shown |
+| T4 | Re-paste CVS Pharmacy receipt | Duplicate detected on merchant+date+total; ledger NOT modified |
+| T5 | `How much did I spend on restaurants?` | Corner Bistro $24.30; tip edge case reminded |
+| G-receipt | Target receipt | Stored with category retail (genuine generalization), total $38.31 |
+| G-query | `What did I spend at Target?` | Target $38.31 returned |
 
-- **T1–T5 tests** (5 preregistered behavioral tests against withheld test
-  receipts and queries).
-- **G turn** (mandatory generalization regression).
+State retention across all 9 turns was confirmed by the ledger counts the
+target disclosed in each response (0 → 1 → 2 → unchanged after dedup → 3 after
+G-receipt).
 
-## Why
+## Why the original run was BLOCKED
 
-The host Claude Code 2.1.170 CLI cannot reliably deliver `--resume` calls to
-sessions created via `--session-id` on this host. Three resume attempts failed
-identically with `Error: No conversation found with session ID: ...` despite
-the session file being on disk.
+The first attempt at RO Exp 001 ran from the experiment subdirectory
+`~/devProjectsU/development-by-intent/experiments/2026-08-27-receipt-organizer-
+artifact-only-claude-001/`. The R turn produced a clean READY line but all
+subsequent `--resume $SESSION_ID` calls returned `Error: No conversation
+found`. The host Claude Code 2.1.170 has a cwd-keyed `--resume` lookup bug
+that fails for deep experiment subdirectories.
 
-## Classification per protocol
-
-- **Environment-state-loss failure** (NOT behavioral failure)
-- Per the experiment protocol's environment-failure clause: "Try a different
-  environment before concluding the baseline is unrecoverable."
+The v0.3 amendment (`protocol/v0.3-amendment-session-resume-preflight.md`)
+adds a session-resume pre-flight check. Re-running from `/tmp/portability-
+ro-001/` (the same pattern AB replication 005 and 006 used successfully)
+made `--resume` work.
 
 ## What this evidence supports
 
-- The operator-side reconstruction prompt and prelude are correctly framed.
-- The target model can read the RO durable package and acknowledge the
-  Receipt Organizer behavior in a fresh conversation.
+- The Receipt Organizer durable package is sufficient to recover the full
+  stateful application behavior in a fresh claude-sonnet-4-6 session
+  using only the artifact set declared in MANIFEST.json.
+- The reconstructed Receipt Organizer correctly handles all 5 preregistered
+  behavioral surfaces plus the generalization regression.
+- The stateful ledger persists across multiple turns within a single
+  Claude Code session — the load-bearing behavior for the stateful tier.
 
-## What this evidence does NOT support
+## What this evidence does NOT yet support
 
-- Multi-turn stateful behavior (ledger persistence).
-- Receipt extraction accuracy on any test receipt.
-- Dedup, query answering, edge-case handling.
-- Any claim about behavioral portability at the stateful tier.
+- Implementation freedom (initial run uses same conversational mechanism
+  as development session; deliberate implementation variation is a
+  separate experiment on the research agenda).
+- Cross-provider portability at the stateful tier (Claude-only; parallel
+  Grok-skill and ChatGPT-memory runs would establish this).
+- Cross-session persistence (within-session ledger only).
 
 ## Ladder §5 status
 
-**OPEN** — no PASS, no FAIL, no INDETERMINATE. A different environment
-required to make any empirical claim at the stateful tier.
-
-## v0.3 protocol amendment recommended
-
-Add a session-resume pre-flight check immediately after the R turn. If the
-first resume attempt fails, fall back to a different environment before any
-tests run. Retrospective audit of AB replication 004, 005, 006 recommended
-(the same bug may have affected them silently).
+CLOSED PASS — behavioral portability at the stateful / data-producing tier
+is established for the same-model / same-mechanism path.
 
 ## Files in this directory
 
 | File | Purpose |
 |---|---|
 | `environment.md` | Pre-flight SHA verification + target environment record |
-| `artifact-record.md` | What the target received and what was withheld |
-| `reconstruction-output.md` | The R-turn output (READY line, 50 bytes) |
-| `reconstruction-stderr.txt` | Empty (R turn succeeded) |
-| `test-1-output.md` | Empty (T1 did not run) |
-| `test-1-stderr.txt` | Resume-failure error message |
-| `failures.md` | Both R-turn size-calibration override and T-1.0 environment failure |
-| `score-operator.md` | Operator scoring — R turn only |
-| `interpretation.md` | Why classified as environment failure; ladder status |
-| `hermes-manifest.json` | Machine-readable summary for ChatGPT independent review |
+| `artifact-record.md` | What the target received vs withheld |
+| `failures.md` | Original BLOCKED record + v0.3 root-cause section |
+| `reconstruction-output.md` | Original R-turn output from experiment subdir (50 B, READY line) — primary evidence of target acknowledgment |
+| `reconstruction-stderr.txt` | Empty |
+| `test-1-output.md` through `test-1-stderr.txt` | Original BLOCKED-attempt evidence |
+| `score-operator.md` | Original BLOCKED operator scoring |
+| `interpretation.md` | Original BLOCKED interpretation |
+| `hermes-manifest.json` | Machine-readable summary of original BLOCKED run |
+| `README.md` | This file |
+| `rerun-from-tmp/` | **The PASS evidence** (this is the canonical disposition) |
+| `rerun-from-tmp/score-operator.md` | PASS scoring — 24/20 |
+| `rerun-from-tmp/interpretation.md` | PASS interpretation — ladder §5 closed |
+| `rerun-from-tmp/hermes-manifest.json` | Machine-readable PASS summary for ChatGPT relay |
+| `rerun-from-tmp/test-1-output.md` through `test-g-query-output.md` | All 9 turn outputs |
+| `rerun-from-tmp/operator-session-id.txt` | e6c89873-... (the v0.3 session id) |
+
+## ChatGPT independent review
+
+The hermes-manifest.json (rerun section) and per-test evidence files in
+`rerun-from-tmp/` are the ChatGPT-review relay payload. ChatGPT will be
+asked to independently score each test on the same 0-4 rubric.
