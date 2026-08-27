@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "experiment_id": "BP-RO-ARTIFACT-ONLY-CLAUDE-001",
+  "transfer_proposed": "20260827T120500Z-bp-ro-artifact-only-claude-001",
+  "preregistration_date": "2026-08-27",
+  "operator": "Hermes Agent (DBI Research Manager)",
+  "independent_reviewer": "ChatGPT (via Frank-as-relay per new operating model)",
+  "frozen_source_commit": "e20f7072c16e7442ebda8ae9f2278a18cee560eb",
+  "frozen_source_branch": "ro-example-package-2026-08-27",
+  "tier": "stateful-data-producing",
+  "paired_with_ab": "BP-AB-ARTIFACT-ONLY-CLAUDE-002 (PASS, 19/19/17)",
+
+  "phase_a_target_inputs": [
+    {
+      "path": "examples/receipt-organizer/03-behavioral-baseline.md",
+      "git_blob_sha1_at_frozen_source": "355d3f60ab55c3219cb03b697d78cd248697ca8e",
+      "byte_verification_command": "git hash-object <staged-file>; must equal 355d3f60ab55c3219cb03b697d78cd248697ca8e",
+      "sha256": "a2828cb56f4417c2d4764c54bcb1bdf033d838c66a8d2181a57af55d0b9cd60a"
+    },
+    {
+      "path": "examples/receipt-organizer/04-durable-package/RECONSTRUCTION-PROMPT.md",
+      "git_blob_sha1_at_frozen_source": "compute-at-execution-from-frozen-source",
+      "sha256": "0df6896c8a35f90d3a6bff7e8c36a1cde06a110d97fa329c137d50116be11f69"
+    }
+  ],
+
+  "withheld_until_freeze": [
+    {
+      "path": "examples/receipt-organizer/tests/behavioral-tests.md",
+      "expected_sha256_content": "ddf0d8018e0a4192fa5190c61c7922ebe5557afa9533a98e8b83c3b3dc61cb43"
+    },
+    {
+      "path": "examples/receipt-organizer/06-validation.md",
+      "expected_sha256_content": "a14bb9cb23aac9af2d322dcf8e3f6ceb4c1c4030cae812b16714be1030e5df0f"
+    },
+    {
+      "path": "examples/receipt-organizer/02-development-transcript/",
+      "expected_sha256_content": "entire-directory-tree-hash-not-applicable; verify file-by-file against 02-development-transcript/README.md recorded SHA-256 16651893e987456acaf15cd7ddfbdd146b2277d4ed4533c7a714894e93537ea8 for receipt_organizer_transcript.txt"
+    }
+  ],
+
+  "target_environment": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model_pinned": "claude-sonnet-4-6",
+    "model_pinned_via": "claude --model claude-sonnet-4-6",
+    "isolation": "--allowedTools '' on every turn",
+    "session_lifecycle": "fresh --session-id <uuid> at reconstruction turn; --resume <uuid> for tests T1-T5 and generalization G",
+    "auth_method_required": "claude.ai firstParty (existing operator credentials only)"
+  },
+
+  "capture_discipline_v02": {
+    "rationale": "Per AB replication-005 finding, capture via shell redirect (not tee+head) eliminates SIGPIPE truncation. Per-turn verification gate: jq empty && size>1KB && size%8192!=0 && sha256sum.",
+    "prohibited_shell_constructs": ["tee", "head -c", "tail -c", "awk buffering on stdout"]
+  },
+
+  "freeze_discipline_v02": {
+    "rationale": "Per AB replication-006 finding, transcript-only reconstruction can fail freeze if the target echoes any imperative phrases from the historical artifact set. This is an artifact-only run (no transcript), so the freeze risk is lower, but the same gate is applied for consistency.",
+    "ready_line_format": "Single line containing exactly `READY` + brief self-description (e.g., 'READY — Receipt Organizer pinned; ledger empty.').",
+    "prohibited_phrases_in_reconstruction_turn": [
+      "Save",
+      "Tell me",
+      "Try it",
+      "Write",
+      "Send",
+      "Reply with",
+      "Email",
+      "Message",
+      "Post",
+      "Now produce",
+      "Reproduce the following"
+    ],
+    "verification_gate_order": [
+      "READY keyword present in reconstruction turn",
+      "no tool_use content blocks",
+      "no verbatim prohibited phrases",
+      "failing gate defaults BLOCKED; no re-issue for freeze per v0.2 §rule 4"
+    ]
+  },
+
+  "test_sequence": [
+    {"turn": "R",  "action": "supply-artifacts-and-prompt-for-reconstruction", "expected": "READY statement; no tool_use; no prohibited phrases"},
+    {"turn": "T1", "action": "paste Test 1 (CVS Pharmacy)", "critical_requirement": "Date ISO-normalized; total canonical"},
+    {"turn": "T2", "action": "paste Test 2 (Corner Bistro with tip)", "critical_requirement": "Tip outside printed total acknowledged, not folded into total"},
+    {"turn": "T3", "action": "'Show me all receipts over $50.'", "critical_requirement": "Threshold query returns only strictly-over-$50 receipts"},
+    {"turn": "T4", "action": "re-paste Test 1", "critical_requirement": "Duplicate detected; ledger unchanged"},
+    {"turn": "T5", "action": "'How much did I spend on restaurants?'", "critical_requirement": "Category aggregate correct over full ingested corpus"},
+    {"turn": "G",  "action": "paste Target; ask 'What did I spend at Target?'", "critical_requirement": "Retail classification; correct query answer; ledger count incremented"}
+  ],
+
+  "state_retention_requirement": {
+    "rationale": "Receipt Organizer is stateful. The reconstructing environment must retain the ledger across turns within the same conversation.",
+    "verification": "After each test turn, operator records the ledger state as reported by the target. If the ledger is empty or reset between turns, this is recorded as environment-state-loss failure (not behavioral failure) per the experimental protocol.",
+    "mitigation_if_state_lost": "Try a different environment (e.g., a different model that retains conversation memory) before concluding the baseline is unrecoverable."
+  },
+
+  "scoring": {
+    "rubric": "examples/receipt-organizer/06-validation.md v1.0",
+    "per_test_scale": "0-4",
+    "max_total": 20,
+    "overall_classification": {
+      "PASS": "all 5 tests PASS (15-20)",
+      "PARTIAL": "at least 3 tests PASS, no test FAIL",
+      "FAIL": "any test FAIL, or fewer than 3 PASS"
+    },
+    "operator_first": true,
+    "independent_reviewer_after_operator": true
+  },
+
+  "out_of_scope": [
+    "image-input handling (v1.0 plain-text only)",
+    "cross-session persistence (development pinned within-session ledger)",
+    "implementation-freedom variation (initial run uses same conversational mechanism as development session)"
+  ],
+
+  "estimated_cost_usd": "0.40-0.80",
+  "estimated_invocations": 8,
+
+  "files": {
+    "README.md": "this file's parent",
+    "MANIFEST.json": "this file",
+    "protocol/artifact-only-reconstruction-v0.2.md": "frozen procedural protocol"
+  }
+}
