@@ -93,3 +93,36 @@ different luck. Recommend a retrospective audit of AB replication 004, 005,
 006 to see whether their session-resume calls succeeded — if they did, the
 bug is intermittent; if not, the AB replications may have been silently
 running on different session content than assumed.
+
+## [T-1.0 UPDATE 2026-08-27] Root cause identified: cwd-keyed --resume lookup bug
+
+Reproduced cleanly from `/tmp/ro-retry-from-tmp/`:
+
+- T1 (`claude -p "Reply with READY" --session-id <uuid>`) succeeded.
+- T2 (`claude --resume <uuid> -p "ping"`) succeeded — returned a continuation
+  response ("I'm ready to help..."), not a fresh-start reply.
+- Session file on disk at `~/.claude/projects/-tmp-ro-retry-from-tmp/<uuid>.jsonl`.
+
+Compared to the same flow from the experiment subdirectory:
+
+- T1 succeeded with the ideal READY line.
+- T2 returned `Error: No conversation found with session ID: ...` despite
+  session file on disk at the experiment-keyed project dir.
+
+Retrospective audit of AB 004/005/006 confirms:
+
+- AB 004: 1 session file (15,894 B, 11 lines) in experiment-specific dir;
+  capture-truncated at 8192 bytes by SIGPIPE. Resume itself worked;
+  capture broke.
+- AB 005: 1 session file (138,409 B, **62 lines**) in parent project dir
+  (cwd was /tmp). Resume worked; full multi-turn conversation preserved.
+- AB 006: 1 session file (83,033 B, **42 lines**) in parent project dir.
+  Resume worked.
+
+Conclusion: AB 005 and 006 PASS dispositions stand. RO Exp 001 BLOCKED
+disposition stands. The v0.3 amendment (cwd-mapping pre-flight + smoke test)
+is filed in `protocol/v0.3-amendment-session-resume-preflight.md`.
+
+The full RO Exp 001 re-run will execute from `/tmp/portability-ro-001/` per
+the v0.3 amendment, with the original R-turn output reused as primary
+evidence of target acknowledgment.
