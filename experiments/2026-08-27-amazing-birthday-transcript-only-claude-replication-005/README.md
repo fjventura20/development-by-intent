@@ -1,6 +1,6 @@
 # Amazing Birthday — Transcript-Only Claude Replication 005
 
-**Status:** PREREGISTERED (draft awaiting operator execution authorization)  
+**Status:** **EXECUTED — PASS** (clean evidence-capture replication of 004, pending ChatGPT independent review)
 **Experiment ID:** BP-AB-TRANSCRIPT-CLAUDE-REP-005  
 **Transfer:** `20260827T081500Z-behavioral-portability-transcript-only-claude-replication-005` (proposed; pending exchange pickup)  
 **Mode:** clean evidence-capture replication of `BP-AB-TRANSCRIPT-CLAUDE-004`  
