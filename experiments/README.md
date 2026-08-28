@@ -20,7 +20,7 @@ This experiment compares three inputs in fresh Claude Sonnet 4.6 sessions:
 
 Five fresh birthday tests, condition ordering, isolation, no-tools posture, capture behavior, evaluator requirements, and failure rules are frozen. Ablation 002's dates are withdrawn. No condition output may be generated unless the no-generation readiness check confirms the externally bound snapshot and unchanged controlled environment.
 
-See [`2026-08-28-amazing-birthday-ablation-003/`](2026-08-28-amazing-birthday-ablation-003/).
+See [`feat/ablation-003-protocol-freeze`](https://github.com/fjventura20/development-by-intent/tree/feat/ablation-003-protocol-freeze/experiments/2026-08-28-amazing-birthday-ablation-003/).
 
 ## Completed and preserved
 
@@ -35,7 +35,7 @@ See [`2026-08-28-amazing-birthday-ablation-003/`](2026-08-28-amazing-birthday-ab
 | [Transcript-only replication 005](2026-08-27-amazing-birthday-transcript-only-claude-replication-005/) | INDETERMINATE; PASS-strength behavior | Historical instructions can become live commands |
 | [Transcript-only replication 006](2026-08-27-amazing-birthday-transcript-only-claude-replication-006/) | PASS — PI-adjudicated 17/18/17 | Freeze discipline closed the formal transcript-only defect |
 | [Receipt Organizer artifact-only Claude 001](2026-08-27-receipt-organizer-artifact-only-claude-001/) | Functional PASS — 24/24; causal status PROVISIONAL | Stateful recovery across nine turns |
-| [Amazing Birthday Ablation 002](2026-08-28-amazing-birthday-ablation-002/) | INDETERMINATE; no scientific result | Execution defects required a clean replacement |
+| [Amazing Birthday Ablation 002](https://github.com/fjventura20/development-by-intent/tree/feat/ablation-002-protocol-freeze/experiments/2026-08-28-amazing-birthday-ablation-002/) | INDETERMINATE; no scientific result | Execution defects required a clean replacement |
 
 ## Required next sequence
 
