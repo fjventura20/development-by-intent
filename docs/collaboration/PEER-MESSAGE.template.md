@@ -1,5 +1,5 @@
 ---
-protocol: spcp-0.1
+protocol: spcp-0.1.1
 thread_id: replace-me
 message_id: replace-me
 parent_message_id: null
@@ -29,4 +29,3 @@ Ask one primary question or request one primary decision or action.
 ## Proposed state delta
 
 State exact additions, changes, or removals proposed for `STATE.md`.
-

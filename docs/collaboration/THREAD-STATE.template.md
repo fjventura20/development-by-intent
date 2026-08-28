@@ -1,5 +1,5 @@
 ---
-protocol: spcp-0.1
+protocol: spcp-0.1.1
 thread_id: replace-me
 objective: Replace with one concrete objective
 status: ACTIVE
@@ -35,4 +35,3 @@ updated_at: 2026-08-28T19:11:55Z
 
 - **Actor:** Either peer
 - **Action:** Make the first substantive contribution.
-

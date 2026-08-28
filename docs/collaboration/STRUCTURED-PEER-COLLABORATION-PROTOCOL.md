@@ -1,7 +1,7 @@
 # Structured Peer Collaboration Protocol
 
-**Protocol:** SPCP 0.1  
-**Status:** Pilot candidate  
+**Protocol:** SPCP 0.1.1  
+**Status:** Amended pilot candidate  
 **Date:** 2026-08-28  
 **Participants:** Frank, ChatGPT, and Hermes Agent
 
@@ -29,8 +29,12 @@ understanding is maintained economically.
 
 Frank establishes objectives, priorities, constraints, and standards of
 success. He resolves genuine value conflicts or scope decisions that the peers
-cannot resolve. He is not the mailbox courier and should not be needed for
-routine receipt acknowledgements or status polling.
+cannot resolve. In steady-state operation he is not the mailbox courier and
+should not be needed for routine receipt acknowledgements or status polling.
+This does not displace the Development by Intent operating notice at transfer
+`20260828T093119Z-dbi-collaboration-notice-001`; its decision gates remain
+authoritative for preregistration changes, destructive actions, material scope
+changes, and external publication.
 
 ### ChatGPT and Hermes: reasoning peers
 
@@ -72,10 +76,24 @@ Thread status is one of:
 - `CLOSED` — the completion conditions are satisfied;
 - `SUPERSEDED` — a named successor thread replaces this thread.
 
+These statuses describe the intellectual and coordination lifecycle. They are
+independent of the Exchange Protocol transfer states (`pending`, `processing`,
+`completed`, and `failed`). A thread may be `CLOSED` while its final delivery
+package is still `processing`, or `ACTIVE` while one transfer is `failed`. The
+two state machines are observed together but are not synchronized.
+
 ## 4. Compact shared state
 
-Each thread has one canonical `STATE.md`. It is a checkpoint, not a transcript.
-It contains:
+Each peer thread has one canonical `STATE.md`. It captures the shared
+intellectual state of the conversation: what has been concluded, what is
+disputed, what evidence is in play, and what should happen next. It is distinct
+from the Conversation-State Wrapper's
+`~/.hermes/state/conversations/<conversation_id>.json`, which is execution
+control state for a multi-turn dialogue. `STATE.md` may reference wrapper state
+by `conversation_id` and `current_turn` but never edits it; the wrapper edits
+its own state and never edits `STATE.md`.
+
+`STATE.md` is a checkpoint, not a transcript. It contains:
 
 - objective and completion conditions;
 - settled conclusions;
@@ -86,9 +104,11 @@ It contains:
 - the last accepted substantive message;
 - a monotonically increasing `state_version`.
 
-The target size is 1,000 words or fewer. If it grows beyond that, settled
-detail moves to referenced decisions or evidence artifacts and the state is
-compressed without changing meaning.
+`next_actor` means the peer expected to produce the next substantive message.
+It is not the wrapper's execution-level `expected_actor` field.
+
+The target size is 1,000 words or fewer. Compression follows the archival rules
+in section 8.
 
 State changes are explicit. A sender proposes a state delta. The receiver
 accepts it, corrects it, or records a disagreement. No agent may silently turn
@@ -99,7 +119,7 @@ a proposal into consensus or erase a dissenting position.
 Every peer message carries a small envelope:
 
 ```yaml
-protocol: spcp-0.1
+protocol: spcp-0.1.1
 thread_id: example-thread-001
 message_id: chatgpt-004
 parent_message_id: hermes-003
@@ -121,12 +141,16 @@ Allowed `message_type` values are:
 - `decision`
 - `synthesis`
 - `blocker`
+- `delta-ack`
 
 The message body contains only the sections that add value:
 
 1. **New contribution** — what changed since the parent turn.
 2. **Reasoning or evidence** — why the contribution matters.
-3. **Requested response** — one primary question, decision, or action.
+3. **Requested response** — one primary question, decision, or action. Required
+   mechanical follow-ons may be listed under `### Mechanical follow-ons` so
+   they remain explicit but visibly separate from the intellectual response.
+   Follow-ons must not crowd out or substitute for the primary response.
 4. **Proposed state delta** — exact additions, changes, or removals to
    `STATE.md`.
 
@@ -139,8 +163,10 @@ A peer reads, in order:
 
 1. the current `STATE.md`;
 2. the parent message;
-3. referenced evidence required for the question;
-4. older messages only when the first three do not resolve an ambiguity.
+3. the specific messages referenced by `parent_message_id`, `artifact_refs`,
+   or any disagreement ID or decision ID mentioned in the parent;
+4. older messages only when the first three do not resolve an ambiguity, and
+   then only the specific older messages needed—not the whole archive.
 
 Messages reference durable artifacts by repository, ref or commit, and path.
 They do not paste an artifact merely to prove it exists. A previous argument is
@@ -148,6 +174,13 @@ referenced by message ID rather than restated unless new reasoning changes it.
 
 A message with no new reasoning, evidence, decision, disagreement, question,
 or requested action is transport status and must not invoke a reasoning peer.
+
+The full envelope is required when a message introduces new reasoning,
+evidence, decisions, disagreements, or actionable questions. A message used
+only to accept a proposed state delta may use a minimal envelope containing
+`protocol`, `thread_id`, `message_id`, `parent_message_id`, `sender`,
+`message_type: delta-ack`, and `state_version_read`. The full envelope is the
+default, not a tax on every line of dialogue.
 
 ## 7. Disagreement and decision discipline
 
@@ -186,13 +219,21 @@ the next action. The other peer approves or corrects it. After acceptance, the
 state version increments and earlier messages become archival context rather
 than required reading.
 
+If state exceeds 1,000 words, settled detail moves to a referenced
+`archive/STATE-v<N>-archived.md` file, hash-bound to the state version that
+introduced it. Canonical `STATE.md` keeps current conclusions, active evidence,
+open questions, disagreements, and the next action. Inline compression without
+archival is permitted only for transcript restatement—not for a decision,
+dissenting position, or evidence reference.
+
 ## 9. Token-efficiency rules
 
 These rules remove redundancy without limiting intellectual depth:
 
 - Standard messages target 500-1,000 tokens.
 - `depth: deep` explicitly permits a longer analysis when the evidence needs it.
-- Each message has one primary requested response.
+- Each message has one primary requested response; mechanical follow-ons remain
+  visibly separate.
 - Full history is not restated.
 - Settled material is referenced from `STATE.md`.
 - No model is invoked when the canonical remote state has not changed.
@@ -230,10 +271,16 @@ number of turns elapsed.
 
 Escalation to Frank is appropriate when:
 
-- the objective or scope must change materially;
+- the objective or scope must change materially, including any change to a
+  frozen experimental protocol, preregistered research design, or standing
+  governance mandate;
 - a value or authority conflict cannot be resolved from existing governance;
 - continuing requires new credentials, spending, or external authority;
-- the peers agree that additional dialogue has stopped producing new value.
+- the peers agree that additional dialogue has stopped producing new value;
+- a destructive, irreversible, safety-sensitive, or externally consequential
+  action is proposed;
+- publication, third-party contact, or a commitment in Frank's name is
+  proposed.
 
 ## 12. Pilot acceptance criteria
 
@@ -250,10 +297,13 @@ The pilot passes when one real collaboration thread demonstrates:
 7. Transport events are distinguishable from semantic turns in the durable
    record.
 
+For criterion 1, each peer classifies its own outbound messages. Either peer
+may ask Frank to classify a disputed message. A classification dispute is
+recorded under section 7 rather than silently resolved.
+
 ## 13. Pilot boundaries
 
 The pilot does not modify an already frozen experimental protocol, regenerate
 frozen artifacts, or authorize model execution. Its first task is peer review
 of SPCP itself. After both peers approve a candidate, they select a live thread
 on which to test it.
-
