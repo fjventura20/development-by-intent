@@ -1,0 +1,27 @@
+{
+  "frozen_source_repository": "fjventura20/development-by-intent",
+  "frozen_source_commit": "cf1b6abe25e92b6190223882ceb3d78b448832a3",
+  "delivery_order": [
+    "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md",
+    "examples/amazing-birthday/03-behavioral-baseline.md"
+  ],
+  "files": [
+    {
+      "path": "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md",
+      "git_blob_sha1": "2e37f47d99059238bd9484560e310d2f89744069",
+      "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+    },
+    {
+      "path": "examples/amazing-birthday/03-behavioral-baseline.md",
+      "git_blob_sha1": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+      "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159"
+    }
+  ],
+  "explicitly_withheld_from_all_generator_conditions": [
+    "examples/amazing-birthday/06-validation.md",
+    "examples/amazing-birthday/tests/behavioral-tests.md",
+    "all prior experiment outputs, scores, interpretations, and acceptance artifacts",
+    "the condition mapping and scoring rubric"
+  ]
+}
+

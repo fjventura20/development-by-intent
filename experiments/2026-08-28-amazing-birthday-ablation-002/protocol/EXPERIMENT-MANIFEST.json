@@ -1,0 +1,30 @@
+{
+  "experiment_id": "BP-AB-ABLATION-002",
+  "protocol_version": "0.2.0-candidate-1",
+  "status": "FROZEN_FOR_OPERATOR_AUDIT_ONLY",
+  "principal_investigator": "Frank Ventura",
+  "research_controller": "ChatGPT",
+  "operator_challenger": "Hermes Agent",
+  "generator": {
+    "provider": "Anthropic",
+    "model": "claude-sonnet-4-6",
+    "cli": "Claude Code already configured on operator host",
+    "fresh_sessions": 3,
+    "outputs_per_session": 5,
+    "tools": "disabled identically",
+    "web": "disabled identically"
+  },
+  "formal_blinded_evaluators": ["ChatGPT", "Codex"],
+  "frozen_source": {
+    "repository": "fjventura20/development-by-intent",
+    "commit": "cf1b6abe25e92b6190223882ceb3d78b448832a3"
+  },
+  "conditions": {
+    "A": "common-prelude.md + condition-a-thin.md",
+    "B": "common-prelude.md + condition-b-contract.md",
+    "C": "common-prelude.md + exact files in condition-c-inventory.json"
+  },
+  "generation_authorized": false,
+  "next_gate": "Hermes operator/challenger audit, followed by separate ChatGPT go/no-go on the committed freeze"
+}
+
