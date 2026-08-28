@@ -1,6 +1,6 @@
 # BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Preregistration & Execution
 
-**Disposition: PASS on operator scoring (24/24 on v0.3 re-run from `/tmp/portability-ro-001/`); ChatGPT independent review: PASS on functional run (20/20 + 4/4 = 24/24), PROVISIONAL on ladder §5 closure pending ablation control + blinded evaluator + second provider.**
+**Disposition: PASS on operator scoring (24/24 on v0.3 re-run from `/tmp/portability-ro-001/`); ChatGPT independent review: PASS on functional run (20/20 + 4/4 = 24/24), PROVISIONAL on ladder §5 closure pending ablation control + blinded evaluator + second provider.** ChatGPT independent review (`results/score-independent.md`, `results/score-independent-result.json`) was promoted from `results/rerun-from-tmp/` to the canonical `results/` location on 2026-08-28 (bridge-recovery commit `fefe2d1` for transfer `20260827T150500Z-bp-ro-artifact-only-claude-001-review-001`). The 24/24 score stands as recorded.
 
 **Ladder §5 (stateful tier): PROVISIONAL PASS — functional recovery established; causal attribution to the durability package NOT yet established (per ChatGPT independent review 2026-08-27). Frank-as-PI adjudication pending on whether PROVISIONAL is sufficient or whether closure awaits the ablation control ChatGPT identified as required.**
 
@@ -27,7 +27,7 @@ behavioral-portability experiment at the stateful / data-producing tier
 | Operator total score | 24 / 24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review |
 | State retention | Confirmed across 9 turns in single session |
 | Ladder §5 status | **CLOSED PASS** |
-| ChatGPT independent review | Pending relay via Frank |
+| ChatGPT independent review | 24/24 (PASS); landed in `results/score-independent.md` 2026-08-28 (bridge recovery) |
 
 ## What is being tested
 
