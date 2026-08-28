@@ -1,8 +1,15 @@
 # BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Preregistration & Execution
 
-**Disposition: PASS on operator scoring (24/24 on v0.3 re-run from `/tmp/portability-ro-001/`); ChatGPT independent review: PASS on functional run, PROVISIONAL on ladder §5 closure pending ablation control + blinded evaluator + second provider.**
+**Disposition: PASS on operator scoring (24/24 on v0.3 re-run from `/tmp/portability-ro-001/`); ChatGPT independent review: PASS on functional run (20/20 + 4/4 = 24/24), PROVISIONAL on ladder §5 closure pending ablation control + blinded evaluator + second provider.**
 
-**Ladder §5 (stateful tier): PROVISIONAL PASS — functional recovery established; causal attribution to the durability package NOT yet established (per ChatGPT independent review 2026-08-27).**
+**Ladder §5 (stateful tier): PROVISIONAL PASS — functional recovery established; causal attribution to the durability package NOT yet established (per ChatGPT independent review 2026-08-27). Frank-as-PI adjudication pending on whether PROVISIONAL is sufficient or whether closure awaits the ablation control ChatGPT identified as required.**
+
+**Operator-side hygiene corrections applied to evidence files (per ChatGPT independent review):**
+- Combined score denominator corrected from "24/20" to "24/24" (core 20/20 + generalization 4/4) in five operator files
+- Ledger progression narrative corrected: 3-receipt ledger observed at G-receipt, not at T5 (Test5 saw only 2 stored receipts)
+- Cross-session persistence overclaim softened to within-session retention only (which is what the run actually demonstrated)
+
+These are reporting-hygiene corrections, not substantive behavioral changes. The behavioral evidence (extraction, classification, dedup, queries, within-session state retention) stands as documented.
 
 Receipt Organizer Exp 001 — artifact-only clean-room reconstruction against
 Anthropic Claude (claude-sonnet-4-6). This is the **first** reconstruction
