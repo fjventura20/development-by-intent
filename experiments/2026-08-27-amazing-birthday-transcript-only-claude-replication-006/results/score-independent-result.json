@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "transfer_id": "20260827T150000Z-bp-ab-transcript-claude-006-review-001",
+  "review_type": "independent_documentary_not_blinded",
+  "manifest_integrity": {
+    "status": "PASS_PAYLOAD_BYTE_IDENTITY",
+    "payload_files_compared_to_canonical_commit": 19,
+    "git_blob_mismatches": 0,
+    "raw_capture_sha256_crosschecks": 4,
+    "raw_capture_sha256_mismatches": 0,
+    "canonical_commit": "c9b80e0"
+  },
+  "scores": [
+    {
+      "test": "November 9, 1989",
+      "earned": 19,
+      "possible": 20,
+      "disposition": "PASS"
+    },
+    {
+      "test": "February 29, 1960",
+      "earned": 18,
+      "possible": 20,
+      "disposition": "PASS"
+    },
+    {
+      "test": "June 23, 1956",
+      "earned": 17,
+      "possible": 20,
+      "disposition": "PASS"
+    }
+  ],
+  "freeze_discipline": "PASS",
+  "warmup_cli_rejection": "NON_MATERIAL_OPERATOR_SETUP_DEVIATION",
+  "comparison_to_005": {
+    "behavioral_strength": "SAME_19_18_17",
+    "formal_validity": "STRONGER_006_PASS_VS_005_INDETERMINATE"
+  },
+  "ladder_section_3": "ELIGIBLE_TO_CLOSE_WITH_DOCUMENTATION_CORRECTION",
+  "required_corrections": [
+    "Preserve independent scores 19/18/17 alongside operator 20/20/20.",
+    "Reconcile README/protocol prelude prose with the sanitized MANIFEST prelude actually recorded as executed; label stale prose superseded or correct it.",
+    "Preserve the warmup empty-prompt CLI rejection as a disclosed non-material setup deviation."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "transfer_id": "20260827T150500Z-bp-ro-artifact-only-claude-001-review-001",
+  "review_type": "independent_documentary_not_blinded",
+  "manifest_integrity": {
+    "status": "PASS",
+    "files_verified": 33,
+    "hash_mismatches": 0
+  },
+  "core_score": {
+    "earned": 20,
+    "possible": 20,
+    "disposition": "PASS"
+  },
+  "generalization_score": {
+    "earned": 4,
+    "possible": 4,
+    "disposition": "PASS"
+  },
+  "combined_score": {
+    "earned": 24,
+    "possible": 24,
+    "note": "Corrects operator denominator from 24/20 to 24/24"
+  },
+  "state_retention": "PASS_WITHIN_SINGLE_SESSION",
+  "protocol_amendment": "SUPPORTED_WITH_REQUIRED_REVISIONS",
+  "ladder_section_5": "PROVISIONAL_NOT_CAUSALLY_ESTABLISHED",
+  "required_corrections": [
+    "Correct 24/20 to core 20/20 plus G 4/4, or combined 24/24",
+    "Correct claim that T5 showed three receipts; the third was added during G",
+    "Record R-turn and per-test size-gate deviations",
+    "Resolve v0.3 authorization and attempt-identity ambiguity",
+    "Do not claim package causality without an ablation control"
+  ]
+}
