@@ -73,7 +73,7 @@
       "notes": "Returned Target receipt with merchant+date+total"
     }
   },
-  "total_operator_score": "24 / 20 (5 tests + G at max 4 each)",
+  "total_operator_score": "24 / 24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review",
   "operator_classification": "PASS",
   "ladder_item_status": "§5 (stateful tier) CLOSED PASS — behavioral portability at the stateful / data-producing tier is established",
   "original_run_disposition": "BLOCKED on environment-state-loss (preserved for audit)",

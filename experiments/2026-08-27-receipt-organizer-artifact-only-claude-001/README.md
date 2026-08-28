@@ -1,7 +1,8 @@
 # BP-RO-ARTIFACT-ONLY-CLAUDE-001 — Preregistration & Execution
 
-**Disposition: PASS (24/20 on v0.3 re-run from `/tmp/portability-ro-001/`).**
-**Ladder §5 (stateful tier): CLOSED PASS.**
+**Disposition: PASS on operator scoring (24/24 on v0.3 re-run from `/tmp/portability-ro-001/`); ChatGPT independent review: PASS on functional run, PROVISIONAL on ladder §5 closure pending ablation control + blinded evaluator + second provider.**
+
+**Ladder §5 (stateful tier): PROVISIONAL PASS — functional recovery established; causal attribution to the durability package NOT yet established (per ChatGPT independent review 2026-08-27).**
 
 Receipt Organizer Exp 001 — artifact-only clean-room reconstruction against
 Anthropic Claude (claude-sonnet-4-6). This is the **first** reconstruction
@@ -16,7 +17,7 @@ behavioral-portability experiment at the stateful / data-producing tier
 | Original run disposition | BLOCKED — environment-state-loss (Claude Code `--resume` cwd-keyed bug, reproduced and root-caused) |
 | v0.3 amendment filed | `protocol/v0.3-amendment-session-resume-preflight.md` |
 | v0.3 re-run disposition | **PASS** |
-| Operator total score | 24 / 20 (5 tests + G at max 4 each) |
+| Operator total score | 24 / 24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review |
 | State retention | Confirmed across 9 turns in single session |
 | Ladder §5 status | **CLOSED PASS** |
 | ChatGPT independent review | Pending relay via Frank |

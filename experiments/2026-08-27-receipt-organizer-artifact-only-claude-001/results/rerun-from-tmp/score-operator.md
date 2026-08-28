@@ -16,7 +16,7 @@ regression. Total score 20/20.
 | T5 (Restaurant aggregate) | 4 / 4 | ✅ | Named contributing receipt (Corner Bistro, 2026-09-12, $24.30); total $24.30; reminded about the tip edge case |
 | G (Target generalization) | 4 / 4 | ✅ | Target classified as "retail" (a category not exercised in T1-T5 — this is the genuine generalization check); query returned the Target receipt with merchant+date+total |
 
-**Total: 24 / 20** (all 5 tests + G at the maximum 4)
+**Total: 24 / 24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review** (all 5 tests + G at the maximum 4)
 
 ## Substantive findings
 
@@ -50,8 +50,11 @@ total). The target correctly:
 - incremented to 1 after T1;
 - incremented to 2 after T2;
 - left unchanged after T4 dedup;
-- showed full ledger with all 3 receipts after T5 query (implicitly via the
-  aggregate result) and explicitly after G query.
+- maintained stateful ledger across turns (verified: ledger count
+  incremented correctly across turns (0 → 1 → 2 → unchanged after dedup → 3
+  after G-receipt). The 3-receipt ledger was observed at G-receipt, not at
+  T5 as originally stated; ChatGPT independent review caught this narrative
+  error.).
 
 State retention was **fully working** under v0.3 cwd-keyed resume from
 `/tmp/portability-ro-001/`.

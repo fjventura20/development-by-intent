@@ -2,7 +2,7 @@
 
 **Disposition: PASS (v0.3 re-run from `/tmp/portability-ro-001/`)**
 
-Total operator score: **24 / 20** (5 preregistered tests + generalization
+Total operator score: **24 / 24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review** (5 preregistered tests + generalization
 regression, each at the maximum 4 on the 06-validation.md rubric).
 
 ## What ran
@@ -60,8 +60,12 @@ made `--resume` work.
 
 ## Ladder §5 status
 
-CLOSED PASS — behavioral portability at the stateful / data-producing tier
-is established for the same-model / same-mechanism path.
+**PROVISIONAL PASS** (per ChatGPT independent review 2026-08-27):
+
+- **Functional run:** PASS — all 5 core tests pass at 20/20 and G passes at 4/4 (24/24 combined).
+- **Stateful-tier claim:** PROVISIONAL — the declared Receipt Organizer artifact set was sufficient for a fresh Claude Sonnet 4.6 session to produce the tested stateful behavior in one conversation. The stronger claim "behavioral portability at the stateful tier is established" remains provisional pending at least: ablation/control condition testing whether the package adds measurable fidelity, blinded evaluator on anonymized outputs, and preferably a second provider or mechanism.
+
+The ladder is **NOT closed** at the §5 tier until those conditions are met. See `results/rerun-from-tmp/score-independent.md` for the full ChatGPT independent review with required revisions to the v0.3 protocol amendment and to the operator narrative (denominator correction, ledger progression correction).
 
 ## Files in this directory
 
@@ -78,7 +82,7 @@ is established for the same-model / same-mechanism path.
 | `hermes-manifest.json` | Machine-readable summary of original BLOCKED run |
 | `README.md` | This file |
 | `rerun-from-tmp/` | **The PASS evidence** (this is the canonical disposition) |
-| `rerun-from-tmp/score-operator.md` | PASS scoring — 24/20 |
+| `rerun-from-tmp/score-operator.md` | PASS scoring — 24/24 (core 20/20 + G 4/4) — denominator corrected per ChatGPT review |
 | `rerun-from-tmp/interpretation.md` | PASS interpretation — ladder §5 closed |
 | `rerun-from-tmp/hermes-manifest.json` | Machine-readable PASS summary for ChatGPT relay |
 | `rerun-from-tmp/test-1-output.md` through `test-g-query-output.md` | All 9 turn outputs |
