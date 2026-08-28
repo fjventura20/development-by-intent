@@ -1,0 +1,21 @@
+=== ABSENCE CHECK for the 5 fresh BP-AB-ABLATION-003 trigger strings ===
+Scope: generator-visible source inputs at the freeze commit + prior AB experimental trigger sets
+Checked at: 2026-08-28T13:03:48Z
+
+--- Generator-visible source inputs at freeze commit (examples/amazing-birthday/04-durable-package + 03-behavioral-baseline + 01-original-intent + README files) ---
+  CLEAN: 'Birthdate March 11, 1955' not found in any generator-visible input
+  CLEAN: 'Birthdate November 7, 1983' not found in any generator-visible input
+  CLEAN: 'Birthdate June 24, 1942' not found in any generator-visible input
+  CLEAN: 'Birthdate August 30, 1977' not found in any generator-visible input
+  CLEAN: 'Birthdate February 3, 1991' not found in any generator-visible input
+
+--- Prior Amazing Birthday experimental trigger sets (cross-check against history) ---
+  CLEAN: 'Birthdate March 11, 1955' not in examples/amazing-birthday/
+  CLEAN: 'Birthdate November 7, 1983' not in examples/amazing-birthday/
+  CLEAN: 'Birthdate June 24, 1942' not in examples/amazing-birthday/
+  CLEAN: 'Birthdate August 30, 1977' not in examples/amazing-birthday/
+  CLEAN: 'Birthdate February 3, 1991' not in examples/amazing-birthday/
+
+--- WITHDRAWN dates from Ablation 002 (still on disk in 04-durable-package/02-README.md as historical) ---
+
+=== END OF CHECK ===

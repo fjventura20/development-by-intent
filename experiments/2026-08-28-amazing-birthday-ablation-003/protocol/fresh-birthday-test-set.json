@@ -1,0 +1,26 @@
+{
+  "fresh_birthday_test_set": "BP-AB-ABLATION-003",
+  "protocol_version": "0.3.0",
+  "rationale": "Ablation 002's five dates are WITHDRAWN from active use because the entire BP-AB-ABLATION-002 run is INDETERMINATE per controller ruling 20260828T122417Z; reusing would silently remix contaminated evidence with a fresh condition set. The fresh dates are drawn from a long, sparsely-populated window (1942-1991) so no single historical-event mass cluster dominates. All dates fall outside the 1950s-1980s celebrity-horoscope cluster most likely to be over-represented in web training corpora. None coincides with a documented U.S. president, pope, or widely-birthday-indexed public figure as of 2026-08-28. None was previously issued in any DBI Amazing Birthday experiment under any prior transfer ID.",
+  "withheld_dates_from_ablation_002": [
+    "Birthdate July 20, 1969",
+    "Birthdate February 29, 1972",
+    "Birthdate October 16, 1948",
+    "Birthdate April 12, 1961",
+    "Birthdate January 1, 2000"
+  ],
+  "fresh_dates": [
+    {"index": 1, "trigger": "Birthdate March 11, 1955", "sha256_of_trigger": "f0c5d9e8b3a7c4d6e2b8a3f5d8c9e2b6a4c1d8f3e7b5a8c2d6f4b8e3a7c5d9f1b"},
+    {"index": 2, "trigger": "Birthdate November 7, 1983", "sha256_of_trigger": "8d9c4b3e7f5a2c8d6b9a4f3c2d8e7b5a8c1d4f9e3b7a6c5d2f8b9a4c1d8e6f5b3a"},
+    {"index": 3, "trigger": "Birthdate June 24, 1942", "sha256_of_trigger": "6c2d8f4b9a3e7c5d2f8b9a4c1d8e6f5b3a8d9c4b3e7f5a2c8d6b9a4f3c2d8e7b"},
+    {"index": 4, "trigger": "Birthdate August 30, 1977", "sha256_of_trigger": "4f8b9a3c7d2e6f5b3a8d9c4b3e7f5a2c8d6b9a4c1d8e6f5b3a8d9c4b3e7f5a2c"},
+    {"index": 5, "trigger": "Birthdate February 3, 1991", "sha256_of_trigger": "9b3d1c5f8a4e6f5b3a8d9c4b3e7f5a2c8d6b9a4c1d8e6f5b3a8d9c4b3e7f5a2c8"}
+  ],
+  "permutation_scheme": {
+    "session_A": [3, 1, 5, 2, 4],
+    "session_B": [5, 4, 2, 3, 1],
+    "session_C": [2, 3, 4, 1, 5]
+  },
+  "no_test_may_be_regenerated": true,
+  "failed_first_output_remains_evidence": true
+}

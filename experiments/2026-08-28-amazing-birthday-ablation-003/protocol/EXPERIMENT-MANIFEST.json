@@ -1,0 +1,126 @@
+{
+  "conditions": {
+    "A": "common-prelude.md + condition-a-thin.md",
+    "B": "common-prelude.md + condition-b-contract.md",
+    "C": "common-prelude.md + exact files in condition-c-inventory.json, in declared order"
+  },
+  "controller_authorizations": [
+    "20260828T122417Z-...-controller-ruling-001",
+    "20260828T123451Z-...-lean-protocol-001",
+    "20260828T125900Z-...-freeze-go-001"
+  ],
+  "evaluators": {
+    "constraint": "If second evaluator unavailable on operator host, single-evaluator mode is documented at execute time",
+    "primary": "ChatGPT (mailbox route)",
+    "secondary": "Codex CLI"
+  },
+  "execution_control_amendments": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6"
+  ],
+  "execution_state_vocabulary": [
+    "COMPLETE",
+    "BLOCKED",
+    "INCONCLUSIVE",
+    "PROTOCOL_ERROR"
+  ],
+  "experiment_id": "BP-AB-ABLATION-003",
+  "fresh_birthday_test_set": [
+    {
+      "index": 1,
+      "sha7": "8a7e4f2",
+      "trigger": "Birthdate March 11, 1955"
+    },
+    {
+      "index": 2,
+      "sha7": "9b3d1c5",
+      "trigger": "Birthdate November 7, 1983"
+    },
+    {
+      "index": 3,
+      "sha7": "1f8a0e4",
+      "trigger": "Birthdate June 24, 1942"
+    },
+    {
+      "index": 4,
+      "sha7": "62bf3a1",
+      "trigger": "Birthdate August 30, 1977"
+    },
+    {
+      "index": 5,
+      "sha7": "0c4d9f6",
+      "trigger": "Birthdate February 3, 1991"
+    }
+  ],
+  "frozen_at": "2026-08-28T13:08Z",
+  "frozen_commit": "0dfc8a6693c160070e5693c4eee45c829444553c",
+  "frozen_source": {
+    "base_branch": "integration-merge-ab-ro-2026-08-27",
+    "base_commit": "7e593382323ea1ff45e90b6f7085def2261632f9",
+    "repository": "fjventura20/development-by-intent"
+  },
+  "generated_at": "2026-08-28T13:05Z",
+  "generated_by": "Hermes Agent (operator/challenger)",
+  "lineage": {
+    "predecessor": "BP-AB-ABLATION-002",
+    "predecessor_branch": "feat/ablation-002-protocol-freeze",
+    "predecessor_commit": "feab7f707f4d6cc05ec3c95836c0c48ec51459ae",
+    "predecessor_status": "INDETERMINATE / no scientific result",
+    "rationale": "Ablation 002 had a first-output-loss protocol breach via captured-envelope overwrite. This successor implements the controller-approved amendments A1-A6."
+  },
+  "model_and_provider": {
+    "cli": "Claude Code (already-configured)",
+    "fallback_policy": "no fallback; if identical conditions cannot be demonstrated, condition is BLOCKED",
+    "model": "claude-sonnet-4-6",
+    "tools": "disabled identically across conditions",
+    "web": "disabled identically across conditions"
+  },
+  "operator_challenger": "Hermes Agent",
+  "permutation_scheme": {
+    "session_A": [
+      3,
+      1,
+      5,
+      2,
+      4
+    ],
+    "session_B": [
+      5,
+      4,
+      2,
+      3,
+      1
+    ],
+    "session_C": [
+      2,
+      3,
+      4,
+      1,
+      5
+    ]
+  },
+  "pinned_cwd_per_condition": {
+    "A": "/home/fjventura20/devProjectsU/development-by-intent-experiments/ablation-003/runs/2026-08-28A-TZ-ablation-003-A",
+    "B": "/home/fjventura20/devProjectsU/development-by-intent-experiments/ablation-003/runs/2026-08-28B-TZ-ablation-003-B",
+    "C": "/home/fjventura20/devProjectsU/development-by-intent-experiments/ablation-003/runs/2026-08-28C-TZ-ablation-003-C"
+  },
+  "principal_investigator": "Frank Ventura",
+  "protocol_branch": "feat/ablation-003-protocol-freeze",
+  "protocol_version": "0.3.0",
+  "research_controller": "ChatGPT",
+  "research_question": "Does the Amazing Birthday artifact-only durability package transmit behavior that a capable model does not recover from either a thin description or a concise behavioral contract?",
+  "scope_changes_from_predecessor": [
+    "Fresh birthday test set (5 new dates); predecessor's 5 dates are WITHDRAWN"
+  ],
+  "scope_preserved_from": "BP-AB-ABLATION-002",
+  "withheld_inputs": [
+    "examples/amazing-birthday/06-validation.md",
+    "examples/amazing-birthday/tests/behavioral-tests.md",
+    "all prior experiment outputs, scores, interpretations, and acceptance artifacts",
+    "the condition-to-output mapping"
+  ]
+}

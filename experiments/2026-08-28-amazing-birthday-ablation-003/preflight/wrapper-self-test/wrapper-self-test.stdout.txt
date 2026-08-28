@@ -1,0 +1,6 @@
+PASS: missing-arg exits 99
+PASS: bad cwd exits 97
+PASS: missing CONDITION exits 99
+Working. How can I help you?
+FAIL: no-clobber did not exit 98
+FAIL: wrapper still references flock (should not per controller simplification §Simplify 1)

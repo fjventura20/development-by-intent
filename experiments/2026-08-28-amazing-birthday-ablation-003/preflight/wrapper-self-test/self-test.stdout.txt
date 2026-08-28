@@ -1,0 +1,6 @@
+PASS: no runtime captures in freeze
+PASS: missing-arg rejected
+PASS: bad-cwd rejected
+PASS: no flock in executable lines
+PASS: wrapper captures and re-emits Claude rc
+ALL TESTS PASS
