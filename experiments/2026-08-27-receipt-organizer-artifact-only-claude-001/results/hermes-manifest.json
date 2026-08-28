@@ -1,0 +1,47 @@
+{
+  "experiment_id": "BP-RO-ARTIFACT-ONLY-CLAUDE-001",
+  "tier": "stateful-data-producing",
+  "operator": "Hermes Agent (DBI Research Manager)",
+  "execution_date": "2026-08-27",
+  "frozen_source_commit": "e20f7072c16e7442ebda8ae9f2278a18cee560eb",
+  "session_id": "0e4cfe7a-8187-40f4-8e44-499947b7cf46",
+  "r_turn_output": "READY — Receipt Organizer pinned; ledger empty.",
+  "r_turn_sha256": "46651f0ec973da03108336074ef5259c1e46f8c0ea183bb186919c5f74f0704d",
+  "r_turn_size_bytes": 50,
+  "r_turn_freeze_gate": {
+    "ready_keyword_present": true,
+    "no_tool_use": true,
+    "no_prohibited_phrases": true,
+    "size_over_200_bytes": false,
+    "size_threshold_override_reason": "Output was exactly the requested format (single READY line); 3/4 substantive criteria pass; size threshold in my self-imposed gate was overly strict for R-turn (protocol v0.2 substantive criteria do not require size>200 for R)"
+  },
+  "r_turn_disposition": "PASS — substantive criteria",
+  "test_turns": {
+    "T1_status": "NOT_RUN",
+    "T2_status": "NOT_RUN",
+    "T3_status": "NOT_RUN",
+    "T4_status": "NOT_RUN",
+    "T5_status": "NOT_RUN",
+    "G_status": "NOT_RUN",
+    "block_reason": "Environment-state-loss failure. Claude Code 2.1.170 --resume lookup cannot find sessions created via --session-id on this host (session file IS on disk, 31KB / 10 lines, but --resume $SID returns 'No conversation found'). Tested 3 resume attempts; all failed identically. Per protocol, classified as environment-state-loss failure (not behavioral failure)."
+  },
+  "operator_classification": "BLOCKED — environment-state-loss",
+  "ladder_item_status": "§5 (stateful tier) OPEN — no PASS, no FAIL, no INDETERMINATE",
+  "v03_protocol_amendment_recommended": "Add session-resume pre-flight check immediately after R turn. Attempt one benign resume. If it fails, fall back to a different environment before any tests run.",
+  "retrospective_audit_recommended": "AB replication 004, 005, 006 — did their --resume calls actually deliver to live sessions, or did they hit the same bug? Evidence files show clean PASS but the resume bug is host-level and could affect all Claude Code multi-turn experiments on this host.",
+  "evidence_files": {
+    "README.md": "../README.md",
+    "MANIFEST.json": "../MANIFEST.json",
+    "protocol/artifact-only-reconstruction-v0.2.md": "../protocol/artifact-only-reconstruction-v0.2.md",
+    "results/environment.md": "environment.md",
+    "results/artifact-record.md": "artifact-record.md",
+    "results/failures.md": "failures.md",
+    "results/reconstruction-output.md": "reconstruction-output.md (50 bytes, READY line)",
+    "results/reconstruction-stderr.txt": "reconstruction-stderr.txt (empty)",
+    "results/test-1-stderr.txt": "test-1-stderr.txt (76 bytes, 'No conversation found' error)",
+    "results/score-operator.md": "score-operator.md",
+    "results/interpretation.md": "interpretation.md",
+    "results/hermes-manifest.json": "this file"
+  },
+  "cost_usd": "negligible (1 successful invocation + 3 failed resume attempts)"
+}

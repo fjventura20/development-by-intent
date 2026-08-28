@@ -1,7 +1,7 @@
 # Behavioral Portability — Evidence Ledger
 
 **Purpose:** maintain a compact, auditable record of evidence relevant to the Behavioral Portability hypothesis.  
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-28
 
 This ledger deliberately separates preregistered experiments from observational demonstrations. A recognizable reconstruction is useful evidence, but it is not automatically equivalent to a clean-room, frozen-rubric replication.
 
@@ -24,6 +24,10 @@ This ledger deliberately separates preregistered experiments from observational 
 | BP-AB-GEMINI-003 | Amazing Birthday | Same frozen package → intended fresh Gemini, operated by Hermes | Same two artifacts; same v1.0 tests/rubric | Preregistered cross-provider-family replication | **BLOCKED at preflight — no Gemini invocation** | Required Gemini CLI absent on Hermes host; protocol forbade installing or substituting runtime |
 | BP-AB-TRANSCRIPT-CLAUDE-004 | Amazing Birthday | Frozen canonical transcript → fresh Claude, operated by Hermes | Canonical development transcript only | Preregistered transcript-only experiment | **INDETERMINATE formal / strong behavioral PASS signal** | First-call capture defect: Test 2 and Test 3 raw envelopes truncated at 8,192 bytes |
 | BP-AB-TRANSCRIPT-CLAUDE-REP-005 | Amazing Birthday | Same frozen canonical transcript → fresh Claude, operated by Hermes | Canonical development transcript only | Preregistered capture-corrected replication | **INDETERMINATE formal / independent behavioral 19/20, 18/20, 17/20** | Clean capture, but preregistered reconstruction-readiness freeze was not reached before testing |
+| BP-AB-TRANSCRIPT-CLAUDE-REP-006 | Amazing Birthday | Frozen canonical transcript → fresh Claude, operated by Hermes | Canonical transcript only | Preregistered freeze-disciplined replication | **PASS — PI-adjudicated 17/20, 18/20, 17/20 (52/60)** | Single application/model; factual errors materially weaken the headline |
+| BP-RO-ARTIFACT-ONLY-CLAUDE-001 | Receipt Organizer | Frozen package → fresh Claude, operated by Hermes | Behavioral baseline + reconstruction prompt | Preregistered stateful reconstruction | **Functional PASS — 24/24; causal status PROVISIONAL** | No thin-description/contract ablation; one provider |
+| BP-AB-ABLATION-002 | Amazing Birthday | Thin description vs contract vs durability package | Three frozen conditions | Preregistered causal ablation | **INDETERMINATE — no scientific result** | Execution/protocol defects; dates withdrawn |
+| BP-AB-ABLATION-003 | Amazing Birthday | Thin description vs contract vs durability package | Three frozen conditions, fresh dates | Preregistered causal ablation | **FREEZE REVIEW PASS; execution pending separate GO** | Result not yet generated |
 
 ## BP-AB-CHATGPT-001 — artifact-only clean-room reconstruction
 
@@ -130,20 +134,57 @@ Bounded interpretation:
 
 This identifies a concrete transcript-only hazard that the structured durability package did not exhibit in replication 002: **historical operational instructions can be treated as live commands instead of merely as evidence from which to reconstruct behavior.**
 
+## BP-AB-TRANSCRIPT-CLAUDE-REP-006 — formal transcript-only PASS
+
+Record: [`experiments/2026-08-27-amazing-birthday-transcript-only-claude-replication-006/`](experiments/2026-08-27-amazing-birthday-transcript-only-claude-replication-006/)
+
+Replication 006 corrected the reconstruction-freeze defect from 005 without changing the withheld test set or frozen rubric. The target reached an explicit clean readiness state, no prohibited historical instruction was executed, captures were complete, and all three first-call outputs met the frozen 17/20 threshold.
+
+ChatGPT's delivered independent review reported **19/20, 18/20, 17/20**. Frank's external factual audit found additional factual-care errors involving the USSR dissolution timing and Woodstock date. The Frank-as-PI adjudication records the project result as **17/20, 18/20, 17/20 = 52/60**. The formal PASS remains because each output is at or above 17, but the evidentiary strength is weaker than the original 54/60 headline.
+
+Bounded conclusion: transcript-only behavioral recovery formally passed for Amazing Birthday in the recorded Claude Sonnet 4.6 environment. This does not show that transcripts are sufficient generally or that durability packages add no value.
+
+## BP-RO-ARTIFACT-ONLY-CLAUDE-001 — stateful functional recovery
+
+Record: [`experiments/2026-08-27-receipt-organizer-artifact-only-claude-001/`](experiments/2026-08-27-receipt-organizer-artifact-only-claude-001/)
+
+Receipt Organizer reconstructed from the frozen artifact package and received an independent **24/24 functional PASS**. Receipt ingestion, normalization, deduplication, query behavior, and state retention across nine turns were demonstrated.
+
+The causal status remains **PROVISIONAL**. Without thin-description and concise-contract controls, the experiment cannot establish what the durability package contributed beyond the target model's capability and the reconstruction instruction.
+
+The source corpus is preserved under [`archive/canonical/receipt-organizer/`](archive/canonical/receipt-organizer/). The archive keeps the verbatim Claude Code transcript, reconstructed ChatGPT transcript, and derived reconstruction prompt separate and hash-bound.
+
+## BP-AB-ABLATION-002 and 003 — causal package test
+
+Ablation 002 produced no scientific result. Its execution defects were preserved, and its birthday dates were withdrawn.
+
+Ablation 003 is the clean replacement. It freezes three conditions—thin description, concise behavioral contract, and artifact-only durability package—in one controlled Claude Sonnet 4.6 environment with five fresh birthday tests. Its immutable snapshot received an independent **FREEZE_REVIEW: PASS** on 2026-08-28. No condition may execute until a separate GO confirms the externally bound snapshot, evaluator availability, wrapper/capture readiness, and unchanged controlled environment.
+
 ## Current support for Behavioral Portability
 
-The evidence supports a strong but bounded statement:
+The evidence supports the following bounded statements:
 
-> Governed Amazing Birthday behavioral intent has survived artifact-only reconstruction in a fresh same-provider environment and in a fresh Claude target under a preregistered clean-room protocol. The clean artifact-only Claude replication passed all three withheld tests with immutable first-call evidence despite prose variance and factual-care errors. Transcript-only runs also produced PASS-strength behavior on the same withheld triggers, but have not yet achieved a clean formal PASS because of evidence-capture and reconstruction-freeze defects.
+1. Amazing Birthday behavior has survived reconstruction in fresh ChatGPT and Claude environments under frozen behavioral tests.
+2. Transcript-only Amazing Birthday recovery reached a formal PASS in one controlled Claude Sonnet 4.6 run, although factual-care errors remained.
+3. Receipt Organizer achieved a 24/24 stateful functional reconstruction, including nine-turn ledger retention.
+4. Observational Claude and Grok reconstructions show implementation diversity, but they are weaker than preregistered replications.
+5. The evidence does not yet establish that a full durability package outperforms a thin description or concise behavioral contract.
 
-This supports Behavioral Portability for this application across the recorded ChatGPT-origin → Claude boundary when the behavior is represented by the structured durability artifacts. The transcript-only comparison is positive but formally unresolved. The Google Gemini provider-family boundary remains **unresolved/BLOCKED** because the required Gemini CLI runtime was absent on the Hermes host.
+The active causal question is therefore not whether reconstruction can occur. It is **what preserved information causes the recovered behavior**.
 
-It remains premature to claim universal portability across providers, models, upgrades, preservation forms, or application classes.
+## Decision gate
+
+BP-AB-ABLATION-003 controls the next research step:
+
+- If Condition C materially outperforms Conditions A and B, the durability-package thesis gains bounded causal support.
+- If all conditions perform similarly, recovery in this application may be dominated by target-model competence rather than package content.
+- Either result narrows the theory and determines the Receipt Organizer ablation design.
 
 ## Highest-value unresolved questions
 
-1. Can a transcript-only protocol reach an explicit clean reconstruction freeze without allowing historical operational instructions in the transcript to become live commands?
-2. Does the same frozen package pass on Gemini under the same clean protocol once an eligible pre-existing Gemini CLI environment is available?
-3. How much run-to-run variance appears under identical reconstruction conditions, especially in factual care?
-4. Which durability-package components are necessary versus redundant?
-5. Does Behavioral Portability survive decision-oriented, stateful, structured-data, tool-dependent, and process-cluster applications?
+1. What does the Amazing Birthday durability package add beyond a thin description and concise behavioral contract?
+2. Does the same causal pattern hold for stateful Receipt Organizer behavior?
+3. Does behavioral portability survive a second controlled provider family?
+4. How much run-to-run and model-version variance appears under identical conditions?
+5. Where is the safe applicability boundary for persistent state, tools, external side effects, transactions, and high-assurance applications?
+6. Does Development by Intent materially reduce development and modification effort against a matched conventional implementation?

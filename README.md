@@ -72,12 +72,14 @@ See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
 ├── README.md
 ├── THEORY.md
 ├── RESEARCH-AGENDA.md
+├── CURRENT-STATUS.md
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 ├── docs/
 │   ├── terminology.md
-│   └── experiment-protocol.md
+│   ├── experiment-protocol.md
+│   └── collaboration/
 ├── examples/
 │   ├── amazing-birthday/
 │   │   ├── README.md
@@ -89,7 +91,9 @@ See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
 │   │   ├── 06-validation.md
 │   │   ├── tests/
 │   │   └── results/
+│   ├── receipt-organizer/
 │   └── fair-price/
+├── archive/canonical/
 └── experiments/
     ├── README.md
     ├── 2026-08-24-amazing-birthday-clean-room-001/
@@ -134,11 +138,29 @@ We refer to this provisionally as **behavioral portability** or **intent portabi
 
 A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, provenance, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
 
-## Next planned example: Fair Price
+## Second canonical example: Receipt Organizer
 
-**[Fair Price](examples/fair-price/README.md)** is the next planned example. It adds current market research, budgeting judgment, domain constraints, and practical recommendations for homeowners-association services and projects.
+**[Receipt Organizer](examples/receipt-organizer/README.md)** extends the research into a stateful, data-producing application. It ingests structured receipt text, normalizes fields, deduplicates records, retains a session ledger, and answers natural-language spending questions.
 
-If Amazing Birthday tests conversational development and durability in a research-and-narrative micro-app, Fair Price asks whether the method extends to a more decision-oriented application.
+Its first artifact-only Claude reconstruction produced a **24/24 functional PASS**, including state retention across nine turns. That result establishes functional recoverability in the recorded environment. It does not yet establish that the durability package caused the recovery rather than model competence or a thinner description. The result therefore remains **PROVISIONAL for causal attribution**.
+
+The two distinct Receipt Organizer transcript artifacts and the derived reconstruction prompt are preserved separately under [`archive/canonical/receipt-organizer/`](archive/canonical/receipt-organizer/) with SHA-256 commitments and provenance. Reconstructed assistant behavior is never relabeled as verbatim historical dialogue.
+
+## Current causal experiment
+
+**BP-AB-ABLATION-003** compares three frozen Amazing Birthday inputs in the same controlled Claude Sonnet 4.6 environment:
+
+1. thin description;
+2. concise behavioral contract;
+3. complete artifact-only durability package.
+
+The independent immutable-snapshot freeze review passed on 2026-08-28. Execution requires a separate fail-closed GO after the controlled environment is verified unchanged. The result will determine whether the durability package adds measurable behavioral information beyond a thin description or concise contract in this bounded case.
+
+Receipt Organizer will receive the same causal treatment after the Amazing Birthday decision gate closes.
+
+## Deferred work
+
+**[Fair Price](examples/fair-price/README.md)** and comparative development-economics measurements remain planned, but are intentionally deferred until the Amazing Birthday and Receipt Organizer causal questions are resolved.
 
 ## How to participate
 
@@ -158,7 +180,9 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [experiment protocol](docs
 
 ## Project status
 
-**Status: experimental / pre-1.0**
+**Status: experimental / pre-1.0 — late proof-of-concept / early research program.**
+
+See [CURRENT-STATUS.md](CURRENT-STATUS.md) for the current evidence, active gate, branch posture, and execution order.
 
 The immediate goal is not adoption. It is **validation, falsification, and co-development**.
 

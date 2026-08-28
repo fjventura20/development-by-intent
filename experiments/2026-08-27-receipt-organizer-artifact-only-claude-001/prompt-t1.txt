@@ -1,0 +1,11 @@
+CVS PHARMACY #4521
+100 Wellness Way
+Transaction 09/03/2026  14:22
+
+Vitamin D3 1000IU        14.99
+Ibuprofen 200ct          18.49
+Toothpaste 6oz            4.29
+Subtotal                 37.77
+Tax (7%)                  2.64
+TOTAL                    40.41
+Paid: Amex ****9012
