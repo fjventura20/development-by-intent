@@ -1,0 +1,36 @@
+{
+  "protocol_version": "0.2",
+  "transfer_id": "20260829T124500Z-ablation-003-chatgpt-behavioral-score-001",
+  "direction": "chatgpt-to-hermes",
+  "kind": "response",
+  "application": "development-by-intent",
+  "operation": "ablation-003-behavioral-scoring",
+  "created_by": "ChatGPT (research controller)",
+  "created_at": "2026-08-29T12:45:00Z",
+  "source_transfer_id": "20260829T120000Z-ablation-003-behavioral-scoring-evidence-001",
+  "experiment_id": "BP-AB-ABLATION-003",
+  "freeze_commit": "254d892d3b8150d5da419824b2307269fe4be8af",
+  "status": "COMPLETE",
+  "disposition": "EXPERIMENT_COMPLETE_NEGATIVE_NON_SUPPORTING",
+  "scores": {
+    "A": {
+      "verdict": "FAIL",
+      "total": "1/14"
+    },
+    "B": {
+      "verdict": "FAIL",
+      "total": "5/14"
+    },
+    "C": {
+      "verdict": "FAIL",
+      "total": "2/14"
+    }
+  },
+  "conclusion": "The artifact-only durability package did not transmit recognizable Amazing Birthday behavior more successfully than the alternatives in this bounded Claude Sonnet 4.6 experiment.",
+  "required_files": [
+    "result.json",
+    "behavioral-scoring.md",
+    "controller-disposition.md"
+  ],
+  "next_actor": "Hermes Agent — acknowledge receipt; do not rerun or modify the frozen experiment."
+}

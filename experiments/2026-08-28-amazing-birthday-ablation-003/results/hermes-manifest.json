@@ -1,0 +1,87 @@
+{
+  "experiment_id": "BP-AB-ABLATION-003",
+  "experiment_short_title": "Artifact-Only Durability vs Transcript-Only Behavioral Contract — Behavioral Portability Ablation",
+  "transfer_chain": {
+    "spec": "20260827T195331Z-amazing-birthday-ablation-001",
+    "execution_go": "20260829T101300Z-ablation-003-execution-go-001",
+    "execution_result": "20260829T105000Z-ablation-003-experiment-result-001",
+    "scoring_blocked_inbound": "20260829T112500Z-ablation-003-chatgpt-scoring-blocked-001",
+    "evidence_projection_outbound": "20260829T120000Z-ablation-003-behavioral-scoring-evidence-001",
+    "scoring_result_inbound": "20260829T124500Z-ablation-003-chatgpt-behavioral-score-001",
+    "scoring_acknowledgement_outbound": "20260829T130000Z-ablation-003-behavioral-scoring-acknowledgement-001"
+  },
+  "operator": "Hermes Agent (MiniMax-M3)",
+  "operator_provider": "minimax",
+  "operator_session": "telegram:hermes-workstreams:279",
+  "date_utc": "2026-08-28 to 2026-08-29",
+  "freeze_branch": "feat/ablation-003-protocol-freeze",
+  "freeze_commit": "254d892d3b8150d5da419824b2307269fe4be8af",
+  "freeze_repo": "https://github.com/fjventura20/development-by-intent",
+  "freeze_preserved": true,
+  "freeze_modified_this_experiment": false,
+  "freeze_path": "experiments/2026-08-28-amazing-birthday-ablation-003/protocol/",
+  "target": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model_pinned": "claude-sonnet-4-6",
+    "model_pinned_via": "claude --model claude-sonnet-4-6 on every turn",
+    "isolation": "--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' on every turn",
+    "tools_disabled": true,
+    "web_disabled": true
+  },
+  "experimental_design": {
+    "conditions": ["A", "B", "C"],
+    "sessions_per_condition": 3,
+    "trigger_attempts_per_session": 5,
+    "total_trigger_attempts": 45,
+    "reconstructions_per_session": 1,
+    "total_reconstructions": 9,
+    "total_invocations": 54
+  },
+  "execution_summary": {
+    "captures_successful": 54,
+    "captures_total": 54,
+    "capture_files_total": 162,
+    "all_exit_code_zero": true,
+    "deviations": 1,
+    "deviation_id": "A-b §6.3 pre-generator bad session_id",
+    "deviation_recovered": true,
+    "conditions_complete": ["A", "B", "C"],
+    "wall_time_minutes": 26,
+    "cost_usd": 0.10
+  },
+  "evidence_projection": {
+    "package_transfer_id": "20260829T120000Z-ablation-003-behavioral-scoring-evidence-001",
+    "view_a_complete_stdout_files": 45,
+    "view_b_blinded_packets": 45,
+    "all_45_trigger_stdout_byte_identical_to_host_captures": true,
+    "raw_output_index_byte_identical_to_prior_transfer": true,
+    "validation_recipe": "See evidence-package.md in the outbound package on origin/mailbox/main"
+  },
+  "scoring_method": {
+    "rubric_dimensions": 7,
+    "rubric_scale": "0/1/2 per dimension per condition (max 14 per condition)",
+    "rubric_name": "Amazing Birthday v1.0 7-criterion behavioral baseline",
+    "scoring_discipline": "scored blinded (before unblinding key disclosure)",
+    "scoring_unit": "the condition's 15 trigger outputs",
+    "scoring_inputs": "complete trigger stdout from trigger-stdout/<cond>/<sess>/attempt-NN-<sha7>.stdout.txt"
+  },
+  "final_scores": {
+    "A": {"verdict": "FAIL", "score": "1/14", "treatment": "thin description"},
+    "B": {"verdict": "FAIL", "score": "5/14", "treatment": "concise behavioral contract"},
+    "C": {"verdict": "FAIL", "score": "2/14", "treatment": "artifact-only durability package"}
+  },
+  "research_conclusion": "In this bounded Claude Sonnet 4.6 experiment, the artifact-only durability package did not transmit recognizable Amazing Birthday behavior more successfully than the alternatives. Condition B (concise behavioral contract) performed best but still failed the frozen identity criterion.",
+  "scope_caveat": "Bounded Claude Sonnet 4.6 result, not a universal claim about artifact-only durability packages.",
+  "experiment_disposition": "EXPERIMENT_COMPLETE_NEGATIVE_NON_SUPPORTING",
+  "stop_condition_active": true,
+  "awaiting_new_controller_decision": true,
+  "operator_compliance_attestation": {
+    "no_rerun": true,
+    "no_freeze_modification": true,
+    "no_output_regeneration": true,
+    "no_follow_up_experiment_initiated": true,
+    "operator_scoring_attempted": false,
+    "operator_preliminary_analysis_is_descriptive_only": true
+  }
+}

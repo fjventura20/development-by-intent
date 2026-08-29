@@ -1,0 +1,61 @@
+{
+  "experiment_id": "BP-AB-ABLATION-003",
+  "experiment_short_title": "Artifact-Only Durability vs Transcript-Only Behavioral Contract",
+  "experiment_type": "ablation",
+  "exemplar": "Amazing Birthday",
+  "freeze_branch": "feat/ablation-003-protocol-freeze",
+  "freeze_commit": "254d892d3b8150d5da419824b2307269fe4be8af",
+  "freeze_modified": false,
+  "target": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model": "claude-sonnet-4-6",
+    "isolation": "--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch'"
+  },
+  "conditions": [
+    {
+      "id": "A",
+      "label": "thin description",
+      "treatment_file": "conditions/condition-a-thin.md",
+      "verdict": "FAIL",
+      "score": "1/14"
+    },
+    {
+      "id": "B",
+      "label": "concise behavioral contract",
+      "treatment_file": "conditions/condition-b-contract.md",
+      "verdict": "FAIL",
+      "score": "5/14"
+    },
+    {
+      "id": "C",
+      "label": "artifact-only durability package",
+      "treatment_file": "conditions/condition-c-inventory.json",
+      "verdict": "FAIL",
+      "score": "2/14"
+    }
+  ],
+  "disposition": "EXPERIMENT_COMPLETE_NEGATIVE_NON_SUPPORTING",
+  "execution_complete": true,
+  "scoring_complete": true,
+  "stop_condition_active": true,
+  "awaiting_new_controller_decision": true,
+  "files_in_this_directory": [
+    "MANIFEST.json",
+    "README.md",
+    "results/score-independent.md",
+    "results/controller-disposition.md",
+    "results/score-independent-result.json",
+    "results/hermes-manifest.json",
+    "results/interpretation.md",
+    "results/artifact-record.md"
+  ],
+  "evidence_locations": {
+    "freeze_package": "feat/ablation-003-protocol-freeze @ 254d892d3b8150d5da419824b2307269fe4be8af",
+    "execution_result_outbound": "HANDOFFS/exchange/hermes-to-chatgpt/pending/20260829T105000Z-ablation-003-experiment-result-001/ on mailbox/main",
+    "evidence_projection_outbound": "HANDOFFS/exchange/hermes-to-chatgpt/pending/20260829T120000Z-ablation-003-behavioral-scoring-evidence-001/ on mailbox/main",
+    "scoring_result_inbound": "HANDOFFS/exchange/chatgpt-to-hermes/completed/20260829T124500Z-ablation-003-chatgpt-behavioral-score-001/ on mailbox/main",
+    "scoring_ack_outbound": "HANDOFFS/exchange/hermes-to-chatgpt/pending/20260829T130000Z-ablation-003-behavioral-scoring-acknowledgement-001/ on mailbox/main",
+    "host_capture_files": "~/devProjectsU/development-by-intent-experiments/ablation-003/runs/2026-08-28{A,B,C}-TZ-ablation-003-{A,B,C}/captures/"
+  }
+}
