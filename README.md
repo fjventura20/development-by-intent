@@ -1,196 +1,172 @@
 # Development by Intent
 
-**An experimental software-development methodology for building certain applications primarily through conversation with general-purpose AI.**
+**What if the primary thing a developer writes is intent — and the AI owns the implementation?**
 
-Development by Intent (DbI) explores a simple but consequential idea:
+Development by Intent (DbI) is an experimental software-development method for applications where a capable AI can supply much of the implementation capability.
 
-> Instead of implementing every capability in application-specific code, a developer can define, shape, constrain, test, and preserve behavior that already exists within a capable AI system.
+The human developer stays responsible for **intent, constraints, evaluation, and acceptance**. The AI is allowed to choose how to realize the behavior.
 
-This repository is not a finished framework and it is not a manifesto. It is an **open experimental project** intended to test where conversational application development works, where it fails, and what is required to make it reproducible and durable.
-
-## Why this project exists
-
-Traditional software development commonly follows a cycle such as:
-
-`requirements → design → implementation → test → debug → modification → redeploy`
-
-For suitable AI-native applications, Development by Intent may compress much of that loop to:
-
-`state intent → execute → inspect → refine`
-
-A conversational correction can sometimes function simultaneously as a requirements change, behavioral change, interface change, and new executable version.
-
-The project is investigating whether this produces measurable advantages in:
-
-- initial application development time
-- debugging and correction cycles
-- modification speed
-- direct participation by domain experts
-- reduction of bespoke application code
-- reuse of capabilities already present in general-purpose AI systems
-- rapid prototyping that remains usable rather than being discarded
-
-## What we are trying to prove — and disprove
-
-The current working thesis is:
-
-> **Development by Intent is a software-development approach in which certain applications can be created primarily through conversation by shaping and constraining capabilities that already exist in a general-purpose AI system, rather than implementing those capabilities from scratch in conventional code.**
-
-Important qualifiers: **certain applications** and **primarily through conversation**.
-
-We explicitly do **not** assume that:
-
-- all software can or should be built this way
-- source code becomes unnecessary
-- conversational behavior is automatically reproducible
-- model upgrades preserve behavior
-- a written specification always captures everything that emerged during development
-- probabilistic behavior can be governed exactly like deterministic software
-
-Those are research questions.
-
-## Current research questions
-
-1. Can an independent developer reconstruct an application from its original development conversation?
-2. What behavior is lost when reconstruction uses only derived artifacts rather than the original conversation?
-3. What is the minimum durable artifact set for reliable recovery?
-4. Which classes of applications are suitable for Development by Intent?
-5. How should regression testing work when the runtime is probabilistic?
-6. What constitutes the source of a conversational application?
-7. How do model changes affect application identity and behavior?
-8. Can intent, examples, tests, and governance replace meaningful portions of application-specific code?
-9. How much faster are development, debugging, and modification cycles in practice?
-10. Which behaviors arise from explicit intent versus one-time generation artifacts?
-11. Can a durability package preserve enough governed intent for a different AI platform to reconstruct the same application behavior using its own implementation mechanism?
-
-See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
-
-## Repository structure
+Instead of beginning with:
 
 ```text
-.
-├── README.md
-├── THEORY.md
-├── RESEARCH-AGENDA.md
-├── CURRENT-STATUS.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── LICENSE
-├── docs/
-│   ├── terminology.md
-│   ├── experiment-protocol.md
-│   └── collaboration/
-├── examples/
-│   ├── amazing-birthday/
-│   │   ├── README.md
-│   │   ├── 01-original-intent.md
-│   │   ├── 02-development-transcript/
-│   │   ├── 03-behavioral-baseline.md
-│   │   ├── 04-durable-package/
-│   │   ├── 05-reconstruction/
-│   │   ├── 06-validation.md
-│   │   ├── tests/
-│   │   └── results/
-│   ├── receipt-organizer/
-│   └── fair-price/
-├── archive/canonical/
-└── experiments/
-    ├── README.md
-    ├── 2026-08-24-amazing-birthday-clean-room-001/
-    └── 2026-08-25-amazing-birthday-grok-reconstruction-001/
+requirements → design → code → test → debug → redeploy
 ```
 
-## First canonical example: Amazing Birthday
+DbI explores a shorter development loop:
 
-The first canonical worked example is **[Amazing Birthday](examples/amazing-birthday/README.md)**, a small conversational application that turns an exact birthdate into a selective historical birthday story.
+```text
+state intent → let the system act → inspect → refine → test → preserve
+```
 
-It is useful as a first specimen because the application is easy to understand but its behavior is not a simple lookup. It requires research, relevance judgment, exact-date discipline, narrative synthesis, and the ability to generalize the same behavioral pattern to a date not used during development.
+This repository exists to determine where that approach works, where it fails, and whether the resulting application behavior can be made durable and portable.
 
-The historical experiment completed the full lifecycle:
+## Try it in 10 minutes
 
-`Develop → Preserve → Isolate → Reconstruct → Test → Continue`
+The fastest way to understand DbI is to experience it.
 
-The repository example separates original evidence from derived artifacts and provides a protocol another developer can use to attempt the reconstruction independently.
+Open the **[Amazing Birthday tutorial](examples/amazing-birthday/TUTORIAL.md)** and follow the first few steps in a fresh conversation with a capable AI.
 
-The goal is not to reproduce identical prose. The goal is to determine whether the **behavior that makes Amazing Birthday recognizably the same application** survives reconstruction.
+You will:
 
-### Cross-platform reconstruction evidence
+1. state a simple outcome rather than an implementation specification;
+2. inspect what the AI produces;
+3. correct the behavior conversationally;
+4. test whether the correction generalizes to a new input;
+5. establish a reusable trigger;
+6. preserve the behavior so it can be tested outside the original conversation.
 
-Amazing Birthday has now produced recognizable reconstructed behavior in independent AI environments using different implementation mechanisms:
+You do **not** need to choose a language, framework, database, architecture, or UI toolkit first.
 
-| Environment | Implementation mechanism | Current evidence status |
-|---|---|---|
-| ChatGPT | Reconstructed conversational behavior | Preregistered clean-room PASS |
-| Claude | AI-selected generated application code | Observed behavioral reconstruction |
-| Grok | Platform-native skill | Preliminary behavioral PASS |
+That omission is deliberate.
 
-The [Grok reconstruction record](experiments/2026-08-25-amazing-birthday-grok-reconstruction-001/) documents the inputs, timing, generated output, limitations, and assessment.
+## The central idea
 
-These observations provide preliminary evidence that governed behavioral intent can survive a change of AI provider and implementation mechanism. They do **not** yet establish exact equivalence, deterministic portability, or readiness for transactional and regulated enterprise systems.
+Traditional AI-assisted coding usually keeps source code at the center:
 
-This leads to a stronger working hypothesis: **the portable invariant may be application behavior rather than implementation**. One AI platform may realize an application conversationally, another may generate code, and another may create a platform-native skill. If each implementation satisfies the same governed behavioral contract and acceptance criteria, the application may remain recognizably the same despite a different technical realization.
+```text
+human intent → AI writes code → human reviews code → application
+```
 
-A candidate AI-native portability path is:
+Development by Intent asks whether, for some classes of software, the development boundary can move upward:
 
-`conversational development → durability package → different AI platform → platform-selected implementation → validated application behavior`
+```text
+human intent + evaluation
+          ↓
+     AI implementation
+          ↓
+  observable behavior
+```
 
-We refer to this provisionally as **behavioral portability** or **intent portability**. If repeated experiments support the hypothesis across more complex applications, a durability package could become an **AI-native application portability layer**: instead of porting source code, a receiving AI reconstructs and validates the intended behavior.
+If implementation details need to change, the AI may change them. The human evaluates whether the application still satisfies the intended behavior.
 
-A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, provenance, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
+The strongest version of the hypothesis is that a durable application asset may sometimes be a governed behavioral contract — intent, constraints, examples, acceptance tests, provenance, and evidence — while code, skills, workflows, and integrations become replaceable implementation artifacts.
 
-## Second canonical example: Receipt Organizer
+That hypothesis is being tested, not assumed.
 
-**[Receipt Organizer](examples/receipt-organizer/README.md)** extends the research into a stateful, data-producing application. It ingests structured receipt text, normalizes fields, deduplicates records, retains a session ledger, and answers natural-language spending questions.
+## This is not just "vibe coding"
 
-Its first artifact-only Claude reconstruction produced a **24/24 functional PASS**, including state retention across nine turns. That result establishes functional recoverability in the recorded environment. It does not yet establish that the durability package caused the recovery rather than model competence or a thinner description. The result therefore remains **PROVISIONAL for causal attribution**.
+DbI is not "keep prompting until something looks good."
 
-The two distinct Receipt Organizer transcript artifacts and the derived reconstruction prompt are preserved separately under [`archive/canonical/receipt-organizer/`](archive/canonical/receipt-organizer/) with SHA-256 commitments and provenance. Reconstructed assistant behavior is never relabeled as verbatim historical dialogue.
+The method adds explicit engineering discipline:
 
-## Current causal experiment
+- **behavioral identity** — define what makes the application recognizably the same application;
+- **generalization tests** — test on inputs not used during development;
+- **durability** — preserve enough intent and evidence to reconstruct the application after the original context is gone;
+- **isolation** — test reconstruction without silently relying on prior memory or conversation history;
+- **acceptance criteria** — score behavior rather than expecting identical prose or identical code;
+- **provenance** — distinguish original evidence from derived artifacts and later reconstructions.
 
-**BP-AB-ABLATION-003** compares three frozen Amazing Birthday inputs in the same controlled Claude Sonnet 4.6 environment:
+The goal is not to eliminate engineering. It is to move more engineering effort from implementation detail to intent, behavior, evaluation, and evidence where the application permits it.
 
-1. thin description;
-2. concise behavioral contract;
-3. complete artifact-only durability package.
+## A concrete example: Amazing Birthday
 
-The independent immutable-snapshot freeze review passed on 2026-08-28. Execution requires a separate fail-closed GO after the controlled environment is verified unchanged. The result will determine whether the durability package adds measurable behavioral information beyond a thin description or concise contract in this bounded case.
+**[Amazing Birthday](examples/amazing-birthday/README.md)** began as a simple conversational request: make a person's birthdate historically interesting and engaging.
 
-Receipt Organizer will receive the same causal treatment after the Amazing Birthday decision gate closes.
+Through use and correction, recognizable behavior emerged: select a small number of meaningful historical connections, explain why they matter, distinguish exact-date events from nearby context, and connect the birthdate to the person's lifetime.
 
-## Deferred work
+That behavior was then preserved, reconstructed in fresh environments, and tested on previously unseen dates.
 
-**[Fair Price](examples/fair-price/README.md)** and comparative development-economics measurements remain planned, but are intentionally deferred until the Amazing Birthday and Receipt Organizer causal questions are resolved.
+The important question is not whether another model produces identical prose. It is whether another implementation retains the behavioral identity that makes it the same application.
 
-## How to participate
+See **[EVIDENCE.md](EVIDENCE.md)** for the short version and the full experiment directories for the auditable record.
 
-The most valuable contribution is not agreement. It is a reproducible result.
+## What has been observed so far
 
-Good contributions include:
+The project has produced bounded evidence that:
 
-- independently reconstructing a published example
-- finding behavior that cannot be reproduced
-- proposing a stricter test
-- running the same reconstruction on a different model
-- identifying an application class that does not fit the methodology
-- measuring cycle time against a conventional implementation
-- proposing better preservation or regression techniques
+- a conversationally developed application can exhibit stable, testable behavioral identity;
+- that behavior can be represented in human-readable durable artifacts;
+- fresh AI environments can reconstruct recognizable behavior without the original development conversation;
+- different AI platforms can realize similar intended behavior using different implementation mechanisms;
+- a stateful Receipt Organizer reconstruction passed its recorded functional test suite;
+- controlled ablation work has begun separating information supplied by thin descriptions, behavioral contracts, and fuller durability packages.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [experiment protocol](docs/experiment-protocol.md).
+These results are evidence of feasibility, not proof that DbI works for all software or that larger durability packages are always necessary.
 
-## Project status
+## Where DbI is most plausible
 
-**Status: experimental / pre-1.0 — late proof-of-concept / early research program.**
+Good early candidates are applications whose difficult capabilities already exist inside the AI runtime, such as:
 
-See [CURRENT-STATUS.md](CURRENT-STATUS.md) for the current evidence, active gate, branch posture, and execution order.
+- research and synthesis;
+- classification and extraction;
+- natural-language interaction;
+- judgment under explicit criteria;
+- transformation of semi-structured information;
+- small workflow orchestration;
+- personalized reporting.
 
-The immediate goal is not adoption. It is **validation, falsification, and co-development**.
+DbI is **not** currently claimed as a replacement for conventional engineering in safety-critical, highly deterministic, high-throughput, real-time, regulated, or low-level systems.
 
-### Maintenance model
+## Developer Preview v0.1
 
-This repository is maintained on a **best-effort research basis**. There is no support SLA, fixed release schedule, or guarantee that every issue or pull request will receive a response. Evidence-bearing reports and reproducible experiments receive priority over feature requests or general support questions.
+If you are evaluating the idea, use this path:
 
-The project is intentionally structured to remain lightweight for its maintainer. Contributors should treat the repository as a public laboratory notebook and experimental testbed, not as a supported software product.
+1. **[Tutorial](examples/amazing-birthday/TUTORIAL.md)** — experience the method.
+2. **[Amazing Birthday](examples/amazing-birthday/README.md)** — inspect the canonical example.
+3. **[Evidence](EVIDENCE.md)** — see what has actually been demonstrated and what has not.
+4. **[Demo script](DEMO.md)** — a short walkthrough of the claim and evidence.
+5. **[Theory](THEORY.md)** and **[Research Agenda](RESEARCH-AGENDA.md)** — go deeper only if the idea survives your first inspection.
+
+## The developer test we care about now
+
+The next important validation is external, not another round of internal theorizing:
+
+> Can an independent developer understand DbI quickly enough to try it on a small application of their own?
+
+If you try it, the most useful feedback is:
+
+- What did you think DbI meant after five minutes?
+- Does it differ meaningfully from ordinary AI-assisted coding or vibe coding?
+- Could you reproduce the Amazing Birthday development loop?
+- Where do you think the method breaks?
+- Would you try it on one of your own small applications?
+
+Agreement is not required. A clear failure mode is valuable evidence.
+
+## Research record
+
+The repository preserves the deeper experimental program rather than hiding it:
+
+- [`examples/`](examples/) — worked examples and reconstruction material;
+- [`experiments/`](experiments/) — frozen experimental evidence;
+- [`BEHAVIORAL-PORTABILITY.md`](BEHAVIORAL-PORTABILITY.md) — portability hypothesis;
+- [`BEHAVIORAL-PORTABILITY-EVIDENCE.md`](BEHAVIORAL-PORTABILITY-EVIDENCE.md) — detailed evidence ledger;
+- [`CURRENT-STATUS.md`](CURRENT-STATUS.md) — current research posture;
+- [`docs/experiment-protocol.md`](docs/experiment-protocol.md) — experimental protocol.
+
+The front page is intentionally simpler than the laboratory behind it.
+
+## Contributing
+
+The most valuable contribution is a reproducible result: try the method, identify a failure, reconstruct an example in a different environment, or propose a stricter test.
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+
+## Status
+
+**Experimental / pre-1.0. Developer Preview v0.1.**
+
+DbI has moved from initial concept discovery into external developer validation. The project is deliberately keeping the public entry path small while preserving the full research record underneath it.
 
 ## License
 
