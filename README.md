@@ -1,6 +1,6 @@
 # Development by Intent
 
-**What if the primary thing a developer writes is intent — and the AI owns the implementation?**
+**What if the primary thing a developer writes is intent — and AI assumes more of the burden of implementation?**
 
 Development by Intent (DbI) is an experimental software-development method for applications where a capable AI can supply much of the implementation capability.
 
@@ -62,6 +62,24 @@ If implementation details need to change, the AI may change them. The human eval
 The strongest version of the hypothesis is that a durable application asset may sometimes be a governed behavioral contract — intent, constraints, examples, acceptance tests, provenance, and evidence — while code, skills, workflows, and integrations become replaceable implementation artifacts.
 
 That hypothesis is being tested, not assumed.
+
+## Human Benefit and Agency Principle
+
+Development by Intent is intended to use AI to **increase human capability, not make human displacement the objective**.
+
+DbI therefore treats human agency as part of the architecture, not as an optional social consideration:
+
+- **Humans own purpose, intent, constraints, judgment, and acceptance.** AI may implement an outcome, but it does not acquire authority to redefine why the system exists or what constitutes an acceptable result.
+- **AI should remove unnecessary implementation barriers.** The goal is to let more people turn legitimate ideas into useful software without requiring every person to master the technical machinery underneath it.
+- **People must retain meaningful control.** A human should be able to inspect outcomes, redirect behavior, reject results, revise intent, and determine when the system has succeeded.
+- **Capability should broaden access.** DbI is most valuable when it enables individuals, small organizations, domain experts, educators, nonprofits, and others who may not have access to conventional software-development resources.
+- **Productivity is not itself the purpose.** Reducing implementation effort is useful when it expands what people can accomplish; reducing human participation is not a success criterion by itself.
+
+A concise statement of the principle is:
+
+> **Humans own purpose, intent, judgment, and acceptance. AI assumes the burden of implementation.**
+
+DbI may still change the amount and kind of implementation work people perform. The project does not assume that such disruption is harmless. Its design goal is to place increasing AI capability under explicit human direction while preserving human authorship, authority, and responsibility for the resulting system.
 
 ## This is not just "vibe coding"
 
