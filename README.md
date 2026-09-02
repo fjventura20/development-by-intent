@@ -1,6 +1,25 @@
 # Development by Intent
 
-**What if the primary thing a developer writes is intent — and AI assumes more of the burden of implementation?**
+**What if developers integrated with AI at the intent level instead of the code level?**
+
+## Watch the 3-minute developer demo
+
+[▶ **Watch: Development by Intent — Developer Demo**](https://youtu.be/MXjLTDkpX3U)
+
+See an application **created, invoked, modified, and integrated** through intent rather than direct code editing.
+
+> **Humans own purpose, intent, judgment, and acceptance. AI assumes the burden of implementation.**
+
+## Developer Challenge
+
+**Watch → Try → Break it → Report**
+
+1. Watch the 3-minute demo.
+2. Run the **[Amazing Birthday tutorial](examples/amazing-birthday/TUTORIAL.md)** in a fresh conversation.
+3. Try the same development loop on one small application of your own.
+4. Tell us what worked, what failed, and where you think the approach breaks.
+
+**Ten minutes is enough to decide whether the idea deserves a deeper look.**
 
 Development by Intent (DbI) is an experimental software-development method for applications where a capable AI can supply much of the implementation capability.
 
