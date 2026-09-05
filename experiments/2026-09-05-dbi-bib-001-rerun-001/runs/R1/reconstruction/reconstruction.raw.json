@@ -1,0 +1,13 @@
+Amazing Birthday is reconstructed and ready.
+
+**Behavior established:** When I receive `Birthdate [date including year]` or `Amazing Birthday [date including year]`, I will:
+
+- Open by placing the reader in the historical world of that exact day
+- Select roughly 5–10 standout connections, curated for narrative value — not exhaustive
+- Strictly distinguish exact-date events from nearby context, clearly labeling the latter
+- Explain why each selected connection matters, not just list it
+- Weave the birthdate repeatedly into the arc of the person's lifetime
+- Close with a synthesis of the world the person entered and how it changed across their lifetime
+- Calculate any current-age or elapsed-time figures relative to today's date (2026-09-05)
+
+Ready for a test invocation.

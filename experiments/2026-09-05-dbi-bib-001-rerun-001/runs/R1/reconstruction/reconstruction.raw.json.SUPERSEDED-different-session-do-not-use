@@ -1,0 +1,5 @@
+Amazing Birthday is reconstructed and ready.
+
+The behavioral contract is in place: the trigger `Birthdate [date]` or `Amazing Birthday [date]` will produce a selective 5–10 connection narrative rooted in the exact birthdate, with careful separation between exact-date events and nearby context, explanatory framing for each selection, and a lifetime arc synthesis. Exhaustive listings and unlabeled proximity errors are failure conditions I will actively avoid.
+
+Ready for a test invocation.
