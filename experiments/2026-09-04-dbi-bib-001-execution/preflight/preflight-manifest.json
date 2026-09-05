@@ -1,0 +1,209 @@
+{
+  "experiment_id": "DBI-BIB-001",
+  "freeze_id": "DBI-BIB-001-EXEC-FREEZE-001",
+  "preflight_status": "PREFLIGHT_BLOCKED",
+  "preflight_at_utc": "2026-09-04T17:55:00Z",
+
+  "frozen_artifacts_verified": {
+    "protocol_repository": "fjventura20/development-by-intent",
+    "protocol_path": "experiments/behavioral-identity-baseline-v0.1/PROTOCOL.md",
+    "protocol_commit_sha_claimed": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
+    "protocol_commit_sha_reachable_on_origin_main": true,
+    "protocol_commit_sha_is_parent_of_origin_main_HEAD": true,
+    "protocol_blob_sha_claimed": "1d06f02a9d331df279ee4417e23b4d52330b63f9",
+    "protocol_blob_sha_actual_at_origin_main": "1d06f02a9d331df279ee4417e23b4d52330b63f9",
+    "protocol_blob_sha_match": "PASS",
+
+    "execution_package_path": "experiments/behavioral-identity-baseline-v0.1/execution-package-v0.1/",
+    "execution_package_snapshot_commit_claimed": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+    "execution_package_snapshot_commit_actual": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+    "execution_package_snapshot_commit_match": "PASS",
+    "execution_package_files_verified": [
+      {"path": "EVALUATION-PROCEDURE.md",      "blob_sha1": "50a02e1f445c9508aa467faae152a59ee2f05d7b", "match": "PASS"},
+      {"path": "EVALUATOR-RUBRIC.md",         "blob_sha1": "0a78ee8657b6719a24a9c2b904c2bb96d3eab545", "match": "PASS"},
+      {"path": "MANIFEST.schema.json",        "blob_sha1": "50192caf1871eed92a2d075a1a5cc86d091df01c", "match": "PASS"},
+      {"path": "OPERATOR-INSTRUCTIONS.md",    "blob_sha1": "c20f720c2c489337c67d7eed5024342718756906", "match": "PASS"},
+      {"path": "README.md",                   "blob_sha1": "8202bbc5c1d7115398f231c2d2a317c2eb6e3c8c", "match": "PASS"},
+      {"path": "SOURCE-PACKAGE.md",           "blob_sha1": "857897f42897813b84398c14ab5051d43886fb47", "match": "PASS"},
+      {"path": "TEST-CORPUS.md",              "blob_sha1": "b483a6b1c76697989ae28ebad6e7af04fcd6e4ab", "match": "PASS"}
+    ],
+
+    "freeze_record_path": "experiments/behavioral-identity-baseline-v0.1/EXECUTION-PACKAGE-FREEZE.md",
+    "freeze_record_commit_match": "PASS",
+    "freeze_record_blob_sha1": "6d14d694e228b6c7f9262b280165e1507233fca2",
+
+    "source_commit_claimed": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "source_commit_reachable": true,
+    "source_files_verified": [
+      {
+        "path": "examples/amazing-birthday/03-behavioral-baseline.md",
+        "blob_sha1_claimed": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+        "blob_sha1_actual":   "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+        "sha256_claimed":     "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+        "sha256_actual":      "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+        "size_bytes": 3483,
+        "match": "PASS"
+      },
+      {
+        "path": "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md",
+        "blob_sha1_claimed": "2e37f47d99059238bd9484560e310d2f89744069",
+        "blob_sha1_actual":   "2e37f47d99059238bd9484560e310d2f89744069",
+        "sha256_claimed":     "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+        "sha256_actual":      "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+        "size_bytes": 1556,
+        "match": "PASS"
+      }
+    ],
+
+    "test_prompts_verified": [
+      {"id": "T1", "payload": "Birthdate February 20, 1952", "sha256_claimed": "75302f1fce9bc33f64b9c0a9a47863f5362e54c9ce1e40ce3ce4831866e5598b", "sha256_actual": "75302f1fce9bc33f64b9c0a9a47863f5362e54c9ce1e40ce3ce4831866e5598b", "match": "PASS"},
+      {"id": "T2", "payload": "Birthdate June 23, 1956",     "sha256_claimed": "58170a11a454717de4409ccbe836deeb7c30b23e308a237d1a9f406302744712", "sha256_actual": "58170a11a454717de4409ccbe836deeb7c30b23e308a237d1a9f406302744712", "match": "PASS"},
+      {"id": "T3", "payload": "Birthdate February 29, 1960","sha256_claimed": "52fb3fa1d282a1607e455586c365134c574ad018d36897fba5bcbf2909d67ca8", "sha256_actual": "52fb3fa1d282a1607e455586c365134c574ad018d36897fba5bcbf2909d67ca8", "match": "PASS"},
+      {"id": "T4", "payload": "Birthdate November 9, 1989", "sha256_claimed": "a8ad9dcbb99fcf8df4c66449f5b6118ec65063217588c7857378d984fe8cf7fe", "sha256_actual": "a8ad9dcbb99fcf8df4c66449f5b6118ec65063217588c7857378d984fe8cf7fe", "match": "PASS"},
+      {"id": "T5", "payload": "Birthdate August 24, 1931",  "sha256_claimed": "c1786d3ad2454208996a7313d92efaf13a1f1ed65f28002a7ee4beb314829b44", "sha256_actual": "c1786d3ad2454208996a7313d92efaf13a1f1ed65f28002a7ee4beb314829b44", "match": "PASS"}
+    ],
+
+    "frozen_artifacts_modified_during_preflight": false,
+    "verification_record_path": "/tmp/dbi-bib-preflight/evidence-dir/hashes/SHA256SUMS"
+  },
+
+  "runtime_lock": {
+    "provider": "Anthropic Claude",
+    "model": "claude-sonnet-4-6",
+    "cli_or_runtime": "claude (Claude Code)",
+    "cli_or_runtime_version": "2.1.170",
+    "runtime_version_source": "claude --version stdout",
+    "auth_posture": {
+      "api_key_env_var": "ANTHROPIC_API_KEY",
+      "api_key_present": false,
+      "auth_method": "Claude Code OAuth session (provider default)"
+    },
+    "no_tools_flag": "--allowedTools ''",
+    "additional_flags": ["--tools ''", "--disallowedTools 'WebFetch,WebSearch'"],
+    "no_tools_posture_verified": "PASS — smoke call ce261cc5 produced single-sentence response with no tool_use content blocks"
+  },
+
+  "isolation_posture": {
+    "fresh_session_capability": "PASS — smoke call session_id=ce261cc5-7c9d-45b4-bc93-a537b94da5c1, num_turns=1",
+    "no_inheritance_of_prior_amazing_birthday_context": "PASS — probe 'Reply with one sentence only.' returned 'How can I help you today?' with no Amazing Birthday signal",
+    "model_lock_discipline": "PASS — --model claude-sonnet-4-6 flag honored; modelUsage field shows claude-sonnet-4-6 + claude-haiku-4-5-20251001 (operator observation: dual-model listing in usage metadata does not affect gate; response was generated under --model pinning)"
+  },
+
+  "capture_system": {
+    "primary_pattern": "shell redirect (claude [flags] > RAW_FILE 2> STDERR_FILE)",
+    "fallback_pattern": "stream-json or --output-format json via direct redirect",
+    "post_generator_pipe_buffer_truncation_protected": true,
+    "smoke_call_evidence": {
+      "primary_redirect_smoke": {
+        "session_id": "ce261cc5-7c9d-45b4-bc93-a537b94da5c1",
+        "exit_code": 0,
+        "stdout_bytes": 26,
+        "stdout_sha256": "12fef57232d909ea4657b25ac154fe22789cdd3c794addf42e08fc226d81ed27",
+        "stderr_bytes": 0,
+        "elapsed_seconds": 7.23,
+        "cost_usd": 0.0,
+        "content": "How can I help you today?"
+      },
+      "json_envelope_smoke": {
+        "session_id": "ce261cc5-7c9d-45b4-bc93-a537b94da5c1",
+        "exit_code": 0,
+        "stdout_bytes": 1430,
+        "stdout_sha256": "93634d212d646c65ffd4bb2378c135664dd80f781a4914c14cc774dbb875bb3f",
+        "envelope_parses": "PASS",
+        "result_subtype": "success",
+        "modelUsage_keys": ["claude-haiku-4-5-20251001", "claude-sonnet-4-6"],
+        "total_cost_usd": 0.0024819,
+        "num_turns": 1
+      }
+    },
+    "smoke_total_cost_usd": 0.0024819
+  },
+
+  "manifest_and_evidence_implementation": {
+    "skeleton_manifest_validated": "PASS — 24 preflight-expected omissions documented (reconstructions[].outputs[*] not yet generated); 0 unexpected schema errors",
+    "skeleton_manifest_path": "/tmp/dbi-bib-preflight/skeleton-manifest.json",
+    "skeleton_manifest_sha256": "006f12a5013ba6c70be9a0e8512fc2561e315cc5cdac330fa5864edec4532a6d",
+    "reconstruction_input_path": "/tmp/dbi-bib-preflight/reconstruction-input.txt",
+    "reconstruction_input_size_bytes": 5362,
+    "reconstruction_input_sha256": "fb069bf6c49e8f80f394e57b96b6a5c9d768d30b48ecbce5590a38aede63f47b",
+    "reconstruction_input_NOT_sent_to_engine": true,
+    "test_corpus_path": "/tmp/dbi-bib-preflight/test-corpus.txt",
+    "test_corpus_size_bytes": 473,
+    "test_corpus_sha256": "68eaa1aa2fe5b4162e500bb9f970706945f03a0faf55087b6bab64aec787a9dd",
+    "evidence_directory_layout": "/tmp/dbi-bib-preflight/evidence-dir/{inputs,runs,blinding,evaluation,analysis,hashes}",
+    "evidence_directory_sha256sums_path": "/tmp/dbi-bib-preflight/evidence-dir/hashes/SHA256SUMS",
+    "evidence_directory_sha256sums_entries": 10,
+    "disk_space_free_gb": 21,
+    "deviation_logging_approach": "schema-validated deviations[] array in MANIFEST.json with severity MINOR/MATERIAL/INVALIDATING, timestamp, affected artifacts, disposition (per OPERATOR-INSTRUCTIONS.md §9)"
+  },
+
+  "evaluator_availability": {
+    "evaluator_A": {
+      "candidate_runtime": "codex (codex-cli 0.146.0)",
+      "candidate_provider_family": "OpenAI",
+      "candidate_distinct_from_reconstruction_engine": true,
+      "candidate_distinct_from_hermes": true,
+      "candidate_distinct_from_chatgpt_as_protocol_designer": "ADJUDICATION_REQUIRED — codex is OpenAI's CLI, but login status shows 'Logged in using ChatGPT' (ChatGPT OAuth session). Frank-as-PI must adjudicate whether this satisfies §F independence.",
+      "candidate_eligibility_summary": "ELIGIBLE subject to Frank's adjudication of the ChatGPT-OAuth auth-posture question",
+      "availability_demonstrated": "PARTIAL — codex CLI binary present and logged in; `codex exec` invocation pattern did not complete cleanly in this sandbox (one timeout at 120s with no output, one immediate exit on git-repo-trust check). Pre-flight execution pattern needs more work before evaluator calls are reliable. NOT a blocker; can be resolved."
+    },
+    "evaluator_B": {
+      "candidate_runtime": "NONE AVAILABLE ON HOST",
+      "available_cli_inventory": ["claude (DISQUALIFIED — reconstruction engine)", "codex (potential Evaluator A; auth adjudication needed)"],
+      "missing_cli_inventory": ["gemini", "gpt", "grok", "mistral", "opencode", "llama-cli"],
+      "missing_api_keys": ["OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY", "GROK_API_KEY", "XAI_API_KEY", "MISTRAL_API_KEY"],
+      "remote_evaluator_bridge": "NOT CONFIGURED on this host",
+      "eligibility_summary": "BLOCKED — no second eligible independent evaluator runtime available on this host",
+      "unblock_paths": [
+        "Frank provides an API key for a non-OpenAI, non-Anthropic provider (Gemini, Grok, Mistral, etc.) so Hermes can install and invoke a CLI",
+        "Frank designates a Frank-controlled remote evaluator instance external to this machine and provides an invocation protocol",
+        "Frank accepts a protocol amendment reducing the evaluator count from 2 to 1 (would require a new freeze and ChatGPT-as-protocol-designer amendment)"
+      ]
+    },
+    "blocking_condition": "§F of preflight instructions: 'If two eligible independent evaluators cannot be established, pre-GO readiness FAILS.'",
+    "protocol_rule": "OPERATOR-INSTRUCTIONS.md §12 + EVALUATION-PROCEDURE.md role assignment: 'If two eligible independent evaluators cannot be established, generation evidence may be preserved, but evaluation status is BLOCKED and no PASS/FAIL baseline conclusion may be issued.'"
+  },
+
+  "gate_summary": {
+    "§A_frozen_artifact_integrity": {"status": "PASS", "evidence": "All 5 source/exec-pkg/test-prompt SHA-256s verified byte-identical"},
+    "§B_reconstruction_runtime":     {"status": "PASS", "evidence": "claude 2.1.170 --model flag honored; OAuth auth; --allowedTools '' effective"},
+    "§C_isolation_no_tools_posture": {"status": "PASS", "evidence": "Fresh session ce261cc5; no-tool_use response; no prior Amazing Birthday inheritance"},
+    "§D_capture_system":             {"status": "PASS", "evidence": "Direct shell redirect + json envelope both verified; SHA-256 capture discipline"},
+    "§E_manifest_evidence_implementation": {"status": "PASS", "evidence": "Skeleton validates against MANIFEST.schema.json; reconstruction-input.txt assembled (5362 B, sha256 fb069bf6...); test corpus ready; evidence directory laid out"},
+    "§F_evaluator_availability":     {"status": "BLOCKED", "evidence": "Codex CLI present (potential Evaluator A pending Frank's ChatGPT-OAuth adjudication); no second eligible evaluator available on host"}
+  },
+
+  "deviations": [
+    {
+      "deviation_id": "DEV-001",
+      "timestamp": "2026-09-04T17:55:00Z",
+      "severity": "MINOR",
+      "description": "Smoke call modelUsage metadata field reports two models (claude-haiku-4-5-20251001 AND claude-sonnet-4-6). The pinned --model claude-sonnet-4-6 was honored and the response was generated under that pinning; the dual-listing is metadata behavior, not a model-substitution event.",
+      "affected_artifacts": ["smoke-1b-json.stdout.txt"],
+      "disposition": "Recorded for audit. No action required. Surfaced as observation for Frank's awareness."
+    },
+    {
+      "deviation_id": "DEV-002",
+      "timestamp": "2026-09-04T17:55:00Z",
+      "severity": "MATERIAL",
+      "description": "Codex `codex exec` invocation pattern did not complete cleanly: (a) one attempt timed out at 120s with no stdout output, (b) a follow-up attempt exited at 0.1s with stderr 'Reading additional input from stdin...' and 'Not inside a trusted directory and --skip-git-repo-check was not specified.' Codex CLI is logged in (auth status: 'Logged in using ChatGPT') but the exec invocation pattern needs refinement for non-interactive scoring calls.",
+      "affected_artifacts": ["runs/smoke-preflight/codex-smoke.stderr.txt", "runs/smoke-preflight/codex-smoke.stdout.txt", "runs/smoke-preflight/codex-smoke-2.stderr.txt", "runs/smoke-preflight/codex-smoke-2.stdout.txt"],
+      "disposition": "Recorded for Frank's awareness. Not a preflight blocker; can be resolved before actual evaluator calls. Independent of §F eligibility question."
+    }
+  ],
+
+  "execution_authorization": "WITHHELD_BY_DESIGN",
+  "generation_started": false,
+
+  "overall_disposition": "PREFLIGHT_BLOCKED",
+  "blocking_gate_summary": "§F — Two eligible independent evaluators not established on this host (Codex potentially eligible as Evaluator A subject to Frank's ChatGPT-OAuth auth-posture adjudication; no path to a second eligible evaluator without Frank's external action).",
+
+  "evidence_locations": {
+    "skeleton_manifest": "/tmp/dbi-bib-preflight/skeleton-manifest.json",
+    "evidence_directory": "/tmp/dbi-bib-preflight/evidence-dir/",
+    "smoke_runs": "/tmp/dbi-bib-preflight/evidence-dir/runs/smoke-preflight/",
+    "preflight_report": "/tmp/dbi-bib-preflight/preflight-report.md",
+    "evaluator_audit": "/tmp/dbi-bib-preflight/evaluator-audit.json",
+    "this_manifest": "/tmp/dbi-bib-preflight/preflight-manifest.json"
+  }
+}

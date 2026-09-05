@@ -1,0 +1,94 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-001",
+  "record_kind": "stop-condition-correction",
+  "transfer_id": "20260905T094400Z-dbi-bib-001-incomplete-adjudication-001",
+  "issued_at_utc": "2026-09-05T09:44:00Z",
+  "issued_in_response_to": "Frank-as-PI correction request: 'compute the missing Evaluator-A exploratory 100-distance between-variance table, correct the stop-condition record, and prepare a clean rerun plan. No model calls and no new execution GO are authorized.'",
+  "authorization_scope": [
+    "Compute the missing Evaluator-A exploratory 100-distance between-variance table",
+    "Correct the stop-condition record",
+    "Prepare a clean rerun plan"
+  ],
+  "authorization_explicitly_excluded": [
+    "Any model call (reconstruction or evaluator invocation)",
+    "Any new execution GO",
+    "Any modification to frozen protocol artifacts",
+    "Any modification to captured raw evidence"
+  ],
+  "previous_stop_condition_record_summary": "The 2026-09-04T23:57\u21922026-09-05T00:51 execution triggered OPERATOR-INSTRUCTIONS.md \u00a714 stop condition based on TWO infrastructure failures (R6 reconstruction infrastructure failure DEV-007, Evaluator B infrastructure failure DEV-008) attributed to a shared Claude OAuth session limit. Both were framed as triggering the \u00a714 'more than one reconstruction has infrastructure failure' stop criterion.",
+  "corrected_stop_condition_assessment": {
+    "operator_instructions_section": "\u00a714",
+    "triggered_criterion_candidate": "'more than one reconstruction has infrastructure failure'",
+    "fact_check": {
+      "R6_reconstruction_failure": {
+        "category": "reconstruction infrastructure failure (per \u00a714)",
+        "counted_under_trigger": true,
+        "evidence": "execution-driver.log shows R6 recon exit=1 at 2026-09-05T00:51:31Z (Claude OAuth session limit HTTP 429)",
+        "dev_id": "DEV-007"
+      },
+      "R1_R5_reconstruction_failures": {
+        "category": "none \u2014 all 5 reconstructed cleanly",
+        "counted_under_trigger": 0
+      },
+      "Evaluator_B_failure": {
+        "category": "evaluator-runtime infrastructure failure (NOT a reconstruction failure; falls under \u00a714 'evaluator rubric proves unusable under its pre-registered agreement gates' OR \u00a713/\u00a712 evaluation-side stop, NOT under 'more than one reconstruction has infrastructure failure')",
+        "counted_under_trigger": false,
+        "rationale": "\u00a714 enumerates 'more than one reconstruction has infrastructure failure' as one of several stop triggers. The 'reconstruction' count refers exclusively to the 6 reconstruction units R1-R6, not to evaluator invocations. Evaluator B's 429 affected a separate role (evaluator-runtime) under \u00a712 (blinding and evaluation). Conflating these would treat an evaluator-account quota issue as equivalent to a reconstruction failure for stop-condition purposes, which is not what \u00a714 says.",
+        "evidence": "evaluation/evaluator-B-failure-evidence preserved separately; OPERATOR-INSTRUCTIONS.md \u00a712 governs blinding+evaluation; \u00a714 governs reconstruction-side stops."
+      }
+    },
+    "corrected_triggered_count_of_reconstruction_failures": 1,
+    "stop_threshold_for_that_criterion": "more than 1 (i.e., \u22652)",
+    "criterion_triggered": false,
+    "other_potential_stops_assessed": [
+      {
+        "criterion": "source verification failure",
+        "triggered": false,
+        "evidence": "All source SHA-256 verifications passed preflight and again before each reconstruction turn."
+      },
+      {
+        "criterion": "reconstruction isolation failure",
+        "triggered": false,
+        "evidence": "All 5 successful reconstructions used fresh sessions; capture discipline (v0.2-style shell redirect) verified per turn; no prompt contamination detected."
+      },
+      {
+        "criterion": "runtime changes materially during execution",
+        "triggered": false,
+        "evidence": "Runtime lock claude 2.1.170 / claude-sonnet-4-6 / --allowedTools '' held across R1-R5; only change was R6 hitting account-level 429."
+      },
+      {
+        "criterion": "capture integrity becomes unreliable",
+        "triggered": false,
+        "evidence": "All 50 valid captures passed per-turn gate (jq empty && size>1KB && size%8192!=0); 11 R6 invalid captures preserved with valid_capture=false; SHA-256 inventory covers 100% of files."
+      },
+      {
+        "criterion": "frequent identity-breaking behavior makes calibration clearly fail",
+        "triggered": false,
+        "evidence": "Evaluator A distribution: 29 SAME (58%) + 20 SAME_WITH_VARIANCE (40%) + 1 DIFFERENT (2%). DIFFERENT count = 1/50 = 2%, well below any identity-breaking threshold. SAME+SAME_WITH_VARIANCE = 98% on 50 valid candidates."
+      },
+      {
+        "criterion": "evaluator rubric proves unusable under its pre-registered agreement gates",
+        "triggered": false,
+        "evidence": "Rubric was used successfully by Evaluator A on all 50 valid candidates with no rubric-side defects surfaced. Evaluator B's failure was infrastructure (account quota), not rubric usability. Agreement-gate computation requires both evaluators and is therefore DEFERRED but not refused-by-rubric."
+      }
+    ],
+    "corrected_disposition": "PREPARED \u2192 EXECUTED-PARTIAL (NOT stop-condition triggered; experiment remains scientifically live and awaiting resumption of evaluation phase and/or clean rerun)."
+  },
+  "what_this_means_for_disposition_label": [
+    "OUTBOUND PACKAGE LABEL (already pushed as hermes-to-chatgpt/20260904T235900Z-dbi-bib-001-execution-go-001-response-001/): The 'INCOMPLETE_EVALUATOR_B_BLOCKED_INFRASTRUCTURE' disposition label was substantively correct (experiment did not reach PASS/FAIL/INCONCLUSIVE due to Evaluator B failure) \u2014 but the framing of 'stop condition triggered' was OVERSTATED. The \u00a714 stop was NOT correctly triggered on the count-of-reconstruction-failures criterion; the experiment was paused because evaluation could not complete, not because \u00a714 demanded stop.",
+    "CORRECTED DISPOSITION LANGUAGE: 'PARTIAL_EVALUATION_BLOCKED_SINGLE_EVALUATOR'. The underlying outcome (one of two evaluators failed) is unchanged; the prior articulation incorrectly attributed the halt to \u00a714. Future adjudication should reference this correction."
+  ],
+  "deliverables_in_this_correction_packet": [
+    "analysis/evaluator-A-between-100.csv \u2014 100-row between-reconstruction Manhattan distance table (2 blocks \u00d7 5 tests \u00d7 10 unordered reconstruction pairs)",
+    "analysis/evaluator-A-between-100.json \u2014 structured exploratory analysis with per-test, per-block, per-R-pair summaries",
+    "deviations/STOP-CONDITION-CORRECTION.md \u2014 full corrected \u00a714 analysis in human-readable form",
+    "deviations/RERUN-PLAN.md \u2014 clean rerun plan per Frank's recommendation"
+  ],
+  "open_questions_for_frank_pi": [
+    "Confirm the corrected \u00a714 interpretation (R6 alone does not cross threshold; Evaluator B failure is evaluator-runtime, not reconstruction-side).",
+    "Confirm the rerun plan below is the next step (six entirely new reconstructions; R1-R4 first Claude window, R5-R6 after reset; no blinding/evaluation until all 60 outputs exist).",
+    "Authorize the rerun GO when ready (this correction packet explicitly does NOT authorize it).",
+    "Decide whether to discard or preserve the existing R1-R5 captures. Recommendation: PRESERVE but do NOT use as part of the clean rerun's 60 outputs \u2014 the rerun must produce 6 entirely new reconstructions, per Frank's stated plan. Old captures are audit-precious frozen evidence; they remain on disk under runs/R1..R5/."
+  ]
+}

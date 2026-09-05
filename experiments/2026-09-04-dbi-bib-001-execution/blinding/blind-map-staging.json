@@ -1,0 +1,546 @@
+{
+  "note": "STAGING \u2014 regenerate after all 60 captures complete",
+  "candidates_count": 60,
+  "candidates": [
+    {
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/A/T1.raw.json",
+      "raw_output_sha256": "d2885e5bab8ee4f74f3ecac972ac6a37dde952c67f105cb0b2e9b251a79dc154",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/A/T2.raw.json",
+      "raw_output_sha256": "e172e3942c3a47f9649ab2a90598e82ea01509e1a30049ff204eca652c1d8173",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/A/T4.raw.json",
+      "raw_output_sha256": "b1ad12ebf9147e70183e0810ed4eb1fb337e94a26b017101eee4559490c4e22e",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R1/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/A/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/A/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/A/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R2/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/A/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/A/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/A/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R3/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/A/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/A/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/A/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R4/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/A/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/A/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/A/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R5/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/A/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/A/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/A/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/A/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/A/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T1",
+      "sequence_number": 1,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/B/T1.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 20, 1952"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T2",
+      "sequence_number": 2,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/B/T2.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate June 23, 1956"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T3",
+      "sequence_number": 3,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/B/T3.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate February 29, 1960"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T4",
+      "sequence_number": 4,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/B/T4.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate November 9, 1989"
+    },
+    {
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T5",
+      "sequence_number": 5,
+      "raw_output_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/runs/R6/captures/B/T5.raw.json",
+      "raw_output_sha256": "PENDING",
+      "test_input": "Birthdate August 24, 1931"
+    }
+  ]
+}

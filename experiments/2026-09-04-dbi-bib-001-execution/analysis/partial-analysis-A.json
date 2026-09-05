@@ -1,0 +1,46 @@
+{
+  "experiment_id": "DBI-BIB-001",
+  "analysis_date_utc": "2026-09-05T00:57:08Z",
+  "evaluator": "A_only",
+  "valid_reconstructions": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5"
+  ],
+  "invalid_reconstructions": [
+    "R6 (session-limit infrastructure failure)"
+  ],
+  "valid_candidates": 50,
+  "invalid_candidates": 10,
+  "within_reconstruction_distances": [
+    3,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    0,
+    4,
+    1,
+    1,
+    5,
+    0,
+    0,
+    0,
+    1
+  ],
+  "within_reconstruction_count": 25,
+  "note": "EVALUATOR B INFRASTRUCTURE FAILURE: Claude Code OAuth session limit reached; resets 12:30am America/New_York. Cross-evaluator agreement and between-reconstruction variance computation BLOCKED."
+}

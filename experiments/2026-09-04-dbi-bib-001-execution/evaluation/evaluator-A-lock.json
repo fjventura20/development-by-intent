@@ -1,0 +1,16 @@
+{
+  "evaluator": "A",
+  "evaluator_runtime": "codex-cli 0.146.0 (gpt-5.6-sol via ChatGPT-OAuth)",
+  "scores_path": "/home/fjventura20/devProjectsU/development-by-intent/experiments/2026-09-04-dbi-bib-001-execution/evaluation/evaluator-A-scores.jsonl",
+  "scores_sha256": "0f29356c079f358fb5da5b317b1567f43e3d0bfd8d1cfc44abeea02b1d37956c",
+  "scores_locked_at": "2026-09-05T00:56:02Z",
+  "record_count": 50,
+  "classification_distribution": {
+    "SAME": 29,
+    "SAME_WITH_VARIANCE": 20,
+    "DIFFERENT": 1
+  },
+  "scoring_method": "frozen EVALUATOR-RUBRIC.md (DBI-BIB-001 protocol commit b9b6c86c)",
+  "zero_tool_condition_verified": true,
+  "fresh_session_used": true
+}

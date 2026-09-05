@@ -1,0 +1,66 @@
+{
+  "packet_id": "synthetic-eval-packet-demo-001",
+  "rubric": {
+    "rubric_id": "synthetic-eval-packet-demo-001",
+    "content_free_demo": true,
+    "dimensions": [
+      {
+        "id": "D1",
+        "name": "Word-count approximation",
+        "scale": "0-2",
+        "anchor_low": "0: empty",
+        "anchor_mid": "1: short",
+        "anchor_high": "2: medium-length"
+      },
+      {
+        "id": "D2",
+        "name": "Whether the response contains a question mark",
+        "scale": "0-2",
+        "anchor_low": "0: none",
+        "anchor_mid": "1: one",
+        "anchor_high": "2: more than one"
+      },
+      {
+        "id": "D3",
+        "name": "Whether the response contains the word 'the'",
+        "scale": "0-2",
+        "anchor_low": "0: absent",
+        "anchor_mid": "1: appears once",
+        "anchor_high": "2: appears twice or more"
+      }
+    ],
+    "classification": [
+      "PASS",
+      "FAIL"
+    ],
+    "scoring_discipline": "Each evaluator receives the rubric, the candidate output, and a blind candidate ID. Score independently. Do not compare with other candidates."
+  },
+  "candidates": [
+    {
+      "blind_id": "BLIND-A1B2C3",
+      "prompt": "Write a sentence about the weather.",
+      "output": "Today the sky is clear and bright."
+    },
+    {
+      "blind_id": "BLIND-D4E5F6",
+      "prompt": "Write a sentence about a common object.",
+      "output": "The chair by the window is wooden."
+    },
+    {
+      "blind_id": "BLIND-G7H8I9",
+      "prompt": "Write a question about your favorite food.",
+      "output": "What is your favorite kind of pizza? Do you prefer thin crust?"
+    },
+    {
+      "blind_id": "BLIND-J0K1L2",
+      "prompt": "Write a short observation about a public square.",
+      "output": "Children are playing."
+    },
+    {
+      "blind_id": "BLIND-M3N4O5",
+      "prompt": "Write a sentence that mentions an animal and a place.",
+      "output": "A fox crossed the field at dusk."
+    }
+  ],
+  "instructions_to_evaluator": "You are receiving a synthetic evaluator input packet for a preflight demonstration. The content is intentionally generic and unrelated to any real experiment. For each candidate, score it against the rubric dimensions D1, D2, D3 (each 0-2) and classify the candidate as PASS or FAIL. Output one JSON record per candidate, matching the schema in evaluator-output-schema.json. Score candidates independently. Do not compare candidates. Do not modify the schema."
+}

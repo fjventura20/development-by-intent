@@ -1,0 +1,2235 @@
+{
+  "experiment_id": "DBI-BIB-001",
+  "analysis_kind": "evaluator-A-between-variance-exploratory",
+  "analysis_date_utc": "2026-09-05T09:44:00Z",
+  "evaluator": "A_only",
+  "evaluator_runtime": "codex-cli 0.146.0 (gpt-5.6-sol via ChatGPT-OAuth)",
+  "scope_note": "Exploratory computation; complements (does NOT replace) the missing cross-evaluator analysis which remains blocked by Evaluator B infrastructure failure.",
+  "valid_reconstructions": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5"
+  ],
+  "invalid_reconstructions": [
+    "R6 (session-limit infrastructure failure)"
+  ],
+  "valid_candidates": 50,
+  "invalid_candidates": 10,
+  "scoring_block_structure": "Each reconstruction R yields two evaluation-block captures (A and B), each containing tests T1-T5 = 25 records per reconstruction \u00d7 5 reconstructions \u00d7 2 blocks = 50 records for valid candidates.",
+  "computation": {
+    "definition": "For each (block, test_id) pair, compute Manhattan distance (L1 over 4 dimensions: contract_compliance, selection_behavior, narrative_behavior, functional_completeness) between every unordered pair of reconstructions from {R1,R2,R3,R4,R5}. 2 blocks \u00d7 5 tests \u00d7 C(5,2)=10 pairs = 100 Manhattan distances.",
+    "distance_formula": "Manhattan(R_a, R_b, block, T) = \u03a3_{d in 4 dims} |score_a(d) - score_b(d)|",
+    "range_per_distance": "0 (identical) to 16 (max possible; not observed here; observed max=5)",
+    "secondary_metric": "max_dim: maximum single-dimension absolute difference per pair (range 0-4)"
+  },
+  "exploratory_summary": {
+    "n_distances": 100,
+    "manhattan_mean": 1.06,
+    "manhattan_median": 1,
+    "manhattan_min": 0,
+    "manhattan_max": 5,
+    "manhattan_distribution": {
+      "3": 11,
+      "0": 39,
+      "1": 41,
+      "5": 2,
+      "4": 4,
+      "2": 3
+    },
+    "max_dim_mean": 0.77,
+    "max_dim_max": 3,
+    "zero_distance_count": 39,
+    "zero_or_one_distance_count": 80,
+    "fraction_leq_1": 0.8
+  },
+  "per_test_summary": {
+    "T1": {
+      "n": 20,
+      "mean": 2.0,
+      "max": 5,
+      "distribution": {
+        "3": 6,
+        "0": 6,
+        "1": 4,
+        "5": 2,
+        "4": 2
+      }
+    },
+    "T2": {
+      "n": 20,
+      "mean": 0.6,
+      "max": 1,
+      "distribution": {
+        "1": 12,
+        "0": 8
+      }
+    },
+    "T3": {
+      "n": 20,
+      "mean": 1.2,
+      "max": 4,
+      "distribution": {
+        "0": 6,
+        "1": 10,
+        "4": 2,
+        "3": 2
+      }
+    },
+    "T4": {
+      "n": 20,
+      "mean": 0.3,
+      "max": 1,
+      "distribution": {
+        "0": 14,
+        "1": 6
+      }
+    },
+    "T5": {
+      "n": 20,
+      "mean": 1.2,
+      "max": 3,
+      "distribution": {
+        "1": 9,
+        "0": 5,
+        "2": 3,
+        "3": 3
+      }
+    }
+  },
+  "per_block_summary": {
+    "block_A": {
+      "n": 50,
+      "mean": 0.72,
+      "distribution": {
+        "3": 6,
+        "0": 26,
+        "1": 18
+      }
+    },
+    "block_B": {
+      "n": 50,
+      "mean": 1.4,
+      "distribution": {
+        "1": 23,
+        "0": 13,
+        "5": 2,
+        "4": 4,
+        "3": 5,
+        "2": 3
+      }
+    }
+  },
+  "per_R_pair_summary": {
+    "R1-R2": {
+      "n": 10,
+      "mean": 0.9,
+      "max": 3,
+      "distribution": {
+        "3": 1,
+        "1": 4,
+        "0": 4,
+        "2": 1
+      }
+    },
+    "R1-R3": {
+      "n": 10,
+      "mean": 1.1,
+      "max": 3,
+      "distribution": {
+        "3": 2,
+        "0": 3,
+        "1": 5
+      }
+    },
+    "R1-R4": {
+      "n": 10,
+      "mean": 0.9,
+      "max": 4,
+      "distribution": {
+        "0": 4,
+        "1": 5,
+        "4": 1
+      }
+    },
+    "R1-R5": {
+      "n": 10,
+      "mean": 1.0,
+      "max": 5,
+      "distribution": {
+        "3": 1,
+        "0": 6,
+        "1": 2,
+        "5": 1
+      }
+    },
+    "R2-R3": {
+      "n": 10,
+      "mean": 0.8,
+      "max": 3,
+      "distribution": {
+        "0": 4,
+        "1": 5,
+        "3": 1
+      }
+    },
+    "R2-R4": {
+      "n": 10,
+      "mean": 1.2,
+      "max": 3,
+      "distribution": {
+        "3": 2,
+        "0": 2,
+        "1": 6
+      }
+    },
+    "R2-R5": {
+      "n": 10,
+      "mean": 0.9,
+      "max": 4,
+      "distribution": {
+        "0": 5,
+        "1": 3,
+        "4": 1,
+        "2": 1
+      }
+    },
+    "R3-R4": {
+      "n": 10,
+      "mean": 1.0,
+      "max": 3,
+      "distribution": {
+        "3": 2,
+        "1": 2,
+        "0": 5,
+        "2": 1
+      }
+    },
+    "R3-R5": {
+      "n": 10,
+      "mean": 1.1,
+      "max": 4,
+      "distribution": {
+        "0": 4,
+        "1": 4,
+        "4": 1,
+        "3": 1
+      }
+    },
+    "R4-R5": {
+      "n": 10,
+      "mean": 1.7,
+      "max": 5,
+      "distribution": {
+        "3": 1,
+        "1": 5,
+        "0": 2,
+        "5": 1,
+        "4": 1
+      }
+    }
+  },
+  "table_100": [
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        2,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T1",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T2",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T3",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T4",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "A",
+      "test_id": "T5",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 5,
+      "max_dim": 3,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        1,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 4,
+      "max_dim": 2,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        1,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 4,
+      "max_dim": 2,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        1,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T1",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 5,
+      "max_dim": 3,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        1,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T2",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 4,
+      "max_dim": 2,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 3,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 3,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T3",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 4,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        3,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T4",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R2",
+      "manhattan": 2,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        3,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R3",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R1",
+      "R_b": "R5",
+      "manhattan": 0,
+      "max_dim": 0,
+      "vector_a": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R3",
+      "manhattan": 3,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        3,
+        4,
+        4
+      ],
+      "vector_b": [
+        2,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R4",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        3,
+        4,
+        4
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R2",
+      "R_b": "R5",
+      "manhattan": 2,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        3,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R3",
+      "R_b": "R4",
+      "manhattan": 2,
+      "max_dim": 1,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R3",
+      "R_b": "R5",
+      "manhattan": 3,
+      "max_dim": 2,
+      "vector_a": [
+        2,
+        4,
+        4,
+        3
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "block": "B",
+      "test_id": "T5",
+      "R_a": "R4",
+      "R_b": "R5",
+      "manhattan": 1,
+      "max_dim": 1,
+      "vector_a": [
+        3,
+        4,
+        4,
+        4
+      ],
+      "vector_b": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

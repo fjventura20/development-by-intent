@@ -1,0 +1,224 @@
+Reading prompt from stdin...
+OpenAI Codex v0.146.0
+--------
+workdir: /tmp/codex-eval-demo
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: none
+reasoning summaries: none
+session id: 01a06e32-28c6-7c41-ab2a-77e2fdae5745
+--------
+user
+Read /tmp/codex-eval-demo/evaluator-input-packet.json. Score each of 5 candidates against the rubric's D1, D2, D3 dimensions (D1 = word-count approx 0-2: 0=empty, 1=short, 2=medium; D2 = contains question mark 0-2: 0=none, 1=one, 2=more than one; D3 = contains 'the' 0-2: 0=absent, 1=once, 2=twice or more) and classify each as PASS or FAIL. Output one JSON array of 5 records, each {blind_id, scores: {D1, D2, D3}, classification, rationale}.
+codex
+I’ll inspect the packet to confirm the candidates and the rubric’s PASS/FAIL rule, then return only the requested JSON array.
+exec
+/bin/bash -lc "sed -n '1,240p' /tmp/codex-eval-demo/evaluator-input-packet.json" in /tmp/codex-eval-demo
+ succeeded in 0ms:
+{
+  "packet_id": "synthetic-eval-packet-demo-001",
+  "rubric": {
+    "rubric_id": "synthetic-eval-packet-demo-001",
+    "content_free_demo": true,
+    "dimensions": [
+      {
+        "id": "D1",
+        "name": "Word-count approximation",
+        "scale": "0-2",
+        "anchor_low": "0: empty",
+        "anchor_mid": "1: short",
+        "anchor_high": "2: medium-length"
+      },
+      {
+        "id": "D2",
+        "name": "Whether the response contains a question mark",
+        "scale": "0-2",
+        "anchor_low": "0: none",
+        "anchor_mid": "1: one",
+        "anchor_high": "2: more than one"
+      },
+      {
+        "id": "D3",
+        "name": "Whether the response contains the word 'the'",
+        "scale": "0-2",
+        "anchor_low": "0: absent",
+        "anchor_mid": "1: appears once",
+        "anchor_high": "2: appears twice or more"
+      }
+    ],
+    "classification": [
+      "PASS",
+      "FAIL"
+    ],
+    "scoring_discipline": "Each evaluator receives the rubric, the candidate output, and a blind candidate ID. Score independently. Do not compare with other candidates."
+  },
+  "candidates": [
+    {
+      "blind_id": "BLIND-A1B2C3",
+      "prompt": "Write a sentence about the weather.",
+      "output": "Today the sky is clear and bright."
+    },
+    {
+      "blind_id": "BLIND-D4E5F6",
+      "prompt": "Write a sentence about a common object.",
+      "output": "The chair by the window is wooden."
+    },
+    {
+      "blind_id": "BLIND-G7H8I9",
+      "prompt": "Write a question about your favorite food.",
+      "output": "What is your favorite kind of pizza? Do you prefer thin crust?"
+    },
+    {
+      "blind_id": "BLIND-J0K1L2",
+      "prompt": "Write a short observation about a public square.",
+      "output": "Children are playing."
+    },
+    {
+      "blind_id": "BLIND-M3N4O5",
+      "prompt": "Write a sentence that mentions an animal and a place.",
+      "output": "A fox crossed the field at dusk."
+    }
+  ],
+  "instructions_to_evaluator": "You are receiving a synthetic evaluator input packet for a preflight demonstration. The content is intentionally generic and unrelated to any real experiment. For each candidate, score it against the rubric dimensions D1, D2, D3 (each 0-2) and classify the candidate as PASS or FAIL. Output one JSON record per candidate, matching the schema in evaluator-output-schema.json. Score candidates independently. Do not compare candidates. Do not modify the schema."
+}
+exec
+/bin/bash -lc "sed -n '1,240p' /tmp/codex-eval-demo/evaluator-output-schema.json 2>/dev/null || true; rg -n 'PASS|FAIL|classification|threshold|short|medium' /tmp/codex-eval-demo -g '*.json'" in /tmp/codex-eval-demo
+ succeeded in 0ms:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evaluator output envelope (synthetic demo)",
+  "type": "object",
+  "required": [
+    "records"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "blind_id",
+          "scores",
+          "classification",
+          "rationale"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "blind_id": {
+            "type": "string"
+          },
+          "scores": {
+            "type": "object",
+            "required": [
+              "D1",
+              "D2",
+              "D3"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "D1": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "D2": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "D3": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2
+              }
+            }
+          },
+          "classification": {
+            "enum": [
+              "PASS",
+              "FAIL"
+            ]
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}/tmp/codex-eval-demo/evaluator-input-packet.json:12:        "anchor_mid": "1: short",
+/tmp/codex-eval-demo/evaluator-input-packet.json:13:        "anchor_high": "2: medium-length"
+/tmp/codex-eval-demo/evaluator-input-packet.json:32:    "classification": [
+/tmp/codex-eval-demo/evaluator-input-packet.json:33:      "PASS",
+/tmp/codex-eval-demo/evaluator-input-packet.json:34:      "FAIL"
+/tmp/codex-eval-demo/evaluator-input-packet.json:56:      "prompt": "Write a short observation about a public square.",
+/tmp/codex-eval-demo/evaluator-input-packet.json:65:  "instructions_to_evaluator": "You are receiving a synthetic evaluator input packet for a preflight demonstration. The content is intentionally generic and unrelated to any real experiment. For each candidate, score it against the rubric dimensions D1, D2, D3 (each 0-2) and classify the candidate as PASS or FAIL. Output one JSON record per candidate, matching the schema in evaluator-output-schema.json. Score candidates independently. Do not compare candidates. Do not modify the schema."
+/tmp/codex-eval-demo/evaluator-output-schema.json:17:          "classification",
+/tmp/codex-eval-demo/evaluator-output-schema.json:51:          "classification": {
+/tmp/codex-eval-demo/evaluator-output-schema.json:53:              "PASS",
+/tmp/codex-eval-demo/evaluator-output-schema.json:54:              "FAIL"
+/tmp/codex-eval-demo/rubric.json:10:      "anchor_mid": "1: short",
+/tmp/codex-eval-demo/rubric.json:11:      "anchor_high": "2: medium-length"
+/tmp/codex-eval-demo/rubric.json:30:  "classification": [
+/tmp/codex-eval-demo/rubric.json:31:    "PASS",
+/tmp/codex-eval-demo/rubric.json:32:    "FAIL"
+
+codex
+[
+  {
+    "blind_id": "BLIND-A1B2C3",
+    "scores": {
+      "D1": 2,
+      "D2": 0,
+      "D3": 1
+    },
+    "classification": "PASS",
+    "rationale": "Medium-length response; no question marks; 'the' appears once."
+  },
+  {
+    "blind_id": "BLIND-D4E5F6",
+    "scores": {
+      "D1": 2,
+      "D2": 0,
+      "D3": 2
+    },
+    "classification": "PASS",
+    "rationale": "Medium-length response; no question marks; 'the' appears twice, counting case-insensitively."
+  },
+  {
+    "blind_id": "BLIND-G7H8I9",
+    "scores": {
+      "D1": 2,
+      "D2": 2,
+      "D3": 0
+    },
+    "classification": "PASS",
+    "rationale": "Medium-length response; two question marks; 'the' is absent."
+  },
+  {
+    "blind_id": "BLIND-J0K1L2",
+    "scores": {
+      "D1": 1,
+      "D2": 0,
+      "D3": 0
+    },
+    "classification": "PASS",
+    "rationale": "Short response; no question marks; 'the' is absent."
+  },
+  {
+    "blind_id": "BLIND-M3N4O5",
+    "scores": {
+      "D1": 2,
+      "D2": 0,
+      "D3": 1
+    },
+    "classification": "PASS",
+    "rationale": "Medium-length response; no question marks; 'the' appears once."
+  }
+]
+tokens used
+6,237

@@ -1,0 +1,18 @@
+{
+  "reconstruction_id": "R1",
+  "started_at": "2026-09-04T23:47:05Z",
+  "elapsed_seconds": 0.21,
+  "exit_code": 1,
+  "stdout_size_bytes": 0,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_size_bytes": 5387,
+  "stderr_sha256": "7330ccaab498a395b0e9aa73dfe3296998fa1ed62a98895c5474d7140f442437",
+  "input_sha256": "fb069bf6c49e8f80f394e57b96b6a5c9d768d30b48ecbce5590a38aede63f47b",
+  "input_sha256_match": true,
+  "freeze_discipline_gate_issues": [
+    "reconstruction envelope is not valid JSON: Expecting value: line 1 column 1 (char 0)"
+  ],
+  "envelope_metadata": {
+    "parse_error": "Expecting value: line 1 column 1 (char 0)"
+  }
+}
