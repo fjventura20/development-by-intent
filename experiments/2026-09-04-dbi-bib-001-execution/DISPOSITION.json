@@ -1,0 +1,165 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "experiment-disposition-record",
+  "experiment_id": "DBI-BIB-001",
+  "experiment_status": "INCOMPLETE",
+  "disposition_label": "PARTIAL_EVALUATION_BLOCKED_SINGLE_EVALUATOR",
+  "disposition_status_enum": "INCOMPLETE",
+  "recorded_at_utc": "2026-09-05T10:30:00Z",
+  "recorded_by": "Hermes (operator)",
+  "recorded_in_response_to": "Frank-as-PI instruction 2026-09-05: 'Record the disposition as PARTIAL_EVALUATION_BLOCKED_SINGLE_EVALUATOR / INCOMPLETE. Do not characterize this commit as PASS, calibrated baseline, or completed experiment.'",
+  "explicit_exclusions": [
+    "PASS",
+    "calibrated baseline",
+    "completed experiment",
+    "any other disposition consistent with the first-attempt evidence"
+  ],
+  "evidence_root": "experiments/2026-09-04-dbi-bib-001-execution/",
+  "evidence_root_commit_sha": "f2fc4a7ad88d3b25c31c7022877b093637ca665e",
+  "evidence_root_branch": "integration-merge-ab-ro-2026-08-27",
+  "evidence_root_file_count": 168,
+  "frozen_references_NOT_duplicated_into_evidence_directory": {
+    "rationale": "Per Frank-as-PI: 'The frozen protocol and execution package are already Git-addressable at b9b6c86c…, 00676a33…, and freeze commit ebbb4319…; do not duplicate them into this evidence directory merely because they are not on the current branch tip.'",
+    "protocol": {
+      "path": "experiments/behavioral-identity-baseline-v0.1/PROTOCOL.md",
+      "commit_sha": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
+      "blob_sha": "1d06f02a9d331df279ee4417e23b4d52330b63f9"
+    },
+    "execution_package": {
+      "version": "v0.1",
+      "index_commit": "00676a3",
+      "freeze_commit": "ebbb4319fcc7daedcc55e4be78a99e948e2a8c9c"
+    },
+    "source_package": {
+      "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+      "files": [
+        {
+          "path": "examples/amazing-birthday/03-behavioral-baseline.md",
+          "git_blob_sha1": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+          "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159"
+        },
+        {
+          "path": "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md",
+          "git_blob_sha1": "2e37f47d99059238bd9484560e310d2f89744069",
+          "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+        }
+      ]
+    }
+  },
+  "first_attempt_summary": {
+    "execution_window_utc": "2026-09-04T23:57:35Z -> 2026-09-05T00:51:44Z",
+    "reconstructions_attempted": 6,
+    "reconstructions_with_valid_outputs": 5,
+    "reconstructions_with_infrastructure_failure": 1,
+    "test_outputs_intended": 60,
+    "test_outputs_valid": 50,
+    "test_outputs_invalid": 10,
+    "evaluators_configured": 2,
+    "evaluators_completed": 1,
+    "evaluators_blocked_infrastructure": 1,
+    "evaluator_a_status": "LOCKED at 2026-09-05T00:56:02Z; 50/50 records scored; distribution 29 SAME / 20 SAME_WITH_VARIANCE / 1 DIFFERENT; SHA 0f29356c079f358fb5da5b317b1567f43e3d0bfd8d1cfc44abeea02b1d37956c; zero-tool verified",
+    "evaluator_b_status": "BLOCKED_INFRASTRUCTURE; Claude OAuth session limit HTTP 429; account-level quota; preserved failure evidence in evaluation/evaluator-B-failure-evidence*; NEVER scored any candidate",
+    "cross_evaluator_analysis_status": "NOT COMPUTED — requires Evaluator B; downstream artifacts (Cohen's kappa, per-dimension MAE, baseline envelope) are explicitly NOT produced in this evidence bundle"
+  },
+  "stop_condition_corrected_assessment": {
+    "operator_instructions_section": "§14 (OPERATOR-INSTRUCTIONS.md at execution_package_freeze ebbb4319)",
+    "triggered_criterion_candidate": "'more than one reconstruction has infrastructure failure'",
+    "count_of_reconstruction_infrastructure_failures": 1,
+    "stop_threshold": "more than 1 (i.e., ≥2)",
+    "criterion_triggered": false,
+    "evaluator_b_failure_classification": "evaluator-runtime infrastructure failure (under §12 blinding-and-evaluation), NOT a reconstruction-side failure under §14",
+    "other_section_14_criteria_rechecked": [
+      "source verification failure: NO",
+      "reconstruction isolation failure: NO",
+      "runtime changes materially during execution: NO",
+      "capture integrity becomes unreliable: NO",
+      "frequent identity-breaking behavior makes calibration clearly fail: NO (single-evaluator DIFFERENT=1/50=2%)",
+      "evaluator rubric proves unusable under its pre-registered agreement gates: NO (rubric used cleanly by Evaluator A; Evaluator B failure was account quota, not rubric)"
+    ],
+    "previous_disposition_overclaim": "The prior outbound package 20260904T235900Z-dbi-bib-001-execution-go-001-response-001 (mailbox commit 7fda79e) framed the halt as '§14 stop condition triggered' based on conflated reconstruction+evaluator failures. That framing was OVERSTATED.",
+    "corrected_disposition": "PARTIAL_EVALUATION_BLOCKED_SINGLE_EVALUATOR — the halt is correct, but its §14 attribution was overclaimed. The experiment is INCOMPLETE because one of two evaluators failed to score any candidate."
+  },
+  "preliminary_signal_NOT_calibrated_baseline": {
+    "caveat": "These are methodological observations from a single evaluator on a partial run. They are NOT a calibrated baseline. Per PROTOCOL.md §14, thresholds must be derived from a full calibrated baseline, not pre-set. No baseline envelope has been computed.",
+    "evaluator_a_only_within_reconstruction_manhattan_n_25_mean": 1.16,
+    "evaluator_a_only_within_reconstruction_manhattan_median": 1,
+    "evaluator_a_only_within_reconstruction_manhattan_max": 5,
+    "evaluator_a_only_between_reconstruction_manhattan_n_100_mean": 1.06,
+    "evaluator_a_only_between_reconstruction_manhattan_median": 1,
+    "evaluator_a_only_between_reconstruction_manhattan_max": 5,
+    "evaluator_a_only_fraction_between_le_1": 0.80,
+    "evaluator_a_only_identity_preservation_same_plus_same_with_variance_fraction": 0.98,
+    "evaluator_a_only_different_count": 1,
+    "cross_evaluator_agreement": "NOT COMPUTED — requires Evaluator B",
+    "calibrated_baseline_envelope": "NOT COMPUTED — requires both evaluators and complete 60-output set",
+    "interpretation_disclaimer": "The 98% same-classification figure and 80% fraction-of-distances ≤ 1 are encouraging preliminary signals that the baseline hypothesis may hold. They are explicitly NOT sufficient evidence to claim the hypothesis is supported."
+  },
+  "correction_artifacts_included_as_audit_supplement_NOT_retroactive_evidence_modification": {
+    "correction_packet_transfer_id": "20260905T094400Z-dbi-bib-001-incomplete-adjudication-001",
+    "correction_packet_role": "AUDIT SUPPLEMENT — supplements what actually happened; does NOT retroactively rewrite captured raw evidence; does NOT alter evaluator-A scores; does NOT alter blind-map or run-side captures",
+    "files_included": [
+      {
+        "path": "analysis/evaluator-A-between-100.csv",
+        "size_bytes": 4658,
+        "sha256": "998b0dafcb4b7cbf4591f14f7885c44e74379958e83e39a370063415b6a8dfb8"
+      },
+      {
+        "path": "analysis/evaluator-A-between-100.json",
+        "size_bytes": 32702,
+        "sha256": "0cc562c080d5bfaac838e2452f3eaab3024d6b8adda7164a33071a318ba48c2a"
+      },
+      {
+        "path": "deviations/stop-condition-correction.json",
+        "size_bytes": 7737,
+        "sha256": "4da8a1cf3ddb064554b0b57d5d236a89f349504acc641f9d5328f6f97ecd5a65"
+      },
+      {
+        "path": "deviations/STOP-CONDITION-CORRECTION.md",
+        "size_bytes": 7186,
+        "sha256": "0361b17b8a45fd79f85334edb4bc4306f1fb72097e485dd9391e07e42f3e43c7"
+      },
+      {
+        "path": "deviations/RERUN-PLAN.md",
+        "size_bytes": 10587,
+        "sha256": "a2b25f5444a65037f3241e0370287892834b3c242d48545311178bb455b684d1"
+      }
+    ],
+    "what_correction_artifacts_may_NOT_be_used_for": [
+      "Retroactively rewriting captured raw outputs in runs/R1..R6/",
+      "Modifying Evaluator-A scores in evaluation/evaluator-A-scores.jsonl",
+      "Modifying the blind-map in blinding/blind-map.json",
+      "Altering SHA256SUMS for any pre-existing file",
+      "Recharacterizing the first-attempt outcome as PASS or calibrated"
+    ],
+    "what_correction_artifacts_MAY_be_used_for": [
+      "Recording what actually happened (audit supplement)",
+      "Documenting the corrected §14 assessment",
+      "Documenting the proposed staged-rerun design",
+      "Methodological reference for DBI-BIB-001-RERUN-001 design choices"
+    ]
+  },
+  "rerun_status": {
+    "next_experiment_id": "DBI-BIB-001-RERUN-001",
+    "authorization_state": "NOT YET AUTHORIZED",
+    "explicit_exclusions_until_authorization": [
+      "Any model call (reconstruction turn)",
+      "Any evaluator call",
+      "Any execution GO",
+      "Any protocol amendment (no PROTOCOL.md, OPERATOR-INSTRUCTIONS.md, EVALUATOR-RUBRIC.md, MANIFEST.schema.json, blinding seeds, or frozen source commit modification)"
+    ],
+    "rerun_go_form": "Will be issued as a clean protocol-v0.2 kind=request transfer that explicitly identifies Frank-as-PI, references unchanged frozen commits (protocol b9b6c86c, package ebbb4319, source c3692150), specifies six-new-session requirement, specifies staged quota-window execution (R1-R4 window A, R5-R6 window B), prohibits prior-capture reuse, and locks both evaluator runtimes only after all 60 valid outputs exist and both are confirmed callable."
+  },
+  "evidence_immutability_attestation": {
+    "first_attempt_evidence_root_commit_sha": "f2fc4a7ad88d3b25c31c7022877b093637ca665e",
+    "first_attempt_evidence_root_branch": "integration-merge-ab-ro-2026-08-27",
+    "file_count_in_first_attempt_evidence_root": 168,
+    "sha256sum_check_passed": true,
+    "sha256sum_check_lines_total": 167,
+    "sha256sum_check_ok": 167,
+    "sha256sum_check_failed": 0,
+    "verified_at_utc": "2026-09-05T10:30:00Z",
+    "raw_evidence_byte_identity_preserved": true,
+    "no_existing_file_modified": true,
+    "no_existing_capture_altered": true
+  }
+}
