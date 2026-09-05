@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1",
+  "deviation_id": "DEV-002-r4-block-b-quota",
+  "classification": "RUN-INVALIDATING infrastructure failure",
+  "scope_disclaimer": "RUN-INVALIDATING does NOT mean experiment-invalidating. It means THIS RUN is invalidated and must be quarantined + rerun per preregistered procedure. The experiment as a whole is not invalidated by this run because the predefined \u00a714 stop threshold has not been crossed.",
+  "reconstruction_id": "R4",
+  "window": "A (R1-R4)",
+  "description": "R4 Block B failed because of Claude OAuth session limits (HTTP 429 / 'resets' indicator mid-session). R4 Block A captured cleanly (5 valid outputs in session 590f85b9...). Block B returned 5 infrastructure-error envelopes (~3220 B each, exit=1) starting at 2026-09-05T21:12:18Z. Per OPERATOR-INSTRUCTIONS.md \u00a75(6) and \u00a78 retry policy, an infrastructure failure affecting a reconstruction's mandatory Block B invalidates that reconstruction's run. R4 must be quarantined and rerun in its entirety.",
+  "scope_of_invalidation": "R4 only. R1, R2, R3 remain valid. R5 and R6 are unaffected.",
+  "scope_of_non_invalidation": "The experiment DBI-BIB-001-RERUN-001 is NOT invalidated because: (1) \u00a714 stop threshold ('more than one reconstruction has infrastructure failure') requires >=2 such failures \u2014 currently count = 1 (R4 only); (2) protocol does NOT permit automatic sample expansion beyond six reconstructions; (3) the preregistered procedure provides a clear corrective path: quarantine + full rerun.",
+  "remediation": "Quarantine R4 evidence at runs/_quarantine_R4_partial/R4/ \u2014 preserve Block A (5 valid outputs) as audit evidence with metadata flagging them as quarantined-not-countable. Wait for Claude OAuth session-limit reset. Re-run R4 from scratch using /tmp/dbi_bib_rerun_runner_v2.sh (the fixed driver that includes all 10 turns). R4 will execute in window B alongside R5 and R6 \u2014 the staging plan accommodates the rerun.",
+  "staging_implication": "Original plan: R1-R4 in window A, R5-R6 in window B. Revised plan: R1-R3 already complete in window A; R4 is moved to window B and rerun; R5-R6 remain in window B. Window B thus has THREE reconstructions (R4 rerun, R5, R6) instead of two. Per-stage runtime reverification (\u00a75 of the GO instructions) applies at the start of R4 rerun as at the start of any other stage.",
+  "discovered_at_utc": "2026-09-05T21:12:18Z",
+  "discovered_by": "Hermes operator",
+  "recorded_by": "Hermes operator at 2026-09-05T21:14:00Z per Frank-as-PI correction to original DEV-002 wording"
+}

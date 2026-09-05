@@ -1,0 +1,3 @@
+Amazing Birthday is reconstructed and ready for a test invocation.
+
+The behavior is active: sending `Birthdate [date including year]` or `Amazing Birthday [date including year]` will produce a selective, narrative birthday report following the behavioral contract — exact-date discipline, explanatory judgment, ~5–10 curated connections, and lifetime arc framing. No further instructions needed.
