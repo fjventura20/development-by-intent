@@ -1,0 +1,10 @@
+{
+  "schema_version": "0.1",
+  "deviation_id": "DEV-RUNNER-V1-A-T1-A-T2-MISSING",
+  "reconstruction_id": "R2",
+  "classification": "MATERIAL",
+  "description": "First driver script (/tmp/dbi_bib_rerun_runner.sh) omitted A/T1 and A/T2 from the test loop. R2's reconstruction session captured only A/T3-A/T5 + B/T1-B/T5 = 8/10 valid outputs. Per \u00a76 'do not reset the session between blocks' and \u00a711 'account for all 10 intended test attempts per reconstruction', a partial sequence is not a valid R. R2 quarantined and re-run from scratch with v2 driver (/tmp/dbi_bib_rerun_runner_v2.sh) that includes all 10 turns.",
+  "remediation": "R2 quarantined at runs/_quarantine_R2_partial/R2/ \u2014 preserved as audit evidence of the partial capture. R2 re-run from scratch with v2 driver.",
+  "discovered_at_utc": "2026-09-05T20:36:00Z",
+  "discovered_by": "Hermes operator"
+}

@@ -1,0 +1,7 @@
+I've read both documents. Let me check the existing memory for any additional context.
+
+**Amazing Birthday is ready.**
+
+The behavior is established: when you send `Birthdate [date including year]` or `Amazing Birthday [date including year]`, I will produce a selective, narrative birthday report for that date — curated to roughly 5–10 standout connections, maintaining strict exact-date discipline, explaining why each connection matters, and framing the result through the arc of the person's lifetime.
+
+Send a test invocation when ready.

@@ -1,0 +1,11 @@
+{
+  "reconstruction_id": "R2",
+  "session_id": null,
+  "started_at": "2026-09-05T20:28:21Z",
+  "completed_at": null,
+  "reconstruction_prompt_sha256": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f",
+  "reconstruction_raw_path": "reconstruction/reconstruction.raw.json",
+  "reconstruction_raw_sha256": null,
+  "reconstruction_ready": false,
+  "outputs": []
+}
