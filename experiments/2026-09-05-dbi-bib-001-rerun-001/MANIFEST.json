@@ -1,0 +1,211 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-001-RERUN-001",
+  "experiment_status": "PREREGISTERED",
+  "status_reason": "GO received at 2026-09-05T10:22:54Z (transfer 20260905T102254Z-dbi-bib-001-rerun-go-001); READY at hermes-coordination commit 6c8798b9d06da341c276917907fa937ddd0c0422. Both evaluators verified callable BEFORE any candidate generation (Codex gpt-5.6-sol + Claude claude-opus-4-7, both returned successful smoke responses). No model candidate calls issued yet. Staged across quota windows per Frank-as-PI: R1-R4 window A, R5-R6 window B.",
+  "go_transfer": {
+    "transfer_id": "20260905T102254Z-dbi-bib-001-rerun-go-001",
+    "ready_commit": "6c8798b9d06da341c276917907fa937ddd0c0422",
+    "branch": "mailbox/main",
+    "disposition": "GO \u2014 EXECUTION AUTHORIZED",
+    "authorization_source": "Frank-as-PI explicit GO"
+  },
+  "protocol_freeze": {
+    "repository": "fjventura20/development-by-intent",
+    "path": "experiments/behavioral-identity-baseline-v0.1/PROTOCOL.md",
+    "commit_sha": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
+    "blob_sha": "1d06f02a9d331df279ee4417e23b4d52330b63f9"
+  },
+  "execution_package": {
+    "version": "v0.1",
+    "index_commit": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+    "freeze_record_path": "experiments/behavioral-identity-baseline-v0.1/EXECUTION-PACKAGE-FREEZE.md",
+    "freeze_commit_sha": "ebbb4319fcc7daedcc55e4be78a99e948e2a8c9c"
+  },
+  "source_package": {
+    "repository": "fjventura20/development-by-intent",
+    "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "files_verified": [
+      {
+        "path": "examples/amazing-birthday/03-behavioral-baseline.md",
+        "git_blob_sha1": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+        "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+        "verified_at": "2026-09-05T20:12:08Z"
+      },
+      {
+        "path": "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md",
+        "git_blob_sha1": "2e37f47d99059238bd9484560e310d2f89744069",
+        "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+        "verified_at": "2026-09-05T20:12:08Z"
+      }
+    ]
+  },
+  "frozen_input_artifacts": {
+    "inputs/03-behavioral-baseline.md": {
+      "size": 3483,
+      "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159"
+    },
+    "inputs/RECONSTRUCTION-PROMPT.md": {
+      "size": 1556,
+      "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+    },
+    "inputs/reconstruction-input.txt": {
+      "size": 5366,
+      "sha256": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f"
+    },
+    "inputs/test-corpus.txt": {
+      "size": 153,
+      "sha256": "a61a75053a4921e23922075be2164932b1eb543fff7c3c29b7baaea97d60f9a1"
+    },
+    "individual_test_prompt_sha256": {
+      "T1": "75302f1fce9bc33f64b9c0a9a47863f5362e54c9ce1e40ce3ce4831866e5598b",
+      "T2": "58170a11a454717de4409ccbe836deeb7c30b23e308a237d1a9f406302744712",
+      "T3": "52fb3fa1d282a1607e455586c365134c574ad018d36897fba5bcbf2909d67ca8",
+      "T4": "a8ad9dcbb99fcf8df4c66449f5b6118ec65063217588c7857378d984fe8cf7fe",
+      "T5": "c1786d3ad2454208996a7313d92efaf13a1f1ed65f28002a7ee4beb314829b44",
+      "verified_at": "2026-09-05T20:12:08Z"
+    }
+  },
+  "runtime_lock": {
+    "reconstruction": {
+      "provider": "Anthropic Claude",
+      "model": "claude-sonnet-4-6",
+      "cli_or_runtime": "claude (Claude Code)",
+      "cli_or_runtime_version": "2.1.170",
+      "no_tools": true,
+      "locked_at": "2026-09-05T20:12:08Z",
+      "notes": "Locked at preflight. Smoke call returned successful response. Flags: --allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch'."
+    },
+    "evaluator_a": {
+      "provider": "OpenAI Codex (ChatGPT-OAuth)",
+      "model": "gpt-5.6-sol",
+      "cli_or_runtime": "codex",
+      "cli_or_runtime_version": "0.146.0",
+      "no_tools": true,
+      "locked_at": "2026-09-05T20:12:08Z",
+      "notes": "Codex smoke call successful at preflight. Will be re-verified callable BEFORE any candidate exposure per GO \u00a78-9."
+    },
+    "evaluator_b": {
+      "provider": "Anthropic Claude",
+      "model": "claude-opus-4-7",
+      "cli_or_runtime": "claude (Claude Code)",
+      "cli_or_runtime_version": "2.1.170",
+      "no_tools": true,
+      "locked_at": "2026-09-05T20:12:08Z",
+      "notes": "Claude Opus 4.7 smoke call successful at preflight. Earlier BIB-001 attempt was blocked on HTTP 429 account quota; quota appears to have reset. Will be re-verified callable BEFORE any candidate exposure per GO \u00a78-9."
+    }
+  },
+  "execution_authorization": {
+    "authorized": true,
+    "authorization_id": "20260905T102254Z-dbi-bib-001-rerun-go-001",
+    "authorized_at": "2026-09-05T10:22:54Z",
+    "authorizer": "Frank-as-PI (ChatGPT-relayed)"
+  },
+  "execution_design": {
+    "sample_size": {
+      "reconstructions": 6,
+      "tests_per_block": 5,
+      "blocks_per_reconstruction": 2,
+      "total_outputs": 60
+    },
+    "staging": {
+      "window_a_reconstructions": [
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "window_b_reconstructions": [
+        "R5",
+        "R6"
+      ],
+      "rationale": "Staged across Claude quota windows per Frank-as-PI; R1-R4 first window, R5-R6 second window after observed quota reset."
+    },
+    "blinding_timing": "Build fresh blind-map AFTER all 60 outputs exist; release scoring packets only after both evaluators re-verified callable (per GO \u00a78-9 and Frank's explicit 'no evaluator sees candidates until all 60 valid outputs exist' rule)."
+  },
+  "prior_attempt_reference": {
+    "evidence_directory": "experiments/2026-09-04-dbi-bib-001-execution/",
+    "immutable_commit_sha": "8b14f6ad3605cc21403623080191394517e9fcc4",
+    "disposition": "PARTIAL_EVALUATION_BLOCKED_SINGLE_EVALUATOR / INCOMPLETE",
+    "use_in_rerun": "REFERENCE ONLY \u2014 prior R1-R5 captures, sessions, blind IDs, candidate outputs, and evaluator scores are NOT reused in DBI-BIB-001-RERUN-001. Prior attempt is audit-precious frozen evidence."
+  },
+  "reconstructions": [
+    {
+      "reconstruction_id": "R1",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    },
+    {
+      "reconstruction_id": "R2",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    },
+    {
+      "reconstruction_id": "R3",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    },
+    {
+      "reconstruction_id": "R4",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    },
+    {
+      "reconstruction_id": "R5",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    },
+    {
+      "reconstruction_id": "R6",
+      "session_id": null,
+      "started_at": null,
+      "completed_at": null,
+      "reconstruction_ready": false,
+      "outputs": []
+    }
+  ],
+  "evaluators": {
+    "A": {
+      "role": "Evaluator A",
+      "provider": "OpenAI Codex",
+      "model_or_identity": "gpt-5.6-sol",
+      "runtime_version": "0.146.0",
+      "locked_before_candidate_access": true,
+      "scores_path": "evaluation/evaluator-A-scores.jsonl",
+      "scores_locked_at": null,
+      "scoring_completed": false
+    },
+    "B": {
+      "role": "Evaluator B",
+      "provider": "Anthropic Claude",
+      "model_or_identity": "claude-opus-4-7",
+      "runtime_version": "2.1.170",
+      "locked_before_candidate_access": true,
+      "scores_path": "evaluation/evaluator-B-scores.jsonl",
+      "scores_locked_at": null,
+      "scoring_completed": false
+    }
+  },
+  "blind_mapping": {
+    "path": "blinding/blind-map.json",
+    "created_at": null,
+    "withheld_from_evaluators_until_scores_locked": true
+  },
+  "deviations": [],
+  "recorded_at_utc": "2026-09-05T20:12:08Z"
+}
