@@ -1,0 +1,5 @@
+Amazing Birthday is reconstructed and ready.
+
+The behavior is active: when you send `Birthdate [date including year]` or `Amazing Birthday [date including year]`, I will produce a selective, narrative birthday report following the behavioral contract in `03-behavioral-baseline.md` — exact-date discipline, 5–10 curated connections, explanatory judgment, and lifetime-arc framing.
+
+Ready for a test invocation.
