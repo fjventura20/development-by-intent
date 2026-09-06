@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-001-RERUN-001",
+  "experiment_status": "EVALUATED",
+  "disposition": "INCONCLUSIVE",
+  "all_gates_passed": false,
+  "gates": {
+    "g1_both_evaluators_90pct_identity_preserved": {
+      "value_A": 0.9167,
+      "value_B": 0.9167,
+      "value_both": 0.9167,
+      "threshold": 0.9,
+      "passed": true
+    },
+    "g2_no_systematic_identity_breaking": {
+      "identity_breaking_count_A": 5,
+      "identity_breaking_count_B": 5,
+      "passed": false
+    },
+    "g3_evaluator_usability_gates": {
+      "passed": true
+    },
+    "g4_bounded_between_reconstruction_distribution": {
+      "evaluator_A_p95": 15,
+      "evaluator_A_p95_minus_median": 13.0,
+      "passed": true
+    },
+    "g5_no_protocol_stop_condition": {
+      "passed": true
+    }
+  },
+  "agreement_summary": {
+    "identity_preservation_agreement": 1.0,
+    "three_class_exact_agreement": 0.7,
+    "kappa_two_class": 1.0,
+    "kappa_three_class": 0.2829,
+    "per_dimension_mae": {
+      "contract_compliance": {
+        "mean_absolute_difference": 0.4,
+        "max_absolute_difference": 2,
+        "median_absolute_difference": 0.0
+      },
+      "selection_behavior": {
+        "mean_absolute_difference": 0.05,
+        "max_absolute_difference": 1,
+        "median_absolute_difference": 0.0
+      },
+      "narrative_behavior": {
+        "mean_absolute_difference": 0.2167,
+        "max_absolute_difference": 1,
+        "median_absolute_difference": 0.0
+      },
+      "functional_completeness": {
+        "mean_absolute_difference": 0.7167,
+        "max_absolute_difference": 1,
+        "median_absolute_difference": 1.0
+      }
+    }
+  },
+  "recommendation": {
+    "proceed_to_evolution_experiment": false,
+    "rationale_summary": "See final-result.md"
+  }
+}

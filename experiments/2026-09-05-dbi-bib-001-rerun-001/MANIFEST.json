@@ -1,8 +1,9 @@
 {
   "schema_version": "0.1",
   "experiment_id": "DBI-BIB-001-RERUN-001",
-  "experiment_status": "EXECUTED_AWAITING_EVALUATION",
-  "status_reason": "All 6 reconstructions complete. 60/60 valid outputs across 6 dedicated sessions. Generation completion gate (OPERATOR-INSTRUCTIONS.md \u00a711) satisfied. Per GO instructions \u00a77-9: no blinding or evaluation has occurred yet. Next step is pre-scoring evaluator-callable re-verification and blind-map construction.",
+  "experiment_status": "EVALUATED",
+  "evaluation_phase_status": "EVALUATED — both evaluator score sets LOCKED with SHA-256 fingerprints; analysis complete; formal disposition INCONCLUSIVE pending Frank-as-PI adjudication on DEV-002-driven G2 failure.",
+  "status_reason": "Evaluation Phase executed per GO (2026-09-06). Gate 1 (evaluator callable) PASS for both evaluators. Gate 2 (fresh blind map) PASS — 60 fresh UUID4 IDs, two independent OS-CSPRNG permutations, blind-map.json preserved separately. Gates 3-5 (independent scoring + lock before unblind) PASS for both evaluators. Gate 6 (analysis after both locks) produced the disposition reported in analysis/final-result.md. Net: 4 of 5 frozen quantitative gates pass; G2 ('no systematic identity-breaking') fails because 5 candidates were IDENTITY-BREAKING by both evaluators — those 5 are entirely concentrated in R4 Block B (the documented DEV-002 quota-deviation subset). Formal disposition is INCONCLUSIVE; recommendation is Conditional — requires Frank adjudication.",
   "go_transfer": {
     "transfer_id": "20260905T102254Z-dbi-bib-001-rerun-go-001",
     "ready_commit": "6c8798b9d06da341c276917907fa937ddd0c0422",
@@ -651,8 +652,16 @@
       "runtime_version": "0.146.0",
       "locked_before_candidate_access": true,
       "scores_path": "evaluation/evaluator-A-scores.jsonl",
-      "scores_locked_at": null,
-      "scoring_completed": false
+      "scores_locked_path": "evaluation/evaluator-A-scores-LOCKED.jsonl",
+      "lock_record_path": "evaluation/evaluator-A-lock-record.json",
+      "raw_response_path": "evaluation/evaluator-A-raw.txt",
+      "raw_response_sha256": "98ab2f7480f5563c3d464d01b2761bb6f87c54ac61a51b09955ee547e3e0f648",
+      "locked_scores_sha256": "df08f5046eaf744ca4c902212405216ff3ffe6e11bb6307fbc3d1989dc385b85",
+      "scores_locked_at": "2026-09-06T09:45:00Z",
+      "scoring_completed": true,
+      "preflight_path": "preflight/evaluator-A-preflight.json",
+      "preflight_passed": true,
+      "classification_counts": {"SAME": 38, "SAME_WITH_VARIANCE": 17, "DIFFERENT": 5}
     },
     "B": {
       "role": "Evaluator B",
@@ -661,17 +670,74 @@
       "runtime_version": "2.1.170",
       "locked_before_candidate_access": true,
       "scores_path": "evaluation/evaluator-B-scores.jsonl",
-      "scores_locked_at": null,
-      "scoring_completed": false
+      "scores_locked_path": "evaluation/evaluator-B-scores-LOCKED.jsonl",
+      "lock_record_path": "evaluation/evaluator-B-lock-record.json",
+      "raw_response_path": "evaluation/evaluator-B-raw.txt",
+      "raw_response_sha256": "cdf80d0aae66ec3a6f963f4e13d836d01d854c20995e531b1a94e6e077b1aab1",
+      "locked_scores_sha256": "d2866a96934a544b17afb920937a3bc5dd6cca4e03b4ce723cd948278328c70d",
+      "scores_locked_at": "2026-09-06T10:10:00Z",
+      "scoring_completed": true,
+      "preflight_path": "preflight/evaluator-B-preflight.json",
+      "preflight_passed": true,
+      "classification_counts": {"SAME": 54, "SAME_WITH_VARIANCE": 1, "DIFFERENT": 5}
     }
   },
   "blind_mapping": {
     "path": "blinding/blind-map.json",
-    "created_at": null,
+    "provenance_path": "blinding/blind-map-provenance.json",
+    "blind_map_sha256": "629d2ff2ef002e73db88f948128002a8facae74ad1013d3ef3e86f905f6e46a2",
+    "evaluator_A_order_path": "blinding/evaluator-A-order.json",
+    "evaluator_A_order_sha256": "47b0575768fae27b9eab5f4858bf1ad7c9bb79c981f5e968809bee49f177e7e0",
+    "evaluator_B_order_path": "blinding/evaluator-B-order.json",
+    "evaluator_B_order_sha256": "c1b0dd31eb00e66002cfa533ffba2999f1c5d5609ade3356bdf79bbb0d639752",
+    "blind_id_algorithm": "uuid.uuid4 (Python stdlib; OS CSPRNG)",
+    "orderings_independent_seeds": "OS CSPRNG seed_A != seed_B; orderings_identical=false",
+    "created_at": "2026-09-06T09:30:00Z",
     "withheld_from_evaluators_until_scores_locked": true
   },
-  "deviations": [],
-  "recorded_at_utc": "2026-09-06T01:48:27Z",
+  "evaluation_results": {
+    "formal_disposition": "INCONCLUSIVE",
+    "all_gates_passed": false,
+    "gates_summary": {
+      "G1_both_evaluators_90pct_identity_preserved": {"passed": true, "A": 0.9167, "B": 0.9167, "threshold": 0.90},
+      "G2_no_systematic_identity_breaking": {"passed": false, "A_count": 5, "B_count": 5, "attributable_to": "DEV-002 (R4 Block B quota-error retry)"},
+      "G3_evaluator_usability_gates": {"passed": true, "identity_preservation_agreement": 1.00, "max_per_dim_mae": 0.7167},
+      "G4_bounded_between_reconstruction_distribution": {"passed": true, "evaluator_A_p95": 15, "evaluator_B_p95": 16},
+      "G5_no_protocol_stop_condition": {"passed": true}
+    },
+    "agreement_summary": {
+      "identity_preservation_raw_agreement": 1.00,
+      "kappa_two_class": 1.00,
+      "three_class_exact_agreement": 0.70,
+      "kappa_three_class_descriptive": 0.2829
+    },
+    "variance_summary": {
+      "evaluator_A_within_mean": 3.30,
+      "evaluator_A_between_mean": 3.55,
+      "evaluator_B_within_mean": 2.73,
+      "evaluator_B_between_mean": 2.73
+    },
+    "concentration_of_different": {
+      "evaluator_A_different_candidates": ["R4/B/T1", "R4/B/T2", "R4/B/T3", "R4/B/T4", "R4/B/T5"],
+      "evaluator_B_different_candidates": ["R4/B/T1", "R4/B/T2", "R4/B/T3", "R4/B/T4", "R4/B/T5"],
+      "all_concentrated_in": "R4 Block B (DEV-002 documented quota-error retry)",
+      "out_of_evaluator_alignment": true
+    },
+    "recommendation": {
+      "proceed_to_evolution_experiment": false,
+      "rationale": "Conditional. Two consistent readings — strict-literal (INCONCLUSIVE; do not proceed without Frank adjudication) and deviation-attributable (55-candidate non-deviated envelope is well-defined; R4/B exclusion should be explicitly documented). Final adjudication rests with Frank-as-PI.",
+      "read_more": "analysis/final-result.md"
+    },
+    "final_result_path": "analysis/final-result.md",
+    "agreement_path": "analysis/evaluator-agreement.json",
+    "baseline_envelope_path": "analysis/baseline-envelope.md",
+    "unblinded_audit_path": "analysis/unblinded-score-audit.md"
+  },
+  "deviations": [
+    "DEV-RUNNER-V1-A-T1-A-T2-MISSING.json (MATERIAL; resolved; R2 re-run cleanly)",
+    "DEV-002-r4-block-b-quota.json (RUN-INVALIDATING infrastructure failure; R4/B 5 candidates scored IDENTITY-BREAKING by both evaluators; treated as candidate behavior per GO §3)"
+  ],
+  "recorded_at_utc": "2026-09-06T10:15:00Z",
   "valid_output_total": 60,
   "completed_reconstructions": [
     "R1",

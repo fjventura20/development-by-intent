@@ -1,0 +1,102 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-001-RERUN-001",
+  "candidate_count": 60,
+  "identity_preservation_agreement": {
+    "description": "Collapse SAME+SAME_WITH_VARIANCE to IDENTITY_PRESERVED, DIFFERENT to IDENTITY_BROKEN. Raw agreement.",
+    "raw_agreement": 1.0,
+    "gate_threshold": 0.9,
+    "gate_passed": true,
+    "cohen_kappa_two_class": 1.0
+  },
+  "three_class_agreement": {
+    "description": "Exact three-class agreement (SAME / SAME_WITH_VARIANCE / DIFFERENT) on the raw labels.",
+    "raw_agreement": 0.7,
+    "cohen_kappa": 0.2829,
+    "kappa_descriptive_note": "Kappa is descriptive only; high class imbalance can depress it.",
+    "categories": [
+      "SAME",
+      "SAME_WITH_VARIANCE",
+      "DIFFERENT"
+    ]
+  },
+  "per_dimension_mean_absolute_evaluator_difference": {
+    "contract_compliance": {
+      "mean_absolute_difference": 0.4,
+      "max_absolute_difference": 2,
+      "median_absolute_difference": 0.0
+    },
+    "selection_behavior": {
+      "mean_absolute_difference": 0.05,
+      "max_absolute_difference": 1,
+      "median_absolute_difference": 0.0
+    },
+    "narrative_behavior": {
+      "mean_absolute_difference": 0.2167,
+      "max_absolute_difference": 1,
+      "median_absolute_difference": 0.0
+    },
+    "functional_completeness": {
+      "mean_absolute_difference": 0.7167,
+      "max_absolute_difference": 1,
+      "median_absolute_difference": 1.0
+    }
+  },
+  "rubric_usability_gates": {
+    "identity_preservation_agreement_ge_90_pct": {
+      "value": 1.0,
+      "threshold": 0.9,
+      "passed": true
+    },
+    "per_dimension_mae_le_1": {
+      "contract_compliance": {
+        "value": 0.4,
+        "threshold": 1.0,
+        "passed": true
+      },
+      "selection_behavior": {
+        "value": 0.05,
+        "threshold": 1.0,
+        "passed": true
+      },
+      "narrative_behavior": {
+        "value": 0.2167,
+        "threshold": 1.0,
+        "passed": true
+      },
+      "functional_completeness": {
+        "value": 0.7167,
+        "threshold": 1.0,
+        "passed": true
+      }
+    }
+  },
+  "all_rubric_usability_gates_passed": true,
+  "classification_frequencies": {
+    "evaluator_A": {
+      "DIFFERENT": 5,
+      "SAME_WITH_VARIANCE": 17,
+      "SAME": 38
+    },
+    "evaluator_B": {
+      "DIFFERENT": 5,
+      "SAME": 54,
+      "SAME_WITH_VARIANCE": 1
+    }
+  },
+  "violation_severity_frequencies": {
+    "evaluator_A": {
+      "IDENTITY-BREAKING": 5,
+      "MATERIAL": 17,
+      "MINOR": 19
+    },
+    "evaluator_B": {
+      "IDENTITY-BREAKING": 5,
+      "MINOR": 1
+    }
+  },
+  "identity_breaking_violation_count_by_evaluator": {
+    "evaluator_A": 5,
+    "evaluator_B": 5
+  }
+}
