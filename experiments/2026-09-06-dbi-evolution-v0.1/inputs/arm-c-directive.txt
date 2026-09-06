@@ -1,0 +1,1 @@
+Follow the Amazing Birthday behavioral contract as specified in the durable package above. No additional directives apply to this reconstruction. Preserve all existing behaviors exactly as specified.
