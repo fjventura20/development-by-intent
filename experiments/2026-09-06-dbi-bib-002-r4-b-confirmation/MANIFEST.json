@@ -2,8 +2,8 @@
   "schema_version": "0.1",
   "experiment_id": "DBI-BIB-002",
   "experiment_short_name": "R4/B Deviation Confirmation",
-  "experiment_status": "AUTHORIZED",
-  "status_reason": "Frank-as-PI GO received 2026-09-06 referencing preregistration commit 6d2aa82 (PREREGISTER.md sha256 99edcda3...). GO included an interpretation clarification recorded in 'interpretation_clarification' below. Execution proceeds under the preregistered design: 3 reconstructions (R7/R8/R9), 30 candidates, fresh UUID4 blind IDs, two independent OS-CSPRNG permutations, no BIB-001 reuse. Next gate: preflight (Gate 1) → generation (Gate 2) → blind map (Gate 3) → evaluator scoring with lock before unblind (Gate 4) → analysis (Gate 5).",
+  "experiment_status": "EVALUATED",
+  "status_reason": "Evaluator B HTTP 429 (2026-09-06T10:46:42Z) was retried at 2026-09-06T14:30:19Z after quota reset (smoke call returned READY). Same packet, same evaluator identity, no scoring inputs modified. Both evaluator score sets now LOCKED; post-lock analysis completed; preregistered decision rules applied.",
   "experiment_design": {
     "research_question": "Does the R4/B identity-breaking pattern recur when the affected generation path is executed cleanly, without the DEV-002 infrastructure failure, on independent fresh reconstruction sessions?",
     "reconstructions": 3,
@@ -17,7 +17,7 @@
   "frozen_references": {
     "protocol_designer": "Frank Ventura (PI)",
     "operator": "Hermes Agent",
-    "frozen_protocol_inheritance": "Inherits frozen source, frozen rubric, frozen test corpus, evaluator identity, and protocol structure from DBI-BIB-001. Only structural change vs BIB-001: 3 reconstructions × 10 tests design + preregistered decision rules in PREREGISTER.md §9.",
+    "frozen_protocol_inheritance": "Inherits frozen source, frozen rubric, frozen test corpus, evaluator identity, and protocol structure from DBI-BIB-001. Only structural change vs BIB-001: 3 reconstructions \u00d7 10 tests design + preregistered decision rules in PREREGISTER.md \u00a79.",
     "frozen_protocol_commit": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
     "frozen_protocol_blob": "1d06f02a9d331df279ee4417e23b4d52330b63f9",
     "execution_package_index_commit": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
@@ -81,7 +81,7 @@
       "no_tools": true
     },
     "post_execution_reverification_required": true,
-    "reverification_rule": "Per PREREGISTER.md §5: re-verify both evaluators callable IMMEDIATELY before any BIB-002 candidate is exposed. Re-verify Claude Sonnet 4.6 callable at the start of each staged window."
+    "reverification_rule": "Per PREREGISTER.md \u00a75: re-verify both evaluators callable IMMEDIATELY before any BIB-002 candidate is exposed. Re-verify Claude Sonnet 4.6 callable at the start of each staged window."
   },
   "decision_rules_preregistered": {
     "primary_question": "Does the R4/B identity-breaking pattern recur?",
@@ -95,7 +95,7 @@
   },
   "execution_design": {
     "staging": "All 3 reconstructions may run in a single Claude quota window if quota permits; if quota pressure recurs, stage across two windows with per-stage runtime reverification at the start of each window.",
-    "blinding_timing": "Build fresh blind-map AFTER all 30 outputs exist; release scoring packets only after both evaluators re-verified callable (per PREREGISTER.md §7-8)."
+    "blinding_timing": "Build fresh blind-map AFTER all 30 outputs exist; release scoring packets only after both evaluators re-verified callable (per PREREGISTER.md \u00a77-8)."
   },
   "bib001_reference": {
     "evidence_directory": "experiments/2026-09-05-dbi-bib-001-rerun-001/",
@@ -114,7 +114,7 @@
     "preregister_sha256": "99edcda3046eefc1f58b73dce8bbd7e6aa6cf8d5d8105d91d82da68a34fc5a99"
   },
   "interpretation_clarification": {
-    "purpose": "Fix the interpretation of the historical BIB-001 record before new data are generated. Wording clarification only — no change to any quantitative threshold, candidate, evaluator, or experimental procedure.",
+    "purpose": "Fix the interpretation of the historical BIB-001 record before new data are generated. Wording clarification only \u2014 no change to any quantitative threshold, candidate, evaluator, or experimental procedure.",
     "rule": "DBI-BIB-001 retains its historical formal disposition of INCONCLUSIVE regardless of the DBI-BIB-002 outcome. DBI-BIB-002 does not retroactively rewrite the recorded outcome of BIB-001.",
     "outcome_interpretation": {
       "PATTERN_NOT_REPRODUCED": "The combined BIB-001 + BIB-002 evidence may support concluding that the original R4/B identity-breaking cluster was deviation-associated infrastructure contamination and that the behavioral-identity baseline is sufficiently calibrated to permit the DbI Evolution Experiment. Do NOT rewrite BIB-001 itself as PASS.",
@@ -133,9 +133,69 @@
   "reconstructions": null,
   "evaluators": null,
   "blind_mapping": null,
-  "evaluation_results": null,
-  "deviations": [],
-  "recorded_at_utc": "2026-09-06T10:20:00Z",
-  "valid_output_total": null,
-  "completed_reconstructions": []
+  "evaluation_results": {
+    "evaluator_A": {
+      "model": "gpt-5.6-sol",
+      "locked_score_sha256": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6",
+      "classifications": {
+        "SAME": 24,
+        "SAME_WITH_VARIANCE": 6,
+        "DIFFERENT": 0
+      },
+      "identity_breaking_count": 0,
+      "locked_at_utc": "2026-09-06T11:00:00Z"
+    },
+    "evaluator_B": {
+      "model": "claude-opus-4-7",
+      "locked_score_sha256": "11ac84e8cf0606dac2a585c91bd7bfb7e20bc5ddadc80d0cc72c295bf2eec437",
+      "classifications": {
+        "SAME": 30,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "identity_breaking_count": 0,
+      "locked_at_utc": "2026-09-06T14:30:30Z",
+      "retry_note": "Original call failed HTTP 429 at 2026-09-06T10:46:42Z (session limit, resets 14:20Z). Retried at 14:30:19Z after READY smoke. No scoring inputs modified."
+    }
+  },
+  "deviations": [
+    {
+      "id": "D1",
+      "phase": "evaluation",
+      "description": "Evaluator B original call (2026-09-06T10:46:42Z) returned HTTP 429 session-limit (resets 14:20Z America/New_York).",
+      "severity": "OPERATIONAL",
+      "protocol_affecting": false,
+      "resolution": "Retry fired 2026-09-06T14:30:19Z (~10 min after reset) after READY smoke confirmed quota reset. Same evaluator packet; no scoring inputs modified. Retry succeeded (EXIT=0, 1 turn, 21073 bytes).",
+      "second_retry_policy": "Per operator directive: STOP and report on second 429. Single retry attempted only."
+    }
+  ],
+  "recorded_at_utc": "2026-09-06T14:35:00Z",
+  "valid_output_total": 30,
+  "completed_reconstructions": [
+    "R7",
+    "R8",
+    "R9"
+  ],
+  "analysis_summary": {
+    "outcome": "PATTERN_NOT_REPRODUCED",
+    "decision_rule_inputs": {
+      "different_count_both_evaluators": 0,
+      "within_mean_A": 0.4,
+      "within_mean_B": 0.0,
+      "threshold_different_count": 2,
+      "threshold_within_mean": 4.0
+    },
+    "rule_PRP_PATTERN_REPRODUCED_2plus_different": "failed",
+    "rule_PRP_PATTERN_REPRODUCED_within_mean_gt_4": "failed",
+    "rule_PRP_INCONCLUSIVE_PENDING_FURTHER": "not_triggered",
+    "final_result_json_sha256": "bf9463da08cfaeec733905cce29dcd7a1a7e78694f5c3343c30b13f903587617",
+    "final_result_md_sha256": "cee4a89f0d9e425df241afc11fda2cada44f571a09ac8dd2f280f5c459d4b816",
+    "agreement": {
+      "identity_preservation_agreement": 1.0,
+      "kappa_two_class": 1.0,
+      "three_class_exact_agreement": 0.8
+    },
+    "rubric_usability_gates_passed": true
+  },
+  "bib001_history_disposition_immunity": "DBI-BIB-001 retains its historical formal disposition (INCONCLUSIVE) regardless of the BIB-002 outcome. BIB-002 does not retroactively rewrite the recorded outcome of BIB-001. (Per Frank-as-PI interpretation clarification.)"
 }

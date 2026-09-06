@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-002",
+  "experiment_status": "EVALUATED",
+  "outcome": "PATTERN_NOT_REPRODUCED",
+  "decision_rule_evaluation": {
+    "rule_PRP_PATTERN_REPRODUCED_2plus_different_both_evaluators": {
+      "value": 0,
+      "threshold": 2,
+      "passed": false
+    },
+    "rule_PRP_PATTERN_REPRODUCED_within_mean_gt_4": {
+      "evaluator_A_value": 0.4,
+      "evaluator_B_value": 0,
+      "threshold": 4.0,
+      "passed": false
+    },
+    "rule_PRP_INCONCLUSIVE_PENDING_FURTHER_weaker_signal": {
+      "exactly_1_different_both_evaluators": false,
+      "within_mean_in_2_to_4_band": false
+    }
+  },
+  "observed_quantities": {
+    "evaluator_A_different_count": 0,
+    "evaluator_B_different_count": 0,
+    "evaluator_A_within_mean": 0.4,
+    "evaluator_A_within_median": 0,
+    "evaluator_A_within_max": 1,
+    "evaluator_B_within_mean": 0,
+    "evaluator_B_within_median": 0,
+    "evaluator_B_within_max": 0,
+    "evaluator_A_classification_counts": {
+      "SAME": 24,
+      "SAME_WITH_VARIANCE": 6
+    },
+    "evaluator_B_classification_counts": {
+      "SAME": 30
+    }
+  },
+  "agreement_summary": {
+    "identity_preservation_agreement": 1.0,
+    "three_class_exact_agreement": 0.8,
+    "kappa_two_class": 1.0,
+    "kappa_three_class": 0.0,
+    "per_dimension_mae": {
+      "contract_compliance": {
+        "mean_absolute_difference": 0.5,
+        "max_absolute_difference": 1,
+        "median_absolute_difference": 0.5
+      },
+      "selection_behavior": {
+        "mean_absolute_difference": 0.0333,
+        "max_absolute_difference": 1,
+        "median_absolute_difference": 0.0
+      },
+      "narrative_behavior": {
+        "mean_absolute_difference": 0,
+        "max_absolute_difference": 0,
+        "median_absolute_difference": 0.0
+      },
+      "functional_completeness": {
+        "mean_absolute_difference": 0,
+        "max_absolute_difference": 0,
+        "median_absolute_difference": 0.0
+      }
+    }
+  },
+  "interpretation_per_preregister_md_section_13": {
+    "PATTERN_NOT_REPRODUCED": "The combined BIB-001 + BIB-002 evidence may support concluding that the original R4/B identity-breaking cluster was deviation-associated infrastructure contamination and that the behavioral-identity baseline is sufficiently calibrated to permit the DbI Evolution Experiment. Do NOT rewrite BIB-001 itself as PASS.",
+    "PATTERN_REPRODUCED": "The behavioral-identity baseline remains insufficiently stable. DbI Evolution remains blocked.",
+    "INCONCLUSIVE_PENDING_FURTHER": "Do not proceed to DbI Evolution. Return the evidence for PI adjudication."
+  },
+  "bib001_history_disposition_immunity": "DBI-BIB-001 retains its historical formal disposition of INCONCLUSIVE regardless of the BIB-002 outcome. DBI-BIB-002 does not retroactively rewrite the recorded outcome of BIB-001."
+}

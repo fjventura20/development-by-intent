@@ -1,0 +1,87 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-002",
+  "kind": "unblinded-score-audit",
+  "generated_at_utc": "2026-09-06T10:55:00Z",
+  "per_reconstruction": {
+    "R7": {
+      "candidate_count": 10,
+      "evaluator_A": {
+        "SAME": 4,
+        "SAME_WITH_VARIANCE": 6,
+        "DIFFERENT": 0
+      },
+      "evaluator_B": {
+        "SAME": 10,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_A_mean_total": 15.1,
+      "evaluator_B_mean_total": 16.0
+    },
+    "R8": {
+      "candidate_count": 10,
+      "evaluator_A": {
+        "SAME": 10,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_B": {
+        "SAME": 10,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_A_mean_total": 15.7,
+      "evaluator_B_mean_total": 16.0
+    },
+    "R9": {
+      "candidate_count": 10,
+      "evaluator_A": {
+        "SAME": 10,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_B": {
+        "SAME": 10,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_A_mean_total": 15.6,
+      "evaluator_B_mean_total": 16.0
+    }
+  },
+  "per_block": {
+    "A": {
+      "candidate_count": 15,
+      "evaluator_A": {
+        "SAME": 13,
+        "SAME_WITH_VARIANCE": 2,
+        "DIFFERENT": 0
+      },
+      "evaluator_B": {
+        "SAME": 15,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_A_mean_total": 15.4,
+      "evaluator_B_mean_total": 16.0
+    },
+    "B": {
+      "candidate_count": 15,
+      "evaluator_A": {
+        "SAME": 11,
+        "SAME_WITH_VARIANCE": 4,
+        "DIFFERENT": 0
+      },
+      "evaluator_B": {
+        "SAME": 15,
+        "SAME_WITH_VARIANCE": 0,
+        "DIFFERENT": 0
+      },
+      "evaluator_A_mean_total": 15.53,
+      "evaluator_B_mean_total": 16.0
+    }
+  },
+  "total_candidates": 30,
+  "operational_note": "For adjudication. Does not change the preregistered disposition."
+}
