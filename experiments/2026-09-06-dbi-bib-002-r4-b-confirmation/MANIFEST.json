@@ -1,0 +1,120 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-BIB-002",
+  "experiment_short_name": "R4/B Deviation Confirmation",
+  "experiment_status": "PREREGISTERED_AWAITING_GO",
+  "status_reason": "Preregistration written (PREREGISTER.md, sha256 to be fingerprinted at GO receipt). 30-candidate confirmatory design to test whether the BIB-001 R4/B identity-breaking cluster reproduces under clean infrastructure. Frozen inputs verified. No execution has begun. Per §12 of PREREGISTER.md, a separate Frank-as-PI GO referencing this preregistration is required before execution begins.",
+  "experiment_design": {
+    "research_question": "Does the R4/B identity-breaking pattern recur when the affected generation path is executed cleanly, without the DEV-002 infrastructure failure, on independent fresh reconstruction sessions?",
+    "reconstructions": 3,
+    "tests_per_block": 5,
+    "blocks_per_reconstruction": 2,
+    "total_candidates": 30,
+    "rationale": "BIB-001 produced 55 cleanly-preserved + 5 sharply-localized IDENTITY-BREAKING candidates (all in R4/B under DEV-002). This confirmation experiment decides whether the original cluster was DEV-002-attributable (then BIB-001 can be reclassified PASS with documented exclusion rule and Evolution proceeds) or whether it was a behavioral-baseline failure (then BIB-001's INCONCLUSIVE disposition is confirmed and Evolution remains blocked).",
+    "matched_control_design": "A is a per-reconstruction matched control, not a redundant check. The within-reconstruction (A vs B) Manhattan distance is the cleanest test statistic.",
+    "no_reuse": "No reuse of BIB-001 scores, blind IDs, orderings, or evaluation packets."
+  },
+  "frozen_references": {
+    "protocol_designer": "Frank Ventura (PI)",
+    "operator": "Hermes Agent",
+    "frozen_protocol_inheritance": "Inherits frozen source, frozen rubric, frozen test corpus, evaluator identity, and protocol structure from DBI-BIB-001. Only structural change vs BIB-001: 3 reconstructions × 10 tests design + preregistered decision rules in PREREGISTER.md §9.",
+    "frozen_protocol_commit": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
+    "frozen_protocol_blob": "1d06f02a9d331df279ee4417e23b4d52330b63f9",
+    "execution_package_index_commit": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+    "execution_package_freeze_commit": "ebbb4319fcc7daedcc55e4be78a99e948e2a8c9c",
+    "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a"
+  },
+  "frozen_input_artifacts": {
+    "inputs/03-behavioral-baseline.md": {
+      "size": 3483,
+      "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+      "matches_frozen_source": true
+    },
+    "inputs/RECONSTRUCTION-PROMPT.md": {
+      "size": 1556,
+      "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+      "matches_frozen_source": true
+    },
+    "inputs/reconstruction-input.txt": {
+      "size": 5366,
+      "sha256": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f",
+      "matches_bib001": true
+    },
+    "inputs/test-corpus.txt": {
+      "size": 153,
+      "sha256": "a61a75053a4921e23922075be2164932b1eb543fff7c3c29b7baaea97d60f9a1"
+    },
+    "inputs/EVALUATOR-RUBRIC.md": {
+      "size": 8039,
+      "sha256": "0d665161a34d98d9ee69ccdad46d0e2b438f46b6cffb51ef9722b501c88428fb"
+    },
+    "individual_test_prompt_sha256": {
+      "T1": "75302f1fce9bc33f64b9c0a9a47863f5362e54c9ce1e40ce3ce4831866e5598b",
+      "T2": "58170a11a454717de4409ccbe836deeb7c30b23e308a237d1a9f406302744712",
+      "T3": "52fb3fa1d282a1607e455586c365134c574ad018d36897fba5bcbf2909d67ca8",
+      "T4": "a8ad9dcbb99fcf8df4c66449f5b6118ec65063217588c7857378d984fe8cf7fe",
+      "T5": "c1786d3ad2454208996a7313d92efaf13a1f1ed65f28002a7ee4beb314829b44"
+    },
+    "verified_at_utc": "2026-09-06T10:20:00Z"
+  },
+  "runtime_lock_target": {
+    "reconstruction": {
+      "provider": "Anthropic Claude",
+      "model": "claude-sonnet-4-6",
+      "cli_or_runtime": "claude (Claude Code)",
+      "cli_or_runtime_version_target": "2.1.170",
+      "no_tools": true,
+      "posture": "--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch'"
+    },
+    "evaluator_a": {
+      "provider": "OpenAI Codex (ChatGPT-OAuth)",
+      "model": "gpt-5.6-sol",
+      "cli_or_runtime": "codex",
+      "cli_or_runtime_version_target": "0.146.0",
+      "no_tools": true
+    },
+    "evaluator_b": {
+      "provider": "Anthropic Claude",
+      "model": "claude-opus-4-7",
+      "cli_or_runtime": "claude (Claude Code)",
+      "cli_or_runtime_version_target": "2.1.170",
+      "no_tools": true
+    },
+    "post_execution_reverification_required": true,
+    "reverification_rule": "Per PREREGISTER.md §5: re-verify both evaluators callable IMMEDIATELY before any BIB-002 candidate is exposed. Re-verify Claude Sonnet 4.6 callable at the start of each staged window."
+  },
+  "decision_rules_preregistered": {
+    "primary_question": "Does the R4/B identity-breaking pattern recur?",
+    "pattern_reproduced_condition": "Both evaluators independently classify >=2 of the 30 new candidates as IDENTITY-BREAKING, OR a within-reconstruction (A->B) Manhattan distance mean across the 15 (3 reconstructions x 5 tests) pairs exceeds 4.0.",
+    "pattern_not_reproduced_condition": "Neither of the above.",
+    "inconclusive_pending_further_condition": "Weaker signals: exactly 1 DIFFERENT by both evaluators, or within-mean in the 2-4 range.",
+    "threshold_4_rationale": "BIB-001 R4/B contamination signature was within-mean ~13.5 (Evaluator A on R4 within-distances). The 55-candidate non-deviated envelope had within-mean 0.5-1.0. Threshold of 4.0 is the midpoint between 'indistinguishable from clean envelope' and 'indistinguishable from original contamination.' A stricter threshold (e.g., 8.0) would risk false-negative confirmation.",
+    "threshold_2_rationale": "The BIB-001 R4/B cluster was 5 contiguous candidates (the entire Block B of one reconstruction). Requiring 2-or-more preserves the cluster-vs-incident distinction. A single isolated DIFFERENT could arise from incidental run-specific issues.",
+    "rules_locked_before_generation": true,
+    "post_hoc_modification_prohibited": true
+  },
+  "execution_design": {
+    "staging": "All 3 reconstructions may run in a single Claude quota window if quota permits; if quota pressure recurs, stage across two windows with per-stage runtime reverification at the start of each window.",
+    "blinding_timing": "Build fresh blind-map AFTER all 30 outputs exist; release scoring packets only after both evaluators re-verified callable (per PREREGISTER.md §7-8)."
+  },
+  "bib001_reference": {
+    "evidence_directory": "experiments/2026-09-05-dbi-bib-001-rerun-001/",
+    "formal_disposition": "INCONCLUSIVE",
+    "g2_failure_attribution": "5 IDENTITY-BREAKING candidates entirely concentrated in R4/B (DEV-002 documented quota-error retry)",
+    "use_in_bib002": "REFERENCE ONLY. BIB-001 scores, blind IDs, orderings, and evaluation packets are NOT reused in DBI-BIB-002."
+  },
+  "authorization": {
+    "authorized": false,
+    "authorization_required": true,
+    "authorization_required_description": "A separate Frank-as-PI GO referencing this preregistration (PREREGISTER.md) must be received before execution begins. Per PREREGISTER.md §12, this preregistration does NOT authorize execution; it only fixes the design and decision rules before execution so that no post-hoc threshold modifications are possible."
+  },
+  "execution_authorization": null,
+  "reconstructions": null,
+  "evaluators": null,
+  "blind_mapping": null,
+  "evaluation_results": null,
+  "deviations": [],
+  "recorded_at_utc": "2026-09-06T10:20:00Z",
+  "valid_output_total": null,
+  "completed_reconstructions": []
+}
