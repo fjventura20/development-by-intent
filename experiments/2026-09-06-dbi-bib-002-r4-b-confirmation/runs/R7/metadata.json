@@ -1,0 +1,100 @@
+{
+  "reconstruction_id": "R7",
+  "started_at_utc": "2026-09-06T09:57:29Z",
+  "completed_at_utc": "2026-09-06T10:09:24Z",
+  "reconstruction_ready": true,
+  "session_id": "0deac217-5c6f-4950-a2f0-e8b3a57db434",
+  "outputs": [
+    {
+      "test_id": "T1",
+      "block": "A",
+      "raw_path": "runs/R7/captures/A/T1.raw.json",
+      "stderr_path": "runs/R7/captures/A/T1.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6511,
+      "sha256": "2aac80b56828de07bb8e54acaf97011a7993c9e739a1b8fdddf940591ca316d6"
+    },
+    {
+      "test_id": "T2",
+      "block": "A",
+      "raw_path": "runs/R7/captures/A/T2.raw.json",
+      "stderr_path": "runs/R7/captures/A/T2.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6701,
+      "sha256": "b37e2d1ad1f782d36f5e8c2148896f9c56bd5663f4c4d1911c47ec1ccefc07dd"
+    },
+    {
+      "test_id": "T3",
+      "block": "A",
+      "raw_path": "runs/R7/captures/A/T3.raw.json",
+      "stderr_path": "runs/R7/captures/A/T3.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6271,
+      "sha256": "b1088b903b22daeb8369d2ca2c6db235717f1bedb9050a3b1816774722cb1167"
+    },
+    {
+      "test_id": "T4",
+      "block": "A",
+      "raw_path": "runs/R7/captures/A/T4.raw.json",
+      "stderr_path": "runs/R7/captures/A/T4.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6906,
+      "sha256": "aa9356c5879de26007fe458968484ebf89f66946088997479d4b8ba6fcec4e4e"
+    },
+    {
+      "test_id": "T5",
+      "block": "A",
+      "raw_path": "runs/R7/captures/A/T5.raw.json",
+      "stderr_path": "runs/R7/captures/A/T5.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 7168,
+      "sha256": "677818ae01c2ec47a59a379edb2917ea53dd384a9fc43b558792b871d0584116"
+    },
+    {
+      "test_id": "T1",
+      "block": "B",
+      "raw_path": "runs/R7/captures/B/T1.raw.json",
+      "stderr_path": "runs/R7/captures/B/T1.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6673,
+      "sha256": "427056ac60ba987a7ff877a6c26504fa7a234e27444750e35c569d45e4df6c7a"
+    },
+    {
+      "test_id": "T2",
+      "block": "B",
+      "raw_path": "runs/R7/captures/B/T2.raw.json",
+      "stderr_path": "runs/R7/captures/B/T2.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 7585,
+      "sha256": "bdf226873c52f152741509ce12b4828f12f4371beb97bdf638394661885a48f6"
+    },
+    {
+      "test_id": "T3",
+      "block": "B",
+      "raw_path": "runs/R7/captures/B/T3.raw.json",
+      "stderr_path": "runs/R7/captures/B/T3.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6335,
+      "sha256": "338a4d8a6e28ee3aa8e775086cb24a6edd046e7d9708d6d463715197df295147"
+    },
+    {
+      "test_id": "T4",
+      "block": "B",
+      "raw_path": "runs/R7/captures/B/T4.raw.json",
+      "stderr_path": "runs/R7/captures/B/T4.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6947,
+      "sha256": "5ab08f7941cf5be82edf8572d270d5870ed40c9c05918ba3c4fd7782121e49ed"
+    },
+    {
+      "test_id": "T5",
+      "block": "B",
+      "raw_path": "runs/R7/captures/B/T5.raw.json",
+      "stderr_path": "runs/R7/captures/B/T5.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 7084,
+      "sha256": "13650ed2fe36d7cdc96437c2027ec0e3efba3f5dd283fc80e60ed9e922fbe168"
+    }
+  ],
+  "errors": []
+}

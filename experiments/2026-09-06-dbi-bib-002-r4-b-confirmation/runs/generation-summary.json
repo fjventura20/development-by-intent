@@ -1,0 +1,30 @@
+{
+  "reconstructions": [
+    {
+      "reconstruction_id": "R7",
+      "session_id": "0deac217-5c6f-4950-a2f0-e8b3a57db434",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "reconstruction_id": "R8",
+      "session_id": "7288de18-f581-4426-84a1-b316367b5141",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "reconstruction_id": "R9",
+      "session_id": "fcc12ad0-21f6-4f14-9370-574d6f934724",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    }
+  ],
+  "stopped": false,
+  "stop_reason": null
+}

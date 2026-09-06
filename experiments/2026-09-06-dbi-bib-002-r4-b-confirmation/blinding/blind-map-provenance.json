@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "blind-map-provenance",
+  "experiment_id": "DBI-BIB-002",
+  "constructed_at_utc": "2026-09-06T10:45:00Z",
+  "blind_map_sha256": "2ea71629e6ae59832dba9d77b2899fd620ebf4efd9df42daf8ed901e9ddd5059",
+  "evaluator_A_order_sha256": "701489120467bedc1b90fd391bf41c2935c16e5f754265f88edf9a5507fdbea2",
+  "evaluator_B_order_sha256": "679b837f17049142b6cfdd86189cc271cf11190fdb570ab78efc907f13a6e648",
+  "orderings_identical": false,
+  "candidate_count": 30,
+  "blind_id_algorithm": "uuid.uuid4 (OS CSPRNG; independent of BIB-001)",
+  "ordering_algorithm": "Fisher-Yates shuffle, per-evaluator seed from OS CSPRNG (independent of BIB-001)",
+  "operational_notes": [
+    "blind-map.json is NOT shipped to either evaluator. It is private operator evidence until BOTH score sets are locked.",
+    "Each evaluator receives evaluator-X-order.json (an ordered list of 30 blind IDs) + the frozen behavioral baseline + frozen rubric + the matrix of (blind_id, test_prompt, raw_output_text).",
+    "No reconstruction_id, block, test_id, session_id, model, or any provenance is included in the evaluator packet."
+  ]
+}

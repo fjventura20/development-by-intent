@@ -2,8 +2,8 @@
   "schema_version": "0.1",
   "experiment_id": "DBI-BIB-002",
   "experiment_short_name": "R4/B Deviation Confirmation",
-  "experiment_status": "PREREGISTERED_AWAITING_GO",
-  "status_reason": "Preregistration written (PREREGISTER.md, sha256 to be fingerprinted at GO receipt). 30-candidate confirmatory design to test whether the BIB-001 R4/B identity-breaking cluster reproduces under clean infrastructure. Frozen inputs verified. No execution has begun. Per §12 of PREREGISTER.md, a separate Frank-as-PI GO referencing this preregistration is required before execution begins.",
+  "experiment_status": "AUTHORIZED",
+  "status_reason": "Frank-as-PI GO received 2026-09-06 referencing preregistration commit 6d2aa82 (PREREGISTER.md sha256 99edcda3...). GO included an interpretation clarification recorded in 'interpretation_clarification' below. Execution proceeds under the preregistered design: 3 reconstructions (R7/R8/R9), 30 candidates, fresh UUID4 blind IDs, two independent OS-CSPRNG permutations, no BIB-001 reuse. Next gate: preflight (Gate 1) → generation (Gate 2) → blind map (Gate 3) → evaluator scoring with lock before unblind (Gate 4) → analysis (Gate 5).",
   "experiment_design": {
     "research_question": "Does the R4/B identity-breaking pattern recur when the affected generation path is executed cleanly, without the DEV-002 infrastructure failure, on independent fresh reconstruction sessions?",
     "reconstructions": 3,
@@ -104,11 +104,32 @@
     "use_in_bib002": "REFERENCE ONLY. BIB-001 scores, blind IDs, orderings, and evaluation packets are NOT reused in DBI-BIB-002."
   },
   "authorization": {
-    "authorized": false,
+    "authorized": true,
     "authorization_required": true,
-    "authorization_required_description": "A separate Frank-as-PI GO referencing this preregistration (PREREGISTER.md) must be received before execution begins. Per PREREGISTER.md §12, this preregistration does NOT authorize execution; it only fixes the design and decision rules before execution so that no post-hoc threshold modifications are possible."
+    "authorization_id": "frank-go-2026-09-06-dbi-bib-002-r4-b-confirmation",
+    "authorization_at_utc": "2026-09-06T09:55:00Z",
+    "authorizer": "Frank Ventura (PI)",
+    "go_references_preregistration_commit": "6d2aa82",
+    "go_references_preregistration_path": "experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/PREREGISTER.md",
+    "preregister_sha256": "99edcda3046eefc1f58b73dce8bbd7e6aa6cf8d5d8105d91d82da68a34fc5a99"
   },
-  "execution_authorization": null,
+  "interpretation_clarification": {
+    "purpose": "Fix the interpretation of the historical BIB-001 record before new data are generated. Wording clarification only — no change to any quantitative threshold, candidate, evaluator, or experimental procedure.",
+    "rule": "DBI-BIB-001 retains its historical formal disposition of INCONCLUSIVE regardless of the DBI-BIB-002 outcome. DBI-BIB-002 does not retroactively rewrite the recorded outcome of BIB-001.",
+    "outcome_interpretation": {
+      "PATTERN_NOT_REPRODUCED": "The combined BIB-001 + BIB-002 evidence may support concluding that the original R4/B identity-breaking cluster was deviation-associated infrastructure contamination and that the behavioral-identity baseline is sufficiently calibrated to permit the DbI Evolution Experiment. Do NOT rewrite BIB-001 itself as PASS.",
+      "PATTERN_REPRODUCED": "The behavioral-identity baseline remains insufficiently stable. DbI Evolution remains blocked.",
+      "INCONCLUSIVE_PENDING_FURTHER": "Do not proceed to DbI Evolution. Return the evidence for PI adjudication."
+    },
+    "fixed_at": "2026-09-06T09:55:00Z (with Frank-as-PI GO)"
+  },
+  "execution_authorization": {
+    "authorized": true,
+    "authorization_id": "frank-go-2026-09-06-dbi-bib-002-r4-b-confirmation",
+    "authorized_at": "2026-09-06T09:55:00Z",
+    "authorizer": "Frank Ventura (PI)",
+    "references_preregistration_commit": "6d2aa82"
+  },
   "reconstructions": null,
   "evaluators": null,
   "blind_mapping": null,

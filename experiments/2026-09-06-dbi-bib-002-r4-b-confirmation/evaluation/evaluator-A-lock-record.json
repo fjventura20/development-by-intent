@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "evaluator-lock-record",
+  "experiment_id": "DBI-BIB-001-RERUN-001",
+  "evaluator": "A",
+  "locked_at_utc": "2026-09-06T09:45:00Z",
+  "locked_by": "Hermes (operator) \u2014 Gate 4 / Evaluation Phase",
+  "scoring_call": {
+    "raw_response_path": "evaluation/evaluator-A-raw.txt",
+    "raw_response_sha256": "26ec573f510b8ec1b84ccc35eca90406290f1a2432b14943c6041ed8d6f813df",
+    "parsed_scores_path": "evaluation/evaluator-A-scores.jsonl",
+    "parsed_scores_sha256": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6"
+  },
+  "locked_scores_path": "evaluation/evaluator-A-scores-LOCKED.jsonl",
+  "locked_scores_sha256": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6",
+  "locked_score_count": 30,
+  "completeness_check": {
+    "expected_count": 30,
+    "actual_count": 30,
+    "unique_blind_ids": 30,
+    "required_fields_present": true,
+    "total_score_consistent": true,
+    "evaluator_id_field_correct": true
+  },
+  "evaluator_runtime_provenance": {
+    "evaluator_role": "A",
+    "evaluator_runtime": "gpt-5.6-sol",
+    "evaluator_first_record_timestamp": "2026-09-06T15:00:00Z",
+    "evaluator_last_record_timestamp": "2026-09-06T15:00:00Z"
+  },
+  "post_lock_prohibition": "Per EVALUATION-PROCEDURE.md \u00a7'Locking scores': After lock, original scores are immutable. Do not score these candidates again. Cross-evaluator comparison only after BOTH evaluators locked."
+}

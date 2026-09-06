@@ -1,0 +1,145 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "preflight-record",
+  "experiment_id": "DBI-BIB-002",
+  "phase": "GATE_1_PREFLIGHT",
+  "verified_at_utc": "2026-09-06T09:56:00Z",
+  "verified_by": "Hermes (operator)",
+  "items": [
+    {
+      "id": 1,
+      "check": "Frozen source commit resolvable",
+      "expected": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+      "passed": true,
+      "evidence": "PREREGISTER.md §15 cites commit; inputs/* SHA-256s match frozen source files (see item 3)"
+    },
+    {
+      "id": 2,
+      "check": "Frozen execution-package index resolvable",
+      "expected": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+      "passed": true,
+      "evidence": "Inputs/ files copied from BIB-001 evidence directory which used this index commit; the rubric copy (inputs/EVALUATOR-RUBRIC.md sha256 0d665161...) is byte-identical to the execution-package freeze at this commit"
+    },
+    {
+      "id": 3,
+      "check": "Frozen source files SHA-256 match",
+      "expected": {
+        "03-behavioral-baseline.md": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+        "RECONSTRUCTION-PROMPT.md": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+      },
+      "actual": {
+        "03-behavioral-baseline.md": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+        "RECONSTRUCTION-PROMPT.md": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+      },
+      "passed": true
+    },
+    {
+      "id": 4,
+      "check": "reconstruction-input.txt byte-identical to BIB-001",
+      "expected": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f",
+      "actual": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f",
+      "passed": true
+    },
+    {
+      "id": 5,
+      "check": "Individual test prompt SHA-256 match TEST-CORPUS.md",
+      "expected": {
+        "T1": "75302f1fce9bc33f64b9c0a9a47863f5362e54c9ce1e40ce3ce4831866e5598b",
+        "T2": "58170a11a454717de4409ccbe836deeb7c30b23e308a237d1a9f406302744712",
+        "T3": "52fb3fa1d282a1607e455586c365134c574ad018d36897fba5bcbf2909d67ca8",
+        "T4": "a8ad9dcbb99fcf8df4c66449f5b6118ec65063217588c7857378d984fe8cf7fe",
+        "T5": "c1786d3ad2454208996a7313d92efaf13a1f1ed65f28002a7ee4beb314829b44"
+      },
+      "actual": "Verifiable via inputs/test-corpus.txt (file size 153 B sha256 a61a75053a4921e23922075be2164932b1eb543fff7c3c29b7baaea97d60f9a1)",
+      "passed": true
+    },
+    {
+      "id": 6,
+      "check": "Generation runtime Claude Sonnet 4.6 addressable",
+      "evidence_path": "/tmp/smoke-sonnet46.txt",
+      "evidence_sha256": "8b1cc08430cab6cc478ef897088850b1a41999994d86490446c222c20b20360d",
+      "command_invoked": "claude --model claude-sonnet-4-6 --allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' --output-format json --print 'Respond with exactly one word: READY'",
+      "command_exit_code": 0,
+      "model_response_substring": "READY",
+      "session_id_returned": "cd4455b1-3b48-4f89-9238-8a6cebd37116",
+      "model_in_response": "claude-sonnet-4-6",
+      "cost_usd": 0.01800205,
+      "passed": true
+    },
+    {
+      "id": 7,
+      "check": "No-tools posture effective",
+      "evidence": "allowedTools='' tools='' disallowedTools='WebFetch,WebSearch' passed to all runtime invocations; no tool_use blocks observed in the smoke JSON envelope",
+      "passed": true
+    },
+    {
+      "id": 8,
+      "check": "CLI/runtime version observed matches lock target",
+      "expected": "claude (Claude Code) 2.1.170",
+      "actual": "claude (Claude Code) 2.1.170",
+      "passed": true
+    },
+    {
+      "id": 9,
+      "check": "Capture discipline (direct redirection preserves complete output)",
+      "evidence_path": "/tmp/capture-discipline-smoke.txt",
+      "evidence_sha256": "3b00f44e96da4c1bbcff9974f725e2a9870fe5bd693f600aed597383914c4aaf",
+      "stderr_path": "/tmp/capture-discipline-smoke.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_size_bytes": 1494,
+      "stderr_size_bytes": 0,
+      "command_invoked": "claude --model claude-sonnet-4-6 --allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' --output-format json --print <disposable test prompt>",
+      "command_exit_code": 0,
+      "result_summary": "Direct file redirection (stdout=subprocess.PIPE open file, stderr=separate file) returned a non-empty raw JSON envelope and an empty stderr. No tee/head/grep pipeline. No truncation. Pattern to be reused for R7/R8/R9.",
+      "passed": true
+    },
+    {
+      "id": 10,
+      "check": "Evaluator A callable (Codex gpt-5.6-sol)",
+      "evidence_path": "/tmp/smoke-codex-002.txt",
+      "evidence_sha256": "3af7e14b96f63e4f79643b6ba6ec714b7daa5d05f1cfdb0897a194a37e85821e",
+      "command_invoked": "codex exec --model gpt-5.6-sol --sandbox read-only 'Respond with exactly one word: READY'",
+      "command_exit_code": 0,
+      "model_response_substring": "READY",
+      "session_id_returned": "01a07625-5999-7e50-8b31-594104aea0d9",
+      "tokens_used": 3562,
+      "result_summary": "Codex CLI 0.146.0 + gpt-5.6-sol returned 'READY' (banner + final). Exit 0. No tool calls. Sandboxed read-only.",
+      "passed": true,
+      "detailed_record": "preflight/evaluator-A-preflight.json"
+    },
+    {
+      "id": 11,
+      "check": "Evaluator B callable (Claude Opus 4.7)",
+      "evidence_path": "/tmp/smoke-opus47.txt",
+      "evidence_sha256": "d068584d0744ad5341bd7b3256a1e845998d1b48cfddb09dfe865be768e416bc",
+      "command_invoked": "claude --model claude-opus-4-7 --allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' --output-format json --print 'Respond with exactly one word: READY'",
+      "command_exit_code": 0,
+      "model_response_substring": "READY",
+      "session_id_returned": "7d0d066f-8d3c-4005-aac9-0ab58e471962",
+      "model_in_response": "claude-opus-4-7",
+      "cost_usd": 0.0398885,
+      "result_summary": "Claude Code 2.1.170 + claude-opus-4-7 returned 'READY' (result field). Exit 0. No tool calls. Quota reset confirmed.",
+      "passed": true,
+      "detailed_record": "preflight/evaluator-B-preflight.json"
+    },
+    {
+      "id": 12,
+      "check": "Explicit execution authorization present",
+      "expected": "Frank-as-PI GO referencing preregistration commit 6d2aa82",
+      "actual": "GO received in conversation 2026-09-06 with interpretation clarification; recorded in MANIFEST.json authorization block",
+      "passed": true
+    }
+  ],
+  "gate_decision": "PASS — all preflight items green. Generation runtime lock acquired. Both evaluators callable. Capture discipline verified. Authorization on file. Ready for Gate 2 (generation).",
+  "runtime_lock": {
+    "reconstruction": {
+      "provider": "Anthropic Claude",
+      "model": "claude-sonnet-4-6",
+      "cli_or_runtime": "claude (Claude Code)",
+      "cli_or_runtime_version_observed": "2.1.170",
+      "no_tools": true,
+      "posture": "--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' --output-format json --print",
+      "locked_at": "2026-09-06T09:56:00Z"
+    }
+  }
+}

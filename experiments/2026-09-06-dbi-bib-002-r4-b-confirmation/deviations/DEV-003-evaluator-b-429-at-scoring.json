@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1",
+  "deviation_id": "DEV-003-evaluator-b-429-at-scoring",
+  "classification": "EVALUATOR-RUNTIME INFRASTRUCTURE FAILURE (under PREREGISTER.md §10 / OPERATOR-INSTRUCTIONS.md §8)",
+  "scope_disclaimer": "This is a scoring-time infrastructure failure. NOT a generation-side failure. NOT a Gate 1 preflight failure (Gate 1 passed for Evaluator B at 2026-09-06T09:56:00Z with smoke call returning literal 'READY'). It is a runtime OAuth account quota exhaustion encountered when invoking Evaluator B for actual scoring.",
+  "phase": "Gate 4 — Evaluator B scoring",
+  "evaluator": "B",
+  "description": "Evaluator B (Claude Opus 4.7) returned an HTTP 429 'session limit' error envelope when invoked for BIB-002 scoring at 2026-09-06T10:46:40Z. The error envelope says 'resets 10:20am (America/New_York)' = 2026-09-06T14:20:00Z. Quota exhaustion occurred during the actual scoring call (a 208KB packet), NOT during preflight (which passed at 09:56 UTC with a tiny smoke call). The original failed attempt + stderr-equivalent error envelope is preserved at evaluation/evaluator-B-raw.txt (sha256 to be recorded).",
+  "error_envelope_path": "evaluation/evaluator-B-raw.txt",
+  "error_envelope_sha256": "7667ec34c55727c6ad8b4d8ab51487361a84da7357389a6fa024da36cd68c9c8",
+  "error_envelope_substring": "\"is_error\":true,\"api_error_status\":429,\"result\":\"You've hit your session limit \\u00b7 resets 10:20am (America/New_York)\"",
+  "session_id_returned": "4b89ffc6-6678-4984-ba9f-e3e3896a5220",
+  "quota_reset_at_utc": "2026-09-06T14:20:00Z",
+  "quota_reset_in_hours_from_discovery": 3.55,
+  "scope_of_invalidation": "Evaluator B's BIB-002 score set only. The Evaluator A score set (sha256 3ab8ffed...) is unaffected and remains locked.",
+  "scope_of_non_invalidation": "DBI-BIB-002 generation evidence (R7/R8/R9 reconstructed cleanly with 30/30 valid outputs, no quota anomaly on the generation side) is unaffected. The RERUN of the 60-candidate BIB-001 result remains INCONCLUSIVE and is not affected. No reconstruction was invalidated.",
+  "stop_condition_assessment": "PREREGISTER.md §10 stop conditions: (a) source verification fails - NO; (b) Claude Sonnet 4.6 runtime unavailable - NO (it just generated 30/30 cleanly); (c) >1 of 3 reconstructions fails infrastructure-side - NO (all 3 reconstructed cleanly); (d) capture integrity unreliable - NO (direct redirection, all sha256s verified); (e) both evaluators fail Gate 1 - NO (Gate 1 passed for both at preflight). Therefore NO §10 stop condition is triggered. The 429 is a recoverable runtime infrastructure failure that should be retried after the quota reset.",
+  "remediation": "Preserve the failed attempt and stderr-equivalent error envelope (DONE; sha256 below). Wait for the OAuth quota reset at 2026-09-06T14:20:00Z. Re-run Evaluator B against the SAME evaluator-B-input.md packet (which remains valid because the packet was constructed without reference to Evaluator A's score set). After the retry, re-parse and re-lock. The previously-locked Evaluator A score set is immutable and is NOT regenerated.",
+  "retry_window_target_utc": "2026-09-06T14:20:00Z",
+  "discovered_at_utc": "2026-09-06T10:46:40Z",
+  "discovered_by": "Hermes (operator)",
+  "recorded_by": "Hermes (operator)",
+  "frozen_references_NOT_duplicated": {
+    "rationale": "Same rationale as BIB-001 deviation DEV-002: the frozen protocol and execution package are Git-addressable; they are not duplicated into this evidence directory merely because they are not on the current branch tip."
+  }
+}
