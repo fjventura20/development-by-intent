@@ -114,7 +114,7 @@
     "preregister_sha256": "99edcda3046eefc1f58b73dce8bbd7e6aa6cf8d5d8105d91d82da68a34fc5a99"
   },
   "interpretation_clarification": {
-    "purpose": "Fix the interpretation of the historical BIB-001 record before new data are generated. Wording clarification only \u2014 no change to any quantitative threshold, candidate, evaluator, or experimental procedure.",
+    "purpose": "Fix the interpretation of the historical BIB-001 record before new data are generated. Wording clarification only — no change to any quantitative threshold, candidate, evaluator, or experimental procedure.",
     "rule": "DBI-BIB-001 retains its historical formal disposition of INCONCLUSIVE regardless of the DBI-BIB-002 outcome. DBI-BIB-002 does not retroactively rewrite the recorded outcome of BIB-001.",
     "outcome_interpretation": {
       "PATTERN_NOT_REPRODUCED": "The combined BIB-001 + BIB-002 evidence may support concluding that the original R4/B identity-breaking cluster was deviation-associated infrastructure contamination and that the behavioral-identity baseline is sufficiently calibrated to permit the DbI Evolution Experiment. Do NOT rewrite BIB-001 itself as PASS.",
@@ -123,6 +123,19 @@
     },
     "fixed_at": "2026-09-06T09:55:00Z (with Frank-as-PI GO)"
   },
+  "pi_authorization_decision_record": {
+    "decided_at_utc": "2026-09-06T18:35:00Z",
+    "decision_id": "pi-auth-dbi-evolution-2026-09-06",
+    "decision_text": "PI AUTHORIZATION — September 6, 2026. DBI-BIB-002 completed with the preregistered outcome PATTERN_NOT_REPRODUCED. Both blinded evaluators identified 0/30 identity-breaking candidates, and within-reconstruction variance remained inside the established non-deviated baseline envelope. BIB-001 retains its historical INCONCLUSIVE disposition and is not retroactively modified. BIB-002 provides independent evidence consistent with DEV-002 infrastructure contamination and supports the adequacy of the behavioral-identity baseline for the next experiment. Decision: GO — authorize preparation of the DbI Evolution Experiment under a separately frozen and preregistered protocol. GO means 'begin protocol preparation', not 'start generation immediately'. The Evolution experiment's modification specification, controls, evaluators, outcome thresholds, and role separation must be frozen (preregistered) before any generation begins.",
+    "scope_clarifications": [
+      "GO authorizes Evolution Experiment PROTOCOL PREPARATION, not Generation.",
+      "BIB-001 historical disposition (INCONCLUSIVE) is immutable; BIB-002 outcome does not rewrite it.",
+      "The retry job bib002-eval-b-retry-after-429 has completed and is to be removed.",
+      "Methodological position update: BIB-002 evidence supports that behavioral-identity measurement is stable enough to serve as the control foundation for the Evolution Experiment. It does NOT prove DbI works.",
+      "Sequence: Behavioral Identity Baseline -> COMPLETE; DbI Evolution Experiment -> NEXT (under preparation); DbI Evidence Brief v0.2 -> AFTER EVOLUTION."
+    ],
+    "authorizer": "Frank Ventura (PI)"
+  },
   "execution_authorization": {
     "authorized": true,
     "authorization_id": "frank-go-2026-09-06-dbi-bib-002-r4-b-confirmation",
@@ -130,6 +143,7 @@
     "authorizer": "Frank Ventura (PI)",
     "references_preregistration_commit": "6d2aa82"
   },
+  "pi_decision_record": "pi-auth-dbi-evolution-2026-09-06",
   "reconstructions": null,
   "evaluators": null,
   "blind_mapping": null,
