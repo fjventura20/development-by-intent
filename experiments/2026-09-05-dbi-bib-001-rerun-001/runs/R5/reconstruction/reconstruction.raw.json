@@ -1,0 +1,5 @@
+Reading the existing memory for context before reconstructing.
+
+**Amazing Birthday is ready for a test invocation.**
+
+The behavior is established: when you send `Birthdate [date including year]` or `Amazing Birthday [date including year]`, I'll respond with a selective, curated narrative placing the reader in that historical world — 5–10 standout connections, exact-date discipline, explanatory depth, and a lifetime arc perspective. No report until you supply a test date.

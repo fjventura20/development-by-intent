@@ -1,0 +1,84 @@
+{
+  "reconstruction_id": "R6",
+  "session_id": "0b2cd0f4-151a-46b8-98a2-cadce264c219",
+  "started_at": "2026-09-06T01:34:23Z",
+  "completed_at": "2026-09-06T01:48:05Z",
+  "reconstruction_prompt_sha256": "03ce4c40816f9c5b4a47ee5e6ca6a051a605b7035b1f7ce70ad12f10ea03e72f",
+  "reconstruction_raw_path": "reconstruction/reconstruction.raw.json",
+  "reconstruction_raw_sha256": "e5dca90f47e56e942d671157c81b0901f05fd7074ba935a5640863c088b1e163",
+  "reconstruction_ready": true,
+  "outputs": [
+    {
+      "test_id": "T1",
+      "block": "A",
+      "raw_path": "captures/A/T1.raw.json",
+      "sha256": "c1e3b7dc9f5c179113deeb757d60c70750d0fd0a164dde5af0482bc4cbbe7f85",
+      "size_bytes": 4986
+    },
+    {
+      "test_id": "T2",
+      "block": "A",
+      "raw_path": "captures/A/T2.raw.json",
+      "sha256": "de928f211243c8af7396046a4b6e0cfa8ac5582830bd8cee5632dd5a6fa76eb9",
+      "size_bytes": 5981
+    },
+    {
+      "test_id": "T3",
+      "block": "A",
+      "raw_path": "captures/A/T3.raw.json",
+      "sha256": "ab125746afaec640dd0f53aa4cfeb59718fa67ef30f19d2826082ea64074fa95",
+      "size_bytes": 6502
+    },
+    {
+      "test_id": "T4",
+      "block": "A",
+      "raw_path": "captures/A/T4.raw.json",
+      "sha256": "e9199afc575c1b0fc46c1bf1d4779d026480826dbca30261486a551c744debe6",
+      "size_bytes": 6030
+    },
+    {
+      "test_id": "T5",
+      "block": "A",
+      "raw_path": "captures/A/T5.raw.json",
+      "sha256": "38b4e1b833a7d5c2c49e1763b8abf141e7a50ce35c6c76605a612cecaf94ef90",
+      "size_bytes": 7480
+    },
+    {
+      "test_id": "T1",
+      "block": "B",
+      "raw_path": "captures/B/T1.raw.json",
+      "sha256": "9698140341f278e9ac3cccb6a50096e43470bda2ea6695d447893c11c0bce622",
+      "size_bytes": 7234
+    },
+    {
+      "test_id": "T2",
+      "block": "B",
+      "raw_path": "captures/B/T2.raw.json",
+      "sha256": "bc795a66c374689d7f1b9e9ea7fcd572cd0ca20bc817e948357dd80ed1f0e1fb",
+      "size_bytes": 7336
+    },
+    {
+      "test_id": "T3",
+      "block": "B",
+      "raw_path": "captures/B/T3.raw.json",
+      "sha256": "6ff2e2865818fd9c515ffbc3035e113cf0992fc903a67aadc12cd1720886923b",
+      "size_bytes": 7439
+    },
+    {
+      "test_id": "T4",
+      "block": "B",
+      "raw_path": "captures/B/T4.raw.json",
+      "sha256": "029c4fc3d477ac2efdc3b1428a0d63e0e2a1550d2648f387582125a78fb2d9da",
+      "size_bytes": 7833
+    },
+    {
+      "test_id": "T5",
+      "block": "B",
+      "raw_path": "captures/B/T5.raw.json",
+      "sha256": "25b34e5409031f64202fd92207ead0ae92e074a883d52b9be3f0b564d15c7167",
+      "size_bytes": 7715
+    }
+  ],
+  "valid_output_count": 10,
+  "per_turn_gate_passed": true
+}
