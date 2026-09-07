@@ -154,17 +154,50 @@ DbI may still change the amount and kind of implementation work people perform. 
 
 ## Value Architecture
 
-As implementation autonomy increases, explicit rules alone may not determine every choice an intelligent system makes.
+As implementation autonomy increases, explicit instructions cannot determine every choice an intelligent system will face. **Value Architecture** addresses the behavioral layer that governs those choices when discretion exists.
 
-The project therefore treats **Value Architecture** as a separate but complementary concern: the durable principles and behavioral dispositions that govern an agent when instructions are incomplete, objectives conflict, or immediate supervision is absent.
+The project's formal working definition is:
 
-A concise working formulation is:
+> **A Value Architecture is a structured, versioned set of durable behavioral values, authority boundaries, conflict-resolution procedures, evidence requirements, and conformance tests that govern how an intelligent agent exercises discretion.**
+
+A concise formulation remains:
 
 > **Value Architecture is what an agent is made of when nobody is looking.**
 
-This is not satisfied by an agent merely stating the correct values. It requires behavioral evidence under conditions where violating a value would make the task easier or more convenient.
+The phrase is behavioral, not anthropomorphic. A value matters when following it is inconvenient, when a shortcut is available, when instructions are incomplete, or when immediate external correction is absent.
 
-Value Architecture is broader than DbI. Any intelligence-native system that grants meaningful discretion will need some way to govern how that discretion is exercised.
+### Value is not the same as rule, policy, prompt, or mechanism
+
+- A **value** is a durable behavioral preference or decision criterion that guides choices across situations.
+- A **rule** is an explicit constraint or required action for a defined condition.
+- A **policy** is an organized set of rules, permissions, prohibitions, and domain interpretations.
+- A **prompt** is an instruction-bearing artifact that may communicate values or rules but is not itself evidence that they are behaviorally durable.
+- An **implementation mechanism** is the technical means used to realize or enforce the architecture — for example permissions, event subscriptions, memory, approval gates, logs, sandboxes, hashes, or rollback systems.
+
+The central test is observable behavior. **Stated values are claims until behavior provides evidence.**
+
+### Core values under investigation
+
+The current Value Architecture Standard defines twelve core values:
+
+- **Human Agency** — preserve human ownership of purpose, correction, rejection, and acceptance.
+- **Integrity and Truthfulness** — distinguish what is known, inferred, estimated, uncertain, or unverified.
+- **Awareness** — notice material changes in state, context, dependencies, authority, or risk and reassess affected assumptions.
+- **Restraint and Authority Respect** — do not convert technical capability into self-granted permission.
+- **Evidence and Epistemic Discipline** — preserve provenance and support consequential claims or actions with appropriate evidence.
+- **Continuity** — carry forward relevant commitments, constraints, accepted decisions, identity, provenance, and unresolved obligations.
+- **Stewardship** — treat entrusted data, systems, resources, money, access, and evidence as held on behalf of the principal.
+- **Privacy and Confidentiality** — minimize unnecessary exposure and unrelated reuse of private information.
+- **Proportionality** — scale effort, cost, verification, monitoring, and intervention to consequence, uncertainty, and reversibility.
+- **Recovery and Reversibility** — preserve the ability to inspect, correct, resume, or reverse work where practical and report partial failure truthfully.
+- **Diligence** — perform delegated work competently and completely within applicable constraints.
+- **Human Benefit** — use automation as a means to improve human outcomes rather than treating reduction of human participation as the objective.
+
+Each value is paired with observable behaviors and portable conformance tests. The intent is to make Value Architecture experimentally falsifiable rather than aspirational.
+
+See **[VALUE-ARCHITECTURE-STANDARD-v0.2.md](VALUE-ARCHITECTURE-STANDARD-v0.2.md)** for the vocabulary, authority model, behavior matrix, conflict-resolution procedure, evidence model, and initial 21-test conformance suite. The prior **[v0.1 draft](VALUE-ARCHITECTURE-STANDARD-v0.1.md)** is preserved as part of the research history.
+
+Value Architecture is broader than DbI. DbI primarily asks **what outcome should be realized and how humans govern acceptance**. Value Architecture asks **how intelligence should exercise discretion while realizing that outcome**.
 
 ## This is not just "vibe coding"
 
@@ -229,7 +262,8 @@ If you are evaluating the idea, use this path:
 3. **[Evidence](EVIDENCE.md)** — see what has actually been demonstrated and what has not.
 4. **[Demo script](DEMO.md)** — a short walkthrough of the claim and evidence.
 5. **[Research Direction](RESEARCH-DIRECTION.md)** — see the broader Intelligence-Native Software Architecture framing.
-6. **[Theory](THEORY.md)** and **[Research Agenda](RESEARCH-AGENDA.md)** — go deeper only if the idea survives your first inspection.
+6. **[Value Architecture Standard v0.2](VALUE-ARCHITECTURE-STANDARD-v0.2.md)** — inspect the emerging governance and behavioral-value framework.
+7. **[Theory](THEORY.md)** and **[Research Agenda](RESEARCH-AGENDA.md)** — go deeper only if the idea survives your first inspection.
 
 ## The developer test we care about now
 
@@ -253,6 +287,7 @@ Agreement is not required. A clear failure mode is valuable evidence.
 The repository preserves the deeper experimental program rather than hiding it:
 
 - [`RESEARCH-DIRECTION.md`](RESEARCH-DIRECTION.md) — broader intelligence-native framing;
+- [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md) — formal Value Architecture vocabulary, values, behavioral criteria, and conformance tests;
 - [`examples/`](examples/) — worked examples and reconstruction material;
 - [`experiments/`](experiments/) — frozen experimental evidence;
 - [`BEHAVIORAL-PORTABILITY.md`](BEHAVIORAL-PORTABILITY.md) — portability hypothesis;
