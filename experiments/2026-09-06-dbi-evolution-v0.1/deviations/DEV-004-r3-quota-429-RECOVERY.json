@@ -1,0 +1,98 @@
+{
+  "schema_version": "0.1",
+  "deviation_id": "DEV-004-r3-quota-429-RECOVERY",
+  "classification": "RUNTIME INFRASTRUCTURE FAILURE (Claude OAuth session-limit HTTP 429) - RESOLVED",
+  "scope_disclaimer": "PI Option A recovery of DEV-004, executed 2026-09-07 between 21:31Z and 21:56Z. All original 17 HTTP 429 envelopes + their SHA-256 values + original failed R3_C reconstruction call + logs + DEV-004 documentation are preserved exactly as captured. The recovery retries live in *.RETRY sidecar files alongside the original failed paths. The 43 original successful candidate outputs from R1_C, R1_M, R2_C, R2_M, and R3_M T1-T3 are byte-identical to their pre-recovery state. No frozen protocol parameter, threshold, gate, scoring rule, blinding scheme, or analysis rule was modified.",
+
+  "frozen_references_unchanged": {
+    "frozen_protocol_commit": "da11836",
+    "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+    "frozen_artifacts_all_match": true,
+    "experiment_state_commit_post_recovery": "2abd2c6 (unchanged; recovery artifacts are uncommitted, to be committed under a separate commit prefix per the v0.5 freeze correction discipline)"
+  },
+
+  "preservation_verification": {
+    "all_8_original_429_envelopes_byte_identical": {
+      "R3_M/A/T4": "910877aaee7a88b1688d9ff0e65725f0fd4069d78476bcc1b21e5f4ec3893a28",
+      "R3_M/A/T5": "e221245edd12683335a1fcc33f0540de2b3558bfa70cb2fff7c32a461c004437",
+      "R3_M/B/T1": "45436dfde76adb6c98366872c914cf148bf58a172fb72e0487da7e8e89e05daa",
+      "R3_M/B/T2": "6d2db3a681942bc7d9523abf8085cab2abeae860481140b6ede43787361b579a",
+      "R3_M/B/T3": "8b68d1cb9f813dc99f5748623a3f9af93620ec490ee9440ef8e444ffc2977425",
+      "R3_M/B/T4": "24d3652de3e81d21086aed17782bc540eb948912f152fd50d599731fc8514061",
+      "R3_M/B/T5": "fbe7836bf7eaa8ac0b99a8662b5b6979d2b01d57489e5822a2daa6e92578201b",
+      "R3_C/reconstruction": "22cb78e6a9857cae68d70f805c5327692e1e44aa351dd19ba66a0d15acf7366a"
+    },
+    "forty_three_originals_byte_identical_to_metadata_sha256": true,
+    "no_silent_overwrite": true,
+    "no_candidate_replacement": true,
+    "originals_remain_in_place": true
+  },
+
+  "retry_summary": {
+    "r3_m_strategy": "Fresh isolated R3_M session (reconstruction session 55cc4823-c8ba-4d9f-8f15-efd287d5a483; the prior successful session 7aeed303-667e-4546-ae91-4fa4756d5378 had expired on the host - cli's --resume returned 'No conversation found with session ID'). Successful R3_M reconstruction artifact (sha ef6d0a97e4...) and the three successful R3_M T1-T3 candidates (sha a1cb321c29..., 3e7e0780ca..., c46cefd7ad...) remain in place as the original R3 outputs. The seven failed candidate calls (A/T4, A/T5, B/T1..B/T5) are recovered as *.RETRY sidecars from the fresh session, preserving the same frozen reconstruction-input-M.txt (sha a4576895d7a...).",
+    "r3_c_strategy": "Fresh isolated R3_C reconstruction call (session 47b638df-58ce-411e-8b03-558fa65591b9, sha 2809a59ab63..., 1923 B, ready=True) wrote reconstruction.raw.json.RETRY. The original 779 B 429 envelope at reconstruction/reconstruction.raw.json is preserved exactly. T1-T10 candidate calls were driven from the fresh session, written as *.RETRY sidecars. No original candidate files exist for R3_C (the upstream reconstruction failed), so the *.RETRY sidecars are the only artifact for those slots - no original-vs-retry ambiguity to resolve.",
+    "r3_m_retry_artifacts": [
+      {"slot": "A/T4", "bytes": 6378, "sha256": "0c1b692a1bd09694ec4b3dec5fc5c734a90108a43b51da8fc29deb0df0bf01b1", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "A/T5", "bytes": 7072, "sha256": "aea4ae56029961088e6fd8c2f65bb70613c768f8cabc828e75e5aa52ecc8c810", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "B/T1", "bytes": 6882, "sha256": "c25daab89c58a669351d9287cb3eb2facd396961f7a24266acc7c1362b9efbe8", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "B/T2", "bytes": 6908, "sha256": "02553a65130db53ced4785030e1b926fd63a84990757ddd9598199b225759799", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "B/T3", "bytes": 7188, "sha256": "bc5b8e5278e9ffab2d0273c57913477a855c1e8efa2e4b192f223ea888aaaac8", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "B/T4", "bytes": 6829, "sha256": "a3330facf2fd12ad6df847552a3ecfd871440f922cf7feab53d26ea697d46182", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"},
+      {"slot": "B/T5", "bytes": 7641, "sha256": "0c82505931874512ca513120de5f90de837e16cec4796ebd51539ae2b90efeb6", "is_error": false, "api_error_status": null, "session_id": "55cc4823-c8ba-4d9f-8f15-efd287d5a483"}
+    ],
+    "r3_c_reconstruction_retry_artifact": {
+      "path": "runs/R3_C/reconstruction/reconstruction.raw.json.RETRY",
+      "bytes": 1923,
+      "sha256": "2809a59ab63e560788e319d51b2812bbace8fc329ca479f92da1479f26c59801",
+      "is_error": false,
+      "api_error_status": null,
+      "session_id": "47b638df-58ce-411e-8b03-558fa65591b9",
+      "ready_signal_present": true
+    },
+    "r3_c_retry_artifacts": [
+      {"slot": "A/T1", "bytes": 6167, "sha256": "8e1fa0277dfb2ba385e68aa4f8b910c4f7d37fb1be4133fdadc218370038780d", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "A/T2", "bytes": 7301, "sha256": "fe3b0dce689b43aaa775beaa39385c9ccc6877c4a02ca887bf08b1aa24942d25", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "A/T3", "bytes": 6707, "sha256": "47114787c0bb4c029051d15551d788d6bc39783b5247ba52c02843f61372be16", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "A/T4", "bytes": 7413, "sha256": "8de58d34bd5e08dd78b16f1bbae1c9e2d79611dbc8338a15543b6e3f3061263a", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "A/T5", "bytes": 7755, "sha256": "151e967728e64ee1a9716cb0e1e602d90a5616e35c315e75aa531366cedbd1cd", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "B/T1", "bytes": 7062, "sha256": "c0f03913ac0657f837ff09fb54e30bbaa6ae614e5d9b3c9bcdf3c362990a919d", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "B/T2", "bytes": 7564, "sha256": "2921d67021953613a7ae92ee6327864ad2546c8a8b6315aa7ce72f5fe538b75c", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "B/T3", "bytes": 7064, "sha256": "370c6f4889ae5ad86fc8c2d594e1e0f6b939099044f7c9c931233d3c93ff9600", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "B/T4", "bytes": 7407, "sha256": "87ce953136810db46a87de8f6b21c0e26164649925449390fb3d411d65627fd0", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"},
+      {"slot": "B/T5", "bytes": 8192, "sha256": "b4980be2ee3c84d1140b8797f05b3585d5db4cba2284953b7f026d85f5eaef6f", "is_error": false, "api_error_status": null, "session_id": "47b638df-58ce-411e-8b03-558fa65591b9"}
+    ],
+    "total_retry_artifacts": 18,
+    "all_retry_envelopes_clean": true
+  },
+
+  "coverage": {
+    "expected_logical_slots": 60,
+    "covered_logical_slots": 60,
+    "missing_slots": [],
+    "extra_slots": [],
+    "slot_provenance": "Each of the 60 logical candidate slots now contains a valid candidate output: 43 from the original generation (R1_C, R1_M, R2_C, R2_M, R3_M T1-T3) and 17 from the authorized HTTP 429 retry (R3_M T4-T10 and R3_C T1-T10). All 17 original 429 envelopes remain on disk as evidence; they are no longer the canonical artifact for their slot, which is now the *.RETRY sidecar."
+  },
+
+  "operator_notes": [
+    "First attempt at the recovery used --resume against the original R3_M session_id, which had expired on the host. Switched to a fresh isolated session for R3_M (documented above). R3_C's first retry used a fresh session which succeeded; the R3_C candidate loop then resumed that session.",
+    "All retry artifacts are written as *.RETRY sidecar files. The frozen *.raw.json paths retain the original 779 B 429 envelopes for R3_M T4-T10, and the original 779 B 429 envelope for R3_C reconstruction. No original artifact was overwritten.",
+    "retry-log.json records every retry call with exit code, byte count, SHA-256, is_error, api_error_status, and session_id; the 18 entries cover R3_M reconstruction + 7 candidate retries, plus R3_C reconstruction + 10 candidate retries. The R3_C reconstruction retry entry references the prior partial-run envelope (sha 2809a59ab63...) which the second-pass driver reused; provenance is recorded.",
+    "Two R3_M empty stderr.RETRY.txt files (76 B each, containing 'No conversation found with session ID: 7aeed303-667e-4546-ae91-4fa4756d5378') were the only output of the first-pass --resume attempt and were deleted before the second-pass driver ran, so they leave no trace in the final tree. The successful R3_C reconstruction.raw.json.RETRY (1923 B) and its empty stderr.RETRY.txt are both retained as evidence of the first retry attempt."
+  ],
+
+  "committed_status_for_pi_adjudication": {
+    "generation_gate_2_recovery_complete": true,
+    "all_60_logical_candidate_slots_have_a_valid_candidate_output": true,
+    "frozen_protocol_unchanged": true,
+    "frozen_artifacts_unchanged": true,
+    "no_candidate_substitution": true,
+    "no_prompt_repair": true,
+    "no_threshold_adjustment": true,
+    "no_post_hoc_corpus_reduction": true,
+    "provenance_records_retry_chain": true,
+    "ready_for_evaluator_packet_construction": true
+  },
+
+  "recorded_at_utc": "2026-09-07T21:57:30Z",
+  "recorded_by": "Hermes (operator)"
+}
