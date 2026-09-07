@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "blind-integrity-check",
+  "experiment_id": "DBI-Evolution-v0.1",
+  "checked_at_utc": "2026-09-07T22:00:51Z",
+  "checks": {
+    "candidate_count_is_60": true,
+    "candidate_count": 60,
+    "arm_ratio_30_30": true,
+    "arm_counts": {
+      "C": 30,
+      "M": 30
+    },
+    "blind_ids_unique": true,
+    "ordering_A_length_60": true,
+    "ordering_B_length_60": true,
+    "ordering_A_complete": true,
+    "ordering_B_complete": true,
+    "orderings_differ": true,
+    "all_candidates_nonempty": true,
+    "empty_candidate_blind_ids": [],
+    "no_provenance_leak_in_candidate_text": true,
+    "provenance_leak_findings": {},
+    "packet_A_sha256": "debdc6a09d21b1ad7e0f562029f6a20ccd709738111a170366270a928ca75b84",
+    "packet_B_sha256": "94bed845beb9a6257857bc10d6bdba0027a48e5dfc20daf12aafda5d676a79c3",
+    "ordering_A_deterministic": true,
+    "ordering_B_deterministic": true
+  },
+  "all_checks_passed": true,
+  "disposition": "PASS"
+}
