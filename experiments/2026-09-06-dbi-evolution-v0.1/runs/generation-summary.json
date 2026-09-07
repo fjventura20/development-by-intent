@@ -1,0 +1,113 @@
+{
+  "reconstructions": [
+    {
+      "arm_session_id": "R1_C",
+      "reconstruction_id": "R1",
+      "arm": "C",
+      "claude_session_id": "b76b1da7-f30e-4ec0-bc96-ed0068b70e23",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "arm_session_id": "R1_M",
+      "reconstruction_id": "R1",
+      "arm": "M",
+      "claude_session_id": "6556ec93-0b4c-4293-8c5f-a7c56acac677",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "arm_session_id": "R2_C",
+      "reconstruction_id": "R2",
+      "arm": "C",
+      "claude_session_id": "0c4590d4-32eb-49dd-899f-358a91480c7b",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "arm_session_id": "R2_M",
+      "reconstruction_id": "R2",
+      "arm": "M",
+      "claude_session_id": "2fb8836e-8fe1-4034-abe9-a234104e74e7",
+      "reconstruction_ready": true,
+      "valid_output_count": 10,
+      "intended_output_count": 10,
+      "errors": []
+    },
+    {
+      "arm_session_id": "R3_C",
+      "reconstruction_id": "R3",
+      "arm": "C",
+      "claude_session_id": null,
+      "reconstruction_ready": false,
+      "valid_output_count": 0,
+      "intended_output_count": 10,
+      "errors": [
+        {
+          "phase": "reconstruction",
+          "exit_code": 1,
+          "stderr_size": 0
+        }
+      ]
+    },
+    {
+      "arm_session_id": "R3_M",
+      "reconstruction_id": "R3",
+      "arm": "M",
+      "claude_session_id": "7aeed303-667e-4546-ae91-4fa4756d5378",
+      "reconstruction_ready": true,
+      "valid_output_count": 3,
+      "intended_output_count": 10,
+      "errors": [
+        {
+          "phase": "test_A_T4",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_A_T5",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_B_T1",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_B_T2",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_B_T3",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_B_T4",
+          "exit_code": 1,
+          "stderr_size": 0
+        },
+        {
+          "phase": "test_B_T5",
+          "exit_code": 1,
+          "stderr_size": 0
+        }
+      ]
+    }
+  ],
+  "stopped": false,
+  "stop_reason": null,
+  "failed_per_arm": {
+    "C": 1,
+    "M": 1
+  },
+  "validity_definition": "A candidate is VALID only if exit_code==0 AND sha256 is non-empty AND the file is not a Claude HTTP error envelope. HTTP 429 envelopes are 779 bytes and are recorded but treated as INVALID for purposes of valid_output_count and per-arm gates."
+}

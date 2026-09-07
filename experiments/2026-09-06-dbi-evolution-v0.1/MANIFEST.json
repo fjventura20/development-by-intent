@@ -1,0 +1,106 @@
+{
+  "schema_version": "0.1",
+  "experiment_id": "DBI-Evolution-v0.1",
+  "experiment_short_name": "DbI Evolution Experiment v0.1",
+  "experiment_status": "AUTHORIZED",
+  "status_reason": "Frank-as-PI EXECUTION GO received 2026-09-06 referencing frozen commit da11836 (protocol SHA-256 079138163f...). GO authorizes execution beginning with preregistered preflight gate. Per PI instruction: no modification of frozen protocol thresholds, gates, scoring rules, artifacts, treatment definitions, or outcome logic after this GO. No candidate replacement. No evaluator substitution except as explicitly permitted by the frozen protocol. Evaluator blinding and evidence-chain requirements must remain intact. C20 control-validity STOP rule remains authoritative. Substantive modification or preservation failures retain frozen failure classifications. Raw evidence, runtime identifiers, retries, deviations, hashes, and locked evaluator outputs must be preserved.",
+
+  "frozen_references": {
+    "frozen_protocol_commit": "da11836",
+    "frozen_protocol_path": "experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md",
+    "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+    "frozen_artifacts": {
+      "inputs/baseline-envelope-membership.json": "dad55959998a1851aa3106aab926e442690249327c5c343072fc4bd938520aa1",
+      "inputs/modification-specification.txt": "9034bdac205e38537dbeaa5e83a857942ebfffb84a6bc13f29078828d0bf7c78",
+      "inputs/arm-c-directive.txt": "c610e2469300b6c9b0445d530117121064939a479d71bee3d7ea9cfdaea08fab",
+      "inputs/evaluator-input-packet-template.md": "4e4c4c9aba5c55958f8f20b671e2185b49b3244c0c877fe12e9ab731c0ba0497",
+      "protocol/EXECUTION-ORDER.md": "d9db91992aaf9539ec4786534128fa99caca34878fae6254ed1747799b10aed7"
+    },
+    "frozen_protocol_inheritance": "Inherits frozen source, frozen rubric, frozen test corpus, evaluator identity, and protocol structure from DBI-BIB-001 + DBI-BIB-002. The 85-observation BIB non-deviated envelope (50 BIB-001 non-deviated + 30 BIB-002) is the operational reference for envelope-preservation; the 5 BIB-001 R4/B DEV-002 contaminated candidates are explicitly excluded.",
+    "frozen_protocol_bib_001_commit": "b9b6c86c017903cca061b4c2f7b798c82870f9c5",
+    "frozen_execution_package_commit": "00676a3343fbf786e3b72b32afcc6e5071582cb8",
+    "frozen_execution_package_freeze_commit": "ebbb4319fcc7daedcc55e4be78a99e948e2a8c9c",
+    "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "frozen_source_file_sha256": {
+      "03-behavioral-baseline.md": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+      "RECONSTRUCTION-PROMPT.md": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"
+    }
+  },
+
+  "authorization": {
+    "authorized": true,
+    "authorization_id": "frank-go-dbi-evolution-v0.1-2026-09-06",
+    "authorization_at_utc": "2026-09-06T23:39:00Z",
+    "authorizer": "Frank Ventura (PI)",
+    "go_references_frozen_commit": "da11836",
+    "go_references_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+    "binding_constraints_recorded": [
+      "no modification of frozen protocol thresholds, gates, scoring rules, artifacts, treatment definitions, or outcome logic after this GO",
+      "no candidate replacement based on observed quality or results",
+      "no evaluator substitution except as explicitly permitted by the frozen protocol",
+      "evaluator blinding and evidence-chain requirements must remain intact",
+      "C20 control-validity STOP rule remains authoritative",
+      "any protocol-invalidating deviation must receive the preregistered INCONCLUSIVE/CONFOUNDED disposition rather than being repaired after observing substantive results",
+      "substantive modification or preservation failures must retain their frozen failure classifications",
+      "raw evidence, runtime identifiers, retries, deviations, hashes, and locked evaluator outputs must be preserved"
+    ]
+  },
+
+  "execution_authorization": {
+    "authorized": true,
+    "authorization_id": "frank-go-dbi-evolution-v0.1-2026-09-06",
+    "authorized_at": "2026-09-06T23:39:00Z",
+    "authorizer": "Frank Ventura (PI)",
+    "references_frozen_commit": "da11836"
+  },
+
+  "experiment_design": {
+    "research_question": "Can a developer change an application by changing its expressed intent, while preserving the application's established behavioral identity outside the intended modification?",
+    "arms": {
+      "C_control": {
+        "reconstruction_input": "BIB base reconstruction input + frozen no-op directive (arm-c-directive.txt)",
+        "intent_change": "none",
+        "reconstructions": 3
+      },
+      "M_modified": {
+        "reconstruction_input": "BIB base reconstruction input + frozen modification specification",
+        "intent_change": "+/-30-day worldwide event inclusion requirement",
+        "reconstructions": 3
+      }
+    },
+    "tests_per_block": 5,
+    "blocks_per_reconstruction": 2,
+    "total_candidates": 60,
+    "execution_order": "interleaved per EXECUTION-ORDER.md (R1=C->M, R2=C->M, R3=M->C); isolated fresh sessions; no conversational state cross"
+  },
+
+  "decision_rules": {
+    "modification_success": {
+      "G_mod_a": "mean modification_conformance >= 3.5/4.0 (per evaluator)",
+      "G_mod_b": ">= 80% of Arm M candidates pass all four M-checks (per evaluator)",
+      "G_mod_c": "each individual Arm M reconstruction >= 70% all-pass candidates (per evaluator)",
+      "G_mod_d": "Arm M all-pass rate >= Arm C all-pass rate + 50 percentage points (absolute, per evaluator)"
+    },
+    "preservation": {
+      "G_pres_a": "Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5 (per evaluator)",
+      "G_pres_b": "Arm M within-Recon Manhattan mean <= 2.5 absolute (per evaluator; backstop)",
+      "C12_axis_rule": "any one of the 8 C12 axes BROKEN (Arm M failure >= 30% AND >= 30pp worse than Arm C) per evaluator => PRESERVATION FAIL",
+      "inter_evaluator_gates": "Arm M identity-preservation agreement >= 0.9; per-dim MAE <= 1.0"
+    },
+    "control_validity": "Arm C satisfies the frozen BIB non-deviated envelope criterion on its own (NO tolerance added to Arm C)",
+    "outcomes": ["EVOLUTION_PASS", "MODIFICATION_FAILURE", "PRESERVATION_FAILURE", "MODIFICATION_AND_PRESERVATION_FAILURE", "INCONCLUSIVE_PENDING_FURTHER"],
+    "pre_check_confounded": ["CONFOUNDED_BY_POSSIBLE_RUNTIME_DRIFT", "INCONCLUSIVE_PENDING_EVALUATOR_UNAVAILABILITY", "INCONCLUSIVE_PENDING_PROTOCOL_INVALIDATING_DEVIATION"]
+  },
+
+  "pi_decision_record": "frank-go-dbi-evolution-v0.1-2026-09-06",
+
+  "reconstructions": null,
+  "evaluators": null,
+  "blind_mapping": null,
+  "evaluation_results": null,
+
+  "deviations": [],
+  "recorded_at_utc": "2026-09-06T23:39:18Z",
+  "valid_output_total": null,
+  "completed_reconstructions": []
+}

@@ -1,0 +1,19 @@
+{
+  "session_id": "R3_C",
+  "reconstruction_id": "R3",
+  "arm": "C",
+  "started_at_utc": "2026-09-07T00:40:45Z",
+  "completed_at_utc": "2026-09-07T00:40:46Z",
+  "reconstruction_ready": false,
+  "claude_session_id": null,
+  "inputs_path": "inputs/reconstruction-input-C.txt",
+  "inputs_sha256": "0e77268326c6cb0358767da715b6fcf92313c8a590f80ebe4fc66f5e7776c753",
+  "outputs": [],
+  "errors": [
+    {
+      "phase": "reconstruction",
+      "exit_code": 1,
+      "stderr_size": 0
+    }
+  ]
+}

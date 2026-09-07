@@ -1,0 +1,140 @@
+{
+  "session_id": "R3_M",
+  "reconstruction_id": "R3",
+  "arm": "M",
+  "started_at_utc": "2026-09-07T00:34:53Z",
+  "completed_at_utc": "2026-09-07T00:40:45Z",
+  "reconstruction_ready": true,
+  "claude_session_id": "7aeed303-667e-4546-ae91-4fa4756d5378",
+  "inputs_path": "inputs/reconstruction-input-M.txt",
+  "inputs_sha256": "a4576895d7a2932f59e5215d0ff2f4f5c1d6261ece6731b2745b421d65bc759d",
+  "outputs": [
+    {
+      "test_id": "T1",
+      "block": "A",
+      "raw_path": "runs/R3_M/captures/A/T1.raw.json",
+      "stderr_path": "runs/R3_M/captures/A/T1.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 6917,
+      "sha256": "a1cb321c29a4b49868044e19f6827bbce6e643cce1fb27f361862878e8064c61"
+    },
+    {
+      "test_id": "T2",
+      "block": "A",
+      "raw_path": "runs/R3_M/captures/A/T2.raw.json",
+      "stderr_path": "runs/R3_M/captures/A/T2.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 7466,
+      "sha256": "3e7e0780ca7dd2f709ad9178aad821a293828b5815e73880f7d6a3d33e6126b3"
+    },
+    {
+      "test_id": "T3",
+      "block": "A",
+      "raw_path": "runs/R3_M/captures/A/T3.raw.json",
+      "stderr_path": "runs/R3_M/captures/A/T3.stderr.txt",
+      "exit_code": 0,
+      "size_bytes": 7813,
+      "sha256": "c46cefd7ad64be456e83b3efaa0b6f628a4e01b2c2766ef90115b4a0dba0975c"
+    },
+    {
+      "test_id": "T4",
+      "block": "A",
+      "raw_path": "runs/R3_M/captures/A/T4.raw.json",
+      "stderr_path": "runs/R3_M/captures/A/T4.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "910877aaee7a88b1688d9ff0e65725f0fd4069d78476bcc1b21e5f4ec3893a28"
+    },
+    {
+      "test_id": "T5",
+      "block": "A",
+      "raw_path": "runs/R3_M/captures/A/T5.raw.json",
+      "stderr_path": "runs/R3_M/captures/A/T5.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "e221245edd12683335a1fcc33f0540de2b3558bfa70cb2fff7c32a461c004437"
+    },
+    {
+      "test_id": "T1",
+      "block": "B",
+      "raw_path": "runs/R3_M/captures/B/T1.raw.json",
+      "stderr_path": "runs/R3_M/captures/B/T1.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "45436dfde76adb6c98366872c914cf148bf58a172fb72e0487da7e8e89e05daa"
+    },
+    {
+      "test_id": "T2",
+      "block": "B",
+      "raw_path": "runs/R3_M/captures/B/T2.raw.json",
+      "stderr_path": "runs/R3_M/captures/B/T2.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "6d2db3a681942bc7d9523abf8085cab2abeae860481140b6ede43787361b579a"
+    },
+    {
+      "test_id": "T3",
+      "block": "B",
+      "raw_path": "runs/R3_M/captures/B/T3.raw.json",
+      "stderr_path": "runs/R3_M/captures/B/T3.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "8b68d1cb9f813dc99f5748623a3f9af93620ec490ee9440ef8e444ffc2977425"
+    },
+    {
+      "test_id": "T4",
+      "block": "B",
+      "raw_path": "runs/R3_M/captures/B/T4.raw.json",
+      "stderr_path": "runs/R3_M/captures/B/T4.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "24d3652de3e81d21086aed17782bc540eb948912f152fd50d599731fc8514061"
+    },
+    {
+      "test_id": "T5",
+      "block": "B",
+      "raw_path": "runs/R3_M/captures/B/T5.raw.json",
+      "stderr_path": "runs/R3_M/captures/B/T5.stderr.txt",
+      "exit_code": 1,
+      "size_bytes": 779,
+      "sha256": "fbe7836bf7eaa8ac0b99a8662b5b6979d2b01d57489e5822a2daa6e92578201b"
+    }
+  ],
+  "errors": [
+    {
+      "phase": "test_A_T4",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_A_T5",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_B_T1",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_B_T2",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_B_T3",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_B_T4",
+      "exit_code": 1,
+      "stderr_size": 0
+    },
+    {
+      "phase": "test_B_T5",
+      "exit_code": 1,
+      "stderr_size": 0
+    }
+  ]
+}

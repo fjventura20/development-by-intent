@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.1",
+  "deviation_id": "DEV-004-r3-quota-429",
+  "classification": "RUNTIME INFRASTRUCTURE FAILURE (Claude OAuth session-limit HTTP 429)",
+  "scope_disclaimer": "Multiple runtime infrastructure failures during the Generation Gate. Original failed attempts + error envelopes are preserved at the paths below; NOT silently replaced. Per OPERATOR-INSTRUCTIONS §8 retry policy: 'Retries are permitted only for demonstrable transport/infrastructure failure, never to improve behavioral content.' All 429 returns are demonstrable transport failures (HTTP 429 session-limit, resets at 12:30am America/New_York).",
+
+  "discovery": {
+    "discovered_at_utc": "2026-09-07T00:40:37Z",
+    "discovered_by": "Hermes (operator)"
+  },
+
+  "affected_reconstructions": [
+    {
+      "arm_session_id": "R3_M",
+      "reconstruction_id": "R3",
+      "arm": "M",
+      "reconstruction_call": "PASS (size=2397B, session 7aeed303-667e-4546-ae91-4fa4756d5378)",
+      "valid_outputs": [
+        {"test_id": "T1", "block": "A", "size_bytes": 6917},
+        {"test_id": "T2", "block": "A", "size_bytes": 7466},
+        {"test_id": "T3", "block": "A", "size_bytes": 7813}
+      ],
+      "invalid_outputs": [
+        {"test_id": "T4", "block": "A", "size_bytes": 779, "error": "HTTP 429 session-limit (resets 12:30am America/New_York)"},
+        {"test_id": "T5", "block": "A", "size_bytes": 779, "error": "HTTP 429 session-limit"},
+        {"test_id": "T1", "block": "B", "size_bytes": 779, "error": "HTTP 429 session-limit"},
+        {"test_id": "T2", "block": "B", "size_bytes": 779, "error": "HTTP 429 session-limit"},
+        {"test_id": "T3", "block": "B", "size_bytes": 779, "error": "HTTP 429 session-limit"},
+        {"test_id": "T4", "block": "B", "size_bytes": 779, "error": "HTTP 429 session-limit"},
+        {"test_id": "T5", "block": "B", "size_bytes": 779, "error": "HTTP 429 session-limit"}
+      ],
+      "valid_count": 3,
+      "invalid_count": 7,
+      "error_envelope_substring": "\"is_error\":true,\"api_error_status\":429,\"result\":\"You've hit your session limit \\u00b7 resets 12:30am (America/New_York)\""
+    },
+    {
+      "arm_session_id": "R3_C",
+      "reconstruction_id": "R3",
+      "arm": "C",
+      "reconstruction_call": "FAIL (size=779B, session null) -- HTTP 429 hit on reconstruction call itself",
+      "valid_outputs": [],
+      "invalid_outputs": [
+        {"phase": "reconstruction", "size_bytes": 779, "error": "HTTP 429 session-limit"}
+      ],
+      "valid_count": 0,
+      "invalid_count": 10,
+      "error_envelope_substring": "\"is_error\":true,\"api_error_status\":429,\"result\":\"You've hit your session limit \\u00b7 resets 12:30am (America/New_York)\""
+    }
+  ],
+
+  "preserved_error_envelopes": [
+    "runs/R3_M/captures/A/T4.raw.json (sha to be recorded)",
+    "runs/R3_M/captures/A/T5.raw.json",
+    "runs/R3_M/captures/B/T1.raw.json through B/T5.raw.json (5 files)",
+    "runs/R3_C/reconstruction/reconstruction.raw.json"
+  ],
+
+  "scope_of_invalidation": "R3_M has 7 of 10 outputs replaced by 779-byte HTTP 429 error envelopes. R3_C has 0 valid outputs (all 10 are 429). The R3 pair is therefore contaminated in both arms.",
+  "scope_of_non_invalidation": "R1_C, R1_M, R2_C, R2_M are unaffected. Each has 10/10 valid outputs captured cleanly under the same runtime. Total clean candidates: 40 of 60.",
+
+  "stop_condition_assessment_per_frozen_protocol_section_12": {
+    "inherited_BIB_section_14_>1_of_3_per_arm": "Arm C failed: 1 of 3 (R1_C pass, R2_C pass, R3_C fail). 1 is NOT > 1, so this rule does not trigger.",
+    "inherited_capture_integrity_unreliable": "QUESTIONABLE. 7 of R3_M's 10 outputs and all 10 of R3_C's outputs are 779-byte error envelopes rather than candidate outputs. This is concentrated failure, not generalized unreliability (R1 and R2 captured cleanly).",
+    "inherited_identity_breaking_frequent_enough_to_calibration_fail": "QUESTIONABLE. R3_M has 3 valid + 7 IDENTITY-BREAKING (HTTP 429 envelopes are not Amazing Birthday reports). R3_C has 0 valid + 10 IDENTITY-BREAKING. The 7+10=17 IDENTITY-BREAKING outputs are infrastructure-failure envelopes, not behavioral IDENTITY-BREAKING classifications by evaluators. They will be scored by evaluators but their content is fixed error text.",
+    "evolution_specific_C20_Arm_C_envelope": "Cannot evaluate Arm C envelope validity until evaluations are complete."
+  },
+
+  "structural_assessment": {
+    "clean_candidates_obtained": 40,
+    "contaminated_candidates_obtained": 17,
+    "missing_candidates_obtained": 3,
+    "total_expected": 60,
+    "gap_explanation": "R3_M: 3 valid + 7 quota-error envelopes. R3_C: 0 valid + 10 quota-error envelopes. Total: 40 valid + 17 error envelopes + 3 unproduced = 60.",
+    "raw_evidence_intact": "All 17 error envelopes preserved at their original paths. No silent overwrite. No candidate replacement. Per Frank GO: 'no candidate replacement based on observed quality or results; raw evidence, runtime identifiers, retries, deviations, hashes, and locked evaluator outputs must be preserved.'"
+  },
+
+  "protocol_remediation_options_under_frozen_protocol": {
+    "option_A_retry_R3_after_quota_reset": "Quota reset at 2026-09-07T04:30:00Z (12:30am America/New_York). If a single permitted retry recovers R3_M and R3_C cleanly, the experiment can proceed with full 60 candidates. Per OPERATOR-INSTRUCTIONS §8 retry policy: HTTP 429 is a demonstrable infrastructure failure; retry permitted.",
+    "option_B_halt_and_adjudicate": "Treat the deviation as a frozen protocol-invalidating event. Per §14 outcome logic pre-check: 'evidence chain intact; blinding not broken -> If FAIL -> INCONCLUSIVE_PENDING_PROTOCOL_INVALIDATING_DEVIATION'. Return to PI for adjudication.",
+    "option_C_proceed_with_partial_candidates": "Use the 40 clean candidates only and analyze R3 as N/A. This violates the preregistered design (60 candidates). Not permitted without PI adjudication."
+  },
+
+  "operator_recommendation": "OPTION A: retry R3 after the quota reset at 2026-09-07T04:30:00Z (~4 hours from generation-end at 00:40:46Z). The retry must use the same frozen inputs (reconstruction-input-{C,M}.txt). The original 17 error envelopes + their SHA-256s are preserved as evidence. After the retry, re-parse + re-lock + re-analyze. If the second retry also fails, treat as Option B and return to PI.",
+  "deviation_recorded_at_utc": "2026-09-07T00:42:00Z",
+  "recorded_by": "Hermes (operator)"
+}
