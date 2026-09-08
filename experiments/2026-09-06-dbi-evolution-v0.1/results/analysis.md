@@ -10,16 +10,21 @@
 
 ## Headline result
 
-**MODIFICATION_AND_PRESERVATION_FAILURE.** Both Evaluator A (gpt-5.6-sol, locked) and Evaluator B (claude-opus-4-7, fresh-session) report:
+**Disposition (per literal application of frozen §14 decision tree):** `MODIFICATION_AND_PRESERVATION_FAILURE`. Both Evaluator A (gpt-5.6-sol, locked) and Evaluator B (claude-opus-4-7, fresh-session) report:
 
 - **Modification Success = FALSE** for both evaluators (all four G_mod_a/b/c/d sub-gates fail; see §1).
 - **Non-target Identity Preservation = FALSE** for both evaluators (G_pres_a and G_pres_b fail; C12 axes preserved; §11.4 met; see §2).
 - **C20 contemporaneous-control validity = PASS** for both evaluators (Arm C is within the frozen BIB non-deviated envelope on all 6 per-(R,B) cells; no tolerance added; see §3).
 - **§11.4 inter-evaluator agreement = PASS** (93.3% identity exact agreement, MAE ≤ 0.23; see §4).
 
-The two failures are **mechanistically one**: both Modification Success and Non-target Identity Preservation fail because of the same 5 specific records — the R2_B Arm M trigger-FAIL deferrals (B0014, B0017, B0018, B0034, B0045) that both evaluators classified as `DIFFERENT` with M1–M4=0. Without these 5 records, the gates would shift substantially (see §5).
+**Empirical interpretation (per Frank's 2026-09-08 adjudication write-up):** the formal disposition understates the scientific finding. The two failures are not independent broad failures; they are both **driven by the same 5 R2_B records** (B0014, B0017, B0018, B0034, B0045). Both evaluators independently classified these 5 records as `DIFFERENT` (the model produced no birthday report — a "repeat-invocation deferral" behavior), and their M1–M4 scores were zero. These 5 records simultaneously:
 
-The protocol's frozen §14 decision tree does not carve out per-record exceptions, does not pool evaluators, and does not allow threshold adjustment (per Frank's directive: "Apply the frozen §14 decision tree exactly—no pooling and no threshold adjustment"). The literal application gives `MODIFICATION_AND_PRESERVATION_FAILURE`.
+- (a) lower modification_conformance (driving G_mod_a/b/c/d FALSE), and
+- (b) inflate within-recon Manhattan distance (driving G_pres_a/b FALSE).
+
+R1 and R3 each reach 60–80% M-all-pass — **substantial** evidence of successful modification with preserved non-target behavior (C12 axes preserved, inter-evaluator agreement 93.3%, Arm C within envelope). R2 fails only in the 5-deferral mode. The preregistered §14 thresholds treat the modification failure and the preservation failure as a single dual failure even though they share a single mechanistic cause; the empirical finding is **"substantial-but-insufficient"** evidence of successful modification with preserved non-target behavior, localized to a specific failure mode (R2_B deferrals). See §8 for the mechanistic decomposition and §11 for the next-experiment hypothesis.
+
+The protocol's frozen §14 decision tree does not carve out per-record exceptions, does not pool evaluators, and does not allow threshold adjustment (per Frank's directive: "Apply the frozen §14 decision tree exactly—no pooling and no threshold adjustment"). The literal application gives `MODIFICATION_AND_PRESERVATION_FAILURE`; the empirical interpretation refines what that disposition means in this experiment.
 
 ---
 
@@ -254,5 +259,53 @@ Per protocol §14 disposition determination and Frank's adjudication, this analy
 - **Locked Evaluator B scorebook:** `HANDOFFS/exchange/chatgpt-to-hermes/pending/20260908T094500Z-dbi-evolution-evaluator-packet-relay-002-response-002/payload/scorebook.json` (sha `37a1d523…a5b1`)
 - **De-blinding key (operator-only, not mutated):** `experiments/2026-09-06-dbi-evolution-v0.1/evaluation/de_blinding_table.json`
 - **Frank's adjudication:** `HANDOFFS/exchange/chatgpt-to-hermes/pending/20260908T113700Z-dbi-evolution-unblind-adjudication-001/`
+- **DBI Evidence Brief v0.2:** `~/devProjectsU/development-by-intent/docs/evidence-brief-v0.2.md`
+- **Next-experiment hypothesis (D034):** DBI Repeat-Invocation / State Isolation Experiment v0.1 (see §11)
+
+---
+
+## 11. The architectural finding and the next-experiment hypothesis (D034)
+
+### What the R2_B failure mode is
+
+The 5 R2_B records that drive the failure are **repeat-invocation deferrals**: the model, when called with a trigger it has already seen within the same conversation/session context, declines to produce a fresh report and instead responds with some variant of "we already discussed this" or "I notice this is a repeat invocation." Evaluator A scored all 5 as `trigger_recognition: FAIL` (the model did not produce a report at all), Evaluator B scored all 5 as `trigger_recognition: PASS` (the model recognized the trigger) but `identity_classification: DIFFERENT` (the response was a deferral, not a birthday report). M1–M4=0 for both evaluators on all 5.
+
+This is a **specific runtime behavior** observed only in the R2_B block. R1 and R3 (the other 2 of 3 reconstructions) do not exhibit it. The same model, same modification, same trigger — but a different reconstruction (different session, different conversational history length) — produces different behavior. The R2_B session context appears to have accumulated enough conversational history that the model's politeness / deference-to-context mechanism overrode the trigger contract.
+
+### What this teaches us about DBI architecture
+
+The protocol's modification specification (`inputs/modification-specification.txt`, sha `9034bdac…f7c78`) instructs the model to "preserve the existing Amazing Birthday behavior, including exact-date priority, selectivity, significance, lifetime-arc treatment, and warm narrative style. Additionally, include exactly one historically significant worldwide event occurring within ±30 calendar days of the birth date, clearly distinguishing it from exact-date connections." The modification is **additive**: it asks the model to do MORE on top of the existing behavior, never less. The model did MORE (the modification) on R1 and R3. On R2_B it did LESS (it declined the entire trigger).
+
+The mechanism is therefore not "the modification is too hard" or "the model can't do it." The mechanism is: **"the model's conversational politeness / memory-of-context mechanism can override the trigger contract when the trigger repeats within a session."** This is a **replay-semantics failure**, not a behavioral-identity failure.
+
+### Architectural implication (per Frank's 2026-09-08 adjudication)
+
+A DBI system cannot rely only on semantic intent. It also needs explicit control over:
+
+1. **State.** What does the application remember about previous invocations? Does it treat each invocation as fresh, or as a continuation?
+2. **Replay semantics.** When the same trigger arrives twice, does the application re-execute its contract, or does it consider itself "done"?
+3. **Trigger idempotence.** If the contract is "produce a birthday report for the supplied date," then re-invocation with the same date should produce a fresh report (the application is a function from date to report, not a singleton cache).
+
+These are not new problems in software engineering (idempotency keys, deterministic replay, stateless functions are well-understood), but they are **newly identified as requirements for intent-defined applications** that operate through generative models. Generative models default to the conversational politeness pattern ("we already did this, here's a summary"); a DBI system must explicitly override that default.
+
+### The next experiment: DBI Repeat-Invocation / State Isolation v0.1
+
+**Status:** Will be authored as a separate protocol at `experiments/2026-09-08-dbi-state-isolation-v0.1/protocol/PROTOCOL-v0.1-frozen-final.md`. Not in scope for this analysis (this is a forward-looking note; the Evolution v0.1 analysis ends here).
+
+**Research question (per Frank's 2026-09-08 framing):** *Does conversational/session history cause a reconstructed intent-defined application to substitute conversational memory for required trigger execution?*
+
+**Manipulated variable:** identical trigger invocation under fresh-session versus same-session/repeated-trigger conditions.
+
+**Outcome measure:** whether the application executes its contract every time or begins saying some version of "we already did this."
+
+**Hypothesis (per Frank):** *Intent-defined applications require replay semantics that dominate conversational politeness or memory.*
+
+If confirmed, this isolates a specific architectural requirement for DBI. If refuted (the model produces a fresh report on every invocation regardless of context), it suggests the R2_B failure was a one-off and Evolution v0.1's mechanism is elsewhere.
+
+### What we do NOT do (per Frank's directive)
+
+We do **not** rerun Evolution v0.1. The experiment is complete. It is preserved exactly as a failed preregistered experiment, with all artifacts committed at canonical SHAs. The `MODIFICATION_AND_PRESERVATION_FAILURE` disposition is the final verdict. Re-running would either (a) succeed and require explaining the R2_B failure away, or (b) fail again for different reasons and dilute the evidence. The next move is to **isolate the newly discovered mechanism** in a targeted experiment, not to re-test the full protocol.
+
+---
 
 End of analysis.
