@@ -1,0 +1,15 @@
+{
+  "replicate": 3,
+  "condition": "repeated",
+  "attempt": 1,
+  "phase": "second_pass",
+  "failed_target": "T4",
+  "session_id": "c6dcac24-4dde-44b2-9bab-1d0f386ceca5",
+  "returncode": 1,
+  "api_error_status": 429,
+  "error_result": "You've hit your session limit · resets 3:50pm (America/New_York)",
+  "failed_raw_path": "runs/replicate_03/repeated/second_pass/T4.raw.json",
+  "rule": "F6 repeated retry must restart the entire repeated sequence from a new reconstruction; no fresh-session target retry and no third attempt",
+  "next_action": "After provider reset, execute exactly one full repeated-condition restart: new reconstruction, priming T1-T5, second pass T1-T5. If it fails, quarantine replicate 3.",
+  "preserved_at_utc": "2026-09-08T15:37:00Z"
+}
