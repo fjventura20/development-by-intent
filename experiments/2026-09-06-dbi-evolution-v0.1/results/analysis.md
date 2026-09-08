@@ -261,6 +261,7 @@ Per protocol §14 disposition determination and Frank's adjudication, this analy
 - **Frank's adjudication:** `HANDOFFS/exchange/chatgpt-to-hermes/pending/20260908T113700Z-dbi-evolution-unblind-adjudication-001/`
 - **DBI Evidence Brief v0.2:** `~/devProjectsU/development-by-intent/docs/evidence-brief-v0.2.md`
 - **Next-experiment hypothesis (D034):** DBI Repeat-Invocation / State Isolation Experiment v0.1 (see §11)
+- **State Isolation v0.1 v0.2 protocol (D035):** `experiments/2026-09-08-dbi-state-isolation-v0.1/protocol/PROTOCOL-DRAFT-v0.2.md` — incorporates all 10 PI rulings (5 Q + 5 C) from `chatgpt-to-hermes/pending/20260908T112600Z-dbi-state-isolation-pi-adjudication-001/`. Two preflight artifacts: `preflight/SUBSTRATE-EQUIVALENCE-VALIDATION.md` and `preflight/MULTITURN-PERSISTENCE-VALIDATION.md`. **No generation GO has been given.** Awaiting final PI freeze review.
 
 ---
 
