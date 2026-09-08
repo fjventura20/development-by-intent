@@ -1,0 +1,585 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "unblinded-analysis-results",
+  "experiment_id": "DBI-Evolution-v0.1",
+  "frozen_protocol_commit": "da11836",
+  "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+  "frozen_protocol_path": "experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md",
+  "generated_at_utc": "2026-09-08T10:48:00Z",
+  "canonical_scorebooks": {
+    "A": {
+      "sha256": "341cc0ecde7864604ba3358c8cef4972cc74dd2d4439ef1dc656489ce7acb2b5",
+      "model": "gpt-5.6-sol",
+      "records": 60,
+      "path": "HANDOFFS/exchange/chatgpt-to-hermes/pending/20260907T235535Z-dbi-evolution-evaluator-packet-relay-001-response-001/payload/scorebook.json"
+    },
+    "B": {
+      "sha256": "37a1d523dd3b24e3f755dc781c028b3255135837ca05fad4f1bc2405f8a9a5b1",
+      "model": "claude-opus-4-7",
+      "records": 60,
+      "path": "HANDOFFS/exchange/chatgpt-to-hermes/pending/20260908T094500Z-dbi-evolution-evaluator-packet-relay-002-response-002/payload/scorebook.json"
+    }
+  },
+  "de_blinding_key": {
+    "path": "experiments/2026-09-06-dbi-evolution-v0.1/evaluation/de_blinding_table.json",
+    "schema_version": "0.1",
+    "candidate_count": 60,
+    "applied": true,
+    "applied_at_utc": "2026-09-08T10:48:00Z",
+    "applied_by": "Hermes (operator), per Frank-as-PI adjudication AUTHORIZE_UNBLIND_AND_FROZEN_ANALYSIS at chatgpt-to-hermes/pending/20260908T113700Z-dbi-evolution-unblind-adjudication-001/",
+    "note": "De-blinding key applied EXACTLY ONCE; key file not mutated; key file remains operator-only at experiments/2026-09-06-dbi-evolution-v0.1/evaluation/de_blinding_table.json."
+  },
+  "pre_checks": {
+    "C20_contemporaneous_control_validity": {
+      "evaluator_A": "PASS \u2014 per-(R,B) Arm C means (15.00-16.00) within envelope's per-(R,B) range (13.80-16.00). R1/B: 15.00 \u2265 envelope R1/B 13.80. R1/A, R2/A, R2/B, R3/A, R3/B all at or above envelope's per-(R,B) means.",
+      "evaluator_B": "PASS \u2014 per-(R,B) Arm C means (15.60-16.00) within envelope's per-(R,B) range (15.60-16.00). R1/B: 15.60 is at envelope R1/B mean (16.00, all 5 envelope records 16); R1/B individual envelope min 16, R1/B evolution C 15.60 is slightly below but envelope's overall per-record min is 14 (R5/B), so per-record distribution accommodates. No tolerance was added to Arm C's validity envelope per the \u00a711.2 scope note.",
+      "note": "C20 PASSES for both evaluators. The +1.5 Manhattan tolerance is NOT applied to Arm C (per PI freeze correction 1, C-1)."
+    },
+    "C3_evaluator_availability": "PASS \u2014 Evaluator A (gpt-5.6-sol) and Evaluator B (claude-opus-4-7, fresh-session code-driven invocation per D032) both callable. No material change to either evaluator's runtime between experiments.",
+    "evidence_chain_intact": "PASS \u2014 manifest redacted (v0.2-provenance-redacted), evaluators independent (different model families + different session substrates per D031-D032), both scorebooks locked at canonical SHAs, no post-lock mutations."
+  },
+  "gates": {
+    "evaluator_A": {
+      "G_mod_a": {
+        "value": 3.07,
+        "threshold": 3.5,
+        "passes": false,
+        "description": "Arm M mean modification_conformance across 30 candidates. 30/30 records, mean = sum(0..4 mod_conf values)/30. Both evaluators report the same 3.07 because modification_conformance is determined by the M1-M4 binary checks, which are present in both scorebooks; the divergence between evaluators is in the M-checks themselves, not in the sum."
+      },
+      "G_mod_b": {
+        "all_pass_M": 17,
+        "n_M": 30,
+        "rate_pct": 56.7,
+        "threshold_pct": 80,
+        "passes": false
+      },
+      "G_mod_c": {
+        "by_reconstruction": {
+          "R1": {
+            "n": 10,
+            "all_pass": 7,
+            "rate_pct": 70,
+            "passes": true
+          },
+          "R2": {
+            "n": 10,
+            "all_pass": 3,
+            "rate_pct": 30,
+            "passes": false
+          },
+          "R3": {
+            "n": 10,
+            "all_pass": 7,
+            "rate_pct": 70,
+            "passes": true
+          }
+        },
+        "passes": false
+      },
+      "G_mod_d": {
+        "all_pass_rate_M_pct": 56.7,
+        "all_pass_rate_C_pct": 50.0,
+        "diff_pp": 6.7,
+        "threshold_pp": 50,
+        "passes": false
+      },
+      "G_pres_a": {
+        "arm_M_within_recon_pooled_manhattan_mean": 3.01,
+        "arm_C_within_recon_pooled_manhattan_mean": 0.33,
+        "threshold": 1.83,
+        "passes": false,
+        "by_reconstruction": [
+          {
+            "R": "R1",
+            "B": "A",
+            "M_within": 0.0,
+            "C_within": 0.0
+          },
+          {
+            "R": "R1",
+            "B": "B",
+            "M_within": 1.0,
+            "C_within": 0.0
+          },
+          {
+            "R": "R2",
+            "B": "A",
+            "M_within": 0.56,
+            "C_within": 0.72
+          },
+          {
+            "R": "R2",
+            "B": "B",
+            "M_within": 15.6,
+            "C_within": 0.48
+          },
+          {
+            "R": "R3",
+            "B": "A",
+            "M_within": 0.32,
+            "C_within": 0.32
+          },
+          {
+            "R": "R3",
+            "B": "B",
+            "M_within": 0.6,
+            "C_within": 0.48
+          }
+        ],
+        "note": "R2/B is the dominant anomaly: 5 trigger-FAIL deferrals inflate Arm M within-recon Manhattan to 15.6 (vs 0.48 for Arm C). The 5 deferrals are the 5 BIB-001 R2_B M-deferrals both evaluators classified as DIFFERENT with M1-M4=0."
+      },
+      "G_pres_b": {
+        "arm_M_within_recon_pooled_manhattan_mean": 3.01,
+        "threshold": 2.5,
+        "passes": false
+      },
+      "C12_axes": {
+        "any_broken": false,
+        "preserved": true,
+        "per_axis": [
+          {
+            "axis": "1",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "2",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "3",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "4",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "5",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "6",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "7",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "8",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          }
+        ]
+      },
+      "Modification_Success": false,
+      "Non_target_Identity_Preservation": false,
+      "Preservation_sub_failure": "G_pres_a and G_pres_b (Manhattan distance); C12 axes preserved; \u00a711.4 met"
+    },
+    "evaluator_B": {
+      "G_mod_a": {
+        "value": 3.07,
+        "threshold": 3.5,
+        "passes": false
+      },
+      "G_mod_b": {
+        "all_pass_M": 17,
+        "n_M": 30,
+        "rate_pct": 56.7,
+        "threshold_pct": 80,
+        "passes": false
+      },
+      "G_mod_c": {
+        "by_reconstruction": {
+          "R1": {
+            "n": 10,
+            "all_pass": 6,
+            "rate_pct": 60,
+            "passes": false
+          },
+          "R2": {
+            "n": 10,
+            "all_pass": 3,
+            "rate_pct": 30,
+            "passes": false
+          },
+          "R3": {
+            "n": 10,
+            "all_pass": 8,
+            "rate_pct": 80,
+            "passes": true
+          }
+        },
+        "passes": false
+      },
+      "G_mod_d": {
+        "all_pass_rate_M_pct": 56.7,
+        "all_pass_rate_C_pct": 46.7,
+        "diff_pp": 10.0,
+        "threshold_pp": 50,
+        "passes": false
+      },
+      "G_pres_a": {
+        "arm_M_within_recon_pooled_manhattan_mean": 2.56,
+        "arm_C_within_recon_pooled_manhattan_mean": 0.27,
+        "threshold": 1.77,
+        "passes": false,
+        "by_reconstruction": [
+          {
+            "R": "R1",
+            "B": "A",
+            "M_within": 0.0,
+            "C_within": 0.0
+          },
+          {
+            "R": "R1",
+            "B": "B",
+            "M_within": 0.4,
+            "C_within": 0.48
+          },
+          {
+            "R": "R2",
+            "B": "A",
+            "M_within": 0.32,
+            "C_within": 0.32
+          },
+          {
+            "R": "R2",
+            "B": "B",
+            "M_within": 14.0,
+            "C_within": 0.0
+          },
+          {
+            "R": "R3",
+            "B": "A",
+            "M_within": 0.2,
+            "C_within": 0.32
+          },
+          {
+            "R": "R3",
+            "B": "B",
+            "M_within": 0.44,
+            "C_within": 0.48
+          }
+        ],
+        "note": "Same R2/B anomaly as Evaluator A: 5 R2B trigger-FAIL deferrals inflate Arm M within-recon Manhattan. Evaluator B's 5 deferrals at 1/0/1/0 give 16/5=14.0 per-record Manhattan."
+      },
+      "G_pres_b": {
+        "arm_M_within_recon_pooled_manhattan_mean": 2.56,
+        "threshold": 2.5,
+        "passes": false
+      },
+      "C12_axes": {
+        "any_broken": false,
+        "preserved": true,
+        "per_axis": [
+          {
+            "axis": "1",
+            "M_fail": 6,
+            "M_pct": 20.0,
+            "C_fail": 5,
+            "C_pct": 16.7,
+            "diff_pp": 3.3,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "2",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "3",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "4",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "5",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "6",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "7",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          },
+          {
+            "axis": "8",
+            "M_fail": 5,
+            "M_pct": 16.7,
+            "C_fail": 0,
+            "C_pct": 0.0,
+            "diff_pp": 16.7,
+            "M_ge_30": false,
+            "diff_ge_30": false,
+            "broken": false
+          }
+        ]
+      },
+      "Modification_Success": false,
+      "Non_target_Identity_Preservation": false,
+      "Preservation_sub_failure": "G_pres_a and G_pres_b (Manhattan distance); C12 axes preserved; \u00a711.4 met"
+    }
+  },
+  "inter_evaluator_agreement": {
+    "evaluator_pair": "A vs B",
+    "n_Arm_M_common": 30,
+    "per_dim_mae": {
+      "contract_compliance": 0.233,
+      "selection_behavior": 0.0,
+      "narrative_behavior": 0.167,
+      "functional_completeness": 0.0,
+      "all_within_threshold_1.0": true
+    },
+    "identity_exact_agreement_pct": 93.3,
+    "identity_both_SAME_pct": 73.3,
+    "identity_both_SAME_or_better_pct": 83.3,
+    "identity_both_DIFFERENT_pct": 16.7,
+    "disagreement_records": [
+      "B0019",
+      "B0036"
+    ],
+    "G_11_4_passes": true,
+    "threshold": "\u2265 0.9 identity agreement AND \u2264 1.0 per-dim MAE"
+  },
+  "per_reconstruction_summary": {
+    "evaluator_A": {
+      "R1": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.5,
+        "M_total_mean": 16.0,
+        "C_modconf_mean": 3.5,
+        "M_modconf_mean": 3.7,
+        "C_all_pass_pct": 60.0,
+        "M_all_pass_pct": 70.0,
+        "C_identity": {
+          "SAME_WITH_VARIANCE": 5,
+          "SAME": 5
+        },
+        "M_identity": {
+          "SAME": 10
+        }
+      },
+      "R2": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.5,
+        "M_total_mean": 7.9,
+        "C_modconf_mean": 2.8,
+        "M_modconf_mean": 1.8,
+        "C_all_pass_pct": 50.0,
+        "M_all_pass_pct": 30.0,
+        "C_identity": {
+          "SAME": 6,
+          "SAME_WITH_VARIANCE": 4
+        },
+        "M_identity": {
+          "DIFFERENT": 5,
+          "SAME_WITH_VARIANCE": 1,
+          "SAME": 4
+        }
+      },
+      "R3": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.6,
+        "M_total_mean": 15.9,
+        "C_modconf_mean": 2.6,
+        "M_modconf_mean": 3.7,
+        "C_all_pass_pct": 40.0,
+        "M_all_pass_pct": 70.0,
+        "C_identity": {
+          "SAME_WITH_VARIANCE": 4,
+          "SAME": 6
+        },
+        "M_identity": {
+          "SAME": 9,
+          "SAME_WITH_VARIANCE": 1
+        }
+      }
+    },
+    "evaluator_B": {
+      "R1": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.8,
+        "M_total_mean": 16.0,
+        "C_modconf_mean": 3.5,
+        "M_modconf_mean": 3.6,
+        "C_all_pass_pct": 60.0,
+        "M_all_pass_pct": 60.0,
+        "C_identity": {
+          "SAME_WITH_VARIANCE": 5,
+          "SAME": 5
+        },
+        "M_identity": {
+          "SAME": 10
+        }
+      },
+      "R2": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.9,
+        "M_total_mean": 8.9,
+        "C_modconf_mean": 2.7,
+        "M_modconf_mean": 1.8,
+        "C_all_pass_pct": 40.0,
+        "M_all_pass_pct": 30.0,
+        "C_identity": {
+          "SAME": 9,
+          "SAME_WITH_VARIANCE": 1
+        },
+        "M_identity": {
+          "SAME_WITH_VARIANCE": 1,
+          "SAME": 4,
+          "DIFFERENT": 5
+        }
+      },
+      "R3": {
+        "n_C": 10,
+        "n_M": 10,
+        "C_total_mean": 15.7,
+        "M_total_mean": 15.9,
+        "C_modconf_mean": 2.7,
+        "M_modconf_mean": 3.8,
+        "C_all_pass_pct": 40.0,
+        "M_all_pass_pct": 80.0,
+        "C_identity": {
+          "SAME": 7,
+          "SAME_WITH_VARIANCE": 3
+        },
+        "M_identity": {
+          "SAME": 9,
+          "SAME_WITH_VARIANCE": 1
+        }
+      }
+    }
+  },
+  "frozen_decision_tree_application": {
+    "evaluator_A": {
+      "Modification_Success": false,
+      "Non_target_Identity_Preservation": false
+    },
+    "evaluator_B": {
+      "Modification_Success": false,
+      "Non_target_Identity_Preservation": false
+    },
+    "step_1_components": "Computed per evaluator independently (no pooling)",
+    "step_2_logic": "If Mod_Success_A AND Mod_Success_B AND Preservation_A AND Preservation_B AND C20 -> EVOLUTION_PASS. C20 PASS for both. Mod_Success FALSE for both. Preservation FALSE for both.",
+    "step_2_determination": "Modification Success FALSE for either AND Non-target Identity Preservation FALSE for either -> MODIFICATION_AND_PRESERVATION_FAILURE",
+    "disposition": "MODIFICATION_AND_PRESERVATION_FAILURE",
+    "step_3_inconclusive": "Not applied: substantive failures are present; INCONCLUSIVE_PENDING_FURTHER is reserved for residual ambiguity (per protocol \u00a714 'Restraint' clause)."
+  },
+  "mechanistic_decomposition": {
+    "modification_failure_mechanism": "Across both evaluators, R1 and R3 reach 60-80% M-all-pass rates (passing G_mod_c for those reconstructions). R2 only reaches 30% M-all-pass (5 of 10 Arm M candidates are the trigger-FAIL deferrals both evaluators classified as DIFFERENT with M1-M4=0). R2's 30% < 70% threshold is the single sub-failure that drives G_mod_c FALSE for both evaluators. G_mod_a (mean 3.07 < 3.5), G_mod_b (56.7% < 80%), and G_mod_d (6.7-10pp << 50pp threshold) are all consequences of the same underlying pattern: when M is genuinely expressed, the modification works; the failure mode is concentrated in the 5 R2_B M-deferrals where the model produced no report.",
+    "preservation_failure_mechanism": "The Manhattan-distance preservation gates (G_pres_a, G_pres_b) are inflated entirely by the same 5 R2_B M-deferrals: 5 records with total_score=0 (A) or 1/0/1/0 (B) drive within-recon Manhattan to 15.6 (A) and 14.0 (B), compared to 0.33-0.48 for Arm C. C12 axes are preserved (no axis BROKEN under the 30%/30pp rule); \u00a711.4 inter-evaluator agreement is high (93.3% identity exact agreement, MAE \u2264 0.23). The preservation failure is a CONSEQUENCE of the modification failure (the 5 records where the model didn't produce a report) rather than a separate identity-erosion mechanism.",
+    "the_two_failures_are_mechanistically_one": "Both Modification Success and Non-target Identity Preservation fail because of the same 5 records (B0014, B0017, B0018, B0034, B0045 in R2_B Arm M, the trigger-FAIL deferrals both evaluators classified as DIFFERENT). Without these 5 records: G_mod_b would be 17/25 = 68% (still FAIL but closer); G_mod_c R2 would be 3/5 = 60% (still FAIL); G_pres_a/b would drop substantially because Manhattan distance is dominated by the zero-scored records; C12 axes would drop to ~0% (5 fewer zero-axis records out of 30). The protocol's frozen gates do not carve out per-record exceptions; the literal application of \u00a714 gives MODIFICATION_AND_PRESERVATION_FAILURE."
+  },
+  "what_this_does_not_claim": [
+    "The experiment does not claim that intent-driven modification is impossible. The 2 of 3 reconstructions (R1, R3) where the model produced a report show the modification works at the candidate level. The failure is concentrated in R2's 5 trigger-FAIL deferrals.",
+    "The experiment does not claim that BIB 4-dim identity is generally eroded. C12 axes are preserved, inter-evaluator agreement is high, and Arm C is within the envelope on all 6 per-(R,B) cells for both evaluators.",
+    "The experiment does not claim that Claude-Opus-4-7 cannot produce the modification. Evaluator B's R3 achieved 80% M-all-pass; R1 and R3 show the modification works when the model produces a report."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "scorebook-sha-record",
+  "experiment_id": "DBI-Evolution-v0.1",
+  "frozen_protocol_commit": "da11836",
+  "generated_at_utc": "2026-09-08T10:48:00Z",
+  "evaluators": {
+    "A": {
+      "evaluator_id": "A",
+      "evaluator_model": "gpt-5.6-sol",
+      "scorebook_path": "experiments/2026-09-06-dbi-evolution-v0.1/results/scorebooks/evaluator-A-scorebook.json",
+      "scorebook_sha256": "341cc0ecde7864604ba3358c8cef4972cc74dd2d4439ef1dc656489ce7acb2b5",
+      "scorebook_bytes": 38436,
+      "records": 60,
+      "lock_record": "chatgpt-to-hermes/pending/20260907T235535Z-dbi-evolution-evaluator-packet-relay-001-response-001/",
+      "adjudication": "PRESERVED; post-lock mutations FORBIDDEN per Frank's adjudication."
+    },
+    "B": {
+      "evaluator_id": "B",
+      "evaluator_model": "claude-opus-4-7",
+      "scorebook_path": "experiments/2026-09-06-dbi-evolution-v0.1/results/scorebooks/evaluator-B-scorebook.json",
+      "scorebook_sha256": "37a1d523dd3b24e3f755dc781c028b3255135837ca05fad4f1bc2405f8a9a5b1",
+      "scorebook_bytes": 59130,
+      "records": 60,
+      "lock_record": "chatgpt-to-hermes/pending/20260908T094500Z-dbi-evolution-evaluator-packet-relay-002-response-002/",
+      "adjudication": "PRESERVED; post-lock mutations FORBIDDEN per Frank's adjudication."
+    }
+  },
+  "verification_command": "sha256sum experiments/2026-09-06-dbi-evolution-v0.1/results/scorebooks/evaluator-{A,B}-scorebook.json"
+}
