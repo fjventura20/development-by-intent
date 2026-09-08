@@ -32,6 +32,19 @@ DATE_ORDER = [
     ("T5", "Birthdate August 24, 1931"),
 ]
 
+# Source of the frozen BIB contract. P1 excludes C12 and M1-M4, but
+# the full behavioral contract and the four BIB quality dimensions are
+# required evaluator inputs.
+SOURCE_PACKET = ROOT.parent / "2026-09-06-dbi-evolution-v0.1" / "evaluation" / "evaluator_B_packet.md"
+
+
+def frozen_contract_text() -> str:
+    text = SOURCE_PACKET.read_text(encoding="utf-8")
+    start = text.index("## Section 1 - Frozen behavioral contract")
+    end = text.index("## Section 2 - Frozen BIB evaluator rubric")
+    return text[start:end].strip()
+
+
 # Evaluator-visible scoring material. P1 excludes C12 and M1-M4.
 EVALUATOR_RUBRIC = {
     "primary_endpoint": {
@@ -115,42 +128,58 @@ def collect_targets() -> list[dict]:
 
 def main() -> int:
     targets = collect_targets()
-    # Fresh opaque UUID4 IDs. Mapping is sealed; evaluator never receives it.
-    blind = []
-    for t in targets:
-        bid = str(__import__("uuid").uuid4())
-        env = load(t["raw"])
-        blind.append({
-            "blind_id": bid,
-            "replicate": t["replicate"],
-            "condition": t["condition"],
-            "pass": t["pass"],
-            "test_id": t["test_id"],
-            "trigger_prompt": t["trigger_prompt"],
-            "session_id": env.get("session_id"),
-            "raw_path": str(t["raw"].relative_to(ROOT)),
-            "raw_sha256": sha(t["raw"]),
-            "raw_bytes": t["raw"].stat().st_size,
-            "cli_path": str(t["cli"].relative_to(ROOT)),
-        })
-    blind_obj = {
-        "schema_version": "0.1",
-        "record_kind": "sealed-blind-map",
-        "experiment_id": "DBI-State-Isolation-v0.1",
-        "sealed": True,
-        "evaluator_access": False,
-        "mapping": blind,
-        "coverage": {"primary_target_count": 30, "repeated": 15, "fresh": 15, "replicates": 3},
-    }
-    BLIND_MAP.write_text(json.dumps(blind_obj, indent=2) + "\n", encoding="utf-8")
-    ids = [x["blind_id"] for x in blind]
-    rng = secrets.SystemRandom()
-    order_a = ids.copy(); rng.shuffle(order_a)
-    order_b = ids.copy(); rng.shuffle(order_b)
-    if order_a == order_b:
-        rng.shuffle(order_b)
-    ORDER_A.write_text(json.dumps({"schema_version":"0.1","record_kind":"evaluator-ordering","evaluator":"A","blind_ids":order_a}, indent=2) + "\n", encoding="utf-8")
-    ORDER_B.write_text(json.dumps({"schema_version":"0.1","record_kind":"evaluator-ordering","evaluator":"B","blind_ids":order_b}, indent=2) + "\n", encoding="utf-8")
+    # Reuse the already-created sealed map/orderings when they exist.
+    # No evaluator has seen them; preserving them avoids unnecessary
+    # post-generation rerandomization during this integrity correction.
+    if BLIND_MAP.exists() and ORDER_A.exists() and ORDER_B.exists():
+        prior = load(BLIND_MAP)
+        blind = prior["mapping"]
+        ids = [x["blind_id"] for x in blind]
+        order_a = load(ORDER_A)["blind_ids"]
+        order_b = load(ORDER_B)["blind_ids"]
+        print("REUSE_EXISTING_BLINDING=1 — sealed map and orderings preserved")
+    else:
+        # Fresh opaque UUID4 IDs. Mapping is sealed; evaluator never receives it.
+        blind = []
+        for t in targets:
+            bid = str(__import__("uuid").uuid4())
+            env = load(t["raw"])
+            blind.append({
+                "blind_id": bid,
+                "replicate": t["replicate"],
+                "condition": t["condition"],
+                "pass": t["pass"],
+                "test_id": t["test_id"],
+                "trigger_prompt": t["trigger_prompt"],
+                "session_id": env.get("session_id"),
+                "raw_path": str(t["raw"].relative_to(ROOT)),
+                "raw_sha256": sha(t["raw"]),
+                "raw_bytes": t["raw"].stat().st_size,
+                "cli_path": str(t["cli"].relative_to(ROOT)),
+            })
+        blind_obj = {
+            "schema_version": "0.1",
+            "record_kind": "sealed-blind-map",
+            "experiment_id": "DBI-State-Isolation-v0.1",
+            "sealed": True,
+            "evaluator_access": False,
+            "mapping": blind,
+            "coverage": {"primary_target_count": 30, "repeated": 15, "fresh": 15, "replicates": 3},
+        }
+        BLIND_MAP.write_text(json.dumps(blind_obj, indent=2) + "\n", encoding="utf-8")
+        ids = [x["blind_id"] for x in blind]
+        rng = secrets.SystemRandom()
+        order_a = ids.copy(); rng.shuffle(order_a)
+        order_b = ids.copy(); rng.shuffle(order_b)
+        if order_a == order_b:
+            rng.shuffle(order_b)
+        ORDER_A.write_text(json.dumps({"schema_version":"0.1","record_kind":"evaluator-ordering","evaluator":"A","blind_ids":order_a}, indent=2) + "\n", encoding="utf-8")
+        ORDER_B.write_text(json.dumps({"schema_version":"0.1","record_kind":"evaluator-ordering","evaluator":"B","blind_ids":order_b}, indent=2) + "\n", encoding="utf-8")
+
+    # If reusing the map, verify its 30 raw paths still correspond to the
+    # current valid target corpus before rebuilding packets.
+    if len(blind) != 30 or set(ids) != set(order_a) or set(ids) != set(order_b):
+        raise RuntimeError("sealed blind map/orderings are not 30-target complete")
 
     by_id = {x["blind_id"]: x for x in blind}
     def packet(order: list[str], evaluator: str) -> dict:
@@ -160,6 +189,7 @@ def main() -> int:
             "experiment_id": "DBI-State-Isolation-v0.1",
             "evaluator_id": evaluator,
             "target_count": 30,
+            "behavioral_contract": frozen_contract_text(),
             "scoring_instructions": EVALUATOR_RUBRIC,
             "targets": [
                 {
