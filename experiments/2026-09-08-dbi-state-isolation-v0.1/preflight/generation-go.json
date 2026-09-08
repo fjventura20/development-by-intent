@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "generation-go",
+  "experiment_id": "DBI-State-Isolation-v0.1",
+  "status": "GENERATION_GO",
+  "authorized_at_utc": "2026-09-08T13:33:06Z",
+  "authorized_by": "Frank Ventura (PI)",
+  "source_mailbox_transfer_id": "20260908T133306Z-dbi-state-isolation-generation-go-005",
+  "source_mailbox_commit": "efae621b01f646bc304b05efc0d3190420d64974",
+  "frozen_final_commit": "ed081083051f23c6f27a996f42cc9dc5a4c06c93",
+  "frozen_final_short_sha": "ed08108",
+  "frozen_final_protocol_sha256": "472d7b9f0058875be1c6a84ca5e7e6b0e2065ac2055bcad4b8d3bc00744d18ac",
+  "authorized_scope": {
+    "total_invocations": 63,
+    "reconstructions": 18,
+    "fresh_scored_targets": 15,
+    "repeated_priming_targets": 15,
+    "repeated_scored_targets": 15,
+    "primary_scored_targets": 30,
+    "replicate_order_flips": {
+      "replicate_1": "repeated_first",
+      "replicate_2": "repeated_first",
+      "replicate_3": "repeated_first"
+    },
+    "preserve_randomization": true,
+    "rerandomization_authorized": false,
+    "extra_samples_authorized": false,
+    "extra_evaluators_authorized": false,
+    "new_endpoints_authorized": false
+  },
+  "frozen_rules": {
+    "runtime": "claude-sonnet-4-6",
+    "trigger_primitive": "claude --resume <session_id> ... --output-format json --print <literal trigger positional argument>",
+    "reconstruction_input": "experiments/2026-09-06-dbi-evolution-v0.1/inputs/reconstruction-input-M.txt",
+    "reconstruction_input_sha256": "a4576895d7a2932f59e5215d0ff2f4f5c1d6261ece6731b2745b421d65bc759d",
+    "date_order": [
+      "Birthdate February 20, 1952",
+      "Birthdate June 23, 1956",
+      "Birthdate February 29, 1960",
+      "Birthdate November 9, 1989",
+      "Birthdate August 24, 1931"
+    ],
+    "retry_policy": "fresh target retry = complete new reconstruction+target pair; repeated target retry = full repeated sequence restart; otherwise quarantine replicate",
+    "stop_on_integrity_failure": true,
+    "stop_before_evaluator_if_pre_evaluation_gate_fails": true
+  },
+  "boundary": {
+    "generation_authorized": true,
+    "evaluator_invocation_authorized_before_section_8_4_pass": false,
+    "scoring_authorized_before_section_8_4_pass": false,
+    "unblinding_authorized_before_both_scorebooks_locked": false,
+    "protocol_modification_authorized": false,
+    "randomization_modification_authorized": false
+  },
+  "recorded_before_first_model_invocation": true
+}
