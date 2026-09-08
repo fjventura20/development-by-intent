@@ -2,7 +2,7 @@
   "schema_version": "0.1",
   "record_kind": "ordering",
   "experiment_id": "DBI-Evolution-v0.1",
-  "generated_at_utc": "2026-09-07T22:00:51Z",
+  "generated_at_utc": "2026-09-08T09:42:34Z",
   "method": "per-evaluator deterministic permutation of the 60 blind_ids, derived from the same OS-CSPRNG seed with different step counts (10,000 for A; 99,999 for B). Reproducible from random_seed_hex.",
   "random_seed_hex": "45f4ebc3a4966a1a88a2020d16b6db607d08bbbd9f9ab73bcad992b5790c4740",
   "evaluator_A_order": [

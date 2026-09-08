@@ -4,11 +4,32 @@ DBI-Evolution-v0.1 — Evaluator packet construction (frozen protocol §7).
 
 Builds:
   evaluation/blind_map.json     - blind_id -> {session,block,test_id,arm,source}
+  evaluation/de_blinding_table.json - operator-side alias of blind_map.json
+                                     (canonical record location for the
+                                     v0.2 redacted manifest)
   evaluation/ordering.json      - per-evaluator candidate order (60 records)
   evaluation/evaluator_A_packet.md
   evaluation/evaluator_B_packet.md
   evaluation/manifest.json      - hashes of every artifact and the 60 raw captures
+                                   (v0.2 schema: provenance-redacted)
   evaluation/blind_integrity_check.json - automated pre-eval gate output
+
+ENVIRONMENT FLAGS:
+  REBUILD_FROM_DISK=1  - Reuse the on-disk blind_map.json and
+                         ordering.json instead of regenerating them
+                         with a fresh OS-CSPRNG seed. Used when
+                         re-running only the manifest-emit step
+                         after a v0.2 schema patch, so the existing
+                         blind_id -> slot binding is preserved.
+                         Packet SHAs (evaluator_A_packet.md,
+                         evaluator_B_packet.md) are also reused from
+                         disk because the packet content is
+                         deterministic from the seed.
+  REDACT_MANIFEST=1    - Emit the v0.2 provenance-redacted manifest
+                         instead of the v0.1 leak-prone variant.
+                         Default ON. Set REDACT_MANIFEST=0 only for
+                         backward-compat testing of the v0.1 schema
+                         (do not ship a v0.1 manifest to evaluators).
 
 Strictly per the frozen protocol:
   - Blinding: blind_id is the only candidate identifier. No session_id,
@@ -131,20 +152,66 @@ for b in blind_map:
 assert arm_counts == {"C": 30, "M": 30}, arm_counts
 
 blind_map_path = EVAL / "blind_map.json"
-blind_map_obj = {
-    "schema_version": "0.1",
-    "record_kind": "blind-map",
-    "experiment_id": "DBI-Evolution-v0.1",
-    "generated_at_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
-    "method": "OS-CSPRNG via secrets.SystemRandom() for the mapping permutation; secrets.token_hex(32) seed for the per-evaluator ordering permutations (reproducible from seed).",
-    "random_seed_hex": seed_hex,
-    "seed_source": "secrets.token_hex(32) - OS entropy (/dev/urandom)",
-    "arm_counts": arm_counts,
-    "candidate_count": len(blind_map),
-    "mapping": blind_map,
-}
-blind_map_path.write_text(json.dumps(blind_map_obj, indent=2) + "\n")
-print(f"WROTE {blind_map_path} ({len(blind_map)} entries)")
+de_blinding_table_path = EVAL / "de_blinding_table.json"
+
+# REBUILD_FROM_DISK: if set, load the existing blind_map.json and
+# ordering.json from disk instead of regenerating. This preserves the
+# blind_id -> slot binding so that existing scorebooks (which are keyed
+# by blind_id) remain valid against the re-emitted manifest. Used in
+# the v0.2 manifest patch workflow.
+import os as _os
+REBUILD_FROM_DISK = _os.environ.get("REBUILD_FROM_DISK", "0") == "1"
+REDACT_MANIFEST = _os.environ.get("REDACT_MANIFEST", "1") == "1"
+
+if REBUILD_FROM_DISK and blind_map_path.exists() and (EVAL / "ordering.json").exists():
+    print(f"REBUILD_FROM_DISK=1 — reusing {blind_map_path} and {EVAL / 'ordering.json'}")
+    blind_map_obj = json.loads(blind_map_path.read_text())
+    blind_map = blind_map_obj["mapping"]
+    seed_hex = blind_map_obj["random_seed_hex"]
+    arm_counts = {"C": 0, "M": 0}
+    for b in blind_map:
+        arm_counts[b["arm"]] += 1
+    assert arm_counts == {"C": 30, "M": 30}, arm_counts
+
+    ordering_obj = json.loads((EVAL / "ordering.json").read_text())
+    order_a = ordering_obj["evaluator_A_order"]
+    order_b = ordering_obj["evaluator_B_order"]
+    assert set(order_a) == set(order_b) == {b["blind_id"] for b in blind_map}
+    assert order_a != order_b
+
+    # Slots are needed for packet rebuild verification; rebuild from
+    # the blind_map's source_artifact_path so we don't double-source.
+    slots = [{
+        "session_id": b["session_id"],
+        "block": b["block"],
+        "test_id": b["test_id"],
+        "arm": b["arm"],
+        "artifact_path": b["source_artifact_path"],
+        "artifact_sha256": b["source_artifact_sha256"],
+        "artifact_bytes": b["source_artifact_bytes"],
+    } for b in blind_map]
+else:
+    blind_map_obj = {
+        "schema_version": "0.1",
+        "record_kind": "blind-map",
+        "experiment_id": "DBI-Evolution-v0.1",
+        "generated_at_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
+        "method": "OS-CSPRNG via secrets.SystemRandom() for the mapping permutation; secrets.token_hex(32) seed for the per-evaluator ordering permutations (reproducible from seed).",
+        "random_seed_hex": seed_hex,
+        "seed_source": "secrets.token_hex(32) - OS entropy (/dev/urandom)",
+        "arm_counts": arm_counts,
+        "candidate_count": len(blind_map),
+        "mapping": blind_map,
+    }
+    blind_map_path.write_text(json.dumps(blind_map_obj, indent=2) + "\n")
+    print(f"WROTE {blind_map_path} ({len(blind_map)} entries)")
+
+# v0.2 manifest: also write a de_blinding_table.json alias for
+# canonical-record clarity. It is byte-identical to blind_map.json
+# but signals the new operator-side artifact name.
+if not de_blinding_table_path.exists() or REBUILD_FROM_DISK:
+    de_blinding_table_path.write_text(json.dumps(blind_map_obj, indent=2) + "\n")
+    print(f"WROTE {de_blinding_table_path} (operator-side de-blinding key)")
 
 # ---------------------------------------------------------------------------
 # 3. Generate per-evaluator orderings (60 records each). The orderings
@@ -378,63 +445,158 @@ for k, v in gate["checks"].items():
 # ---------------------------------------------------------------------------
 # 6. Manifest (artifact + per-candidate SHA-256 inventory)
 # ---------------------------------------------------------------------------
-manifest = {
-    "schema_version": "0.1",
-    "record_kind": "evaluation-packet-manifest",
-    "experiment_id": "DBI-Evolution-v0.1",
-    "generated_at_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
-    "frozen_references": {
-        "frozen_protocol_commit": "da11836",
-        "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
-        "frozen_protocol_path": str(ROOT / "protocol/PROTOCOL-v0.5-frozen-final.md"),
-    },
-    "artifacts": {
-        "blind_map": {
-            "path": str(blind_map_path.relative_to(ROOT)),
-            "sha256": sha(blind_map_path),
-            "bytes": blind_map_path.stat().st_size,
+# Provenance-redaction policy (DBI-Evolution v0.2 manifest schema):
+#   The evaluator-facing manifest MUST NOT carry per-candidate
+#   provenance fields (source_artifact_path, source_artifact_sha256,
+#   source_artifact_bytes, source_was_retry, ordering_position_A,
+#   ordering_position_B). These fields collectively decode the
+#   blind_id -> (run, arm, capture_side, task, retry) mapping, which
+#   is a complete de-blinding map. The 2026-09-08 incident
+#   (POST_SCORE_PROVENANCE_EXPOSURE_IN_SHIPPED_EVALUATION_MANIFEST)
+#   showed that even with explicit anti-leak instructions, evaluators
+#   who read the manifest can derive the binding. Per the v0.2
+#   manifest schema, the operator-side de-blinding key is held
+#   separately (evaluation/de_blinding_table.json) and is NOT shipped
+#   to evaluators.
+#
+#   Aggregate counts (arm_C, arm_M, retry_sources) also leak
+#   experimental design and are redacted to non-identifying labels.
+#
+#   Per-artifact SHAs (blind_map, ordering, evaluator_A/B packets,
+#   blind_integrity_check) ARE retained, because they are
+#   packet-integrity verifications, not candidate provenance.
+#
+#   REDACT_MANIFEST=0 emits the v0.1 schema (with per-candidate
+#   provenance) for backward-compat testing. Do NOT ship a v0.1
+#   manifest to evaluators.
+
+if REDACT_MANIFEST:
+    manifest = {
+        "schema_version": "0.2",  # bumped from 0.1: provenance-redacted
+        "record_kind": "evaluation-packet-manifest",
+        "experiment_id": "DBI-Evolution-v0.1",
+        "generated_at_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
+        "manifest_policy": {
+            "version": "0.2-provenance-redacted",
+            "rationale": "Per-candidate provenance fields are redacted in this manifest. The operator-side de-blinding key is held at evaluation/de_blinding_table.json and is NOT shipped to evaluators. See POST_SCORE_PROVENANCE_EXPOSURE_IN_SHIPPED_EVALUATION_MANIFEST (2026-09-08) for the originating defect.",
         },
-        "ordering": {
-            "path": str(ordering_path.relative_to(ROOT)),
-            "sha256": sha(ordering_path),
-            "bytes": ordering_path.stat().st_size,
-            "random_seed_hex": seed_hex,
+        "frozen_references": {
+            "frozen_protocol_commit": "da11836",
+            "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+            "frozen_protocol_path": str(ROOT / "protocol/PROTOCOL-v0.5-frozen-final.md"),
         },
-        "evaluator_A_packet": {
-            "path": str(packet_a_path.relative_to(ROOT)),
-            "sha256": sha(packet_a_path),
-            "bytes": packet_a_path.stat().st_size,
+        "artifacts": {
+            # NOTE: de_blinding_table and ordering are operator-side
+            # artifacts. Their SHAs are recorded here for integrity
+            # verification, but the files themselves are NOT shipped
+            # to evaluators.
+            "de_blinding_table": {
+                "path": str(blind_map_path.relative_to(ROOT)),
+                "sha256": sha(blind_map_path),
+                "bytes": blind_map_path.stat().st_size,
+                "shipped_to_evaluator": False,
+            },
+            "ordering": {
+                "path": str(ordering_path.relative_to(ROOT)),
+                "sha256": sha(ordering_path),
+                "bytes": ordering_path.stat().st_size,
+                "random_seed_hex": seed_hex,
+                "shipped_to_evaluator": False,
+            },
+            "evaluator_A_packet": {
+                "path": str(packet_a_path.relative_to(ROOT)),
+                "sha256": sha(packet_a_path),
+                "bytes": packet_a_path.stat().st_size,
+            },
+            "evaluator_B_packet": {
+                "path": str(packet_b_path.relative_to(ROOT)),
+                "sha256": sha(packet_b_path),
+                "bytes": packet_b_path.stat().st_size,
+            },
+            "blind_integrity_check": {
+                "path": str((EVAL / "blind_integrity_check.json").relative_to(ROOT)),
+                "sha256": sha(EVAL / "blind_integrity_check.json"),
+            },
         },
-        "evaluator_B_packet": {
-            "path": str(packet_b_path.relative_to(ROOT)),
-            "sha256": sha(packet_b_path),
-            "bytes": packet_b_path.stat().st_size,
+        # Per-candidate fields are intentionally OMITTED in v0.2.
+        # Evaluators receive only blind_id inside the packet itself; the
+        # binding is operator-only at evaluation/de_blinding_table.json.
+        "candidates_redacted": True,
+        "candidates_count": len(blind_map),
+        "totals": {
+            "candidate_count": len(blind_map),
+            # arm_C and arm_M renamed to non-identifying source labels
+            # so the design's arm distribution is not exposed.
+            "source_X_count": arm_counts["C"],  # arm_C, redacted
+            "source_Y_count": arm_counts["M"],  # arm_M, redacted
+            # retry_sources renamed; the per-candidate retry flag is
+            # also redacted, but the aggregate count of non-original
+            # artifacts is not a per-blind_id leak.
+            "non_original_sources": sum(1 for b in blind_map if b["source_was_retry"]),
+            "original_sources": sum(1 for b in blind_map if not b["source_was_retry"]),
         },
-        "blind_integrity_check": {
-            "path": str((EVAL / "blind_integrity_check.json").relative_to(ROOT)),
-            "sha256": sha(EVAL / "blind_integrity_check.json"),
+        "blind_integrity_gate_disposition": gate["disposition"],
+    }
+else:
+    # v0.1 schema: per-candidate provenance fields. DO NOT SHIP.
+    manifest = {
+        "schema_version": "0.1",
+        "record_kind": "evaluation-packet-manifest",
+        "experiment_id": "DBI-Evolution-v0.1",
+        "generated_at_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
+        "frozen_references": {
+            "frozen_protocol_commit": "da11836",
+            "frozen_protocol_sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+            "frozen_protocol_path": str(ROOT / "protocol/PROTOCOL-v0.5-frozen-final.md"),
         },
-    },
-    "candidates": [
-        {
-            "blind_id": b["blind_id"],
-            "source_artifact_path": b["source_artifact_path"],
-            "source_artifact_sha256": b["source_artifact_sha256"],
-            "source_artifact_bytes": b["source_artifact_bytes"],
-            "source_was_retry": b["source_was_retry"],
-            "ordering_position_A": order_a.index(b["blind_id"]) + 1,
-            "ordering_position_B": order_b.index(b["blind_id"]) + 1,
-        }
-        for b in blind_map
-    ],
-    "totals": {
-        "candidate_count": len(blind_map),
-        "arm_C": arm_counts["C"],
-        "arm_M": arm_counts["M"],
-        "retry_sources": sum(1 for b in blind_map if b["source_was_retry"]),
-        "original_sources": sum(1 for b in blind_map if not b["source_was_retry"]),
-    },
-    "blind_integrity_gate_disposition": gate["disposition"],
-}
+        "artifacts": {
+            "blind_map": {
+                "path": str(blind_map_path.relative_to(ROOT)),
+                "sha256": sha(blind_map_path),
+                "bytes": blind_map_path.stat().st_size,
+            },
+            "ordering": {
+                "path": str(ordering_path.relative_to(ROOT)),
+                "sha256": sha(ordering_path),
+                "bytes": ordering_path.stat().st_size,
+                "random_seed_hex": seed_hex,
+            },
+            "evaluator_A_packet": {
+                "path": str(packet_a_path.relative_to(ROOT)),
+                "sha256": sha(packet_a_path),
+                "bytes": packet_a_path.stat().st_size,
+            },
+            "evaluator_B_packet": {
+                "path": str(packet_b_path.relative_to(ROOT)),
+                "sha256": sha(packet_b_path),
+                "bytes": packet_b_path.stat().st_size,
+            },
+            "blind_integrity_check": {
+                "path": str((EVAL / "blind_integrity_check.json").relative_to(ROOT)),
+                "sha256": sha(EVAL / "blind_integrity_check.json"),
+            },
+        },
+        "candidates": [
+            {
+                "blind_id": b["blind_id"],
+                "source_artifact_path": b["source_artifact_path"],
+                "source_artifact_sha256": b["source_artifact_sha256"],
+                "source_artifact_bytes": b["source_artifact_bytes"],
+                "source_was_retry": b["source_was_retry"],
+                "ordering_position_A": order_a.index(b["blind_id"]) + 1,
+                "ordering_position_B": order_b.index(b["blind_id"]) + 1,
+            }
+            for b in blind_map
+        ],
+        "totals": {
+            "candidate_count": len(blind_map),
+            "arm_C": arm_counts["C"],
+            "arm_M": arm_counts["M"],
+            "retry_sources": sum(1 for b in blind_map if b["source_was_retry"]),
+            "original_sources": sum(1 for b in blind_map if not b["source_was_retry"]),
+        },
+        "blind_integrity_gate_disposition": gate["disposition"],
+    }
+
 (EVAL / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-print(f"WROTE {EVAL / 'manifest.json'}")
+print(f"WROTE {EVAL / 'manifest.json'} (schema={manifest['schema_version']}, redact={REDACT_MANIFEST})")

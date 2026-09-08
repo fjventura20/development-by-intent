@@ -2,7 +2,7 @@
   "schema_version": "0.1",
   "record_kind": "blind-integrity-check",
   "experiment_id": "DBI-Evolution-v0.1",
-  "checked_at_utc": "2026-09-07T22:00:51Z",
+  "checked_at_utc": "2026-09-08T09:42:34Z",
   "checks": {
     "candidate_count_is_60": true,
     "candidate_count": 60,
