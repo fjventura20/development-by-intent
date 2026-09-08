@@ -1,8 +1,27 @@
 {
-  "replicate_order_flips_json": {
-    "bytes": 365,
-    "generated_at_utc": "2026-09-08T13:27:01Z",
-    "path": "preflight/replicate-order-flips.json",
-    "sha256": "fb79e62ae46ddc416b7958e72d09f833550057af497038e65ea981a0231145ad"
+  "preflight/blind_map.json": {
+    "sha256": "11764b3765cd68417f384a2365332a7d395b671ecd0e3eaa604f07cf6887c045",
+    "bytes": 16958
+  },
+  "preflight/evaluator-A-ordering.json": {
+    "sha256": "95aa5ee047454bc68ed47fe09bf5ed3485164baf60f6371fd2b831fb8fcc2945",
+    "bytes": 1430
+  },
+  "preflight/evaluator-B-ordering.json": {
+    "sha256": "1049b7f987e236ecf7fa19f349583c0fbc864e06c01640f505f8865d61d9d06f",
+    "bytes": 1430
+  },
+  "preflight/evaluator-packet-A.json": {
+    "sha256": "575255f3d9f7b5d8d99570612e24e2190ed2ac19dfc687dba69e78bd82bbcb48",
+    "bytes": 170665
+  },
+  "preflight/evaluator-packet-B.json": {
+    "sha256": "23208a1f0a4a7ebb4a3962dbdd20cd2f803e5aefc4d8efa9c362d8b7aee19dad",
+    "bytes": 170665
+  },
+  "gate": {
+    "coverage": true,
+    "evaluator_visible_packets_blinded": true,
+    "sealed_blind_map_provenance_complete": true
   }
 }

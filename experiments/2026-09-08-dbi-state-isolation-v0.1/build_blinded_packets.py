@@ -70,7 +70,7 @@ def successful(path: Path) -> bool:
         d = load(path)
     except Exception:
         return False
-    return not d.get("is_error") and not d.get("api_error_status") and bool(d.get("result"))
+    return not d.get("is_error") and not d.get("api_error_status") and isinstance(d, dict)
 
 
 def find_fresh_target(rep: int, index: int) -> tuple[Path, Path]:
@@ -85,11 +85,18 @@ def find_fresh_target(rep: int, index: int) -> tuple[Path, Path]:
 
 
 def find_repeated_target(rep: int, index: int) -> tuple[Path, Path]:
-    raw = RUNS / f"replicate_{rep:02d}" / "repeated" / "second_pass" / f"T{index}.raw.json"
-    cli = RUNS / f"replicate_{rep:02d}" / "repeated" / "second_pass" / f"T{index}.cli.json"
-    if not successful(raw):
-        raise RuntimeError(f"missing successful repeated target R{rep} T{index}")
-    return raw, cli
+    # A successful F6 full-sequence retry takes precedence over the failed
+    # first sequence. R1 and R3 needed retries; R2 uses the original path.
+    bases = [
+        RUNS / f"replicate_{rep:02d}" / "repeated-retry-01" / "repeated",
+        RUNS / f"replicate_{rep:02d}" / "repeated",
+    ]
+    for base in bases:
+        raw = base / "second_pass" / f"T{index}.raw.json"
+        cli = base / "second_pass" / f"T{index}.cli.json"
+        if successful(raw):
+            return raw, cli
+    raise RuntimeError(f"missing successful repeated target R{rep} T{index}")
 
 
 def collect_targets() -> list[dict]:
@@ -158,7 +165,7 @@ def main() -> int:
                 {
                     "blind_id": bid,
                     "trigger_prompt": by_id[bid]["trigger_prompt"],
-                    "captured_response": load(by_id[bid]["raw"])["result"],
+                    "captured_response": load(ROOT / by_id[bid]["raw_path"])["result"],
                 } for bid in order
             ],
         }

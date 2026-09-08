@@ -1,0 +1,9 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "dbi-state-isolation-generation-final-continuation",
+  "experiment_id": "DBI-State-Isolation-v0.1",
+  "replicate_03_repeated_attempt_1": "preserved at runs/replicate_03/repeated; failed 429 at second_pass T4",
+  "replicate_03_repeated_retry": "runs/replicate_03/repeated-retry-01",
+  "replicate_03_fresh": "runs/replicate_03/fresh",
+  "completed_at_utc": "2026-09-08T20:12:44Z"
+}

@@ -1,0 +1,322 @@
+{
+  "replicate": 3,
+  "order": "repeated_first",
+  "repeated_retry": {
+    "condition": "repeated",
+    "reconstruction": {
+      "replicate": 3,
+      "condition": "repeated",
+      "target_label": "sequence",
+      "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+      "returncode": 0,
+      "raw_path": "runs/replicate_03/repeated-retry-01/repeated/reconstruction/reconstruction.raw.json",
+      "raw_sha256": "7a2f7bb04577596bea2b52d449aeff7f577fb27a5158c78ab1687083a745ae01",
+      "raw_bytes": 2297,
+      "started_at_utc": "2026-09-08T19:53:26Z"
+    },
+    "priming": [
+      {
+        "phase": "priming",
+        "test_id": "T1",
+        "prompt": "Birthdate February 20, 1952",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T1.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T1.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T1.cli.json",
+        "raw_sha256": "5693cdb6833ffc7917280bcb1259ac15b88ed2745401040bb1cd9a068efb3670",
+        "raw_bytes": 5688,
+        "result_bytes": 4398,
+        "result_preview": "# February 20, 1952\n\nYou arrived on a Wednesday, in the cold heart of a winter that the world was still sorting out.\n\n---\n\n## The World in Mid-Stride\n\nSeven yea",
+        "captured_at_utc": "2026-09-08T19:54:48Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T2",
+        "prompt": "Birthdate June 23, 1956",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T2.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T2.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T2.cli.json",
+        "raw_sha256": "7a82e6a9c267e5a64ad896964b12a803b009f3c952d6adff5e4743b8fa8cf077",
+        "raw_bytes": 6381,
+        "result_bytes": 5096,
+        "result_preview": "# June 23, 1956\n\nYou arrived on a Saturday in the long American summer, into a country that was prosperous, anxious, and changing faster than most people unders",
+        "captured_at_utc": "2026-09-08T19:55:52Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T3",
+        "prompt": "Birthdate February 29, 1960",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T3.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T3.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T3.cli.json",
+        "raw_sha256": "09e01ab7f8e642c0dc423419372ee816c5551c07e3ae2bc72eca234988be21ca",
+        "raw_bytes": 6171,
+        "result_bytes": 4891,
+        "result_preview": "# February 29, 1960\n\nYou arrived on a Monday \u2014 and not just any Monday. You were born on a day that does not exist in most years, a date the calendar conjures o",
+        "captured_at_utc": "2026-09-08T19:57:01Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T4",
+        "prompt": "Birthdate November 9, 1989",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T4.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T4.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T4.cli.json",
+        "raw_sha256": "72757c2d03bc2dfa2a1c5b7c274ef969bd76b9960d3c0cdb533b2ebc3a51a4d2",
+        "raw_bytes": 7275,
+        "result_bytes": 5973,
+        "result_preview": "# November 9, 1989\n\nYou arrived on a Thursday evening into a world that was, at that precise moment, coming apart at its most defining seam.\n\n---\n\n## The Exact ",
+        "captured_at_utc": "2026-09-08T19:58:13Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T5",
+        "prompt": "Birthdate August 24, 1931",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T5.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T5.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/priming/T5.cli.json",
+        "raw_sha256": "297178c75ff4c3cf52d89876f55e1cda31f2ce552493aecaf992fe3e9d9ca75e",
+        "raw_bytes": 8092,
+        "result_bytes": 6772,
+        "result_preview": "# August 24, 1931\n\nYou arrived on a Monday into a world that was failing \u2014 economically, systematically, and in ways that very few people in power yet understoo",
+        "captured_at_utc": "2026-09-08T19:59:49Z"
+      }
+    ],
+    "second_pass": [
+      {
+        "phase": "second_pass",
+        "test_id": "T1",
+        "prompt": "Birthdate February 20, 1952",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T1.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T1.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T1.cli.json",
+        "raw_sha256": "e3aeac633e0cd1a0e1499f418a40dd4230dddb424d3e1cdbf039a72545871bef",
+        "raw_bytes": 6899,
+        "result_bytes": 5607,
+        "result_preview": "# February 20, 1952\n\nYou arrived on a Wednesday, into a country that was prosperous on the surface and deeply anxious underneath \u2014 fighting a war it couldn't na",
+        "captured_at_utc": "2026-09-08T20:00:54Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T2",
+        "prompt": "Birthdate June 23, 1956",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T2.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T2.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T2.cli.json",
+        "raw_sha256": "ca9757447e9233c4f431605521aad98ca650fc5344ff0167b62ae8ae6b4676dd",
+        "raw_bytes": 6819,
+        "result_bytes": 5514,
+        "result_preview": "# June 23, 1956\n\nYou arrived on a Saturday in midsummer, into a world that was in the middle of shedding one set of organizing assumptions and searching, not al",
+        "captured_at_utc": "2026-09-08T20:02:13Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T3",
+        "prompt": "Birthdate February 29, 1960",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T3.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T3.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T3.cli.json",
+        "raw_sha256": "c81c2860a2fcb3e46b2ca75aa1a0e00067df9b4bd5e04d679148a6fb735a161e",
+        "raw_bytes": 6957,
+        "result_bytes": 5669,
+        "result_preview": "# February 29, 1960\n\nYou arrived on a Monday that most calendars never possess \u2014 and you entered a world in 1960 that was itself balanced on an edge, two superp",
+        "captured_at_utc": "2026-09-08T20:03:20Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T4",
+        "prompt": "Birthdate November 9, 1989",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T4.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T4.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T4.cli.json",
+        "raw_sha256": "bed6a7b86f0c0d35e05c3a8092821c9bd3aef20c38dc79c0cd0c4c5fda483c52",
+        "raw_bytes": 6976,
+        "result_bytes": 5690,
+        "result_preview": "# November 9, 1989\n\nYou were born on a Thursday \u2014 and specifically on a date that carries more concentrated historical weight than almost any other on the Germa",
+        "captured_at_utc": "2026-09-08T20:04:34Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T5",
+        "prompt": "Birthdate August 24, 1931",
+        "session_id": "c7d26b5b-495f-4671-9f3c-6decd547f8c0",
+        "returncode": 0,
+        "raw_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T5.raw.json",
+        "stderr_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T5.stderr.txt",
+        "cli_path": "runs/replicate_03/repeated-retry-01/repeated/second_pass/T5.cli.json",
+        "raw_sha256": "24dc16de1e37997e2692060fd51155d8f10224e8e9670a33cb35ac8859b7f2e4",
+        "raw_bytes": 8204,
+        "result_bytes": 6916,
+        "result_preview": "# August 24, 1931\n\nYou arrived on a Monday into a country where roughly one in six working Americans could not find work, and the number was still rising. The G",
+        "captured_at_utc": "2026-09-08T20:06:02Z"
+      }
+    ]
+  },
+  "fresh": {
+    "condition": "fresh",
+    "targets": [
+      {
+        "target": "T1",
+        "reconstruction": {
+          "replicate": 3,
+          "condition": "fresh",
+          "target_label": "T1",
+          "session_id": "18346e5f-0316-400f-8519-0aef7715820c",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_01/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "0b934117255bd61cf89f2728647b13aa0dee9881440a578e1f99d5d7e236c854",
+          "raw_bytes": 1932,
+          "started_at_utc": "2026-09-08T20:06:12Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T1",
+          "prompt": "Birthdate February 20, 1952",
+          "session_id": "18346e5f-0316-400f-8519-0aef7715820c",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_01/target/T1.raw.json",
+          "stderr_path": "runs/replicate_03/fresh/target_01/target/T1.stderr.txt",
+          "cli_path": "runs/replicate_03/fresh/target_01/target/T1.cli.json",
+          "raw_sha256": "aa718df917bc517fde567bdb21fc7cddbeb76b78315cecb3fc1e88760ba1ab3c",
+          "raw_bytes": 5563,
+          "result_bytes": 4283,
+          "result_preview": "**February 20, 1952 \u2014 a Wednesday**\n\nYou arrived on a winter Wednesday in a world still pulling itself out of rubble. Seven years had passed since the end of th",
+          "captured_at_utc": "2026-09-08T20:07:05Z"
+        }
+      },
+      {
+        "target": "T2",
+        "reconstruction": {
+          "replicate": 3,
+          "condition": "fresh",
+          "target_label": "T2",
+          "session_id": "809b6273-55d2-4f3f-b6f7-de830a2c1afb",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_02/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "28ad6d58c36e15ae57beba808d4601c42fcc9426e1b9bbe023f30bbb63330fd4",
+          "raw_bytes": 2263,
+          "started_at_utc": "2026-09-08T20:07:12Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T2",
+          "prompt": "Birthdate June 23, 1956",
+          "session_id": "809b6273-55d2-4f3f-b6f7-de830a2c1afb",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_02/target/T2.raw.json",
+          "stderr_path": "runs/replicate_03/fresh/target_02/target/T2.stderr.txt",
+          "cli_path": "runs/replicate_03/fresh/target_02/target/T2.cli.json",
+          "raw_sha256": "0c1c904a4565f7a6b9c4fd5cc9343816c42410b43bbabb310281cc0fda48a61c",
+          "raw_bytes": 6910,
+          "result_bytes": 5624,
+          "result_preview": "## June 23, 1956 \u2014 A Saturday\n\nYou arrived on a warm Saturday in the middle of the American century \u2014 Eisenhower in the White House, the Cold War fully settled ",
+          "captured_at_utc": "2026-09-08T20:08:55Z"
+        }
+      },
+      {
+        "target": "T3",
+        "reconstruction": {
+          "replicate": 3,
+          "condition": "fresh",
+          "target_label": "T3",
+          "session_id": "805aad0b-3e6e-4547-b1c2-08c701847196",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_03/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "51205c24c497102d84e94f92d59f2fbb9e1eefa7eae1addcf5108934612853b6",
+          "raw_bytes": 2521,
+          "started_at_utc": "2026-09-08T20:09:13Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T3",
+          "prompt": "Birthdate February 29, 1960",
+          "session_id": "805aad0b-3e6e-4547-b1c2-08c701847196",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_03/target/T3.raw.json",
+          "stderr_path": "runs/replicate_03/fresh/target_03/target/T3.stderr.txt",
+          "cli_path": "runs/replicate_03/fresh/target_03/target/T3.cli.json",
+          "raw_sha256": "947fd1664f10caca3b54d67e92ea8c64344bf595b15047811f5361551bc9ae35",
+          "raw_bytes": 5597,
+          "result_bytes": 4341,
+          "result_preview": "**February 29, 1960 \u2014 a Monday, and the rarest of birthdays**\n\nThis person arrived on one of the strangest calendar dates in existence. The Gregorian calendar p",
+          "captured_at_utc": "2026-09-08T20:10:40Z"
+        }
+      },
+      {
+        "target": "T4",
+        "reconstruction": {
+          "replicate": 3,
+          "condition": "fresh",
+          "target_label": "T4",
+          "session_id": "7e3395da-708b-4313-8aa5-71eb8bace6b5",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_04/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "c812dd675fcd0011a65edb469ca3da79e3e7daba1a4cdc959c7617ac99882efb",
+          "raw_bytes": 2210,
+          "started_at_utc": "2026-09-08T20:10:47Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T4",
+          "prompt": "Birthdate November 9, 1989",
+          "session_id": "7e3395da-708b-4313-8aa5-71eb8bace6b5",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_04/target/T4.raw.json",
+          "stderr_path": "runs/replicate_03/fresh/target_04/target/T4.stderr.txt",
+          "cli_path": "runs/replicate_03/fresh/target_04/target/T4.cli.json",
+          "raw_sha256": "0912ba0bbe2313d7279a7a2cc4f349c4b6acf599e8d2fcae1f93ffe2934f44dc",
+          "raw_bytes": 1216,
+          "result_bytes": 0,
+          "result_preview": "",
+          "captured_at_utc": "2026-09-08T20:11:35Z"
+        }
+      },
+      {
+        "target": "T5",
+        "reconstruction": {
+          "replicate": 3,
+          "condition": "fresh",
+          "target_label": "T5",
+          "session_id": "de09368d-4660-492f-9570-e32bc50255fb",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_05/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "85140a26e071cb520b6f465fd5f3b1c3044099ce9afb46e44a86a2b3213349a1",
+          "raw_bytes": 1959,
+          "started_at_utc": "2026-09-08T20:11:44Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T5",
+          "prompt": "Birthdate August 24, 1931",
+          "session_id": "de09368d-4660-492f-9570-e32bc50255fb",
+          "returncode": 0,
+          "raw_path": "runs/replicate_03/fresh/target_05/target/T5.raw.json",
+          "stderr_path": "runs/replicate_03/fresh/target_05/target/T5.stderr.txt",
+          "cli_path": "runs/replicate_03/fresh/target_05/target/T5.cli.json",
+          "raw_sha256": "a7b40f583dd003a40b97364725c2e6325d15349a7f0d1df74a6bd7dc4616d541",
+          "raw_bytes": 5876,
+          "result_bytes": 4630,
+          "result_preview": "**Monday, August 24, 1931**\n\nYou entered the world on a Monday in one of the most turbulent years of the twentieth century, at the very depth of the Great Depre",
+          "captured_at_utc": "2026-09-08T20:12:44Z"
+        }
+      }
+    ]
+  }
+}

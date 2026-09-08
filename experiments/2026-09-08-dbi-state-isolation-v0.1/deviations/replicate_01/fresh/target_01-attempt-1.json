@@ -1,0 +1,14 @@
+{
+  "replicate": 1,
+  "condition": "fresh",
+  "target": "T1",
+  "attempt": 1,
+  "phase": "reconstruction",
+  "runtime_failure": true,
+  "returncode": 1,
+  "api_error_status": 429,
+  "error_result": "You've hit your session limit \u00b7 resets 10:50am (America/New_York)",
+  "raw_path": "runs/replicate_01/fresh/target_01/reconstruction/reconstruction.raw.json",
+  "stderr_path": "runs/replicate_01/fresh/target_01/reconstruction/reconstruction.stderr.txt",
+  "rule": "F6 fresh retry permitted only as complete new reconstruction+target pair"
+}

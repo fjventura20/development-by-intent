@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "claude",
+    "--resume",
+    "939ea089-c3b6-47a0-8532-d6b1e1b64692",
+    "--model",
+    "claude-sonnet-4-6",
+    "--allowedTools",
+    "",
+    "--tools",
+    "",
+    "--disallowedTools",
+    "WebFetch,WebSearch",
+    "--output-format",
+    "json",
+    "--print",
+    "Birthdate November 9, 1989"
+  ],
+  "stdin_used": false,
+  "captured_at_utc": "2026-09-08T15:20:08Z"
+}

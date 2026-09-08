@@ -1,0 +1,322 @@
+{
+  "replicate": 2,
+  "order": "repeated_first",
+  "repeated": {
+    "condition": "repeated",
+    "reconstruction": {
+      "replicate": 2,
+      "condition": "repeated",
+      "target_label": "sequence",
+      "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+      "returncode": 0,
+      "raw_path": "runs/replicate_02/repeated/reconstruction/reconstruction.raw.json",
+      "raw_sha256": "332e6729094fd9c18f2f93bfe1530c2d1cbe70f49a7f8a6c8ba9c2ead9f6ff95",
+      "raw_bytes": 2248,
+      "started_at_utc": "2026-09-08T15:01:09Z"
+    },
+    "priming": [
+      {
+        "phase": "priming",
+        "test_id": "T1",
+        "prompt": "Birthdate February 20, 1952",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/priming/T1.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/priming/T1.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/priming/T1.cli.json",
+        "raw_sha256": "d411a0b656005831dfcb1ad6a40b8fe9111b1f992002993b88faf59eed6659c9",
+        "raw_bytes": 6354,
+        "result_bytes": 5068,
+        "result_preview": "## Born Into the Frozen Arc of History\n\n**February 20, 1952 \u2014 a Wednesday.**\n\nOslo was in the middle of hosting the world. The VI Winter Olympic Games had opene",
+        "captured_at_utc": "2026-09-08T15:02:21Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T2",
+        "prompt": "Birthdate June 23, 1956",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/priming/T2.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/priming/T2.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/priming/T2.cli.json",
+        "raw_sha256": "b188a4d0f70a59175f16cc50b64c5680397faed85ab1b2186e9861ee337fb934",
+        "raw_bytes": 7088,
+        "result_bytes": 5809,
+        "result_preview": "## A Saturday at the Edge of Everything\n\n**June 23, 1956 \u2014 a Saturday.**\n\nThe summer of 1956 had the particular quality of a world holding its breath. World War",
+        "captured_at_utc": "2026-09-08T15:03:48Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T3",
+        "prompt": "Birthdate February 29, 1960",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/priming/T3.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/priming/T3.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/priming/T3.cli.json",
+        "raw_sha256": "28d1a78cfefbfe991a8f83c1f6408f5d8def0e4aeb715b85e86c158ec7d0ad61",
+        "raw_bytes": 8076,
+        "result_bytes": 6795,
+        "result_preview": "## The Rarest Day\n\n**February 29, 1960 \u2014 a Monday.**\n\nYou share your exact birthday with roughly one in every 1,461 people \u2014 those born on the day the calendar ",
+        "captured_at_utc": "2026-09-08T15:05:08Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T4",
+        "prompt": "Birthdate November 9, 1989",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/priming/T4.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/priming/T4.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/priming/T4.cli.json",
+        "raw_sha256": "ed70d7efd427df0acd918df2d0d343623efc8312df34309ba98f0b11d8074526",
+        "raw_bytes": 7627,
+        "result_bytes": 6346,
+        "result_preview": "## The Night the Wall Came Down\n\n**November 9, 1989 \u2014 a Thursday.**\n\nAt a press conference in East Berlin that afternoon, a Communist Party spokesman named G\u00fcnt",
+        "captured_at_utc": "2026-09-08T15:06:27Z"
+      },
+      {
+        "phase": "priming",
+        "test_id": "T5",
+        "prompt": "Birthdate August 24, 1931",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/priming/T5.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/priming/T5.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/priming/T5.cli.json",
+        "raw_sha256": "2c42f3c20e87c927c508ecb1178cbf76b86887b0e9191403e1b77f19339bf6ba",
+        "raw_bytes": 7753,
+        "result_bytes": 6465,
+        "result_preview": "## Born Into the Wreckage\n\n**August 24, 1931 \u2014 a Monday.**\n\nThe summer of 1931 had the quality of a wound that wouldn't close. The crash of 1929 had not resolve",
+        "captured_at_utc": "2026-09-08T15:08:04Z"
+      }
+    ],
+    "second_pass": [
+      {
+        "phase": "second_pass",
+        "test_id": "T1",
+        "prompt": "Birthdate February 20, 1952",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/second_pass/T1.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/second_pass/T1.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/second_pass/T1.cli.json",
+        "raw_sha256": "27c114125de72fa82d38d7386f1a7407b644e6c4417be4edd65b60176eb436bb",
+        "raw_bytes": 7198,
+        "result_bytes": 5928,
+        "result_preview": "## Wednesday's Child\n\n**February 20, 1952 \u2014 a Wednesday.**\n\nThe sixth Winter Olympics were in their seventh day in Oslo, Norway, the Norwegians collecting medal",
+        "captured_at_utc": "2026-09-08T15:09:31Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T2",
+        "prompt": "Birthdate June 23, 1956",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/second_pass/T2.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/second_pass/T2.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/second_pass/T2.cli.json",
+        "raw_sha256": "caec2efd62fa07804ff856f1e413e7db7fd0c96ab9784fa556ad3500bd32618d",
+        "raw_bytes": 8250,
+        "result_bytes": 6970,
+        "result_preview": "## The Year the World Cracked\n\n**June 23, 1956 \u2014 a Saturday.**\n\nThere are years that are merely years, and there are years that function as fault lines. 1956 wa",
+        "captured_at_utc": "2026-09-08T15:10:48Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T3",
+        "prompt": "Birthdate February 29, 1960",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/second_pass/T3.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/second_pass/T3.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/second_pass/T3.cli.json",
+        "raw_sha256": "11b233d63a029dabd0f1ec7c4903762bd671155f89e33b526ab378f4f91fc5d6",
+        "raw_bytes": 7984,
+        "result_bytes": 6711,
+        "result_preview": "## A Date That Mostly Isn't There\n\n**February 29, 1960.**\n\nConsider what it means to have a birthday that the calendar withholds in three out of every four year",
+        "captured_at_utc": "2026-09-08T15:12:05Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T4",
+        "prompt": "Birthdate November 9, 1989",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/second_pass/T4.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/second_pass/T4.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/second_pass/T4.cli.json",
+        "raw_sha256": "252177a08777e7efb24e7ec24bb1ee3935ae372b4f86d44a47a1fdfe5e18bdfc",
+        "raw_bytes": 8323,
+        "result_bytes": 7037,
+        "result_preview": "## The Night the Guards Stepped Aside\n\n**November 9, 1989 \u2014 a Thursday.**\n\nThink about what it actually felt like to walk through the Brandenburg Gate for the f",
+        "captured_at_utc": "2026-09-08T15:13:29Z"
+      },
+      {
+        "phase": "second_pass",
+        "test_id": "T5",
+        "prompt": "Birthdate August 24, 1931",
+        "session_id": "eb373d38-b02e-48ea-8b3a-63b617221b7b",
+        "returncode": 0,
+        "raw_path": "runs/replicate_02/repeated/second_pass/T5.raw.json",
+        "stderr_path": "runs/replicate_02/repeated/second_pass/T5.stderr.txt",
+        "cli_path": "runs/replicate_02/repeated/second_pass/T5.cli.json",
+        "raw_sha256": "65e9852433897f5d84d52fc3d61995fab2bb59b3c3605b22f4cdddc92fbfd240",
+        "raw_bytes": 9165,
+        "result_bytes": 7888,
+        "result_preview": "## The Weight of August\n\n**August 24, 1931 \u2014 a Monday.**\n\nTo understand what it meant to be born on this day, you have to understand what August 1931 felt like ",
+        "captured_at_utc": "2026-09-08T15:15:04Z"
+      }
+    ]
+  },
+  "fresh": {
+    "condition": "fresh",
+    "targets": [
+      {
+        "target": "T1",
+        "reconstruction": {
+          "replicate": 2,
+          "condition": "fresh",
+          "target_label": "T1",
+          "session_id": "6ca51b95-73e3-4750-a1a0-22d1371b83af",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_01/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "130287cd0c641d990b8f257ecc6f213490f0abdccb96c5d23b3dbc3dfa0ae125",
+          "raw_bytes": 2273,
+          "started_at_utc": "2026-09-08T15:15:14Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T1",
+          "prompt": "Birthdate February 20, 1952",
+          "session_id": "6ca51b95-73e3-4750-a1a0-22d1371b83af",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_01/target/T1.raw.json",
+          "stderr_path": "runs/replicate_02/fresh/target_01/target/T1.stderr.txt",
+          "cli_path": "runs/replicate_02/fresh/target_01/target/T1.cli.json",
+          "raw_sha256": "c9315b0b640112af3005dea7ab2b49ee143fddeed7b41555276cc3319eed1ffd",
+          "raw_bytes": 6165,
+          "result_bytes": 4881,
+          "result_preview": "**February 20, 1952 \u2014 A Wednesday**\n\nYou arrived on a cold Wednesday in early 1952, into a world still sorting out the rubble of one catastrophic war while quie",
+          "captured_at_utc": "2026-09-08T15:16:45Z"
+        }
+      },
+      {
+        "target": "T2",
+        "reconstruction": {
+          "replicate": 2,
+          "condition": "fresh",
+          "target_label": "T2",
+          "session_id": "391dc673-e9bf-402b-8c0b-f7890839474b",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_02/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "1ad2def798cad254011760c90fed0eb9d7fd08821585d44d66417fc05c5169d1",
+          "raw_bytes": 2128,
+          "started_at_utc": "2026-09-08T15:16:52Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T2",
+          "prompt": "Birthdate June 23, 1956",
+          "session_id": "391dc673-e9bf-402b-8c0b-f7890839474b",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_02/target/T2.raw.json",
+          "stderr_path": "runs/replicate_02/fresh/target_02/target/T2.stderr.txt",
+          "cli_path": "runs/replicate_02/fresh/target_02/target/T2.cli.json",
+          "raw_sha256": "64a80909e7e56236a2363d193b79168f95bbf9f62afe85726735d80e6215ec6c",
+          "raw_bytes": 6827,
+          "result_bytes": 5534,
+          "result_preview": "## Born Into the Edge of Everything \u2014 June 23, 1956\n\nIt was a Saturday. The summer of 1956 was not yet half over, and the world was poised at one of its genuine",
+          "captured_at_utc": "2026-09-08T15:18:02Z"
+        }
+      },
+      {
+        "target": "T3",
+        "reconstruction": {
+          "replicate": 2,
+          "condition": "fresh",
+          "target_label": "T3",
+          "session_id": "ee2be997-cb22-401b-bf28-ca2c653f659c",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_03/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "0581362ff1f865dd00ef564ceb5706f854b31d9e55eb2d355d4114c322c4725e",
+          "raw_bytes": 2134,
+          "started_at_utc": "2026-09-08T15:18:13Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T3",
+          "prompt": "Birthdate February 29, 1960",
+          "session_id": "ee2be997-cb22-401b-bf28-ca2c653f659c",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_03/target/T3.raw.json",
+          "stderr_path": "runs/replicate_02/fresh/target_03/target/T3.stderr.txt",
+          "cli_path": "runs/replicate_02/fresh/target_03/target/T3.cli.json",
+          "raw_sha256": "a3d9ef648624c4f328051a5876349f1b7a1e33babd456087e2f55f4ce6302adc",
+          "raw_bytes": 6392,
+          "result_bytes": 5124,
+          "result_preview": "You were born on a day that most years simply doesn't exist.\n\nFebruary 29, 1960 was a Monday \u2014 one of the rarest calendar coordinates a person can occupy. In an",
+          "captured_at_utc": "2026-09-08T15:19:59Z"
+        }
+      },
+      {
+        "target": "T4",
+        "reconstruction": {
+          "replicate": 2,
+          "condition": "fresh",
+          "target_label": "T4",
+          "session_id": "939ea089-c3b6-47a0-8532-d6b1e1b64692",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_04/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "6d2366d9ba324b4223eb534d93b8eeb5957b3f3144b5ebf8d2aba690dcfc74ee",
+          "raw_bytes": 2435,
+          "started_at_utc": "2026-09-08T15:20:08Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T4",
+          "prompt": "Birthdate November 9, 1989",
+          "session_id": "939ea089-c3b6-47a0-8532-d6b1e1b64692",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_04/target/T4.raw.json",
+          "stderr_path": "runs/replicate_02/fresh/target_04/target/T4.stderr.txt",
+          "cli_path": "runs/replicate_02/fresh/target_04/target/T4.cli.json",
+          "raw_sha256": "826c10a6a5bd31aa269c9e41fabc8b96baeecd33a6af35a9301465c396e81e9c",
+          "raw_bytes": 5887,
+          "result_bytes": 4615,
+          "result_preview": "## November 9, 1989 \u2014 Thursday\n\nYou were born on one of the most concentrated days of historical consequence in the twentieth century. Not near it. On it.\n\n---\n",
+          "captured_at_utc": "2026-09-08T15:21:09Z"
+        }
+      },
+      {
+        "target": "T5",
+        "reconstruction": {
+          "replicate": 2,
+          "condition": "fresh",
+          "target_label": "T5",
+          "session_id": "33846933-eae6-4182-89a7-1d1e4f60c0ad",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_05/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "be9729d9d996859893e8a9779baf2a1cca076312a497a2c8981402cc34a9e9a0",
+          "raw_bytes": 2516,
+          "started_at_utc": "2026-09-08T15:21:18Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T5",
+          "prompt": "Birthdate August 24, 1931",
+          "session_id": "33846933-eae6-4182-89a7-1d1e4f60c0ad",
+          "returncode": 0,
+          "raw_path": "runs/replicate_02/fresh/target_05/target/T5.raw.json",
+          "stderr_path": "runs/replicate_02/fresh/target_05/target/T5.stderr.txt",
+          "cli_path": "runs/replicate_02/fresh/target_05/target/T5.cli.json",
+          "raw_sha256": "ec8d573fb56ef008727807c58d4c61d71fe5ae6d34d4518d6baaa29b8a9b6cb8",
+          "raw_bytes": 7527,
+          "result_bytes": 6231,
+          "result_preview": "## Born into a World on the Brink \u2014 August 24, 1931\n\nYou arrived on a Monday. Outside, the world was not celebrating.\n\nThe summer of 1931 was the summer the Gre",
+          "captured_at_utc": "2026-09-08T15:22:28Z"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "replicate": 1,
+  "order": "repeated_first",
+  "repeated_existing": true,
+  "fresh": {
+    "condition": "fresh",
+    "targets": [
+      {
+        "target": "T1",
+        "reconstruction": {
+          "replicate": 1,
+          "condition": "fresh",
+          "target_label": "T1",
+          "session_id": "54b56343-e662-474b-b44c-bfddf57f9eb0",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_01/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "eae1baf9ce40e8a2b48b218240dd353dac65ce596337a94c122f104ccca21f65",
+          "raw_bytes": 2390,
+          "started_at_utc": "2026-09-08T14:53:51Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T1",
+          "prompt": "Birthdate February 20, 1952",
+          "session_id": "54b56343-e662-474b-b44c-bfddf57f9eb0",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_01/target/T1.raw.json",
+          "stderr_path": "runs/replicate_01/fresh/target_01/target/T1.stderr.txt",
+          "cli_path": "runs/replicate_01/fresh/target_01/target/T1.cli.json",
+          "raw_sha256": "310b00c0524c07ff5ad9a244a574ed423f1f619f7571da5d5b5a8f47bf845fc6",
+          "raw_bytes": 6387,
+          "result_bytes": 5103,
+          "result_preview": "# February 20, 1952\n\nYou arrived on a Wednesday in the depths of an American winter \u2014 the kind of gray February that made the warmth of the still-new television",
+          "captured_at_utc": "2026-09-08T14:55:08Z"
+        }
+      },
+      {
+        "target": "T2",
+        "reconstruction": {
+          "replicate": 1,
+          "condition": "fresh",
+          "target_label": "T2",
+          "session_id": "ffbf80cb-e755-4065-bba3-ced7aa7b11f6",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_02/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "0853828762c833e2a137ec296fd21fed9725194049fe33aaba0d982c2ae215f6",
+          "raw_bytes": 1978,
+          "started_at_utc": "2026-09-08T14:55:14Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T2",
+          "prompt": "Birthdate June 23, 1956",
+          "session_id": "ffbf80cb-e755-4065-bba3-ced7aa7b11f6",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_02/target/T2.raw.json",
+          "stderr_path": "runs/replicate_01/fresh/target_02/target/T2.stderr.txt",
+          "cli_path": "runs/replicate_01/fresh/target_02/target/T2.cli.json",
+          "raw_sha256": "45cb02af1cbe61ebf01045320a407c0133b283739a1ace3c83086eccd8e2acf6",
+          "raw_bytes": 6778,
+          "result_bytes": 5497,
+          "result_preview": "**June 23, 1956 \u2014 A Saturday**\n\nThe world paused in a kind of held breath that June. Two thousand years of foreign rule over Egypt had just ended, rock and roll",
+          "captured_at_utc": "2026-09-08T14:56:56Z"
+        }
+      },
+      {
+        "target": "T3",
+        "reconstruction": {
+          "replicate": 1,
+          "condition": "fresh",
+          "target_label": "T3",
+          "session_id": "746ec886-96f9-4c95-bffd-a5b58a8f1c85",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_03/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "9a0ace4d4504ea9164491322db838a9c82828b5a39a466f0bf1f307523d88053",
+          "raw_bytes": 2298,
+          "started_at_utc": "2026-09-08T14:57:04Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T3",
+          "prompt": "Birthdate February 29, 1960",
+          "session_id": "746ec886-96f9-4c95-bffd-a5b58a8f1c85",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_03/target/T3.raw.json",
+          "stderr_path": "runs/replicate_01/fresh/target_03/target/T3.stderr.txt",
+          "cli_path": "runs/replicate_01/fresh/target_03/target/T3.cli.json",
+          "raw_sha256": "2e56aff20c3a82354a137a4cf1d627a170fddd41abffe76970ad264756ef64dd",
+          "raw_bytes": 7796,
+          "result_bytes": 6498,
+          "result_preview": "# February 29, 1960\n\nYou arrived on one of the rarest dates the calendar produces \u2014 a Monday that exists only once every four years, inserted by human decree to",
+          "captured_at_utc": "2026-09-08T14:58:19Z"
+        }
+      },
+      {
+        "target": "T4",
+        "reconstruction": {
+          "replicate": 1,
+          "condition": "fresh",
+          "target_label": "T4",
+          "session_id": "c023a01c-7b08-44b7-8fd4-97e362269a2e",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_04/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "e4565489efcaf241a031b8568c30349a5a8a2f317431840e22e1537a2a0bd9e3",
+          "raw_bytes": 2087,
+          "started_at_utc": "2026-09-08T14:58:29Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T4",
+          "prompt": "Birthdate November 9, 1989",
+          "session_id": "c023a01c-7b08-44b7-8fd4-97e362269a2e",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_04/target/T4.raw.json",
+          "stderr_path": "runs/replicate_01/fresh/target_04/target/T4.stderr.txt",
+          "cli_path": "runs/replicate_01/fresh/target_04/target/T4.cli.json",
+          "raw_sha256": "68873f92850d3fa210735b6db168bc3915b16f1971daaa287908c0f741ddc43f",
+          "raw_bytes": 7048,
+          "result_bytes": 5764,
+          "result_preview": "# Born on the Night the Wall Came Down\n\nYou entered the world on **Thursday, November 9, 1989** \u2014 one of the most consequential single days of the twentieth cen",
+          "captured_at_utc": "2026-09-08T14:59:35Z"
+        }
+      },
+      {
+        "target": "T5",
+        "reconstruction": {
+          "replicate": 1,
+          "condition": "fresh",
+          "target_label": "T5",
+          "session_id": "c152ed8f-5620-4f75-abe2-04be05b58b7d",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_05/reconstruction/reconstruction.raw.json",
+          "raw_sha256": "dbbd4554440ce317cb67234f25d4ec45678e4464933c1ef11ad38a9884256026",
+          "raw_bytes": 2055,
+          "started_at_utc": "2026-09-08T14:59:43Z"
+        },
+        "scored_target": {
+          "phase": "target",
+          "test_id": "T5",
+          "prompt": "Birthdate August 24, 1931",
+          "session_id": "c152ed8f-5620-4f75-abe2-04be05b58b7d",
+          "returncode": 0,
+          "raw_path": "runs/replicate_01/fresh/target_05/target/T5.raw.json",
+          "stderr_path": "runs/replicate_01/fresh/target_05/target/T5.stderr.txt",
+          "cli_path": "runs/replicate_01/fresh/target_05/target/T5.cli.json",
+          "raw_sha256": "5d8c00f4e9dd9a546db0b00acc2df0fd2dd8cae0dd21e8285045942d25285170",
+          "raw_bytes": 6210,
+          "result_bytes": 4940,
+          "result_preview": "## Born into the Depths: August 24, 1931\n\nYou arrived on a **Monday** \u2014 though the week of the week was probably the last thing on anyone's mind. The world you ",
+          "captured_at_utc": "2026-09-08T15:01:01Z"
+        }
+      }
+    ]
+  }
+}
