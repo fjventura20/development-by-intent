@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 RUNS = ROOT / "runs"
 PREFLIGHT = ROOT / "preflight"
-INPUT = ROOT.parent.parent / "2026-09-06-dbi-evolution-v0.1" / "inputs" / "reconstruction-input-M.txt"
+INPUT = ROOT.parent.parent.parent / "2026-09-06-dbi-evolution-v0.1" / "inputs" / "reconstruction-input-M.txt"
 PROTOCOL_SHA = "472d7b9f0058875be1c6a84ca5e7e6b0e2065ac2055bcad4b8d3bc00744d18ac"
 FROZEN_COMMIT = "ed081083051f23c6f27a996f42cc9dc5a4c06c93"
 GO_PATH = PREFLIGHT / "generation-go.json"
@@ -68,6 +68,7 @@ def sha256_file(path: Path) -> str:
 def log(message: str) -> None:
     line = f"[{now()}] {message}"
     print(line, flush=True)
+    RUNS.mkdir(parents=True, exist_ok=True)
     with (RUNS / "generation.log").open("a", encoding="utf-8") as f:
         f.write(line + "\n")
 
