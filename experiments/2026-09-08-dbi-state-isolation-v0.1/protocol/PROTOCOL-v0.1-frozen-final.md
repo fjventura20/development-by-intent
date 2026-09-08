@@ -1,6 +1,6 @@
-# DBI Repeat-Invocation / State Isolation Experiment v0.1 — PROTOCOL v0.3 (frozen-candidate, post PI final-freeze review)
+# DBI Repeat-Invocation / State Isolation Experiment v0.1 — PROTOCOL FROZEN-FINAL
 
-**Status:** v0.3 frozen-candidate. Awaiting PI final-freeze authorization (D036). No generation has been authorized. No generation will occur before a separate explicit Frank-as-PI GO referencing this protocol's commit SHA.
+**Status:** FROZEN-FINAL. Authorized by Frank-as-PI at `chatgpt-to-hermes/pending/20260908T131800Z-dbi-state-isolation-final-freeze-authorization-004/` (disposition `CONDITIONAL_FINAL_FREEZE_AUTHORIZED`) after applying P1-P3 to v0.3 (FROZEN-FINAL commit SHA + protocol SHA-256 to be reported to Frank). **No generation GO has been given.** No reconstruction, priming, fresh target, repeated target, evaluator invocation, or scoring run may begin until a separate explicit Frank-as-PI GO references this protocol's FROZEN-FINAL commit SHA.
 
 **Author:** Hermes (operator, under DBI Research Manager mandate adopted 2026-08-27)
 
@@ -309,10 +309,10 @@ The evaluator packet contains, per scored target response:
 - The trigger prompt (e.g. `Birthdate February 20, 1952`) — necessary for scoring the date-specific content
 - The captured model response (the full `result` field of the JSON envelope)
 - The BIB 4-dim contract (verbatim from the reconstruction input)
-- The 8 C12 non-target axes text (verbatim)
 - The BIB 4-dim scoring rubric (verbatim from Evolution v0.1's evaluator packet)
-- The M1-M4 modification check rubric (verbatim)
-- The classification rubric (verbatim)
+- The classification rubric (verbatim, defining `report_produced` and `history_deferral` per §7.3)
+
+**C12 non-target axes and M1–M4 modification checks are NOT included in the evaluator packet** (per PI final-freeze pass P1, explicit F4 follow-up). They are not preregistered scored secondary outputs and would constitute additional endpoints at freeze time. The protocol history of these dimensions is preserved in this document and in `experiments/2026-09-06-dbi-evolution-v0.1/` for audit, but the preregistered primary endpoint for this mechanism-isolation study is `report_produced` (binary) and the preregistered secondary outputs are the BIB 4-dim vector and the deferral taxonomy only.
 
 **The evaluator packet must NOT contain:**
 - The condition label (`fresh_session_per_invocation` or `same_session_repeated`)
@@ -379,13 +379,14 @@ The v0.2 §8 mixed multiple gates. F7 requires that they be separated. There are
 
 All of the following must be true before this protocol can be committed as `PROTOCOL-v0.1-frozen-final.md`:
 
-- [ ] Corrected protocol text (this v0.3, applying F1-F7) committed
+- [ ] Corrected protocol text (this v0.3 + P1-P3, applying F1-F7 and P1-P3) committed
 - [ ] Multi-turn persistence validation PASS (`preflight/MULTITURN-PERSISTENCE-VALIDATION.md`; completed 2026-09-08)
-- [ ] Evolution runtime/input equivalence PASS (`preflight/SUBSTRATE-EQUIVALENCE-VALIDATION.md`; completed 2026-09-08; updated for F2 to reflect `--print "<trigger>"` positional-arg primitive, not stdin)
+- [ ] Evolution runtime/input equivalence PASS (`preflight/SUBSTRATE-EQUIVALENCE-VALIDATION.md`; completed 2026-09-08; F2-corrected to reflect `--print "<trigger>"` positional-arg primitive, not stdin)
 - [ ] Frozen date order recorded in `preflight/date-order.json`
-- [ ] Evaluator packet schema reviewed (F3 blinding; F4 primary endpoint; F5 disposition)
-- [ ] All required scripts / configuration / randomization script frozen and SHA-256-hashed
+- [ ] Evaluator packet schema reviewed (F3 blinding; F4 primary endpoint; F5 disposition; P1 removes C12/M1-M4 from inputs; P2 corrects leakage-scope clarification)
+- [ ] All required scripts / configuration / randomization script (`preflight/randomization-script.py`) frozen and SHA-256-hashed
 - [ ] Replicate-order randomization script (draws the 3 OS-CSPRNG coin flips) committed and SHA-256-hashed
+- [ ] **P3 acknowledgment:** the F8.4 pre-evaluation gate includes the §8.4.1 procedure for materializing, SHA-256-hashing, and recording both evaluator packets in `artifact-hashes.json` BEFORE any evaluator is invoked. The P3 step itself happens at the F8.4 pre-evaluation gate, NOT at the freeze gate (no generation has occurred yet at freeze time). The §8.4.1 procedure is the F8.4 implementation of P3.
 
 The freeze gate is the precondition for the FROZEN-FINAL commit. No FROZEN-FINAL commit is produced before all checkboxes are true.
 
@@ -407,15 +408,29 @@ During the FROZEN-FINAL commit:
 
 ### 8.4 Pre-evaluation gate (after generation, before either evaluator)
 
+**Scope clarification (per PI final-freeze pass P2):** the provenance-leakage prohibition applies to **evaluator-visible artifacts** — evaluator packets, opaque blind IDs, and evaluator orderings. The sealed `preflight/blind_map.json` is **provenance-rich by design** (it is the only artifact that binds the opaque blind_ids to the real provenance, so the operator can unblind after both evaluators lock). The sealed blind map must remain operator/audit-only and must never be supplied to either evaluator. The two integrity checks below verify (1) sealed blind map has complete coverage AND (2) evaluator-visible artifacts have no provenance.
+
 - [ ] Build the 30-target blinded corpus from the captured raw.json files.
-- [ ] Generate the sealed blind map (`preflight/blind_map.json`) with UUID4 blind_ids.
-- [ ] Generate the two evaluator orderings (`preflight/evaluator-A-ordering.json`, `preflight/evaluator-B-ordering.json`) as independent random permutations.
-- [ ] Compute SHA-256 of all three artifacts; record in `preflight/artifact-hashes.json` (extend the existing file from §8.2).
-- [ ] Verify corpus coverage: all 30 captured target raw.json files are represented in the blind map.
-- [ ] Verify absence of condition leakage: the blind map and orderings contain no condition labels, no replicate numbers (in the blind_id), no pass labels, no session_ids, no retry statuses, no filename encodings of condition.
-- [ ] **If this gate fails, invoke neither evaluator.** Report the integrity failure and STOP.
+- [ ] Generate the sealed blind map (`preflight/blind_map.json`) with UUID4 blind_ids. The blind map **is** provenance-rich (it contains replicate, condition, pass, date, session_id, raw_path, sha256) — this is the operator-only de-blinding key for after both evaluators lock. SHA-256-hash the blind map and record in `preflight/artifact-hashes.json`.
+- [ ] Generate the two evaluator orderings (`preflight/evaluator-A-ordering.json`, `preflight/evaluator-B-ordering.json`) as independent random permutations of the 30 blind_ids. SHA-256-hash each. Record in `preflight/artifact-hashes.json`.
+- [ ] **Materialize evaluator packet A and evaluator packet B** (the two JSON objects, one per evaluator, that map blind_id → trigger_prompt + captured_response). SHA-256-hash each packet. Record in `preflight/artifact-hashes.json`. (This is the P3 step — final-packet hashing BEFORE any evaluator is invoked; see §8.4.1 below for the procedure.)
+- [ ] Verify corpus coverage: all 30 captured target raw.json files are represented in the sealed blind map.
+- [ ] **Verify evaluator-visible artifacts have no provenance** (per P2): the evaluator packets, the blind_ids, and the orderings MUST NOT contain condition labels, replicate numbers (in the blind_id), pass labels, session_ids, retry statuses, execution-order markers, or path/filename encodings of condition. The sealed blind map is explicitly NOT in this set.
+- [ ] **If any check fails, invoke neither evaluator.** Report the integrity failure and STOP.
 
 After this gate passes, the two evaluators are invoked independently per §7.
+
+#### 8.4.1 Procedure for materializing and hashing the final evaluator packets (P3)
+
+P3 requires that both final evaluator packets be materialized, SHA-256-hashed, and recorded in `preflight/artifact-hashes.json` BEFORE either evaluator is invoked. Procedure:
+
+1. For each evaluator (A and B), apply the corresponding ordering permutation to the 30 blind_ids, then for each blind_id retrieve the trigger_prompt and captured_response from the corpus.
+2. Construct the packet as the JSON object defined in §7.6 (one packet per evaluator). The packet's `targets[]` is the ordering-permuted sequence; the packet does NOT include condition, replicate, pass, session_id, raw_path, or any other provenance.
+3. Write the packet to `preflight/evaluator-packet-A.json` or `preflight/evaluator-packet-B.json`.
+4. Compute SHA-256 of the packet file; record `{path, sha256, bytes}` in `preflight/artifact-hashes.json`.
+5. **Invoke neither evaluator until the packet's SHA-256 is in `artifact-hashes.json`.** This is the F7+P3 integrity gate.
+
+The packet materialization step is the LAST pre-evaluation step. It is preceded by the blind map and orderings, and followed by the evaluator invocations.
 
 ---
 
@@ -433,10 +448,12 @@ After this gate passes, the two evaluators are invoked independently per §7.
 | Generation | `preflight/generation-go.json` | (operator-computed) | F7 §8.3 — recorded before generation |
 | Generation | `<sandbox>/<replicate>/<condition>/<pass>/T<n>.raw.json` | per-invocation | Per §4.2 flow |
 | Generation | `<sandbox>/<replicate>/<condition>/reconstruction/session_id.txt` | per-reconstruction | Per §4.2 flow |
-| Pre-evaluation | `preflight/blind_map.json` | (operator-computed) | F7 §8.4 — built after generation |
+| Pre-evaluation | `preflight/blind_map.json` | (operator-computed) | F7 §8.4 — built after generation; provenance-rich (P2) |
 | Pre-evaluation | `preflight/evaluator-A-ordering.json` | (operator-computed) | F7 §8.4 — independent permutation |
 | Pre-evaluation | `preflight/evaluator-B-ordering.json` | (operator-computed) | F7 §8.4 — independent permutation |
-| Pre-evaluation | `preflight/artifact-hashes.json` (extended) | (operator-computed) | F7 §8.4 — extend with blind map + orderings |
+| Pre-evaluation | `preflight/evaluator-packet-A.json` | (operator-computed) | F7+P3 §8.4.1 — final packet; SHA-256 in `artifact-hashes.json` BEFORE evaluator invocation |
+| Pre-evaluation | `preflight/evaluator-packet-B.json` | (operator-computed) | F7+P3 §8.4.1 — final packet; SHA-256 in `artifact-hashes.json` BEFORE evaluator invocation |
+| Pre-evaluation | `preflight/artifact-hashes.json` (extended) | (operator-computed) | F7 §8.4 — extend with blind map + orderings + packets |
 | Scoring | `results/scorebook-A.json` | (operator-computed) | Per-evaluator output |
 | Scoring | `results/scorebook-B.json` | (operator-computed) | Per-evaluator output |
 | Scoring | `results/blinding_check.json` | (operator-computed) | Confirms no condition leakage in evaluator inputs |
@@ -446,7 +463,7 @@ The audit trail is the canonical record. Any failure to produce a per-invocation
 
 ---
 
-## 10. Open questions (resolved by PI adjudication pass 2)
+## 10. Open questions (resolved by PI adjudication pass 2 + final-freeze authorization corrections)
 
 | F | Ruling (from PI adjudication pass 2) | Where applied |
 |---|--------------------------------------|---------------|
@@ -457,19 +474,23 @@ The audit trail is the canonical record. Any failure to produce a per-invocation
 | F5 | Per-evaluator interpretation; MECHANISM_SUPPORTED requires both evaluators strong-support; otherwise MIXED_INCONCLUSIVE; no adjudication or averaging | §5.3, §5.4 |
 | F6 | Fresh retry = new (recon + target) pair; Repeated retry = full sequence restart; quarantine if both fail; execute retry immediately to preserve condition order | §4.5 |
 | F7 | 4-gate separation: freeze → randomization → generation GO → pre-evaluation; no claim of `replicate-order-flips.json` unless file exists | §8 (4 sub-gates) |
+| **P1** | Remove unscored C12 / M1-M4 material from evaluator inputs (do not add new endpoints) | §7.2 |
+| **P2** | Provenance-leakage prohibition applies to evaluator-visible artifacts, NOT the sealed blind map; blind map remains provenance-rich and evaluator-inaccessible | §8.4 (scope clarification) + §7.5 |
+| **P3** | Materialize, SHA-256-hash, and record both evaluator packets in `artifact-hashes.json` BEFORE any evaluator is invoked; add to §9 audit trail | §8.4.1 (new subsection) + §9 audit-trail table |
 
-All 7 corrections applied in v0.3. No remaining PI-adjudication questions at pass 2.
+All 7 F-corrections + 3 P-corrections applied. No remaining PI-adjudication corrections before freeze.
 
 ## 11. Status
 
-**v0.3 frozen-candidate — awaiting PI final-freeze authorization.**
+**v0.3 + P1-P3 — passed PI final-freeze authorization pass (`CONDITIONAL_FINAL_FREEZE_AUTHORIZED`).** Three deterministic integrity corrections (P1-P3) applied; the protocol is ready for the F8.2 randomization step and FROZEN-FINAL commit.
 
 - v0.1 + v0.2 preserved at `protocol/_superseded/` for audit.
 - 9 design elements from v0.2 (Q1-Q5 + C1-C5) preserved unchanged.
-- 7 corrections (F1-F7) applied.
+- 7 corrections (F1-F7) from pass 2 applied.
+- 3 corrections (P1-P3) from pass 3 (final-freeze authorization) applied.
 - §8 4-gate separation is new; the §8.2 randomization artifact is created AT freeze time, not before.
-- No generation GO has been given. No generation will occur before a separate explicit Frank-as-PI GO referencing this protocol's commit SHA.
+- No generation GO has been given. No generation will occur before a separate explicit Frank-as-PI GO referencing the FROZEN-FINAL commit SHA.
 
-**Next step (operator action, after PI freeze authorization):** execute §8.1 freeze gate, then §8.2 randomization (draw coin flips, record flips, hash artifacts), then FROZEN-FINAL commit, then §8.3 generation GO, then generation, then §8.4 pre-evaluation, then evaluator invocations, then analysis per §5.
+**Next step (operator action, after this commit):** execute §8.2 randomization (draw coin flips via `preflight/randomization-script.py`, record flips in `preflight/replicate-order-flips.json`, hash artifacts in `preflight/artifact-hashes.json`), then commit the FROZEN-FINAL protocol + randomization artifacts in a single commit. The FROZEN-FINAL commit SHA + protocol SHA-256 are reported to Frank for final-freeze verification. After that, the generation GO is a separate explicit action.
 
-End of protocol v0.3.
+End of protocol v0.3 + P1-P3.

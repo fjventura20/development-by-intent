@@ -1,0 +1,8 @@
+{
+  "generated_at_utc": "2026-09-08T13:27:01Z",
+  "os_entropy_source": "secrets.SystemRandom() (Python stdlib; OS entropy via /dev/urandom)",
+  "replicate_1_coin_flip": "repeated_first",
+  "replicate_2_coin_flip": "repeated_first",
+  "replicate_3_coin_flip": "repeated_first",
+  "script_sha256": "509462a3310522497f4f10294bbb3c8897ab9b1fed6b8d314860f95d66ec5855"
+}
