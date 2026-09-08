@@ -1,0 +1,155 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "dbi-state-isolation-frozen-analysis",
+  "experiment_id": "DBI-State-Isolation-v0.1",
+  "frozen_final_commit": "ed081083051f23c6f27a996f42cc9dc5a4c06c93",
+  "frozen_protocol_sha256": "472d7b9f0058875be1c6a84ca5e7e6b0e2065ac2055bcad4b8d3bc00744d18ac",
+  "generation_go": "preflight/generation-go.json",
+  "nonfatal_audit_deviation": "R1 initial fresh-T1 failed 429 raw was overwritten by successful retry; metadata survives; PI ruled nonfatal and original cannot be byte-verified",
+  "canonical_scorebooks": {
+    "A": {
+      "sha256": "a8d9e777b16d71c320ea6697c6affdd6d65764eb7101c763419cf3bd01f8c24e",
+      "records": 30,
+      "model": "gpt-5.6-sol"
+    },
+    "B": {
+      "sha256": "1c5d56aedf9b76a1bbea6adc51acd51b20480f92c2838945af923312e008a695",
+      "records": 30,
+      "model": "claude-opus-4-7"
+    }
+  },
+  "per_evaluator": {
+    "A": {
+      "per_replicate": [
+        {
+          "replicate": 1,
+          "fresh_report_produced": 5,
+          "repeated_report_produced": 5,
+          "fresh_rate": 1.0,
+          "repeated_rate": 1.0,
+          "delta": 0.0,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        },
+        {
+          "replicate": 2,
+          "fresh_report_produced": 5,
+          "repeated_report_produced": 5,
+          "fresh_rate": 1.0,
+          "repeated_rate": 1.0,
+          "delta": 0.0,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        },
+        {
+          "replicate": 3,
+          "fresh_report_produced": 4,
+          "repeated_report_produced": 5,
+          "fresh_rate": 0.8,
+          "repeated_rate": 1.0,
+          "delta": -0.2,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        }
+      ],
+      "fresh_total": 14,
+      "repeated_total": 15,
+      "history_deferral_total": 0,
+      "secondary_means": {
+        "contract_compliance": 3.566666666666667,
+        "selection_behavior": 3.7,
+        "narrative_behavior": 3.8666666666666667,
+        "functional_completeness": 3.8666666666666667
+      },
+      "failed_targets": [
+        {
+          "blind_id": "81626393-de6e-4666-ac27-018052992ffc",
+          "replicate": 3,
+          "condition": "fresh",
+          "test_id": "T4",
+          "report_produced": 0,
+          "history_deferral": 0,
+          "taxonomy": "other"
+        }
+      ]
+    },
+    "B": {
+      "per_replicate": [
+        {
+          "replicate": 1,
+          "fresh_report_produced": 5,
+          "repeated_report_produced": 5,
+          "fresh_rate": 1.0,
+          "repeated_rate": 1.0,
+          "delta": 0.0,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        },
+        {
+          "replicate": 2,
+          "fresh_report_produced": 5,
+          "repeated_report_produced": 5,
+          "fresh_rate": 1.0,
+          "repeated_rate": 1.0,
+          "delta": 0.0,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        },
+        {
+          "replicate": 3,
+          "fresh_report_produced": 4,
+          "repeated_report_produced": 5,
+          "fresh_rate": 0.8,
+          "repeated_rate": 1.0,
+          "delta": -0.2,
+          "fresh_history_deferrals": 0,
+          "repeated_history_deferrals": 0
+        }
+      ],
+      "fresh_total": 14,
+      "repeated_total": 15,
+      "history_deferral_total": 0,
+      "secondary_means": {
+        "contract_compliance": 3.8333333333333335,
+        "selection_behavior": 3.8333333333333335,
+        "narrative_behavior": 3.8666666666666667,
+        "functional_completeness": 3.8666666666666667
+      },
+      "failed_targets": [
+        {
+          "blind_id": "81626393-de6e-4666-ac27-018052992ffc",
+          "replicate": 3,
+          "condition": "fresh",
+          "test_id": "T4",
+          "report_produced": 0,
+          "history_deferral": 0,
+          "taxonomy": "other"
+        }
+      ]
+    }
+  },
+  "interpretation": {
+    "rule": "Strong support requires delta>0 in >=2/3 replicates + repeated history_deferral and no fresh history_deferral; No support requires delta<=0 in >=2/3 + no repeated history_deferral; otherwise mixed",
+    "A": "MECHANISM_NOT_REPRODUCED_THIS_EVALUATOR",
+    "B": "MECHANISM_NOT_REPRODUCED_THIS_EVALUATOR",
+    "overall": "MECHANISM_NOT_REPRODUCED",
+    "concordance": true
+  },
+  "evaluator_agreement": {
+    "report_produced_exact_agreement": 1.0,
+    "history_deferral_exact_agreement": 1.0,
+    "deferral_taxonomy_exact_agreement": 1.0,
+    "bib_secondary_dimension_exact_agreement": {
+      "contract_compliance": 0.7,
+      "selection_behavior": 0.8,
+      "narrative_behavior": 1.0,
+      "functional_completeness": 1.0
+    }
+  },
+  "unblinding": {
+    "applied": true,
+    "key": "preflight/blind_map.json",
+    "applied_exactly_once": true,
+    "operator_only": true
+  }
+}

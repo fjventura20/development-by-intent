@@ -1,0 +1,15 @@
+{
+  "evaluator_id": "B",
+  "evaluator_model": "claude-opus-4-7",
+  "records": 30,
+  "report_produced_pass": 29,
+  "report_produced_fail": 1,
+  "history_deferral_count": 0,
+  "secondary_means": {
+    "contract_compliance": 3.833,
+    "selection_behavior": 3.833,
+    "narrative_behavior": 3.867,
+    "functional_completeness": 3.867
+  },
+  "status": "PASS"
+}

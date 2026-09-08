@@ -1,0 +1,15 @@
+{
+  "evaluator_id": "A",
+  "evaluator_model": "gpt-5.6-sol",
+  "records": 30,
+  "report_produced_pass": 29,
+  "report_produced_fail": 1,
+  "history_deferral_count": 0,
+  "secondary_means": {
+    "contract_compliance": 3.566666666666667,
+    "selection_behavior": 3.7,
+    "narrative_behavior": 3.8666666666666667,
+    "functional_completeness": 3.8666666666666667
+  },
+  "status": "PASS"
+}

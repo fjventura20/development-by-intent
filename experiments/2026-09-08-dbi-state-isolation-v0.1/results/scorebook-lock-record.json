@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "state-isolation-scorebook-lock-record",
+  "experiment_id": "DBI-State-Isolation-v0.1",
+  "frozen_protocol_commit": "ed081083051f23c6f27a996f42cc9dc5a4c06c93",
+  "frozen_protocol_sha256": "472d7b9f0058875be1c6a84ca5e7e6b0e2065ac2055bcad4b8d3bc00744d18ac",
+  "generation_go": "preflight/generation-go.json",
+  "evaluator_A": {
+    "model": "gpt-5.6-sol",
+    "records": 30,
+    "scorebook": "results/scorebooks/evaluator-A-scorebook.json",
+    "sha256": "a8d9e777b16d71c320ea6697c6affdd6d65764eb7101c763419cf3bd01f8c24e",
+    "bytes": 15222,
+    "locked": true,
+    "primary_pass": 14,
+    "primary_fail": 1,
+    "history_deferrals": 0,
+    "interpretation": "MECHANISM_NOT_REPRODUCED_THIS_EVALUATOR"
+  },
+  "evaluator_B": {
+    "model": "claude-opus-4-7",
+    "records": 30,
+    "scorebook": "results/scorebooks/evaluator-B-scorebook.json",
+    "sha256": "1c5d56aedf9b76a1bbea6adc51acd51b20480f92c2838945af923312e008a695",
+    "bytes": 14229,
+    "locked": true,
+    "primary_pass": 14,
+    "primary_fail": 1,
+    "history_deferrals": 0,
+    "interpretation": "MECHANISM_NOT_REPRODUCED_THIS_EVALUATOR"
+  },
+  "overall_disposition": "MECHANISM_NOT_REPRODUCED",
+  "agreement": {
+    "report_produced_exact": "30/30",
+    "history_deferral_exact": "30/30",
+    "deferral_taxonomy_exact": "30/30",
+    "secondary_bib_exact": {
+      "contract_compliance": "21/30",
+      "selection_behavior": "24/30",
+      "narrative_behavior": "30/30",
+      "functional_completeness": "30/30"
+    }
+  },
+  "post_lock_mutation": false,
+  "unblinding": {
+    "de_blinding_key": "preflight/blind_map.json",
+    "applied_exactly_once": true,
+    "scorebooks_modified_after_lock": false
+  }
+}
