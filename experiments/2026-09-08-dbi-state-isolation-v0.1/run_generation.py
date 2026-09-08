@@ -143,6 +143,8 @@ def start_reconstruction(out_dir: Path, replicate: int, condition: str, target_l
         raise RuntimeError(f"reconstruction runtime failure rc={rc} path={recon_out}")
     env = parse_envelope(recon_out)
     session_id = str(env.get("session_id", ""))
+    if rc != 0 or env.get("is_error") or env.get("api_error_status"):
+        raise RuntimeError(f"reconstruction runtime failure rc={rc} api_error={env.get('api_error_status')} path={recon_out}")
     if not session_id or not ready(env):
         raise RuntimeError(f"reconstruction readiness failure session={session_id!r}")
     (recon_dir / "session_id.txt").write_text(session_id + "\n", encoding="utf-8")
@@ -174,6 +176,8 @@ def invoke_target(base_dir: Path, phase: str, test_id: str, prompt: str, session
     if not out.exists() or out.stat().st_size == 0:
         raise RuntimeError(f"target runtime failure phase={phase} test={test_id} rc={rc}")
     env = parse_envelope(out)
+    if rc != 0 or env.get("is_error") or env.get("api_error_status"):
+        raise RuntimeError(f"target runtime failure phase={phase} test={test_id} rc={rc} api_error={env.get('api_error_status')}")
     record = {
         "phase": phase,
         "test_id": test_id,
