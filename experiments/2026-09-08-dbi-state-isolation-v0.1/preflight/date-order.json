@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "frozen-date-order",
+  "experiment_id": "DBI-State-Isolation-v0.1",
+  "frozen_at_protocol_draft_v0.3": "2026-09-08",
+  "rationale": "Per Frank's PI adjudication pass 1 Q3: 'Keep the five-date order inside the repeated session identical to the Evolution sequence so the mechanism is reproduced rather than redesigned.'",
+  "frozen_evolution_order": [
+    {"position": 1, "test_id": "T1", "trigger_prompt": "Birthdate February 20, 1952"},
+    {"position": 2, "test_id": "T2", "trigger_prompt": "Birthdate June 23, 1956"},
+    {"position": 3, "test_id": "T3", "trigger_prompt": "Birthdate February 29, 1960"},
+    {"position": 4, "test_id": "T4", "trigger_prompt": "Birthdate November 9, 1989"},
+    {"position": 5, "test_id": "T5", "trigger_prompt": "Birthdate August 24, 1931"}
+  ],
+  "source": "experiments/2026-09-06-dbi-evolution-v0.1/blinding/generate.py:32-38 (TEST_PROMPTS dict, T1..T5 canonical order)",
+  "applies_to_conditions": ["fresh_session_per_invocation", "same_session_repeated"],
+  "applies_to_passes": ["priming", "second_pass"]
+}

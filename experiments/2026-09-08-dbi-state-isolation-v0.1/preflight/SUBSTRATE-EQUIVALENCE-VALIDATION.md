@@ -1,37 +1,45 @@
-# Evolution v0.1 Substrate-Equivalence Validation (DBI State Isolation v0.1 v0.2 preflight)
+# Evolution v0.1 Substrate-Equivalence Validation (DBI State Isolation v0.1 v0.3 preflight)
 
-**Date:** 2026-09-08
+**Date:** 2026-09-08 (updated for v0.3 after F2 correction)
 **Author:** Hermes (operator, under DBI Research Manager mandate adopted 2026-08-27)
-**Purpose:** Document the exact substrate constants of DBI-Evolution v0.1's generation runtime so the State Isolation v0.1 experiment can hold them constant. Per PI adjudication C1 ("Use the Evolution generation runtime/model, not the evaluator runtime") and C2 ("Hold frozen Evolution Arm M intent constant in both conditions").
+**Purpose:** Document the exact substrate constants of DBI-Evolution v0.1's generation runtime so the State Isolation v0.1 experiment can hold them constant. Per PI adjudication C1 ("Use the Evolution generation runtime/model, not the evaluator runtime"), C2 ("Hold frozen Evolution Arm M intent constant in both conditions"), and **F2** ("Match Evolution trigger invocation primitive exactly: resumed test prompt as positional argument to claude --print, not a claimed stdin-equivalent path").
+
+> **v0.3 update:** the v0.2 version of this validation said the resumed test prompt was fed via stdin. **This was wrong.** The Evolution v0.1 generator (`generate.py:163-170`) builds `cmd = ["claude", "--resume", sess, "--model", "claude-sonnet-4-6", ..., "--print", prompt]` and invokes via `subprocess.run(cmd, ...)` — i.e., the trigger is the **positional argument to `--print`**, not stdin. The State Isolation v0.3 protocol §3.1, §4.2, and §6.1 have been updated to match this primitive exactly. The shell-redirect (`< reconstruction_input_path`) is used ONLY for the reconstruction step; the target/priming steps pass the trigger as a CLI argument.
 
 ---
 
 ## 1. Generation runtime (frozen)
 
-### 1.1 Command pattern (fresh invocation)
+### 1.1 Command pattern (fresh invocation, reconstruction step)
+
+The reconstruction step uses the same shell-redirected stdin pattern as Evolution v0.1:
 
 ```
 claude --model claude-sonnet-4-6 \
        --allowedTools "" --tools "" \
        --disallowedTools "WebFetch,WebSearch" \
        --output-format json --print \
-       < input.txt
+       < reconstruction_input_path
 ```
 
-Source: `experiments/2026-09-06-dbi-evolution-v0.1/blinding/generate.py:60-66` (the `COMMON_CLAUDE` constant).
+Source: `experiments/2026-09-06-dbi-evolution-v0.1/blinding/generate.py:60-66` (the `COMMON_CLAUDE` constant) + `generate.py:91` (the `subprocess.run(COMMON_CLAUDE, input=input_data, ...)` call which uses shell-redirected stdin). The reconstruction input is read from disk via shell redirect.
 
-### 1.2 Command pattern (resumed invocation, used within a single session)
+### 1.2 Command pattern (resumed invocation, target/priming steps)
+
+**Critical (F2 correction):** the trigger is passed as the **positional argument to `--print`**, NOT via stdin. This matches Evolution v0.1's exact primitive:
 
 ```
 claude --resume <session_id> \
        --model claude-sonnet-4-6 \
        --allowedTools "" --tools "" \
        --disallowedTools "WebFetch,WebSearch" \
-       --output-format json --print \
-       < input.txt
+       --output-format json \
+       --print "Birthdate February 20, 1952"
 ```
 
-Source: same `generate.py:153` (the per-test `claude --resume` invocation).
+Source: same `generate.py:163-170` (the per-test invocation builds `cmd = ["claude", "--resume", sess, "--model", "claude-sonnet-4-6", ..., "--print", prompt]` and invokes via `subprocess.run(cmd, ...)` — i.e., the trigger text is the LAST CLI argument after `--print`). The v0.2 protocol described this as "stdin"; **that was wrong.** v0.3 has been corrected to match the Evolution primitive exactly.
+
+The v0.2 substrate-equivalence-validation said "stdin" in this section; **that was wrong** and the v0.3 protocol has been corrected to match the actual Evolution primitive. The State Isolation v0.3 main experiment MUST use the `--print "<trigger>"` positional argument, not stdin, to exactly match Evolution v0.1's invocation pattern.
 
 ### 1.3 Reconstruction input (frozen, byte-identical)
 
