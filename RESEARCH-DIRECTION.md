@@ -1,6 +1,9 @@
 # Research Direction — Intelligence-Native Software Architecture
 
-**Working direction — September 6, 2026**
+**Working direction — September 6, 2026**  
+**Architecture baseline added — September 9, 2026**
+
+> **Current architecture:** See [INSA-ARCHITECTURE-v0.1.md](INSA-ARCHITECTURE-v0.1.md) for the explicit five-boundary architecture, invariants, failure taxonomy, application contract, and boundary-driven experimental program derived from this research direction.
 
 ## Why this repository is broadening
 
@@ -119,13 +122,13 @@ The research direction is expanding; the historical evidence is not being rewrit
 
 ## Research posture
 
-The project should continue to separate observation, hypothesis, and demonstrated evidence.
+The project should continue to separate observation, hypothesis, architectural invariant, implementation control, guidance, and demonstrated evidence.
 
 Current claims should remain bounded:
 
-- Intelligence-Native Software Architecture is a **working architectural framing**, not an established discipline.
+- Intelligence-Native Software Architecture is an **explicit experimental architecture**, not an established discipline.
 - Development by Intent is an **experimental development pattern**, not a demonstrated replacement for conventional software engineering.
-- Behavioral portability and stable identity under implementation variability remain **empirical questions**.
+- Behavioral reconstruction and behavioral evolution are **distinct empirical properties**; reconstruction stability does not establish safe evolution.
 - Value Architecture requires behavioral testing; stated values alone are not evidence that an agent will preserve them under conflict or autonomy.
 - High-assurance, safety-critical, real-time, regulated, and strongly deterministic systems may require very different boundaries from the language- and reasoning-centric applications studied so far.
 
@@ -133,14 +136,19 @@ A negative result that establishes those boundaries is useful evidence.
 
 ## Near-term research program
 
-The near-term work remains evidence-first:
+The research program is now organized by the architecture rather than by DbI demonstrations alone.
 
-1. Establish a calibrated Behavioral Identity baseline across independent reconstructions.
-2. Test whether intentional behavioral evolution can occur while identity is preserved.
-3. Measure intent-to-correct-behavior latency and first-execution success where practical.
-4. Continue causal ablation work to determine what information actually preserves behavior.
-5. Design behavioral experiments for Value Architecture in situations where violating a stated value would make task completion easier.
-6. Synthesize the evidence into a concise external brief that distinguishes demonstrated results from architectural hypotheses.
+The priority sequence is:
+
+1. **Review and challenge INSA v0.1** against the accumulated evidence and identify any construct that is guidance rather than architecture.
+2. **Test targeted evolution with preservation (INSA-ID-E1)** using an explicit mutation set, preservation set, permitted variance, acceptance tests, and preservation gates.
+3. **Test authority revocation and least authority (INSA-AUTH-E1)** under consequential action.
+4. **Test values under cost and conflict (INSA-VAL-E1)** rather than treating stated values as evidence.
+5. **Test cross-runtime behavioral identity (INSA-ID-E2)** across materially different implementation stacks.
+6. **Measure minimum sufficient evidence (INSA-EVD-E1)** for reliable external conformance evaluation.
+7. **Test intent compilation (INSA-INT-E1)** to determine when structured constraints improve reliability and when they unnecessarily restrict intelligent execution.
+
+Each experiment should identify the architectural boundary under test, the invariant or hypothesis, the failure condition, the implementation freedom allowed, the evidence required, and the claim that remains prohibited even if the experiment passes.
 
 ## Positioning
 
@@ -150,4 +158,4 @@ The broader project can now be described as:
 
 > **An investigation of Intelligence-Native Software Architecture: how software should be designed when intelligence itself becomes an abundant computational resource. Development by Intent is one experimentally studied pattern within that larger problem.**
 
-This framing should evolve only as the evidence warrants it.
+The architecture should evolve only as the evidence warrants it.
