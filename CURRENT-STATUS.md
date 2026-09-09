@@ -1,170 +1,167 @@
 # Intelligence-Native Software Architecture / Development by Intent — Current Status
 
 **As of:** 2026-09-09  
-**Project stage:** INSA Stage 3 — explicit architecture and boundary validation  
+**Project stage:** INSA Stage 4 — boundary validation  
 **Decision authority:** Frank Ventura as principal investigator  
 **Operating rule:** humans own purpose, intent, authority delegation, judgment, and acceptance; intelligence may assume implementation burden only inside an explicit governed envelope
 
 ## Current assessment
 
-The project has moved beyond the question of whether Development by Intent (DbI) is an interesting development technique.
+The project has completed the transition from Development by Intent (DbI) as the primary conceptual frame to **Intelligence-Native Software Architecture (INSA)** as the broader experimental architecture.
 
-DbI remains the experimental lineage and a primary research vehicle, but the larger research target is now **Intelligence-Native Software Architecture (INSA)**: how software should be designed when machine intelligence becomes a fundamental execution resource rather than merely a coding aid.
+DbI remains the experimental lineage and a primary research vehicle. INSA now defines the architectural boundaries that future experiments are intended to validate, narrow, or falsify.
 
-The project has completed enough discovery to define an explicit experimental architecture. The current baseline is:
+## Frozen architecture baseline
 
-- [`INSA-ARCHITECTURE-v0.1.md`](INSA-ARCHITECTURE-v0.1.md)
-- [`RESEARCH-DIRECTION.md`](RESEARCH-DIRECTION.md)
-- [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md)
+The current architecture is:
 
-The immediate objective is now to determine, through controlled experiments, which INSA boundaries and invariants survive contact with reality.
+- [`INSA-ARCHITECTURE-v0.3-FROZEN.md`](INSA-ARCHITECTURE-v0.3-FROZEN.md) — freeze manifest;
+- [`INSA-ARCHITECTURE-v0.3-candidate.md`](INSA-ARCHITECTURE-v0.3-candidate.md) — exact normative source;
+- source commit: `d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b`;
+- source Git blob SHA: `848e0fe014f5b4a61ba2cb92e772ee3499dca9c1`;
+- final freeze review: [`INSA-ARCHITECTURE-v0.3-FINAL-FREEZE-REVIEW.md`](INSA-ARCHITECTURE-v0.3-FINAL-FREEZE-REVIEW.md);
+- freeze-review disposition: **PASS_FOR_ARCHITECTURE_FREEZE**.
+
+The v0.3 baseline MUST NOT be edited in place for experiments claiming to test that architecture. Any architectural change requires a new version.
+
+## How the architecture reached freeze
+
+The progression was deliberately adversarial:
+
+```text
+research outline
+      ↓
+INSA v0.1 explicit architecture
+      ↓
+v0.1 adversarial review — REVISION_REQUIRED
+      ↓
+INSA v0.2 candidate
+      ↓
+v0.2 freeze review — REVISION_REQUIRED
+      ↓
+INSA v0.3 candidate
+      ↓
+final freeze review — PASS
+      ↓
+INSA v0.3 FROZEN
+```
+
+The review process corrected several important defects before experimental use:
+
+- architectural invariants are now separated from guidance;
+- Evidence is modeled as a cross-cutting verification plane;
+- Authority includes provenance, grant authenticity, revocation, and freshness;
+- Value Declaration is separated from Value Conformance status and evidence;
+- Behavioral evolution is bound to a frozen baseline;
+- permitted variance is dimension-specific rather than a competing behavioral set;
+- State / Continuity is an explicit cross-cutting contract;
+- multi-agent delegation cannot manufacture authority;
+- Evaluation Authority is distinct from Acceptance Authority;
+- boundary applicability must be declared before adjudication.
 
 ## The five INSA boundaries
-
-INSA v0.1 defines five architectural boundaries:
 
 1. **Intent** — what outcome the principal wants, what constraints apply, and what constitutes acceptance.
 2. **Authority** — what the intelligent system may do, independent of what it can technically do.
 3. **Values** — how discretion is governed when instructions do not uniquely determine an action.
 4. **Behavioral Identity** — what must remain stable when implementation varies, is reconstructed, or evolves.
-5. **Evidence** — how humans or independent evaluators can determine whether the preceding boundaries were respected.
+5. **Evidence** — how humans or independent evaluators can establish whether the other boundaries were respected.
 
-The Intelligent Execution Environment — models, agents, tools, code, services, memory, workflows, and coordination — is treated as the implementation freedom zone inside those boundaries.
+The Intelligent Execution Environment — models, agents, tools, code, services, workflows, memory, and coordination — is the implementation freedom zone inside those governed contracts.
 
-## Evidence established so far
+State / Continuity remains cross-cutting rather than a sixth top-level boundary in v0.3.
+
+## Evidence established before INSA freeze
 
 ### Intent-layer development / DbI
 
-The project has bounded evidence that useful language- and reasoning-centric applications can be developed primarily at the intent and behavioral-evaluation layers while capable AI supplies substantial implementation detail.
-
-This establishes feasibility for the studied application classes. It does not establish universal applicability.
+Bounded experiments show that useful language- and reasoning-centric applications can be developed primarily at the intent and behavioral-evaluation layers while capable AI supplies substantial implementation detail.
 
 ### Behavioral reconstruction
 
 The Amazing Birthday research program provides strong bounded evidence that recognizable behavioral identity can survive independent reconstruction under controlled conditions.
 
-The BIB-001 rerun established a calibrated reconstruction baseline with both evaluators passing the frozen gates.
+### BIB-002
 
-### BIB-002 deviation confirmation
-
-The suspected R4/B deviation did **not** reproduce under the preregistered confirmation experiment.
+The suspected R4/B deviation did not reproduce under preregistered confirmation.
 
 Final disposition: **PATTERN_NOT_REPRODUCED**.
 
-This was a useful negative result. The project should not build architecture around the earlier apparent anomaly.
-
 ### Behavioral evolution
 
-The subsequent DbI Evolution experiment asked a harder architectural question: whether a targeted intent change can modify the desired behavior while preserving non-target behavioral identity.
+The subsequent evolution experiment tested whether a targeted intent change could modify desired behavior while preserving non-target identity.
 
 Final disposition: **MODIFICATION_AND_PRESERVATION_FAILURE**.
 
-The central architectural implication is:
+Architectural implication:
 
 > **Reconstruction stability does not imply evolution stability.**
 
-INSA therefore treats safe targeted evolution as an independent architectural problem requiring an explicit mutation set, preservation set, permitted variance, acceptance tests, and preservation gates.
+This result directly motivated INSA's explicit safe-evolution contract.
 
 ### Value Architecture
 
-Value Architecture has advanced from an informal principle into an experimental standard:
+Value Architecture v0.2 provides an experimental vocabulary for capability, intent, values, authority, policy, evidence, implementation, conflict handling, and behavioral conformance.
 
-- capability is distinguished from authority;
-- values are distinguished from rules, policies, prompts, and implementation mechanisms;
-- twelve core values are defined behaviorally;
-- authority, conflict resolution, evidence, and conformance testing are explicit;
-- increasing capability is not permitted to silently imply increasing authority.
+Value conformance remains under-tested and is a major future INSA boundary target.
 
-The vocabulary is relatively mature. Behavioral conformance evidence remains early and is a major next research area.
+## Active milestone — INSA-ID-E1
 
-### Evidence architecture
+The first experiment explicitly designed from the frozen INSA architecture is:
 
-The experimental program now has substantial discipline around:
+**INSA-ID-E1 — Targeted Evolution With Preservation**
 
-- frozen protocols;
-- provenance;
-- hashes;
-- blind mappings;
-- independent evaluators;
-- preserved failures and deviations;
-- bounded claims;
-- PI adjudication;
-- explicit stop conditions.
+The experiment must bind before execution:
 
-This is currently one of the more mature portions of the emerging architecture.
+```text
+B = frozen baseline
+D = scored behavioral dimensions
+M = mutation dimensions
+P = preservation dimensions
+O = out-of-scope dimensions
+V(d) = dimension-specific permitted variance
+A = acceptance tests bound to M
+G = preservation gates bound to P
+```
 
-## Architectural distinction now enforced
+The question is:
 
-INSA v0.1 explicitly separates:
+> **Can a targeted intent change modify a declared target behavior while preserving a predeclared non-target behavioral identity envelope?**
 
-- **architectural invariants** — conditions that must remain true and must have an enforcement, detection, or evaluation path;
-- **controls** — mechanisms used to enforce or observe invariants;
-- **guidance** — recommended practice that is not an architectural boundary;
-- **hypotheses** — propositions still awaiting evidence;
-- **evidence claims** — bounded statements about what has actually been observed.
+This proposition is currently **unproven** and must remain vulnerable to failure.
 
-This distinction is important. Prompt discipline, process advice, or desirable behavior should not be promoted to architecture merely by naming them as such.
+## Execution boundary
 
-## Active milestone — validate the architecture
+The architecture freeze does **not** authorize INSA-ID-E1 execution.
 
-The next milestone is **not another broad demonstration of DbI**.
+The next work is:
 
-The active program is to test INSA boundary by boundary.
-
-Priority experiments defined by v0.1 are:
-
-1. **INSA-ID-E1 — Targeted evolution with preservation**  
-   Test whether one declared behavioral dimension can change while an explicit non-target identity set remains stable.
-
-2. **INSA-AUTH-E1 — Revocation and least authority**  
-   Test whether an agent reliably stops or reroutes consequential action when authority is narrowed or revoked after planning begins.
-
-3. **INSA-VAL-E1 — Values under cost and conflict**  
-   Test whether declared values continue to govern when compliance creates measurable cost, delay, or conflict.
-
-4. **INSA-ID-E2 — Cross-runtime identity portability**  
-   Test the same Behavioral Identity Contract across materially different model/tool stacks.
-
-5. **INSA-EVD-E1 — Minimum sufficient evidence**  
-   Determine the smallest evidence package that still supports reliable blinded conformance evaluation.
-
-6. **INSA-INT-E1 — Intent compilation**  
-   Determine when converting natural-language intent into structured constraints improves reliability versus overconstraining useful intelligence.
-
-## Immediate research gate
-
-Before launching the next expensive experiment, INSA v0.1 should receive an adversarial architecture review against the accumulated experimental record.
-
-The review should ask:
-
-- Are all five boundaries genuinely architectural, or are any merely process guidance?
-- Does every declared invariant have a plausible enforcement, detection, or evaluation path?
-- Are any controls being mistaken for invariants?
-- Does the architecture explain the observed reconstruction/evolution split?
-- Are the proposed experiments capable of falsifying or narrowing the architecture?
-- What important boundary is missing?
-
-If the architecture survives that review with only bounded revisions, the next recommended experimental target is **INSA-ID-E1**, because safe evolution is the clearest experimentally exposed weakness in the current model.
+1. construct the INSA-ID-E1 preregistration and exact experimental protocol;
+2. bind the frozen INSA v0.3 architecture source;
+3. freeze `B/D/M/P/O/V(d)/A/G`;
+4. define evaluator roles, blinding, evidence requirements, stop rules, and allowed claims;
+5. conduct an adversarial protocol review;
+6. freeze the protocol only if that review passes;
+7. obtain separate execution authorization before model dispatch.
 
 ## Current claim boundary
 
-The project may reasonably claim that:
+The project may state that:
 
-- Intelligence-Native Software Architecture is now an explicit experimental architecture, not merely a loose research direction;
-- DbI provides bounded evidence that the human-machine development boundary can move upward for some application classes;
-- behavioral reconstruction and behavioral evolution are distinct engineering properties;
-- Value Architecture and authority become more important as implementation autonomy increases;
-- evidence and evaluation must be architectural concerns when implementation can vary dynamically.
+- INSA v0.3 is an explicit, internally reviewed and frozen experimental architecture baseline;
+- the five-boundary model is ready for controlled validation;
+- DbI provides bounded evidence that the development boundary can move upward for some application classes;
+- behavioral reconstruction and safe behavioral evolution are distinct engineering properties;
+- authority, values, behavioral identity, and evidence become first-class concerns as implementation autonomy increases.
 
-The project may **not** yet claim that:
+The project may not yet state that:
 
-- INSA is an established discipline;
+- INSA is an empirically validated architecture;
 - the five-boundary model is complete;
-- safe behavioral evolution has been solved;
-- Value Architecture is portable or durable across implementations without further testing;
+- safe targeted evolution has been solved;
+- Value Architecture has demonstrated portable behavioral durability;
 - all software benefits from intelligence-native techniques;
-- deterministic architecture is obsolete;
-- intelligence should receive broad autonomous authority.
+- deterministic architecture is obsolete.
 
 ## Project progression
 
@@ -175,20 +172,17 @@ Can useful software behavior be developed at the intent layer?
 Stage 2 — Experimental validation
 Can behavioral identity be reconstructed, measured, compared, and challenged?
 
-Stage 3 — Architecture  ← CURRENT
+Stage 3 — Architecture
 What stable boundaries are required when implementation becomes increasingly intelligent and fluid?
 
-Stage 4 — Boundary validation
+Stage 3A — Adversarial architecture correction
+Can the architecture survive critique before we spend evidence on it?
+
+Stage 4 — Boundary validation  ← CURRENT
 Which proposed INSA invariants survive controlled adversarial experiments?
 
 Stage 5 — External architecture validation
-Can independent developers and researchers implement, challenge, reproduce, or falsify the architecture?
+Can independent developers and researchers implement, challenge, reproduce, narrow, or falsify the architecture?
 ```
 
-The project is now at the transition from **Stage 3 into Stage 4**.
-
-## Repository posture
-
-The repository name remains `development-by-intent` deliberately. DbI is the experimental lineage from which INSA emerged, and preserving links, evidence, hashes, discussions, and historical continuity remains more important than renaming the repository prematurely.
-
-The front page should remain accessible to developers, while the architecture and experimental record provide the deeper technical path.
+The architecture is frozen. The next unit of progress must come from evidence.
