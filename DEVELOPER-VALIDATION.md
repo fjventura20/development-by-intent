@@ -4,9 +4,21 @@ The purpose of this phase is to test whether independent developers can quickly 
 
 This is intentionally lightweight. Do not turn developer feedback into another large internal research program before collecting the first responses.
 
+## Two contribution tiers
+
+### Tier 1 — five-minute observation
+
+Use [`QUICK-VALIDATION.md`](QUICK-VALIDATION.md).
+
+This is the lowest-friction contribution path. A developer runs one fresh-environment observation, preserves the first output, and reports what worked or failed. It is exploratory evidence, not a formal replication.
+
+### Tier 2 — 10–15 minute developer review
+
+Use the fuller validation path below when the participant is willing to spend more time understanding and criticizing the development method itself.
+
 ## Target
 
-Recruit **5–10 software developers** who were not involved in creating DbI.
+Recruit **5–10 software developers** who were not involved in creating DbI for the fuller review.
 
 A mix is preferable:
 
@@ -19,13 +31,13 @@ The sample is exploratory, not statistically representative.
 
 ## What each developer receives
 
-Give them only the public Developer Preview path:
+For the fuller review, give them only the public path:
 
 1. [`README.md`](README.md)
 2. [`examples/amazing-birthday/TUTORIAL.md`](examples/amazing-birthday/TUTORIAL.md)
 3. [`EVIDENCE.md`](EVIDENCE.md)
 
-Optionally show the five-minute walkthrough in [`DEMO.md`](DEMO.md).
+Optionally show the 8:41 developer demo linked from the README.
 
 Do not begin by explaining the internal collaboration history, mailbox protocol, full experimental chronology, or theoretical debates. We want to know whether the public material carries the idea on its own.
 
@@ -55,9 +67,11 @@ Useful evidence includes:
 - willingness to try the method on an independent problem;
 - an independent attempt that succeeds or fails.
 
+A reproducible failure should be credited and preserved rather than treated as an outreach failure.
+
 ## Preview success criteria
 
-Developer Preview v0.1 has done its job if, after the first 5–10 reviews:
+Developer Preview v0.1 has done its job if, after the first 5–10 fuller reviews:
 
 - most participants can describe the human/AI responsibility boundary correctly;
 - at least some can articulate how DbI differs from prompt-and-pray iteration;
@@ -65,7 +79,7 @@ Developer Preview v0.1 has done its job if, after the first 5–10 reviews:
 - objections cluster into concrete technical or methodological issues rather than simple confusion about what DbI means;
 - at least one independent developer attempts DbI on a problem we did not design.
 
-If developers consistently misunderstand the concept, improve the explanation before running more internal experiments.
+If developers consistently misunderstand the concept, improve the explanation before expanding outreach.
 
 If developers understand it but reject it for the same substantive reason, investigate that reason.
 
@@ -73,6 +87,6 @@ If developers understand it and begin independent experiments, prioritize their 
 
 ## Stop rule
 
-After the first 5–10 responses, stop collecting and review the pattern before expanding outreach.
+After the first 5–10 fuller responses, stop collecting and review the pattern before expanding outreach.
 
 The objective is to learn what deserves the next unit of effort — not to accumulate compliments or maximize response count.
