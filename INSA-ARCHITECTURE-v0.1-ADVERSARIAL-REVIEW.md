@@ -5,6 +5,8 @@
 **Review posture:** Attempt to break the architecture before using it to justify further experiments  
 **Disposition:** **REVISION_REQUIRED_BEFORE_ARCHITECTURE_FREEZE**
 
+> **Reviewer disclosure:** This was an internal AI-assisted methodological review within the PI-led research process, not independent external validation. The original artifact did not contemporaneously record a sufficiently specific reviewer/model identity, exact model version, or authoring-context access condition. See [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md). Unknown details are intentionally not reconstructed after the fact.
+
 ## 1. Executive finding
 
 INSA v0.1 succeeds at turning the project's prior research direction into an explicit architectural model. The five-boundary framing is useful and substantially more falsifiable than the earlier conceptual outline.
