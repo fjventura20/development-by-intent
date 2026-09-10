@@ -1,318 +1,180 @@
 # Development by Intent
 
-**An experimental development pattern within a broader investigation of Intelligence-Native Software Architecture.**
-
 **What if developers integrated with AI at the intent level instead of the code level?**
 
-## The broader research question
-
-This repository began by investigating Development by Intent (DbI): whether a human developer can remain primarily at the intent, constraint, evaluation, and acceptance layers while a capable AI assumes much of the burden of implementation.
-
-That work has exposed a larger architectural question:
-
-> **How should software be designed when machine intelligence itself becomes a fundamental execution resource?**
-
-The current working umbrella for that question is **Intelligence-Native Software Architecture**.
-
-Under that framing:
-
-- **Intelligence-Native Software Architecture** is the broader architectural investigation;
-- **Development by Intent (DbI)** is one experimental development pattern within it;
-- **Value Architecture** addresses how intelligent agents should choose when discretion exists;
-- **Behavioral Identity** asks what makes an application remain the same application when implementation can vary;
-- **Evidence and Evaluation Architecture** asks how acceptable behavior, continuity, provenance, and reliability can be demonstrated.
-
-The terminology is provisional. The research questions and evidence matter more than the labels.
-
-See **[RESEARCH-DIRECTION.md](RESEARCH-DIRECTION.md)** for the current framing and its relationship to the existing DbI evidence.
-
-## Watch the 8:41 developer demo
-
-[▶ **Watch: Development by Intent — Developer Demo**](https://youtu.be/MXjLTDkpX3U)
-
-See an application **created, invoked, modified, and integrated** through intent rather than direct code editing.
+Development by Intent (DbI) is an experimental software-development pattern in which the human owns **intent, constraints, judgment, testing, and acceptance**, while a capable AI is allowed to assume much of the implementation burden.
 
 > **Humans own purpose, intent, judgment, and acceptance. AI assumes the burden of implementation.**
 
-## Developer Challenge
+This repository is a research record, not a claim that the pattern is finished or universally applicable.
 
-**Watch → Try → Break it → Report**
+## Start here
 
-1. Watch the 8:41 demo.
-2. Run the **[Amazing Birthday tutorial](examples/amazing-birthday/TUTORIAL.md)** in a fresh conversation.
-3. Try the same development loop on one small application of your own.
-4. Tell us what worked, what failed, and where you think the approach breaks.
+**If you have five minutes:** run the [`Five-Minute External Validation`](QUICK-VALIDATION.md). A failure is a useful contribution.
 
-**The demo is enough to decide whether the idea deserves a deeper look; the tutorial lets you test it yourself.**
+**If you want to see it first:** watch the [8:41 Development by Intent developer demo](https://youtu.be/MXjLTDkpX3U).
 
-Development by Intent (DbI) is an experimental software-development pattern for applications where a capable AI can supply much of the implementation capability.
+**If you want the research state:** read [`CURRENT-STATUS.md`](CURRENT-STATUS.md) and [`EVIDENCE.md`](EVIDENCE.md).
 
-The human developer stays responsible for **intent, constraints, evaluation, and acceptance**. The AI is allowed to choose how to realize the behavior.
+**If you want the full worked example:** use the [`Amazing Birthday tutorial`](examples/amazing-birthday/TUTORIAL.md).
 
-Instead of beginning with:
+## The DbI idea
 
-```text
-requirements → design → code → test → debug → redeploy
-```
-
-DbI explores a shorter development loop:
-
-```text
-state intent → let the system act → inspect → refine → test → preserve
-```
-
-The repository exists to determine where that pattern works, where it fails, what must remain stable when implementation is fluid, and what broader architectural principles follow if intelligence becomes part of the execution environment itself.
-
-## Try it in 10 minutes
-
-The fastest way to understand DbI is to experience it.
-
-Open the **[Amazing Birthday tutorial](examples/amazing-birthday/TUTORIAL.md)** and follow the first few steps in a fresh conversation with a capable AI.
-
-You will:
-
-1. state a simple outcome rather than an implementation specification;
-2. inspect what the AI produces;
-3. correct the behavior conversationally;
-4. test whether the correction generalizes to a new input;
-5. establish a reusable trigger;
-6. preserve the behavior so it can be tested outside the original conversation.
-
-You do **not** need to choose a language, framework, database, architecture, or UI toolkit first.
-
-That omission is deliberate.
-
-## The central DbI idea
-
-Traditional AI-assisted coding usually keeps source code at the center:
+Traditional AI-assisted coding usually keeps implementation at the center:
 
 ```text
 human intent → AI writes code → human reviews code → application
 ```
 
-Development by Intent asks whether, for some classes of software, the development boundary can move upward:
+DbI asks whether the development boundary can move upward for some application classes:
 
 ```text
-human intent + evaluation
-          ↓
-     AI implementation
-          ↓
-  observable behavior
+state intent
+    ↓
+AI realizes behavior
+    ↓
+human inspects and corrects
+    ↓
+test on new inputs
+    ↓
+preserve what must remain true
 ```
 
-If implementation details need to change, the AI may change them. The human evaluates whether the application still satisfies the intended behavior.
+The AI may use code, tools, workflows, platform-native capabilities, or other mechanisms. The human evaluates whether the observable result still satisfies the intended application behavior.
 
-The strongest version of the hypothesis is that a durable application asset may sometimes be a governed behavioral contract — intent, constraints, examples, acceptance tests, provenance, and evidence — while code, skills, workflows, and integrations become replaceable implementation artifacts.
+This does **not** mean code disappears. It asks which implementation decisions can safely become replaceable when the execution environment itself is capable of interpreting intent.
 
-That hypothesis is being tested, not assumed.
+## Evidence first
 
-## Intelligence-native working model
+The project began with a simple question: can an application developed primarily through conversation retain recognizable behavior after the original development conversation is gone?
 
-DbI is now being treated as an experimental vehicle for a broader hypothesis: when intelligence itself participates in execution, the stable architectural boundary may move upward from implementation detail toward **purpose, intent, values, authority, behavior, and evaluation**.
+### Reconstruction result
 
-A working model is:
+The canonical Amazing Birthday example was developed conversationally, reduced to explicit behavioral expectations, reconstructed in fresh environments, and tested on previously unused dates.
+
+Multiple recorded reconstructions met the project's behavioral criteria. Public result indexes distinguish operator scoring from later independent re-scoring where both exist. Independent re-scoring is **not automatically the same as blinded evaluation**; the repository now states that distinction explicitly.
+
+This supports a bounded claim of **behavioral recoverability** for the tested application and environments. It does not establish universal portability or statistical reliability.
+
+See [`EVIDENCE.md`](EVIDENCE.md) and [`examples/amazing-birthday/RESULTS-INDEX.md`](examples/amazing-birthday/RESULTS-INDEX.md).
+
+### The important failure
+
+The project then tested a harder question: can one part of the behavior be intentionally changed while the rest of the application's behavior remains within a declared preservation envelope?
+
+The result was:
+
+`MODIFICATION_AND_PRESERVATION_FAILURE`
+
+The resulting lesson is:
+
+> **Reconstruction stability does not imply evolution stability.**
+
+That failure is now a first-class public result because it changed the architecture that followed. See [`EVOLUTION-FAILURE.md`](EVOLUTION-FAILURE.md).
+
+The project preserves negative, null, indeterminate, and blocked results rather than counting only successes.
+
+## What the evidence does not establish
+
+The project does **not** currently claim that:
+
+- DbI works for every class of software;
+- source code is obsolete;
+- larger preservation packages are always better than concise descriptions;
+- model upgrades preserve application behavior automatically;
+- safe targeted evolution has been solved;
+- AI-generated applications are appropriate today for every regulated, real-time, safety-critical, or highly deterministic system;
+- the broader architecture described below has been empirically validated.
+
+The full claim boundary is maintained in [`EVIDENCE.md`](EVIDENCE.md) and [`CURRENT-STATUS.md`](CURRENT-STATUS.md).
+
+## The broader question: Intelligence-Native Software Architecture
+
+The DbI experiments exposed a larger problem:
+
+> **How should software be designed when machine intelligence itself becomes a fundamental execution resource?**
+
+The project currently calls that investigation **Intelligence-Native Software Architecture (INSA)**.
+
+Frozen INSA v0.3 proposes five concerns that must remain explicit when implementation becomes increasingly intelligent and fluid:
+
+1. **Intent** — what outcome is wanted and what constitutes acceptance.
+2. **Authority** — what the system is permitted to do, independent of what it can technically do.
+3. **Values** — how discretion is governed when instructions permit more than one action.
+4. **Behavioral Identity** — what must remain stable when implementation varies, is reconstructed, or evolves.
+5. **Evidence** — how humans or evaluators can determine whether those boundaries were respected.
+
+This is a **frozen experimental architecture baseline**, not an established architectural discipline.
+
+Current Stage 4 status: **0 completed experiments explicitly designed to validate frozen INSA v0.3.** The first planned experiment is `INSA-ID-E1 — Targeted Evolution With Preservation`; its current protocol is still draft and authorizes zero candidate-generation or evaluator calls.
+
+See [`CURRENT-STATUS.md`](CURRENT-STATUS.md) for the exact state.
+
+## Human control and execution authority
+
+The project deliberately separates technical capability from permission to act.
+
+A capable agent may be able to dispatch models, spend resources, modify repositories, or call tools. That capability does not constitute authority.
+
+For experiments such as INSA-ID-E1, resource-consuming execution requires explicit **PI / human GO** after the protocol and evidence gates are satisfied. This is a human-control boundary, not an independent oversight board.
 
 ```text
-human purpose
-      ↓
-intent + constraints + acceptance criteria
-      ↓
-values + authority boundaries
-      ↓
-intelligent execution environment
-      ↓
-dynamic implementation / tools / coordination
-      ↓
-observable behavior
-      ↓
-evidence + evaluation
-      ↓
-human acceptance / correction
+capability to execute ≠ authority to execute
 ```
-
-The implementation may vary. The governing envelope should remain explicit.
-
-This does not mean code disappears. Deterministic algorithms, APIs, databases, interfaces, security boundaries, infrastructure, and high-assurance components may remain conventional. The research question is which responsibilities can safely move upward when the execution environment can interpret intent and choose implementation mechanisms.
-
-## Human Benefit and Agency Principle
-
-Development by Intent is intended to use AI to **increase human capability, not make human displacement the objective**.
-
-DbI therefore treats human agency as part of the architecture, not as an optional social consideration:
-
-- **Humans own purpose, intent, constraints, judgment, and acceptance.** AI may implement an outcome, but it does not acquire authority to redefine why the system exists or what constitutes an acceptable result.
-- **AI should remove unnecessary implementation barriers.** The goal is to let more people turn legitimate ideas into useful software without requiring every person to master the technical machinery underneath it.
-- **People must retain meaningful control.** A human should be able to inspect outcomes, redirect behavior, reject results, revise intent, and determine when the system has succeeded.
-- **Capability should broaden access.** DbI is most valuable when it enables individuals, small organizations, domain experts, educators, nonprofits, and others who may not have access to conventional software-development resources.
-- **Productivity is not itself the purpose.** Reducing implementation effort is useful when it expands what people can accomplish; reducing human participation is not a success criterion by itself.
-
-A concise statement of the principle is:
-
-> **Humans own purpose, intent, judgment, and acceptance. AI assumes the burden of implementation.**
-
-DbI may still change the amount and kind of implementation work people perform. The project does not assume that such disruption is harmless. Its design goal is to place increasing AI capability under explicit human direction while preserving human authorship, authority, and responsibility for the resulting system.
 
 ## Value Architecture
 
-As implementation autonomy increases, explicit instructions cannot determine every choice an intelligent system will face. **Value Architecture** addresses the behavioral layer that governs those choices when discretion exists.
+As AI systems receive more implementation freedom, instructions cannot uniquely determine every permitted decision. The project uses **Value Architecture** for the separate question of how an intelligent agent should exercise discretion when multiple actions remain technically possible and authorized.
 
-The project's formal working definition is:
+Its governing principle is behavioral:
 
-> **A Value Architecture is a structured, versioned set of durable behavioral values, authority boundaries, conflict-resolution procedures, evidence requirements, and conformance tests that govern how an intelligent agent exercises discretion.**
+> **Stated values are claims until behavior provides evidence.**
 
-A concise formulation remains:
+The current experimental standard is [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md). Value conformance remains under-tested; the standard should not be read as proof that the proposed values are durably embodied by current agents.
 
-> **Value Architecture is what an agent is made of when nobody is looking.**
+## Internal review is not external validation
 
-The phrase is behavioral, not anthropomorphic. A value matters when following it is inconvenient, when a shortcut is available, when instructions are incomplete, or when immediate external correction is absent.
+INSA v0.1, v0.2, and v0.3 passed through internal AI-assisted adversarial and freeze reviews before v0.3 was frozen for experimentation.
 
-### Value is not the same as rule, policy, prompt, or mechanism
+Those reviews found real defects and caused revisions. They are useful evidence of internal methodology, but they are **not independent external certification**. The original artifacts did not record enough reviewer/model/context metadata to support a stronger claim.
 
-- A **value** is a durable behavioral preference or decision criterion that guides choices across situations.
-- A **rule** is an explicit constraint or required action for a defined condition.
-- A **policy** is an organized set of rules, permissions, prohibitions, and domain interpretations.
-- A **prompt** is an instruction-bearing artifact that may communicate values or rules but is not itself evidence that they are behaviorally durable.
-- An **implementation mechanism** is the technical means used to realize or enforce the architecture — for example permissions, event subscriptions, memory, approval gates, logs, sandboxes, hashes, or rollback systems.
+See [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md).
 
-The central test is observable behavior. **Stated values are claims until behavior provides evidence.**
+## Two ways to evaluate the project
 
-### Core values under investigation
+### Developer path
 
-The current Value Architecture Standard defines twelve core values:
+1. [`QUICK-VALIDATION.md`](QUICK-VALIDATION.md) — five-minute external observation.
+2. [`examples/amazing-birthday/TUTORIAL.md`](examples/amazing-birthday/TUTORIAL.md) — experience the development loop.
+3. [`EVIDENCE.md`](EVIDENCE.md) — inspect what has and has not been demonstrated.
+4. [`CONTRIBUTING.md`](CONTRIBUTING.md) — report a result, especially a failure.
 
-- **Human Agency** — preserve human ownership of purpose, correction, rejection, and acceptance.
-- **Integrity and Truthfulness** — distinguish what is known, inferred, estimated, uncertain, or unverified.
-- **Awareness** — notice material changes in state, context, dependencies, authority, or risk and reassess affected assumptions.
-- **Restraint and Authority Respect** — do not convert technical capability into self-granted permission.
-- **Evidence and Epistemic Discipline** — preserve provenance and support consequential claims or actions with appropriate evidence.
-- **Continuity** — carry forward relevant commitments, constraints, accepted decisions, identity, provenance, and unresolved obligations.
-- **Stewardship** — treat entrusted data, systems, resources, money, access, and evidence as held on behalf of the principal.
-- **Privacy and Confidentiality** — minimize unnecessary exposure and unrelated reuse of private information.
-- **Proportionality** — scale effort, cost, verification, monitoring, and intervention to consequence, uncertainty, and reversibility.
-- **Recovery and Reversibility** — preserve the ability to inspect, correct, resume, or reverse work where practical and report partial failure truthfully.
-- **Diligence** — perform delegated work competently and completely within applicable constraints.
-- **Human Benefit** — use automation as a means to improve human outcomes rather than treating reduction of human participation as the objective.
+### Research / architecture path
 
-Each value is paired with observable behaviors and portable conformance tests. The intent is to make Value Architecture experimentally falsifiable rather than aspirational.
+1. [`CURRENT-STATUS.md`](CURRENT-STATUS.md) — authoritative current posture.
+2. [`EVIDENCE.md`](EVIDENCE.md) — evidence and evaluator qualifications.
+3. [`EVOLUTION-FAILURE.md`](EVOLUTION-FAILURE.md) — negative evolution result.
+4. [`INSA-ARCHITECTURE-v0.3-FROZEN.md`](INSA-ARCHITECTURE-v0.3-FROZEN.md) — frozen architecture binding.
+5. [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md) — current value-governance standard.
+6. [`ARCHIVE-INDEX.md`](ARCHIVE-INDEX.md) — canonical versus superseded research artifacts.
+7. [`experiments/`](experiments/) — frozen experimental record.
 
-See **[VALUE-ARCHITECTURE-STANDARD-v0.2.md](VALUE-ARCHITECTURE-STANDARD-v0.2.md)** for the vocabulary, authority model, behavior matrix, conflict-resolution procedure, evidence model, and initial 21-test conformance suite. The prior **[v0.1 draft](VALUE-ARCHITECTURE-STANDARD-v0.1.md)** is preserved as part of the research history.
+## The contribution we want most
 
-Value Architecture is broader than DbI. DbI primarily asks **what outcome should be realized and how humans govern acceptance**. Value Architecture asks **how intelligence should exercise discretion while realizing that outcome**.
+Agreement is not required.
 
-## This is not just "vibe coding"
+The most useful contribution is a reproducible observation that narrows the claim: a failed reconstruction, a case where the method collapses into ordinary prompting, a preservation failure, a stricter test, or an application class where the proposed boundary is wrong.
 
-DbI is not "keep prompting until something looks good."
-
-The method adds explicit engineering discipline:
-
-- **behavioral identity** — define what makes the application recognizably the same application;
-- **generalization tests** — test on inputs not used during development;
-- **durability** — preserve enough intent and evidence to reconstruct the application after the original context is gone;
-- **isolation** — test reconstruction without silently relying on prior memory or conversation history;
-- **acceptance criteria** — score behavior rather than expecting identical prose or identical code;
-- **provenance** — distinguish original evidence from derived artifacts and later reconstructions.
-
-The goal is not to eliminate engineering. It is to move more engineering effort from implementation detail to intent, behavior, evaluation, evidence, governance, and authority where the application permits it.
-
-## A concrete example: Amazing Birthday
-
-**[Amazing Birthday](examples/amazing-birthday/README.md)** began as a simple conversational request: make a person's birthdate historically interesting and engaging.
-
-Through use and correction, recognizable behavior emerged: select a small number of meaningful historical connections, explain why they matter, distinguish exact-date events from nearby context, and connect the birthdate to the person's lifetime.
-
-That behavior was then preserved, reconstructed in fresh environments, and tested on previously unseen dates.
-
-The important question is not whether another model produces identical prose. It is whether another implementation retains the behavioral identity that makes it the same application.
-
-See **[EVIDENCE.md](EVIDENCE.md)** for the short version and the full experiment directories for the auditable record.
-
-## What has been observed so far
-
-The project has produced bounded evidence that:
-
-- a conversationally developed application can exhibit stable, testable behavioral identity;
-- that behavior can be represented in human-readable durable artifacts;
-- fresh AI environments can reconstruct recognizable behavior without the original development conversation;
-- different AI platforms can realize similar intended behavior using different implementation mechanisms;
-- a stateful Receipt Organizer reconstruction passed its recorded functional test suite;
-- controlled ablation work has begun separating information supplied by thin descriptions, behavioral contracts, and fuller durability packages.
-
-These results are evidence of feasibility, not proof that DbI works for all software, that larger durability packages are always necessary, or that Intelligence-Native Software Architecture is an established architectural discipline.
-
-## Where DbI is most plausible
-
-Good early candidates are applications whose difficult capabilities already exist inside the AI runtime, such as:
-
-- research and synthesis;
-- classification and extraction;
-- natural-language interaction;
-- judgment under explicit criteria;
-- transformation of semi-structured information;
-- small workflow orchestration;
-- personalized reporting.
-
-DbI is **not** currently claimed as a replacement for conventional engineering in safety-critical, highly deterministic, high-throughput, real-time, regulated, or low-level systems.
-
-## Developer Preview v0.1
-
-If you are evaluating the idea, use this path:
-
-1. **[Tutorial](examples/amazing-birthday/TUTORIAL.md)** — experience the method.
-2. **[Amazing Birthday](examples/amazing-birthday/README.md)** — inspect the canonical example.
-3. **[Evidence](EVIDENCE.md)** — see what has actually been demonstrated and what has not.
-4. **[Demo script](DEMO.md)** — a short walkthrough of the claim and evidence.
-5. **[Research Direction](RESEARCH-DIRECTION.md)** — see the broader Intelligence-Native Software Architecture framing.
-6. **[Value Architecture Standard v0.2](VALUE-ARCHITECTURE-STANDARD-v0.2.md)** — inspect the emerging governance and behavioral-value framework.
-7. **[Theory](THEORY.md)** and **[Research Agenda](RESEARCH-AGENDA.md)** — go deeper only if the idea survives your first inspection.
-
-## The developer test we care about now
-
-The next important validation is external, not another round of internal theorizing:
-
-> Can an independent developer understand DbI quickly enough to try it on a small application of their own?
-
-If you try it, the most useful feedback is:
-
-- What did you think DbI meant after five minutes?
-- Does it differ meaningfully from ordinary AI-assisted coding or vibe coding?
-- Could you reproduce the Amazing Birthday development loop?
-- Where do you think the method breaks?
-- Would you try it on one of your own small applications?
-- Does the broader intelligence-native framing clarify the architectural problem, or merely rename familiar ideas?
-
-Agreement is not required. A clear failure mode is valuable evidence.
-
-## Research record
-
-The repository preserves the deeper experimental program rather than hiding it:
-
-- [`RESEARCH-DIRECTION.md`](RESEARCH-DIRECTION.md) — broader intelligence-native framing;
-- [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md) — formal Value Architecture vocabulary, values, behavioral criteria, and conformance tests;
-- [`examples/`](examples/) — worked examples and reconstruction material;
-- [`experiments/`](experiments/) — frozen experimental evidence;
-- [`BEHAVIORAL-PORTABILITY.md`](BEHAVIORAL-PORTABILITY.md) — portability hypothesis;
-- [`BEHAVIORAL-PORTABILITY-EVIDENCE.md`](BEHAVIORAL-PORTABILITY-EVIDENCE.md) — detailed evidence ledger;
-- [`CURRENT-STATUS.md`](CURRENT-STATUS.md) — current research posture;
-- [`docs/experiment-protocol.md`](docs/experiment-protocol.md) — experimental protocol.
-
-The front page is intentionally simpler than the laboratory behind it.
-
-The broader framing does **not** rewrite the historical DbI evidence. Existing experiments retain their original names, protocols, dates, hashes, and claims.
-
-## Contributing
-
-The most valuable contribution is a reproducible result: try the method, identify a failure, reconstruct an example in a different environment, propose a stricter test, or challenge the broader architectural framing with evidence.
-
-See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+The [`Five-Minute External Validation`](QUICK-VALIDATION.md) is the cheapest way to start.
 
 ## Status
 
-**Experimental / pre-1.0. Developer Preview v0.1.**
+**Experimental / pre-1.0.**
 
-DbI has moved from initial concept discovery into external developer validation and controlled behavioral experiments. The repository now also records the emerging broader question of **Intelligence-Native Software Architecture** while keeping DbI as the experimental lineage and primary test vehicle.
+DbI is the experimental lineage. INSA is the broader architecture now being tested. The repository remains named `development-by-intent` deliberately so historical evidence, links, discussions, and experiment identifiers are not rewritten by the broader framing.
 
-The repository name remains `development-by-intent` deliberately: continuity of evidence, links, discussions, and experimental history matters more than prematurely renaming the project.
+The frozen architecture is not being revised in response to presentation critique. The next architectural unit of progress must come from evidence.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [`LICENSE`](LICENSE).
