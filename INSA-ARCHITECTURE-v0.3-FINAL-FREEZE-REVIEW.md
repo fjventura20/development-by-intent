@@ -5,6 +5,8 @@
 **Candidate commit:** `d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b`  
 **Disposition:** **PASS_FOR_ARCHITECTURE_FREEZE**
 
+> **Reviewer disclosure:** This was an internal AI-assisted methodological review within the PI-led research process, not independent external validation. The original artifact did not contemporaneously record a sufficiently specific reviewer/model identity, exact model version, or authoring-context access condition. See [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md). `PASS_FOR_ARCHITECTURE_FREEZE` is an internal process disposition, not certification.
+
 ## 1. Gate reviewed
 
 The final gate tested whether the v0.3 candidate corrected the defects identified in the v0.1 adversarial review and v0.2 freeze-gate review without introducing a new structural contradiction.
@@ -111,15 +113,15 @@ outline discovered
       ↓
 explicit v0.1 architecture
       ↓
-adversarial review
+internal adversarial review
       ↓
 v0.2 correction
       ↓
-freeze-gate review
+internal freeze-gate review
       ↓
 v0.3 correction
       ↓
-FINAL FREEZE REVIEW — PASS
+INTERNAL FINAL FREEZE REVIEW — PASS
       ↓
 controlled boundary experiments
 ```
