@@ -4,6 +4,8 @@
 **Artifact:** [`INSA-ARCHITECTURE-v0.2-candidate.md`](INSA-ARCHITECTURE-v0.2-candidate.md)  
 **Disposition:** **REVISION_REQUIRED_BEFORE_FREEZE**
 
+> **Reviewer disclosure:** This was an internal AI-assisted methodological review within the PI-led research process, not independent external validation. The original artifact did not contemporaneously record a sufficiently specific reviewer/model identity, exact model version, or authoring-context access condition. See [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md). Unknown details are intentionally not reconstructed after the fact.
+
 ## Summary
 
 The v0.2 candidate resolves the high-severity defects identified in the v0.1 adversarial review. The five-boundary model still appears useful.
