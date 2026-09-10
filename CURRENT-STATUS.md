@@ -1,8 +1,10 @@
 # Intelligence-Native Software Architecture / Development by Intent — Current Status
 
-**As of:** 2026-09-09  
+**As of:** 2026-09-10  
 **Project stage:** INSA Stage 4 — boundary validation  
+**Completed Stage 4 INSA experiments:** **0**  
 **Decision authority:** Frank Ventura as principal investigator  
+**Execution dispatch authority:** explicit PI / human GO is required before resource-consuming model execution  
 **Operating rule:** humans own purpose, intent, authority delegation, judgment, and acceptance; intelligence may assume implementation burden only inside an explicit governed envelope
 
 ## Current assessment
@@ -10,6 +12,8 @@
 The project has completed the transition from Development by Intent (DbI) as the primary conceptual frame to **Intelligence-Native Software Architecture (INSA)** as the broader experimental architecture.
 
 DbI remains the experimental lineage and a primary research vehicle. INSA now defines the architectural boundaries that future experiments are intended to validate, narrow, or falsify.
+
+The architecture phase is complete enough to test. It is **not** empirically validated. Stage 4 currently has zero completed experiments explicitly designed to test the frozen INSA architecture.
 
 ## Frozen architecture baseline
 
@@ -24,6 +28,16 @@ The current architecture is:
 
 The v0.3 baseline MUST NOT be edited in place for experiments claiming to test that architecture. Any architectural change requires a new version.
 
+For canonical-versus-historical file status, see [`ARCHIVE-INDEX.md`](ARCHIVE-INDEX.md).
+
+## Review provenance and independence
+
+The v0.1 adversarial review, v0.2 freeze-gate review, and v0.3 final freeze review were **internal AI-assisted methodological reviews within the PI-led research process**. They are not external validation or independent certification.
+
+The original public artifacts did not record enough reviewer/model/context metadata to support a stronger independence claim. The known and unknown fields are now stated explicitly in [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md).
+
+Accordingly, `PASS_FOR_ARCHITECTURE_FREEZE` means only that the candidate was judged sufficiently explicit and internally consistent to freeze as the object of controlled experiments. It does not mean INSA was validated.
+
 ## How the architecture reached freeze
 
 The progression was deliberately adversarial:
@@ -33,20 +47,20 @@ research outline
       ↓
 INSA v0.1 explicit architecture
       ↓
-v0.1 adversarial review — REVISION_REQUIRED
+internal v0.1 adversarial review — REVISION_REQUIRED
       ↓
 INSA v0.2 candidate
       ↓
-v0.2 freeze review — REVISION_REQUIRED
+internal v0.2 freeze review — REVISION_REQUIRED
       ↓
 INSA v0.3 candidate
       ↓
-final freeze review — PASS
+internal final freeze review — PASS
       ↓
-INSA v0.3 FROZEN
+INSA v0.3 FROZEN FOR EXPERIMENTATION
 ```
 
-The review process corrected several important defects before experimental use:
+The internal review process corrected several important defects before experimental use:
 
 - architectural invariants are now separated from guidance;
 - Evidence is modeled as a cross-cutting verification plane;
@@ -79,7 +93,7 @@ Bounded experiments show that useful language- and reasoning-centric application
 
 ### Behavioral reconstruction
 
-The Amazing Birthday research program provides strong bounded evidence that recognizable behavioral identity can survive independent reconstruction under controlled conditions.
+The Amazing Birthday research program provides bounded evidence that recognizable behavioral identity can survive reconstruction under controlled conditions. Public indexes distinguish operator scoring from later independent re-scoring where that exists; independence must not be conflated with blinding.
 
 ### BIB-002
 
@@ -87,7 +101,7 @@ The suspected R4/B deviation did not reproduce under preregistered confirmation.
 
 Final disposition: **PATTERN_NOT_REPRODUCED**.
 
-### Behavioral evolution
+### Behavioral evolution — negative result
 
 The subsequent evolution experiment tested whether a targeted intent change could modify desired behavior while preserving non-target identity.
 
@@ -97,7 +111,7 @@ Architectural implication:
 
 > **Reconstruction stability does not imply evolution stability.**
 
-This result directly motivated INSA's explicit safe-evolution contract.
+This result directly motivated INSA's explicit safe-evolution contract. See [`EVOLUTION-FAILURE.md`](EVOLUTION-FAILURE.md) for the promoted public evidence note and its claim boundary.
 
 ### Value Architecture
 
@@ -111,7 +125,9 @@ The first experiment explicitly designed from the frozen INSA architecture is:
 
 **INSA-ID-E1 — Targeted Evolution With Preservation**
 
-The experiment must bind before execution:
+Current protocol state: **v0.2 DRAFT — NO EXECUTION AUTHORIZED**.
+
+The current draft binds the experiment around:
 
 ```text
 B = frozen baseline
@@ -130,19 +146,27 @@ The question is:
 
 This proposition is currently **unproven** and must remain vulnerable to failure.
 
-## Execution boundary
+## Execution boundary — PI / human GO
 
-The architecture freeze does **not** authorize INSA-ID-E1 execution.
+The architecture freeze does **not** authorize INSA-ID-E1 execution, and the current protocol draft explicitly authorizes zero candidate-generation or evaluator calls.
 
-The next work is:
+The separate execution gate is a **human-control boundary**, not an independent oversight body. Its purpose is to prevent agents that possess technical capability from converting that capability into permission to spend resources or dispatch experimental model calls.
 
-1. construct the INSA-ID-E1 preregistration and exact experimental protocol;
-2. bind the frozen INSA v0.3 architecture source;
-3. freeze `B/D/M/P/O/V(d)/A/G`;
-4. define evaluator roles, blinding, evidence requirements, stop rules, and allowed claims;
-5. conduct an adversarial protocol review;
-6. freeze the protocol only if that review passes;
-7. obtain separate execution authorization before model dispatch.
+Before candidate generation, the protocol must complete the required freeze and integrity gates and then receive explicit **PI execution authorization / human GO**.
+
+This distinction is intentional:
+
+```text
+technical capability to execute
+            ≠
+authority to execute
+```
+
+## External validation surface
+
+External participation should be cheaper than the full Developer Challenge.
+
+The repository now provides [`QUICK-VALIDATION.md`](QUICK-VALIDATION.md), a five-minute exploratory contribution path. It asks outsiders to run one fresh-environment observation and report the first output, including failures. This does not replace formal preregistered experiments.
 
 ## Current claim boundary
 
@@ -161,7 +185,8 @@ The project may not yet state that:
 - safe targeted evolution has been solved;
 - Value Architecture has demonstrated portable behavioral durability;
 - all software benefits from intelligence-native techniques;
-- deterministic architecture is obsolete.
+- deterministic architecture is obsolete;
+- the internal architecture-review chain constitutes external or independent validation.
 
 ## Project progression
 
@@ -176,13 +201,14 @@ Stage 3 — Architecture
 What stable boundaries are required when implementation becomes increasingly intelligent and fluid?
 
 Stage 3A — Adversarial architecture correction
-Can the architecture survive critique before we spend evidence on it?
+Can the architecture survive internal critique before we spend evidence on it?
 
 Stage 4 — Boundary validation  ← CURRENT
+Completed INSA experiments: 0
 Which proposed INSA invariants survive controlled adversarial experiments?
 
 Stage 5 — External architecture validation
 Can independent developers and researchers implement, challenge, reproduce, narrow, or falsify the architecture?
 ```
 
-The architecture is frozen. The next unit of progress must come from evidence.
+The architecture is frozen. The next unit of architectural progress must come from evidence, not additional conceptual expansion.
