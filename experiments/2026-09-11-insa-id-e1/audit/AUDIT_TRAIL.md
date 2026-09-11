@@ -1,29 +1,60 @@
 # INSA-ID-E1 — Audit Trail
 
-This directory preserves the v1 frozen-candidate package as audit trail. The v2 protocol revision was created in response to Frank-as-PI corrections at 2026-09-11 (after the v1 freeze at commit `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`).
+This directory preserves the protocol v1 + protocol v2 + proposal v4 + proposal v5 packages as audit history. Protocol v3 (current) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
 
-## v1 frozen-candidate (audit-only)
+## Package v1 (frozen-candidate, 2026-09-11)
 
-**Commit:** `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5` (pushed to `origin/feature/insa-id-e1-proposal`)
-**Status:** Frozen-candidate; superseded by v2.
-**MANIFEST.json SHA-256:** `8052e7cfa2403d87faaa4d5008cd13f5f0cafe359e1d1963f2a3c674c605141a`
+- **v1 commit:** `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`
+- **v1 MANIFEST SHA-256:** `8052e7cfa2403d87faaa4d5008cd13f5f0cafe359e1d1963f2a3c674c605141a`
+- **v1 path:** `audit/v1-frozen-candidate/`
+- **v1 defects:** v4 corrections list documents them (in v5 AUDIT_TRAIL referenced below). v1 was superseded by v2 (Frank's four correctness corrections) and then by v3 (Frank's architecture-binding corrections).
 
-The 20 files in `v1-frozen-candidate/` are byte-identical to the v1 commit's `experiments/2026-09-11-insa-id-e1/` tree (excluding this audit directory itself).
+## Package v2 (frozen-candidate-rev2, 2026-09-11)
 
-### v1 defects identified by Frank-as-PI review
+- **v2 commit:** `6fdd79083608f83d9c496dcb4e69f7db29eff1e0`
+- **v2 MANIFEST SHA-256:** `97946101df774e5403e327302b3a0917960461274854bbf3dc140768094bf3cf`
+- **v2 path:** `audit/v2-frozen-candidate/`
+- **v2 status:** Frozen-candidate-rev2; superseded by v3 (Frank's architecture-binding corrections in proposal v5).
+- **v2 defects:** v5 AUDIT_TRAIL (referenced from `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` v5 corrections list) documents the v2 architecture-binding errors that v3 corrects.
 
-1. **Modification_Success semantics wrong.** v1's `inputs/acceptance-tests.json` defined G_mod_c/G_mod_d as intra-evaluator rescoring checks (A-mod-c/A-mod-d) instead of the proposal v4 four-gate pattern. v2 restores the exact four gates: G_mod_a (mean M-conformance ≥3.5/4), G_mod_b (≥80% of Arm-M candidates pass all four M checks), G_mod_c (every Arm-M reconstruction ≥70% all-pass), G_mod_d (Arm-M all-pass rate exceeds Arm-C by ≥50pp).
-2. **C12 aggregate rule wrong.** v1 required every individual candidate to pass all eight axes. v2 restores the v0.1-style joint rule: an axis is BROKEN only when Arm-M failure rate on that axis ≥30% AND Arm-M failure rate is ≥30pp worse than Arm-C; preservation fails for an evaluator if ANY of the eight axes is BROKEN.
-3. **Scorebooks vs aggregate computation conflated.** v1's evaluator-input-packet had evaluators attempt to compute G_pres_a, but G_pres_a requires contemporaneous Arm-C and Arm-M reconstruction-level statistics that the blinded evaluator cannot see. v2 separates: evaluators return per-candidate raw scores only; the analysis layer (post-lock) computes G_pres_a, G_pres_b, C12 per-axis failure rates, C12-axis-BROKEN.
-4. **Execution-order algorithm not frozen.** v1 referenced `hashing/score-derivation.py` as "generated at preflight," leaving the actual ordering algorithm unspecified at freeze — operator discretion. v2 provides the exact deterministic scoring algorithm, content-addressed in MANIFEST.
-5. **C20 phase wrong.** v1's protocol §8 placed C20 as a pre-dispatch preflight gate, but C20 verifies Arm-C candidates against the BIB envelope and Arm-C candidates do not exist until generation. v2 moves C20 to the correct phase: pre-dispatch preflight (static only) → generation → Arm-C scoring + C20 → M-arm scoring + substantive analysis.
-6. **Authority manifest mutable.** v1's authority manifest contained fields that must be edited at execution time (auth-token SHA, freshness witness). v2 freezes all static policy (including the freshness window in seconds) in the manifest; a separate dynamic `execution-authority-witness.json` artifact is created at preflight (post-GO) carrying execution-time fields.
-7. **MANIFEST proposal_binding.sha256 misnamed.** v1's `proposal_binding.sha256` field actually contained the Git commit SHA `ed95705...`, not a SHA-256 hash. v2 separates into `proposal_commit_sha` (the Git commit SHA, 40 hex) and `proposal_file_sha256` (the file-content SHA-256, 64 hex).
-8. **Non-collapse verification wording wrong.** v1's MANIFEST non-collapse_check_command used `diff` between two ID lists and expected "empty diff," which is correct for set comparison but ambiguous about whether `BIB-4D-4` and `C12-7` overlap by name (factual discipline) — they do by name, intentionally, but the ID *sets* are disjoint. v2 uses an explicit set-intersection check with assertion `intersection == empty_set`.
+## Package v3 (current; awaiting Frank-as-PI execution GO)
 
-## v2 protocol revision (current)
+- **v3 commit:** *(filled at v3 freeze)*
+- **v3 MANIFEST SHA-256:** *(filled at v3 freeze)*
+- **v3 path:** `experiments/2026-09-11-insa-id-e1/` (top level)
+- **v3 protocol SHA-256:** *(filled at v3 freeze)*
+- **v3 status:** Frozen-candidate-rev3 (per proposal v5.1 @ `1f84c31…`).
+- **v3 architecture binding:** Implements proposal v5.1 exactly — B as complete frozen baseline bundle; D = M ∪ P ∪ O; pairwise disjoint M, P, O; O = ∅ with frozen rationale; subset-(a) = actual calibrated BIB 4-dim vector (`contract_compliance`, `selection_behavior`, `narrative_behavior`, `functional_completeness`); subset-(b) = historical 8 C12 axes preserved verbatim, separately gated, non-collapsed; four-gate G_mod_a..d; aggregate C12 BROKEN rule; separate evaluator scoring from analysis aggregation; separate immutable Arm-C and Arm-M scorebooks; static/dynamic authority separation; frozen execution-order algorithm; no self-referential hashes (sidecar pattern); C20 in Phase 2 after Arm-C scoring; explicit executor-change limitation (claude-opus-4-7 vs v0.1's claude-sonnet-4-6); two-level Level-1/Level-2 interpretation; C20 binding is fully deterministic from `inputs/baseline-binding.json` + `inputs/baseline-statistics.json` + `hashing/c20-derivation.py`.
 
-**Path:** `experiments/2026-09-11-insa-id-e1/` (top level, NOT in audit/)
-**See:** `MANIFEST.json` SHA-256 in top-level `MANIFEST.sha256.txt` after the v2 freeze.
+## Proposal lineage
 
-This audit directory is preserved but **not** part of the v2 binding. The v2 binding references only the top-level artifacts.
+- **v2:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v2 commit `5f9365f`)
+- **v3:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v3 commit `db9f77a`; Frank's four correctness corrections)
+- **v4:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v4 commit `ed95705`; Frank's four consistency corrections)
+- **v5:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (proposal v5 commit `04d1d07`; Frank's architecture-binding corrections: §12 B/D/O, BIB 4-dim, baseline statistics, executor change documentation)
+- **v5.1:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (proposal v5.1 commit `1f84c31`; Frank's five cleanup corrections: §5.2 D wording, §7 D/O baseline labels, "5 BIB scorebooks" → "4", abbreviated tuple → full tuple, C20 binding requirement)
+- **APPROVED v5.1 SHA:** `1f84c3101d6add7d44ed821681946c10be8f5f5c` (Frank-as-PI authorization)
+
+## Verification commands
+
+```bash
+# Verify v3 MANIFEST SHA-256 (filled at freeze)
+sha256sum experiments/2026-09-11-insa-id-e1/MANIFEST.json
+
+# Verify v3 protocol SHA-256 (filled at freeze)
+sha256sum experiments/2026-09-11-insa-id-e1/protocol/INSA-ID-E1-protocol.md
+
+# Verify v1 + v2 audit packages preserved
+find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥42 (v1 20 + v2 22)
+
+# Verify INSA v0.3 architecture unchanged
+git cat-file -t 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1   # should be 'blob'
+
+# Verify dbi-evolution-v0.1 protocol unchanged
+git ls-tree origin/feature/insa-id-e1-proposal:experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md
+# Should still show blob 8874692d560d9a6363ef4105fae5384b18cf6ef2
+```
+
+## Authority boundary
+
+This audit directory is preserved but **not** part of the v3 binding. The v3 binding references only the top-level artifacts listed in v3 MANIFEST.json.

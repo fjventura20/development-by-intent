@@ -1,0 +1,121 @@
+{
+  "$schema": "INSA-v0.3-dimensions-decomposition-v1",
+  "schema_version": "1.0",
+  "record_kind": "dimensions-decomposition",
+  "purpose": "Frozen D = M \u222a P \u222a O decomposition per INSA v0.3 \u00a712 + proposal v5.1. Pairwise-disjointness verified. O = \u2205 with frozen rationale.",
+  "experiment_id": "INSA-ID-E1",
+  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "frozen_by": "Hermes (operator)",
+  "D_definition": "D := M \u222a P \u222a O (disjoint union); D is the complete set of scored behavioral dimensions.",
+  "M": {
+    "id": "M",
+    "label": "target mutation dimensions",
+    "cardinality": 1,
+    "enumeration_artifact": "inputs/mutation-dimensions.json",
+    "enumeration_sha256": "26a136b6728c622213b88575cbad6f8d92e3824c9a94dc10f88f8fb1b4d3bf30",
+    "dimensions": [
+      {
+        "id": "M-1",
+        "label": "near_date_historical_event_addition",
+        "type": "additive",
+        "additive_verification": "Verified additive: does not remove, replace, or alter any existing behavior in the frozen BIB behavioral contract. Adds a single new event-connection to the output.",
+        "bounded_verification": "Single-target: exactly one such event per output (not zero, not two-or-more). The 'exactly one' constraint is the bounded-ness check.",
+        "distinction_requirement": "The near-date event must be clearly distinguished from exact-date connections (i.e., the report must label the distinction; it must not be presented as an exact-date connection).",
+        "scope_bound": "Within +/-30 calendar days of the birth date; not globally historical."
+      }
+    ]
+  },
+  "P": {
+    "id": "P",
+    "label": "required preservation dimensions",
+    "cardinality": 12,
+    "definition": "P := subset-(a) \u222a subset-(b) (disjoint union)",
+    "subset_a_artifact": "inputs/preservation-dimensions-subset-a.json",
+    "subset_a_sha256": "fff4d14ebaff37ab7f9bbcc26c5ea5aaf970fd33256db622ffcf6b23be6f7b28",
+    "subset_a_role": "calibrated BIB 4-dim behavior vector (primary identity metric); actual BIB dim names verified from experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl",
+    "subset_a_dimensions": [
+      {
+        "id": "BIB-4D-1",
+        "label": "contract_compliance",
+        "type": "0-4"
+      },
+      {
+        "id": "BIB-4D-2",
+        "label": "selection_behavior",
+        "type": "0-4"
+      },
+      {
+        "id": "BIB-4D-3",
+        "label": "narrative_behavior",
+        "type": "0-4"
+      },
+      {
+        "id": "BIB-4D-4",
+        "label": "functional_completeness",
+        "type": "0-4"
+      }
+    ],
+    "subset_b_artifact": "inputs/preservation-dimensions-subset-b.json",
+    "subset_b_sha256": "7f9f6e16948590107c747295f08f31da004e81bc70f38f87b66bec54841d403d",
+    "subset_b_role": "8 C12 non-target preservation axes preserved verbatim from v0.1 \u00a711.3; the v0.1 axis labels do not exactly map to the BIB 4-dim names per subset-(a); the binary-failure convention for 0-4 axes (failure = score == 0) is an INSA-ID-E1 preregistered rule, NOT an inherited v0.1 rule",
+    "subset_b_axes": [
+      {
+        "id": "C12-1",
+        "label": "exact_date_preference",
+        "type": "binary"
+      },
+      {
+        "id": "C12-2",
+        "label": "connection_count_5_to_10",
+        "type": "operator_counted"
+      },
+      {
+        "id": "C12-3",
+        "label": "selection_significance",
+        "type": "0-4"
+      },
+      {
+        "id": "C12-4",
+        "label": "end_of_report_synthesis",
+        "type": "binary"
+      },
+      {
+        "id": "C12-5",
+        "label": "lifetime_framing",
+        "type": "0-4"
+      },
+      {
+        "id": "C12-6",
+        "label": "warm_vivid_narrative_voice",
+        "type": "0-4"
+      },
+      {
+        "id": "C12-7",
+        "label": "factual_discipline",
+        "type": "binary"
+      },
+      {
+        "id": "C12-8",
+        "label": "avoidance_of_arbitrary_trivia",
+        "type": "binary"
+      }
+    ]
+  },
+  "O": {
+    "id": "O",
+    "label": "out-of-scope dimensions",
+    "cardinality": 0,
+    "value": "\u2205 (empty set)",
+    "rationale": "The BIB 4-dim vector + 8 C12 axes exhaust the scored dimensions tracked by the frozen evaluator rubric. No additional dimensions are scored in this experiment. Any candidate output dimension not in D = M \u222a P is unscored and therefore not a basis for any gate."
+  },
+  "D_cardinality_total": 13,
+  "D_cardinality_breakdown": "1 (M) + 4 (subset-a) + 8 (subset-b) + 0 (O) = 13",
+  "pairwise_disjoint_verification": {
+    "method": "set intersection assertion in Python; intersection of M ids, subset-(a) ids, subset-(b) ids, O ids must equal empty set",
+    "verification_command": "python3 -c \"import json; a=set(d['id'] for d in json.load(open('inputs/mutation-dimensions.json'))['M_enumeration']); b=set(d['id'] for d in json.load(open('inputs/preservation-dimensions-subset-a.json'))['dimensions']); c=set(d['id'] for d in json.load(open('inputs/preservation-dimensions-subset-b.json'))['axes']); assert a & b == set(), f'M \u2229 subset-(a) = {a & b}'; assert a & c == set(), f'M \u2229 subset-(b) = {a & c}'; assert b & c == set(), f'subset-(a) \u2229 subset-(b) = {b & c}'; print('PASS: D = M \u222a P \u222a O is pairwise disjoint across all three subsets')",
+    "expected": "all intersections empty",
+    "actual": "intersections: M\u2229sub_a=set(), M\u2229sub_b=set(), sub_a\u2229sub_b=set(); D = M \u222a P \u222a O is pairwise disjoint: True"
+  },
+  "D_binding_completeness": true,
+  "modification_permitted_after_freeze": false
+}

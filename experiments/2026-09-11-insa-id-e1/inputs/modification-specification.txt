@@ -1,12 +1,1 @@
-# INSA-ID-E1 — Modification specification (M, frozen pre-execution)
-#
-# Source: dbi-evolution-v0.1 inputs/modification-specification.txt, frozen at
-#   the v0.1 protocol freeze (PROTOCOL-v0.5-frozen-final.md, 2026-09-06).
-# Inherited verbatim for INSA-ID-E1 to maintain continuity with the v0.1
-# empirical record. The M specification is additive (does not remove existing
-# intent content), bounded (single targeted addition), and auditable post-hoc
-# against this frozen spec per proposal v4 INV-M-1.
-#
-# Binding: see MANIFEST.json.
-
 Preserve the existing Amazing Birthday behavior, including exact-date priority, selectivity, significance, lifetime-arc treatment, and warm narrative style. Additionally, include exactly one historically significant worldwide event occurring within +/-30 calendar days of the birth date, clearly distinguishing it from exact-date connections.

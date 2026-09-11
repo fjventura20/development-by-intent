@@ -1,13 +1,13 @@
 {
   "$schema": "INSA-v0.3-acceptance-tests-v1",
-  "schema_version": "1.2",
+  "schema_version": "1.1",
   "record_kind": "acceptance-tests-A",
-  "purpose": "Frozen A per proposal v5.1 \u00a75.1 INV-A-1: per-M acceptance tests. Evaluators return per-candidate raw M scores; the analysis layer (post-lock) computes the four gates G_mod_a..d per evaluator.",
+  "purpose": "Frozen A per proposal v4 §5.1 INV-A-1: per-M acceptance tests. v2 restores the exact four-gate Modification_Success pattern from proposal v4 §5.4 STEP 1 (G_mod_a..d) with the specific thresholds specified by Frank-as-PI at 2026-09-11. Evaluators return per-candidate raw M scores; the analysis layer (post-lock) computes the four gates.",
   "experiment_id": "INSA-ID-E1",
+  "v2_revision_note": "v1 incorrectly defined A-mod-c/A-mod-d as intra-evaluator rescoring checks; v2 removes those add-ons and restores the exact four-gate pattern.",
   "binding": {
-    "proposal_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
-    "M_source": "inputs/mutation-dimensions.json",
-    "M_specification_sha256": "4a6af1d75ae8b812c2b9bf8d696f59e31ced0da415016b8c2586f40e27246fe7"
+    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "M_source": "inputs/mutation-dimensions.json"
   },
   "per_candidate_evaluator_scoring": {
     "evaluator_returns": [
@@ -29,33 +29,34 @@
     "G_mod_a": {
       "definition": "For each evaluator independently: across all Arm-M candidates in the experiment (all reconstructions pooled), the mean of modification_conformance >= 3.5/4.",
       "formula": "G_mod_a = (mean(per_candidate.modification_conformance for all Arm-M candidates) >= 3.5)",
-      "binding": "M (per proposal v5.1 \u00a75.1 INV-A-1)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
       "evaluator_independence_required": true
     },
     "G_mod_b": {
       "definition": "For each evaluator independently: >=80% of Arm-M candidates have candidate_all_pass == true (i.e., pass all four M1..M4 checks).",
       "formula": "G_mod_b = (count(candidate_all_pass==True for all Arm-M candidates) / count(total Arm-M candidates) >= 0.80)",
-      "binding": "M (per proposal v5.1 \u00a75.1 INV-A-1)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
       "evaluator_independence_required": true
     },
     "G_mod_c": {
       "definition": "For each evaluator independently: every Arm-M reconstruction has >=70% of its candidates with candidate_all_pass == true (i.e., pass all four M1..M4 checks).",
       "formula": "G_mod_c = AND over R in {R1, R2, R3}: (count(candidate_all_pass==True for Arm-M candidates in R) / count(total Arm-M candidates in R) >= 0.70)",
-      "binding": "M (per proposal v5.1 \u00a75.1 INV-A-1)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
       "evaluator_independence_required": true
     },
     "G_mod_d": {
       "definition": "For each evaluator independently: the Arm-M all-pass rate (across all candidates pooled) exceeds the Arm-C all-pass rate by >=50 percentage points.",
       "formula": "G_mod_d = ((arm_M_all_pass_rate - arm_C_all_pass_rate) >= 0.50)",
-      "binding": "M (per proposal v5.1 \u00a75.1 INV-A-1)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
       "evaluator_independence_required": true,
-      "note": "This is the contemporaneous Arm-C vs Arm-M comparison per proposal v5.1 \u00a75.2 matched-pair design. Arm-C all-pass rate is computed from Arm-C candidates (Phase 2 scorebook); Arm-M all-pass rate from Arm-M candidates (Phase 3 scorebook). The analysis layer computes both from the locked scorebooks."
+      "note": "This is the contemporaneous Arm-C vs Arm-M comparison per proposal v4 §5.2 matched-pair design. Arm-C all-pass rate is computed from Arm-C candidates; Arm-M all-pass rate from Arm-M candidates. The analysis layer computes both from the locked scorebooks."
     }
   },
   "modification_success_aggregation_rule": {
-    "formula": "Modification_Success_per_evaluator = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d (per proposal v5.1 \u00a75.4 STEP 1)",
+    "formula": "Modification_SSuccess = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d (per proposal v4 §5.4 STEP 1)",
     "per_evaluator_independence_required": true,
-    "Modification_Success_experiment_level": "Modification_Success_per_A AND Modification_Success_per_B"
+    "modification_success_per_evaluator": "Computed independently for evaluator A and evaluator B from their respective locked scorebooks.",
+    "both_evaluators_required": "Modification_Success (the experiment-level claim) = (Modification_Success for A) AND (Modification_SSuccess for B)."
   },
   "evaluator_blinding_manifest": {
     "blinded_artifacts": [

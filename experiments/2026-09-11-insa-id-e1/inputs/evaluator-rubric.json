@@ -1,37 +1,54 @@
 {
   "$schema": "INSA-v0.3-evaluator-rubric-v1",
-  "schema_version": "1.0",
+  "schema_version": "1.3",
   "record_kind": "evaluator-rubric",
-  "purpose": "Frozen V(d) per proposal v4 §5.1 INV-V-1: per-dimension tolerance values defined separately for subset-(a) and subset-(b).",
+  "purpose": "Frozen V(d) per proposal v5.1 §5.1 INV-V-1: per-dimension tolerance values defined separately for subset-(a) and subset-(b). Subset-(a) tolerance values for the BIB 4-dim vector aggregate Manhattan criterion; subset-(b) per-axis tolerances.",
   "experiment_id": "INSA-ID-E1",
   "binding": {
-    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "proposal_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
     "P_subset_a": "inputs/preservation-dimensions-subset-a.json",
-    "P_subset_b": "inputs/preservation-dimensions-subset-b.json"
+    "P_subset_b": "inputs/preservation-dimensions-subset-b.json",
+    "baseline_statistics": "inputs/baseline-statistics.json"
   },
   "V_d_subset_a": {
-    "metric": "BIB 4-dim Manhattan distance (aggregate)",
-    "G_pres_a_relative_tolerance": 1.5,
-    "G_pres_a_relative_formula": "Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5",
-    "G_pres_b_absolute_tolerance": 2.5,
-    "G_pres_b_absolute_formula": "Arm M within-Recon Manhattan mean <= 2.5",
+    "metric": "BIB 4-dim Manhattan distance (aggregate, from per-evaluator reference vector)",
+    "reference_vector_source": "inputs/baseline-statistics.json calibrated_4d_reference_vectors (computed deterministically from the 85 envelope observations)",
+    "G_pres_subset_a_a_relative_tolerance": 1.5,
+    "G_pres_subset_a_a_relative_formula": "Arm M within-Recon mean 4-dim Manhattan distance <= arm C within-Recon mean 4-dim Manhattan distance + 1.5",
+    "G_pres_subset_a_b_absolute_tolerance": 2.5,
+    "G_pres_subset_a_b_absolute_formula": "Arm M within-Recon mean 4-dim Manhattan distance <= 2.5",
     "per_dim_tolerance": "none (aggregate Manhattan only)",
-    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 applies ONLY to G_pres_a. Arm C validity envelope (C20) is not enlarged."
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 applies ONLY to G_pres_subset_a_a. Arm-C validity envelope (C20) is not enlarged.",
+    "calibrated_4d_reference_vectors_preregistered": {
+      "evaluator_A": {
+        "contract_compliance": 3.529412,
+        "selection_behavior": 3.964706,
+        "narrative_behavior": 3.847059,
+        "functional_completeness": 3.494118
+      },
+      "evaluator_B": {
+        "contract_compliance": 3.988235,
+        "selection_behavior": 3.988235,
+        "narrative_behavior": 4.0,
+        "functional_completeness": 4.0
+      }
+    }
   },
   "V_d_subset_b": {
-    "metric": "8 C12 axes, independently evaluated",
+    "metric": "8 C12 axes, independently evaluated; aggregate C12 BROKEN rule per proposal v5.1 §5.4",
     "C12_axes": [
       {"id": "C12-1", "name": "exact_date_preference", "tolerance": "binary: preserved/not-preserved"},
       {"id": "C12-2", "name": "connection_count_5_to_10", "tolerance": "5 <= n <= 10"},
-      {"id": "C12-3", "name": "selection_significance", "tolerance": "per-criterion 0-4 range (within historical BIB calibration)"},
+      {"id": "C12-3", "name": "selection_significance", "tolerance": "per-criterion 0-4 range; failure = score == 0"},
       {"id": "C12-4", "name": "end_of_report_synthesis", "tolerance": "binary: present/absent"},
-      {"id": "C12-5", "name": "lifetime_framing", "tolerance": "per-criterion 0-4 range"},
-      {"id": "C12-6", "name": "warm_vivid_narrative_voice", "tolerance": "per-criterion 0-4 range"},
-      {"id": "C12-7", "name": "factual_discipline", "tolerance": "binary: no nearby events misrepresented as exact-date"},
+      {"id": "C12-5", "name": "lifetime_framing", "tolerance": "per-criterion 0-4 range; failure = score == 0"},
+      {"id": "C12-6", "name": "warm_vivid_narrative_voice", "tolerance": "per-criterion 0-4 range; failure = score == 0"},
+      {"id": "C12-7", "name": "factual_discipline", "tolerance": "binary: no-misrepresentation-as-exact-date"},
       {"id": "C12-8", "name": "avoidance_of_arbitrary_trivia", "tolerance": "binary: no arbitrary trivia"}
-    ]
+    ],
+    "broken_rule_preregistered": "axis_a is BROKEN for evaluator_e IF AND ONLY IF BOTH arm_M_failure_rate_on_axis_a >= 0.30 AND (arm_M_failure_rate_on_axis_a - arm_C_failure_rate_on_axis_a) >= 0.30"
   },
-  "v01_2_5_calibration_context": "The 2.5 absolute Manhattan tolerance on G_pres_b (subset-(a)) is inherited from v0.1 §11.2 BIB historical calibration. The BIB historical mean Manhattan distance was calibrated at < 2.5 for the non-deviated envelope; this is the same number used in v0.1.",
-  "modification_to_V_d_after_freeze": "forbidden (per proposal v4 §8 GO constraints and INV-V-1)",
+  "v0_1_2_5_calibration_context": "The 2.5 absolute Manhattan tolerance on G_pres_subset_a_b (subset-(a)) is inherited from v0.1 §11.2 BIB historical calibration. The BIB historical mean 4-dim Manhattan distance was calibrated at < 2.5 for the non-deviated envelope; this is the same number used in v0.1.",
+  "modification_to_V_d_after_freeze": "forbidden (per proposal v5.1 §8 GO constraints and INV-V-1)",
   "frozen_at_utc": "2026-09-11T00:00:00Z"
 }
