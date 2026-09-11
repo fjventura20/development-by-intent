@@ -302,7 +302,7 @@ The thresholds T1, T2, T3 are preregistered; they are **not** tightened or relax
 - Evaluator substitution after observing candidates is forbidden (per §8 GO constraints).
 
 **5.5.5 Why this matters:**
-A candidate timeout, refusal, or provider fault must not automatically erase otherwise valid substantive evidence (v2's defect). Conversely, a systematic runtime defect that makes the treatment uninterpretable must stop architectural inference (which v2's rule did, but by over-inclusion). v3 separates these by the preregistered thresholds T1/T3 above.
+A candidate timeout, refusal, or provider fault must not automatically erase otherwise valid substantive evidence (v2's defect). Conversely, a systematic runtime defect that makes the treatment uninterpretable must stop architectural inference (which v2's rule did, but by over-inclusion). v4 separates these by the preregistered thresholds T1/T2/T3 above.
 
 **5.5.6 Representation in the contract tuple:**
 Every term in the declared pre-bound contract `B + D + M + P + O + V(d) + A + G` is explicitly represented and content-addressed in `MANIFEST.json`. Specifically: `D` (intent document) and `O` (identity contract) have explicit frozen artifacts in §7 (`inputs/intent-document.txt`, `inputs/identity-contract.txt`) and pre-mutation SHAs (INV-D-1, INV-O-1). Neither `D` nor `O` remains implicit.
@@ -437,4 +437,4 @@ If Frank wants to skip INSA-ID-E1 entirely and run a different Stage-4 experimen
 
 ---
 
-**End of proposal v2. Awaiting review.**
+**End of proposal v4. Awaiting protocol + frozen-artifact authoring.**
