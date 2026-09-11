@@ -1,13 +1,19 @@
 # INSA-ID-E1 — Targeted Evolution With Preservation (proposal)
 
-**Status:** v3 — Frank's four corrections to v2 incorporated. Committed on `feature/insa-id-e1-proposal` ahead of v2 @ `5f9365f`. Awaiting Frank's final review of the proposal text before protocol authoring begins.
+**Status:** v4 — Frank's four consistency corrections to v3 incorporated. Committed on `feature/insa-id-e1-proposal` ahead of v3 @ `db9f77a`. Awaiting Frank's final review of the proposal text before protocol authoring begins.
 **Author:** Hermes (operator).
-**Date:** 2026-09-10 (v2), 2026-09-10 (v3 corrections)
+**Date:** 2026-09-10 (v2), 2026-09-10 (v3), 2026-09-11 (v4 consistency corrections)
 **v3 corrections vs v2:**
 1. **Two-level falsification structure added (§4.1):** Level 1 = bound experimental claim; Level 2 = architectural implication. Single-axis failures underdetermine Level 2; only `MODIFICATION_AND_PRESERVATION_FAILURE` (after cause-ruling-out) strengthens Level 2 concern, and even then does not equate to §12 invalidity.
 2. **Disposition taxonomy reconciled:** `ARCHITECTURAL_FAILURE` removed from substantive taxonomy; architectural interpretation now lives as the §4.1 adjudication layer over the four descriptive outcomes.
 3. **Preservation model restored to the v0.1 distinction:** `P` now explicitly separates the calibrated BIB 4-dimensional behavior vector (primary identity metric) from the 8 C12 non-target preservation axes (additional preservation gates); factual discipline is no longer double-listed.
 4. **`EXECUTOR_RUNTIME_FAILURE` rule tightened (§5.5):** preregistered transient vs systematic distinction, retry/replacement policy, experiment-level threshold for systemic classification, and the rule that unaffected candidate observations are not erased.
+**v4 corrections vs v3 (consistency only — no semantic redesign):**
+1. **§6 table rewritten** to mirror §4.1 exactly: each row's "Architectural implication" column now states the precise Level 1 outcome and initial Level 2 reading; no row asserts "structure is fine" or "architectural falsification."
+2. **§3 taxonomy count corrected** from "six" to "seven primary dispositions plus one reserved ambiguity disposition (`INCONCLUSIVE_PENDING_FURTHER`)"; the reserved row is added to the §3 table.
+3. **T2 quantified** in §5.5.2: arm-imbalance with sufficient observations (`fail_M / max(fail_C, 1) ≥ 2` AND `fail_M − fail_C ≥ 3` AND `fail_M + fail_C ≥ 5`). A single Arm-M timeout with `fail_C = 0` and `fail_M = 1` does **not** meet T2.
+4. **§10 risk #3 routed through §5.5:** R2-like deferral pattern no longer auto-produces `EXECUTOR_RUNTIME_FAILURE`; evaluated under T1/T2/T3, with transient treatment when thresholds unmet.
+5. **§4 prose, §5.4 disposition-trailer, and §9 non-claim** rewritten to use §4.1 vocabulary ("strengthens Level 2 concern toward §12's general structure") instead of the older "architectural falsification" phrasing.
 **Frozen architecture this proposal tests:** INSA v0.3 (source blob `848e0fe014f5b4a61ba2cb92e772ee3499dca9c1`, commit `d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b`).
 
 ---
@@ -70,17 +76,18 @@ This proposal does **not** claim:
 
 A provider, executor, or infrastructure failure **must not automatically become evidence against the architecture**. The disposition tree is split into failure-classes that map to distinct interpretations.
 
-This proposal uses a single coherent taxonomy of six descriptive outcomes. Architectural interpretation is *not* a separate disposition; it is a separate adjudication layer (Level 2, §4.1) over the four substantive outcomes below. The taxonomy:
+This proposal uses a single coherent taxonomy of **seven primary dispositions** plus **one reserved ambiguity disposition** (`INCONCLUSIVE_PENDING_FURTHER`, used only when no substantive failure is observed but residual ambiguity prevents a clean Level 1/Level 2 reading). Architectural interpretation is *not* a separate disposition; it is a separate adjudication layer (Level 2, §4.1) over the four substantive outcomes below. The taxonomy:
 
-| Disposition class | What it reports |
-|---|---|
-| `ARCHITECTURAL_PASS` | A passes, G passes, both evaluators independent, control valid, no runtime failure — joint substantive success on the bound contract |
-| `MUTATION_FAILURE` | `A` failed; `G` held — substantive failure on the modification axis only |
-| `PRESERVATION_FAILURE` | `A` succeeded; `G` failed — substantive failure on the preservation axis only |
-| `MODIFICATION_AND_PRESERVATION_FAILURE` | Both `A` and `G` failed — substantive failure on both axes |
-| `EXECUTOR_RUNTIME_FAILURE` | Executor failed at runtime (timeout, deferral, refusal, capacity, model invocation fault) — see §5.5 for transient vs systematic distinction and the rule on unaffected candidates |
-| `EVALUATOR_GATING_FAILURE` | Evaluator unavailable or materially changed — measurement fault |
-| `INVALID_EXPERIMENT` | Pre-check failed (applicability declaration missing, frozen artifacts not bound, baseline envelope failure, control arm fails pre-checks, blinding broken, evidence-chain integrity failure) — measurement fault |
+| # | Disposition class | What it reports |
+|---|---|---|
+| 1 | `ARCHITECTURAL_PASS` | A passes, G passes, both evaluators independent, control valid, no runtime failure — joint substantive success on the bound contract |
+| 2 | `MUTATION_FAILURE` | `A` failed; `G` held — substantive failure on the modification axis only |
+| 3 | `PRESERVATION_FAILURE` | `A` succeeded; `G` failed — substantive failure on the preservation axis only |
+| 4 | `MODIFICATION_AND_PRESERVATION_FAILURE` | Both `A` and `G` failed — substantive failure on both axes |
+| 5 | `EXECUTOR_RUNTIME_FAILURE` | Executor failed at runtime (timeout, deferral, refusal, capacity, model invocation fault) — see §5.5 for transient vs systematic distinction and the rule on unaffected candidates |
+| 6 | `EVALUATOR_GATING_FAILURE` | Evaluator unavailable or materially changed — measurement fault |
+| 7 | `INVALID_EXPERIMENT` | Pre-check failed (applicability declaration missing, frozen artifacts not bound, baseline envelope failure, control arm fails pre-checks, blinding broken, evidence-chain integrity failure) — measurement fault |
+| R | `INCONCLUSIVE_PENDING_FURTHER` *(reserved)* | No substantive failure but residual ambiguity prevents a clean Level 1/Level 2 reading. Report ambiguity; never used to soften a substantive failure (per §8 GO constraints). |
 
 **No class may be silently collapsed into another.** `EXECUTOR_RUNTIME_FAILURE`, `EVALUATOR_GATING_FAILURE`, and `INVALID_EXPERIMENT` are reporting classes that STOP the substantive analysis. The four substantive outcomes above (`ARCHITECTURAL_PASS`, `MUTATION_FAILURE`, `PRESERVATION_FAILURE`, `MODIFICATION_AND_PRESERVATION_FAILURE`) describe what happened on the bound axes; what they imply about §12's general structure is the Level 2 question (§4.1) and is **not** read off the disposition name alone.
 
@@ -98,9 +105,9 @@ The architectural falsifier is:
 
 > A result in which, after all runtime / evaluator / pre-check failures are correctly separated out and **not** counted as evidence against the architecture, and after the experiment is determined to have been correctly bound (`B + D + M + P + O + V(d) + A + G` content-addressed at protocol freeze, authority manifest valid, applicability declaration ACTIVE, evaluators blinded, control arm valid), **the joint disposition `MODIFICATION_AND_PRESERVATION_FAILURE` is recorded with substantive failures in both axes**.
 
-This corresponds to the v0.1 disposition, but **only** if all runtime / evaluator / pre-check causes have been ruled out. The pre-freeze `MODIFICATION_AND_PRESERVATION_FAILURE` was partially explained by R2's deferral pattern; the v0.3-corrected experiment's same-named disposition must be free of such explanations to count as architectural falsification.
+This corresponds to the v0.1 disposition, but **only** if all runtime / evaluator / pre-check causes have been ruled out. The pre-freeze `MODIFICATION_AND_PRESERVATION_FAILURE` was partially explained by R2's deferral pattern; the v0.3-corrected experiment's same-named disposition must be free of such explanations before it can strengthen the §4.1 Level 2 concern toward §12's general structure.
 
-**Note:** `PRESERVATION_FAILURE` or `MUTATION_FAILURE` alone are not read as architectural falsification of the Safe Evolution Contract itself — see §4.1 for the precise Level 1 vs Level 2 mapping.
+**Note:** `PRESERVATION_FAILURE` or `MUTATION_FAILURE` alone do not strengthen the §4.1 Level 2 concern toward §12's general structure; single-axis failures leave Level 2 underdetermined. See §4.1 for the precise Level 1 vs Level 2 mapping.
 
 ### 4.1 Two-level falsification structure (Level 1 vs Level 2)
 
@@ -250,8 +257,11 @@ STEP 3 - Substantive classification (only after pre-checks and the §5.5
     If (Modification_Success = FALSE for either evaluator)
        AND (Non-target_Identity_Preservation = FALSE for either evaluator)
        -> DISPOSITION = MODIFICATION_AND_PRESERVATION_FAILURE
-         (only counts as architectural falsification after runtime
-          and evaluator explanations ruled out; see §4)
+         (only strengthens Level 2 concern toward §12's general structure
+          after runtime, evaluator, and pre-check explanations have been
+          ruled out per §4 + §5.5; see §4.1 for the precise Level 1 vs
+          Level 2 mapping. The disposition does not, by itself, establish
+          §12 invalidity.)
 
 STEP 4 - Only after all substantive outcomes exhausted:
   If (no substantive failure but residual ambiguity)
@@ -259,7 +269,7 @@ STEP 4 - Only after all substantive outcomes exhausted:
   (reserved for genuine ambiguity, never used to soften substantive failures)
 ```
 
-The names of substantive dispositions changed from the v0.1 protocol (`EVOLUTION_PASS` → `ARCHITECTURAL_PASS`; `INCONCLUSIVE_PENDING_FURTHER` retained for residual ambiguity only) to make the architecture-vs-runtime distinction explicit. `EXECUTOR_RUNTIME_FAILURE` is a new disposition class that does not appear in v0.1; it exists specifically because runtime failure must not become architecture evidence.
+The names of substantive dispositions changed from the v0.1 protocol (`EVOLUTION_PASS` → `ARCHITECTURAL_PASS`; `INCONCLUSIVE_PENDING_FURTHER` retained as a reserved ambiguity disposition only — never used to soften substantive failures) to make the architecture-vs-runtime distinction explicit. `EXECUTOR_RUNTIME_FAILURE` is a new disposition class that does not appear in v0.1; it exists specifically because runtime failure must not become architecture evidence, and its triggering rule lives in §5.5 (transient vs systematic threshold T1/T2/T3).
 
 ---
 
@@ -276,10 +286,10 @@ v2's STEP 2 effectively said: any observed runtime failure stops all substantive
 **5.5.2 Experiment-level threshold for systematic classification:**
 A runtime failure is classified as **systematic** (and triggers `EXECUTOR_RUNTIME_FAILURE`) when **any** of the following holds:
 - (T1) ≥ 50% of candidates across the experiment fail with a runtime error of the same root-cause class (e.g., all timeout-class, or all refusal-class, or all capacity-class).
-- (T2) Failures are correlated with the treatment (e.g., all failures occur on Arm M and none on Arm C under identical executor and draw), which would make the treatment effect uninterpretable.
+- (T2) **Treatment-arm imbalance with sufficient observations.** The failure rate in Arm M exceeds the failure rate in Arm C by ≥ 2× (ratio `fail_M / max(fail_C, 1) ≥ 2`) AND the absolute arm-level sample is large enough that the imbalance is unlikely under an arm-symmetric null. Specifically: `fail_M − fail_C ≥ 3` AND `(fail_M + fail_C) ≥ 5`. A single Arm-M timeout with `fail_C = 0` and `fail_M = 1` does **not** meet T2; a single such observation is treated as a transient failure per §5.5.1 with unaffected candidates analyzed normally. T2 is therefore not triggered by isolated arm-level asymmetry — it requires both (i) a material arm-level rate ratio and (ii) enough total failures that the asymmetry is unlikely to be a coincidence of small samples.
 - (T3) Failures span both evaluators and both arms with no candidate producing a complete output for any (R, B) cell — i.e., the executor substrate is effectively unavailable for this experiment.
 
-The threshold is preregistered; it is **not** tightened or relaxed after observing outcomes.
+The thresholds T1, T2, T3 are preregistered; they are **not** tightened or relaxed after observing outcomes.
 
 **5.5.3 What remains analyzable when the threshold is met:**
 - When systematic classification triggers, `EXECUTOR_RUNTIME_FAILURE` is the disposition. Architectural interpretation is *not* assigned to the affected substrate for this experiment.
@@ -301,18 +311,20 @@ Every term in the declared pre-bound contract `B + D + M + P + O + V(d) + A + G`
 
 ## 6. Success / failure criteria mapped to §3 dispositions
 
-| Disposition | What it means | Architectural implication |
-|---|---|---|
-| `ARCHITECTURAL_PASS` | A passes, G passes, both evaluators independent, control valid, no runtime failure | INSA v0.3's Safe Evolution Contract supports this modification class as bound |
-| `MODIFICATION_AND_PRESERVATION_FAILURE` | Both M and G failed AND runtime/executor causes ruled out (§4 falsifier condition) | **Architectural falsification** — INSA v0.3's structure is insufficient for this modification class |
-| `PRESERVATION_FAILURE` | M passed; G failed | INSA's preservation structure is fine; the *specific* P contract is too narrow OR preservation is genuinely hard for this class |
-| `MUTATION_FAILURE` | M failed; G held | INSA's structure is fine; the *specific* M gate is too strict OR the modification wasn't expressible |
-| `EXECUTOR_RUNTIME_FAILURE` | Executor failed at runtime (timeout, deferral, refusal, capacity) | Execution fault; not architectural unless repeatable across executors |
-| `EVALUATOR_GATING_FAILURE` | Evaluator unavailable or materially changed | Measurement fault; not architectural |
-| `INVALID_EXPERIMENT` | Pre-check failure (control, blinding, applicability, evidence chain) | Measurement fault; not architectural |
-| `INCONCLUSIVE_PENDING_FURTHER` | No substantive failure but residual ambiguity (reserved) | Report ambiguity; never used to soften substantive failures |
+This table mirrors §4.1 exactly. The "Architectural implication" column is the initial Level 2 reading; the synthesis step (§11) is the explicit Level 2 adjudication and may refine it.
 
-For all non-arch-pass dispositions, the report must explain which pre-check / runtime / evaluator / gating cause was ruled out and how.
+| Disposition | What it means | Initial Level 2 reading (per §4.1) |
+|---|---|---|
+| `ARCHITECTURAL_PASS` | A passes, G passes, both evaluators independent, control valid, no runtime failure | **Level 1 supported.** Both axes held on the bound contract. Level 2 consistent with §12 supporting this bound class — *without generalization* beyond the bound. |
+| `PRESERVATION_FAILURE` | M passed; G failed | **Level 1 falsified on the preservation axis.** Level 2 underdetermined. |
+| `MUTATION_FAILURE` | M failed; G held | **Level 1 falsified on the modification axis.** Level 2 underdetermined. |
+| `MODIFICATION_AND_PRESERVATION_FAILURE` | Both M and G failed AND runtime/executor/pre-check causes ruled out (§4 + §5.5) | **Level 1 falsified on both axes.** Strengthens Level 2 concern toward §12's general structure for this modification class, but **does not itself establish §12 invalidity.** Cumulative evidence across experiments and modification classes would be needed to support a stronger conclusion. |
+| `EXECUTOR_RUNTIME_FAILURE` | Systematic runtime failure (§5.5 T1/T2/T3) | **No architectural disposition assigned** for the affected substrate. Per §5.5, unaffected candidate observations remain analyzable when the threshold is not met. |
+| `EVALUATOR_GATING_FAILURE` | Evaluator unavailable or materially changed | **No architectural disposition assigned.** Measurement fault. |
+| `INVALID_EXPERIMENT` | Pre-check failure (control, blinding, applicability, evidence chain) | **No architectural disposition assigned.** Measurement fault. |
+| `INCONCLUSIVE_PENDING_FURTHER` | No substantive failure but residual ambiguity | **Report ambiguity.** Reserved; never used to soften a substantive failure. |
+
+For all non-arch-pass dispositions, the report must explain which pre-check / runtime / evaluator / gating cause was ruled out and how (per §5.4 STEP 2 and §5.5).
 
 ---
 
@@ -390,7 +402,7 @@ The GO authorizes execution ONLY. It does NOT authorize modifications to the fro
 - That the corrections in v0.3 are sufficient for unbounded evolution; the Safe Evolution Contract explicitly bounds `V(d)` per dimension.
 - That future INSA versions (v0.4+) are addressed by this proposal.
 - That the frozen v0.3 architecture is "correct" — only that its bounded execution is testable.
-- That `PRESERVATION_FAILURE` or `MUTATION_FAILURE` alone is architectural falsification. Only `MODIFICATION_AND_PRESERVATION_FAILURE` (after ruling out runtime/evaluator/pre-check causes) is. Even then, per §4.1, it strengthens concern toward §12's general structure but does *not* equate to §12 invalidity. Single-axis failures falsify Level 1 on one axis and leave Level 2 underdetermined.
+- That `PRESERVATION_FAILURE` or `MUTATION_FAILURE` alone strengthens the §4.1 Level 2 concern toward §12's general structure. Only `MODIFICATION_AND_PRESERVATION_FAILURE` (after ruling out runtime/evaluator/pre-check causes per §4 + §5.5) can do that, and even then it does *not* equate to §12 invalidity. Single-axis failures falsify Level 1 on one axis and leave Level 2 underdetermined.
 
 ---
 
@@ -398,7 +410,10 @@ The GO authorizes execution ONLY. It does NOT authorize modifications to the fro
 
 1. **Insufficient evaluator availability.** INSA-ID-E1 requires evaluator-blind independent scoring. If the v0.1 evaluator substrate (Codex gpt-5.6-sol + Claude Opus 4.7) is unavailable or materially changed at execution time, STOP per the preregistered evaluator-availability stop rule → `EVALUATOR_GATING_FAILURE`. No evaluator substitution after observing candidates.
 2. **Runtime drift in Arm C.** C20 fails → STOP, classify `INVALID_EXPERIMENT` (no further analysis). The +1.5 Manhattan tolerance applies only to Arm M relative to Arm C, never enlarges Arm C's validity envelope.
-3. **Re-deriving the v0.1 failure shape.** If the failure is concentrated in R2's deferral pattern again, classify as `EXECUTOR_RUNTIME_FAILURE` and report — even though the v0.1 result used `MODIFICATION_AND_PRESERVATION_FAILURE`, the v0.3-corrected experiment must correctly separate runtime causes from architectural ones.
+3. **Re-deriving the v0.1 failure shape.** The v0.1 `MODIFICATION_AND_PRESERVATION_FAILURE` was driven by a deferral pattern in R2 — an executor-runtime signature, not an architectural defect. In INSA-ID-E1, **no R2-like (or any other single-reconstruction) deferral pattern automatically produces `EXECUTOR_RUNTIME_FAILURE`**. Such a pattern is evaluated under the §5.5 preregistered rules:
+   - If R2's deferrals are candidate-scoped and the preregistered T1 (≥ 50% same-class), T2 (arm-imbalance with sufficient observations: `fail_M / max(fail_C, 1) ≥ 2` AND `fail_M − fail_C ≥ 3` AND `fail_M + fail_C ≥ 5`), or T3 (substrate-wide unavailability) threshold is **not** met, the R2 deferrals are treated as transient failures per §5.5.1; unaffected candidates are analyzed normally; the substantive disposition is whatever the §5.4 decision tree produces from the remaining observations.
+   - If any of T1/T2/T3 is met, the disposition is `EXECUTOR_RUNTIME_FAILURE` for the affected substrate per §5.5; no architectural disposition is assigned and the report explains which threshold tripped and why.
+   - In neither case is the v0.1 disposition name (`MODIFICATION_AND_PRESERVATION_FAILURE`) inherited automatically. The v3-corrected experiment must correctly separate runtime causes from architectural ones; v0.1's same-named outcome is not a precedent for treating runtime defects as architectural evidence.
 4. **Modifying frozen artifacts mid-execution.** Disallowed by INSA v0.3's freeze rule and by this proposal. Any material deviation triggers STOP unless PI separately adjudicates.
 5. **Generalization beyond this one experiment.** Out of scope.
 
