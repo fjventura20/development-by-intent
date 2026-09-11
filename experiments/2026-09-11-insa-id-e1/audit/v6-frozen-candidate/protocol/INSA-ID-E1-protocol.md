@@ -273,8 +273,10 @@ Phase 2 - Arm-C scoring + C20 (per §8):
 Phase 3 - Arm-M scoring:
   Same per-candidate fresh-evaluator-session blinding.
   The operator supplies the SAME test invocation (same birthdate) for
-  the matched (R, B, test, run) tuple, but uses the **distinct Arm-M blind_id already assigned and locked in Phase 0** (the frozen blind-map design has one-ID->one-tuple; Arm-C and Arm-M IDs are distinct but both were frozen before any evaluator invocation). Phase 3 does NOT create, replace, or modify any blind_id.
-  Run hashing/normalize-and-join.py for Arm-M with --arm=M to build the operator-side Arm-M scorebooks.
+  the matched (R, B, test, run) tuple, but generates a FRESH blind_id
+  (the frozen blind-map design has one-ID->one-tuple; the run-keyed
+  identifier is per-arm, not shared with Arm-C). Run hashing/normalize-and-join.py
+  for Arm-M with --arm=M to build the operator-side Arm-M scorebooks.
   Lock evaluator-A-arm-M-scorebook.json and evaluator-B-arm-M-scorebook.json.
 
 Phase 4 - Substantive analysis (joint, not ordered ELSE IF):

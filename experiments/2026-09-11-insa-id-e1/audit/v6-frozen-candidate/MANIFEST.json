@@ -9,7 +9,7 @@
   "experiment_revision": "v6 (per proposal v5.1)",
   "binding_verification_script": {
     "artifact": "hashing/binding-verification.py",
-    "sha256": "8879f53dcfe256b98327bd49feddccb7644ff23106f0e8d3d29fc46769948008",
+    "sha256": "4ad613f016bfa3e52d12c16183933cbb50315a762d5a196bc81ead80b55ab34b",
     "role": "Single authoritative source of truth for this MANIFEST. Re-runs all SHA verifications, cross-reference checks, D disjointness check, evaluator-rubric content+hash verification, \u22652-of-4 worldwide-significance verification, normalize-and-join tests, C20 synthetic test suite (9 cases including deliberately-mismatched-blind-map), and clean-environment verification. Exits nonzero on any mismatch."
   },
   "audit_trail": {
@@ -32,7 +32,7 @@
   },
   "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
-  "manifest_generated_at_utc": "2026-09-11T19:56:01Z",
+  "manifest_generated_at_utc": "2026-09-11T19:34:09Z",
   "manifest_generation_method": "hashing/binding-verification.py v6 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)",
   "insa_frozen_architecture_reference": {
     "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
@@ -176,21 +176,21 @@
     },
     {
       "path": "inputs/test-invocations.json",
-      "sha256": "f7ab2ee4210b5d4cfab603d2d67241f7f69edf4f060eb0eeb699160124fb141b",
-      "size_bytes": 6353,
-      "git_blob_sha1": "5e1cbd187dd2d65a5a4654d4facbcb133ee14a72"
+      "sha256": "67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a",
+      "size_bytes": 3696,
+      "git_blob_sha1": "64f39712f97d8d44dea553a1347dcb8bd8037cba"
     },
     {
       "path": "protocol/INSA-ID-E1-protocol.md",
-      "sha256": "b268a799cb82ad774407233b94d1d7ffd4bdf14fdda3b285dac0c1338c2ec47c",
-      "size_bytes": 27350,
-      "git_blob_sha1": "183f12ca47123c3462ac98fdf707ec5d8eb87a74"
+      "sha256": "24ef0c793efbd97b02b944b9a800b7821711117bb4c25c765e33cc9431966916",
+      "size_bytes": 27220,
+      "git_blob_sha1": "1bb521791687207925fab9da7312c4c13206762b"
     },
     {
       "path": "protocol/EXECUTION-ORDER.md",
-      "sha256": "8e3be5c3294d51c7ac743313f9decd4cad9f8b18ff99a28215bc3d2d2282ad3c",
-      "size_bytes": 17015,
-      "git_blob_sha1": "6ed9f41b5355f9a249388a1d637a28040b8088f8"
+      "sha256": "acce2b9fb70264a2291734ac85e6d9660b551634e48a11a908e37fe7b567483d",
+      "size_bytes": 17045,
+      "git_blob_sha1": "0a9acfc419b16e9f2abd1c065468f88173957a7f"
     }
   ],
   "supporting_artifacts": [
@@ -208,27 +208,21 @@
     },
     {
       "path": "hashing/c20-derivation.py",
-      "sha256": "2e0a35fe04fd60bf499c2f09a63b28911cd07f5fcff3ac12a51ee2492e122dd5",
-      "size_bytes": 18039,
-      "git_blob_sha1": "53473c7ba16a13d459682dbc9673a947db40d8ff"
+      "sha256": "49097f4cbf207f2aaa943e24e207d4adfaeffbe11912b8dada96c45c164b2d76",
+      "size_bytes": 17276,
+      "git_blob_sha1": "fe56013252ae60c598f1a02c8aeab46c43b01670"
     },
     {
       "path": "hashing/normalize-and-join.py",
-      "sha256": "9adae7cd9e2c4c677aabb7a08acf15bafd730a8fcc835955ac3e77064f8ace2a",
-      "size_bytes": 11437,
-      "git_blob_sha1": "ecfd4de09a48644489c1d436d6c8e211ce76d592"
-    },
-    {
-      "path": "hashing/blind-map-builder.py",
-      "sha256": "c1f4722bf5b65bc36213df2cd4e57422d48e390f2e5d706e5892836176883e56",
-      "size_bytes": 10689,
-      "git_blob_sha1": "dbdc8aaade9b8477bfd8977c13cba3e5ab8ee63d"
+      "sha256": "7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836",
+      "size_bytes": 10703,
+      "git_blob_sha1": "34566af9a61e8bb7891cc891ee9dbd2319b3f106"
     },
     {
       "path": "hashing/binding-verification.py",
-      "sha256": "8879f53dcfe256b98327bd49feddccb7644ff23106f0e8d3d29fc46769948008",
-      "size_bytes": 78936,
-      "git_blob_sha1": "3c0b3dac29937853d95125f9d692486f9ed2fb58"
+      "sha256": "4ad613f016bfa3e52d12c16183933cbb50315a762d5a196bc81ead80b55ab34b",
+      "size_bytes": 77176,
+      "git_blob_sha1": "03819e39b07642dada5c4473135ca734630baedf"
     },
     {
       "path": "preflight/build-reconstruction-input.py",
@@ -239,8 +233,8 @@
   ],
   "artifact_counts": {
     "frozen_proposal_section_7": 21,
-    "supporting": 7,
-    "total_excluding_self": 28
+    "supporting": 6,
+    "total_excluding_self": 27
   },
   "B_binding": {
     "artifact": "inputs/baseline-binding.json",
@@ -320,7 +314,7 @@
       "R3/B1"
     ],
     "c20_derivation_script_artifact": "hashing/c20-derivation.py",
-    "c20_derivation_script_sha256": "2e0a35fe04fd60bf499c2f09a63b28911cd07f5fcff3ac12a51ee2492e122dd5",
+    "c20_derivation_script_sha256": "49097f4cbf207f2aaa943e24e207d4adfaeffbe11912b8dada96c45c164b2d76",
     "c20_provenance_v6": "INSA-ID-E1 uses its own preregistered Manhattan/reference-vector control-validity operationalization (per proposal v5.1). The predecessor Evolution C20 used historical total-score envelope comparisons; v6 does NOT describe INSA-ID-E1's C20 as the identical inherited v0.1 C20 computation. The 85-record BIB corpus calibrates the new rule."
   },
   "V_d_binding": {
@@ -353,7 +347,7 @@
   },
   "test_invocations_binding": {
     "artifact": "inputs/test-invocations.json",
-    "sha256": "f7ab2ee4210b5d4cfab603d2d67241f7f69edf4f060eb0eeb699160124fb141b",
+    "sha256": "67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a",
     "role": "Frozen content-addressed test invocation schedule. Maps every candidate index 1..10 (per (R, B, arm) cell) to its exact frozen Birthdate <date including year> invocation. The 5 distinct test prompts T1..T5 are repeated twice (run-1 and run-2) within each (R, B) cell. The executor MUST consume the test invocation from this artifact via the blind map; it MUST NOT invent or select the birthdate at runtime.",
     "repetition_design": "five frozen test prompts repeated twice per (R, B) cell"
   },
@@ -406,14 +400,14 @@
   },
   "c20_derivation_summary": {
     "artifact": "hashing/c20-derivation.py",
-    "sha256": "2e0a35fe04fd60bf499c2f09a63b28911cd07f5fcff3ac12a51ee2492e122dd5",
+    "sha256": "49097f4cbf207f2aaa943e24e207d4adfaeffbe11912b8dada96c45c164b2d76",
     "role": "Frozen deterministic C20 derivation (v6). Consumes the ACTUAL evaluator-return schema preserved by hashing/normalize-and-join.py in the operator-side scorebook + the operator-only blind map + the frozen test-invocations. Re-verifies all inputs; rejects unknown / duplicate blind IDs, duplicate tuples, arm != expected, (R, B) outside current expected cells, and any operator-metadata mismatch against the blind map (fatal on all). Uses the preregistered historical envelope bound (A=1.807059, B=0.414118). derivation_recorded_at_utc set automatically.",
     "interface_v6": "--blind-map is a REQUIRED input. Each record in the operator-side Arm-C scorebook has fields: blind_id, reconstruction_id, block, arm, candidate, birthdate, test_id, run, scores_<X>, M_scores, G_subset_b_axis_scores, evaluator_self_report. The script RECOMPUTES each of the four BIB scorebook SHAs and compares against baseline-statistics.json expected values (fatal on mismatch); verifies the 85 envelope records; verifies the baseline-statistics required fields; uses the preregistered historical envelope bound; emits c20_per_evaluator_pass, c20_joint_pass, c20_fail_reasons.",
     "verified_during_v6_freeze": "9 test cases: (1) healthy -> c20_joint_pass=True; (2) missing R2/B -> False; (3) degraded R1/B (contract_compliance=0) -> False; (4) unknown blind_id -> FATAL; (5) duplicate blind_id -> FATAL; (6) Arm-M blind_id in Arm-C scorebook -> FATAL; (7) tampered BIB-001 evaluator A scorebook -> FATAL; (8) tampered baseline membership (1 obs removed) -> FATAL; (9) deliberately-mismatched blind-map/scorebook tuple -> FATAL. Plus normalize-and-join step rejects forbidden provenance fields in evaluator return (e.g., reconstruction_id) as FATAL."
   },
   "execution_order_binding": {
     "artifact": "protocol/EXECUTION-ORDER.md",
-    "sha256": "8e3be5c3294d51c7ac743313f9decd4cad9f8b18ff99a28215bc3d2d2282ad3c",
+    "sha256": "acce2b9fb70264a2291734ac85e6d9660b551634e48a11a908e37fe7b567483d",
     "frozen_scoring_algorithm": {
       "artifact": "hashing/score-derivation.py",
       "sha256": "9e6fa0e5d2ec1703b6451d71e7e988ed36448482659e419b79ef891d116f32e6",
@@ -443,7 +437,7 @@
     },
     "frozen_normalize_and_join_script": {
       "artifact": "hashing/normalize-and-join.py",
-      "sha256": "9adae7cd9e2c4c677aabb7a08acf15bafd730a8fcc835955ac3e77064f8ace2a",
+      "sha256": "7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836",
       "role": "Frozen deterministic evaluator-return \u2192 operator-side scorebook normalization/join script. Consumes the raw evaluator-return JSON + locked blind map and produces the immutable operator-side scorebook. Preserves M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report. Adds reconstruction_id, block, arm, candidate, birthdate, test_id, run solely from the blind map. Verifies every added metadata field against the blind map (fatal on mismatch). Rejects unknown blind IDs, duplicate blind IDs, duplicate tuples, any forbidden provenance field in the evaluator return."
     },
     "blind_map_timing_v6": "preflight/blind-map.json is constructed and locked in Phase 0 (pre-dispatch preflight), before any evaluator invocation. Phase 2 USES the already-locked blind map; it does NOT construct or mutate the blind map in Phase 2. Phase 3 uses FRESH per-arm blind_ids (the frozen blind-map design has one-ID->one-tuple); Phase 3 does NOT use \"the same blind_id\" as Arm-C.",

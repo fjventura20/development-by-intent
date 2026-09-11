@@ -157,7 +157,7 @@ After Phase 1 completes for **all Arm-C tuples**:
 
 If C20 PASSES (Phase 2):
 
-1. **Per-candidate fresh-evaluator-session blinding (continued):** Evaluator-A and Evaluator-B score each Arm-M candidate in a fresh independent session. The operator provides the same test invocation (same birthdate) used in Phase 1 for the matched (R, B, test, run) tuple — but uses the **distinct Arm-M blind_id already assigned and locked in Phase 0**. The frozen blind-map design has one-ID->one-tuple; Arm-C and Arm-M IDs are distinct but both were frozen before any evaluator invocation. Phase 3 does NOT create, replace, or modify any blind_id.
+1. **Per-candidate fresh-evaluator-session blinding (continued):** Evaluator-A and Evaluator-B score each Arm-M candidate in a fresh independent session. The operator provides the same test invocation (same birthdate) used in Phase 1 for the matched (R, B, test, run) tuple — but generates a **FRESH blind_id** for the Arm-M candidate (the frozen blind-map design has one-ID->one-tuple; the run-keyed identifier is per-arm, not shared with Arm-C). Phase 3 does NOT use "the same blind_id" as Arm-C; it uses a fresh per-arm blind_id that resolves to the same (R, B, candidate) tuple.
 2. The evaluator receives the test prompt (with the birthdate substituted) but does NOT know whether it is scoring control or treatment. The modification specification itself is hidden.
 3. Lock `evaluation/evaluator-A-arm-M-scorebook.json` and `evaluation/evaluator-B-arm-M-scorebook.json`. **No further appends.**
 4. The Arm-C scorebooks remain locked and untouched. No cross-arm appends.

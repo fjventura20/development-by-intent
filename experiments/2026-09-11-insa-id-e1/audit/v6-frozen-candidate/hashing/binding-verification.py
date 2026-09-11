@@ -73,8 +73,7 @@ SUPPORTING_ARTIFACTS = [
     'evaluation/evaluator-input-packet.md',
     'hashing/score-derivation.py',
     'hashing/c20-derivation.py',
-    'hashing/normalize-and-join.py',
-    'hashing/blind-map-builder.py',
+    'hashing/normalize-and-join.py',  # v6 NEW
     'hashing/binding-verification.py',  # self-binding
     'preflight/build-reconstruction-input.py',
 ]
@@ -289,31 +288,6 @@ def main():
             fail(f'test-invocations.json missing {test_id} = "{invocation}"')
     print(f'  test-invocations.json content-addresses the exact 5 frozen test corpus invocations: OK')
 
-    # 3g. v6.1: Verify the frozen blind-map builder/validator is present and
-    # validates the complete 60-entry Phase-0 universe using only frozen inputs.
-    blind_builder = os.path.join(exp_dir, 'hashing', 'blind-map-builder.py')
-    if not os.path.exists(blind_builder):
-        fail('blind-map-builder.py missing from frozen supporting artifacts')
-    with tempfile.TemporaryDirectory() as tmpdir:
-        bm_out = os.path.join(tmpdir, 'blind-map.json')
-        r = subprocess.run(['python3', blind_builder, '--test-invocations', os.path.join(exp_dir, 'inputs/test-invocations.json'), '--out', bm_out], capture_output=True, text=True, cwd=exp_dir)
-        if r.returncode != 0:
-            fail(f'blind-map-builder.py failed to build synthetic Phase-0 map: {r.stderr[-500:]}')
-        r2 = subprocess.run(['python3', blind_builder, '--test-invocations', os.path.join(exp_dir, 'inputs/test-invocations.json'), '--out', bm_out, '--validate-only'], capture_output=True, text=True, cwd=exp_dir)
-        if r2.returncode != 0:
-            fail(f'blind-map-builder.py failed to validate its own map: {r2.stderr[-500:]}')
-        bm = json.load(open(bm_out))
-        if len(bm.get('blind_id_to_tuple', {})) != 60:
-            fail('blind-map-builder.py did not produce exactly 60 blind IDs')
-    print('  blind-map-builder.py: PASS (60 unique IDs, 60 unique tuples, 30 C + 30 M, 10 per cell, explicit test mapping)')
-
-    # 3h. Verify expected current test schedule is fully explicit (no shorthand)
-    for cell in ('R1/B1', 'R2/B1', 'R3/B1'):
-        layout = ti['cell_layout'].get(cell)
-        if not isinstance(layout, list) or len(layout) != 10:
-            fail(f'test-invocations.json {cell} must explicitly enumerate a list of 10 candidates; shorthand is forbidden')
-    print('  test-invocations.json: PASS (all three cells explicitly enumerate candidates 1..10)')
-
     # Step 4: D = M ∪ P ∪ O pairwise-disjoint check
     print()
     print('Step 4: running D = M ∪ P ∪ O pairwise-disjoint check...')
@@ -332,47 +306,59 @@ def main():
         print('Step 5: running C20 derivation synthetic tests (using actual frozen artifacts + real schema)...')
         envelope_records_data = bs_data['envelope_records_85_with_per_dim_scores']
 
-        # v6.1: Build the COMPLETE Phase-0 blind map (3 R × 1 B × 2 arms × 10 candidates = 60).
-        # Each cell uses the frozen test-invocations mapping: candidates 1..10 = T1r1,T1r2,...,T5r2.
+        # Build the blind map (3 R x 1 B x 1 arm=C x 2 tests = 6 entries; 5 tests x 2 runs = 10)
+        # Build per-test_invocation: each test (T1..T5) is run twice (run-1, run-2) per (R, B, arm) cell
         blind_map = {'schema_version': '1.0', 'lock_timestamp_utc': '2026-09-11T13:00:00Z', 'blind_id_to_tuple': {}}
-        test_to_bd = ti['frozen_test_corpus']['tests']
         counter = 0
-        for R in ('R1', 'R2', 'R3'):
-            for arm in ('C', 'M'):
-                for candidate in range(1, 11):
-                    test_id = f'T{(candidate - 1) // 2 + 1}'
-                    run_idx = ((candidate - 1) % 2) + 1
+        for r in envelope_records_data:
+            if r['reconstruction_id'] in ('R1','R2','R3') and r['block'] == 'B':
+                # Map test_id (T1..T5) to a birthdate string from test_invocations
+                test_to_bd = ti['frozen_test_corpus']['tests']
+                # The 5 test_ids from the envelope are T1..T5 (each appearing in both A and B blocks historically; now only B)
+                test_id = r['test_id']
+                birthdate_str = test_to_bd[test_id]
+                for run_idx in (1, 2):
                     counter += 1
                     bid = f'blind-{counter:03d}'
                     blind_map['blind_id_to_tuple'][bid] = {
-                        'reconstruction_id': R,
-                        'block': 'B1',
-                        'arm': arm,
-                        'candidate': candidate,
-                        'birthdate': test_to_bd[test_id],
+                        'reconstruction_id': r['reconstruction_id'],
+                        'block': r['block'],
+                        'arm': 'C',
+                        'candidate': f'{test_id}-r{run_idx}',
+                        'birthdate': birthdate_str,
                         'test_id': test_id,
                         'run': run_idx,
                     }
-        if len(blind_map['blind_id_to_tuple']) != 60:
-            fail(f'v6.1 synthetic blind map has {len(blind_map["blind_id_to_tuple"])} entries; expected 60')
 
-        def build_evaluator_returns(evaluator, arm='C'):
-            # Build exactly 30 raw evaluator-return records for the requested arm:
-            # 3 reconstructions × 5 tests × 2 runs. Return schema has NO provenance fields.
-            by_R_test = {(r['reconstruction_id'], r['test_id']): r for r in envelope_records_data
-                         if r['reconstruction_id'] in ('R1','R2','R3') and r['block'] == 'B'}
+        def build_evaluator_returns(evaluator, block='B'):
             out = []
-            for bid, tup in blind_map['blind_id_to_tuple'].items():
-                if tup['arm'] != arm:
-                    continue
-                r = by_R_test[(tup['reconstruction_id'], tup['test_id'])]
-                out.append({
-                    'blind_id': bid,
-                    'M_scores': {'M1_pass': True, 'M2_pass': True, 'M3_pass': True, 'M4_pass': True, 'modification_conformance': 4, 'candidate_all_pass': True},
-                    'G_subset_a_4dim_vector': dict(r[f'scores_{evaluator}']),
-                    'G_subset_b_axis_scores': {'C12-1': True, 'C12-2': 7, 'C12-3': 3, 'C12-4': True, 'C12-5': 3, 'C12-6': 3, 'C12-7': True, 'C12-8': True},
-                    'evaluator_self_report': {'runtime_failure_observed': False},
-                })
+            for r in envelope_records_data:
+                if r['reconstruction_id'] in ('R1','R2','R3') and r['block'] == block:
+                    test_id = r['test_id']
+                    # The blind map has 2 blind_ids per (R, B, test_id) (one per run). The envelope
+                    # record represents the BIB historical data; the synthetic evaluator returns
+                    # just need to associate each (R, B, test_id) with a consistent blind_id.
+                    # Use the FIRST match for each test_id to keep deterministic 1:1 mapping.
+                    bid = None
+                    for k, v in blind_map['blind_id_to_tuple'].items():
+                        if v['reconstruction_id'] == r['reconstruction_id'] and v['block'] == r['block'] and v['test_id'] == test_id and v['run'] == 1:
+                            bid = k
+                            break
+                    if bid is None:
+                        # fallback to any matching
+                        for k, v in blind_map['blind_id_to_tuple'].items():
+                            if v['reconstruction_id'] == r['reconstruction_id'] and v['block'] == r['block'] and v['test_id'] == test_id:
+                                bid = k
+                                break
+                    if bid is None:
+                        continue
+                    out.append({
+                        'blind_id': bid,
+                        'M_scores': {'M1_pass': True, 'M2_pass': True, 'M3_pass': True, 'M4_pass': True, 'modification_conformance': 4, 'candidate_all_pass': True},
+                        'G_subset_a_4dim_vector': dict(r[f'scores_{evaluator}']),
+                        'G_subset_b_axis_scores': {'C12-1': True, 'C12-2': 7, 'C12-3': 3, 'C12-4': True, 'C12-5': 3, 'C12-6': 3, 'C12-7': True, 'C12-8': True},
+                        'evaluator_self_report': {'runtime_failure_observed': False},
+                    })
             return out
 
         def operator_join(evaluator_returns, blind_map, eval_id):
@@ -398,8 +384,8 @@ def main():
             return out
 
         # Step 5a: build synthetic raw evaluator returns (real schema)
-        eval_ret_A = build_evaluator_returns('A', 'C')
-        eval_ret_B = build_evaluator_returns('B', 'C')
+        eval_ret_A = build_evaluator_returns('A', 'B')
+        eval_ret_B = build_evaluator_returns('B', 'B')
 
         # Step 5b: run the frozen normalize-and-join.py to build the operator-side scorebook
         def run_normalize_and_join(eval_returns_A, eval_returns_B, blind_map_data, test_name='', must_fail=False):
@@ -427,7 +413,7 @@ def main():
                 try:
                     _sys.argv = ['normalize-and-join.py',
                                  '--raw-returns', raw_A, '--blind-map', bm_p, '--arm', 'C',
-                                 '--expected-current-cells', 'R1/B1,R2/B1,R3/B1',
+                                 '--expected-current-cells', 'R1/B,R2/B,R3/B',
                                  '--out', a_out, '--score-field-suffix', 'A']
                     try:
                         nj_mod.main()
@@ -437,7 +423,7 @@ def main():
                     # Re-run for evaluator B
                     _sys.argv = ['normalize-and-join.py',
                                  '--raw-returns', raw_B, '--blind-map', bm_p, '--arm', 'C',
-                                 '--expected-current-cells', 'R1/B1,R2/B1,R3/B1',
+                                 '--expected-current-cells', 'R1/B,R2/B,R3/B',
                                  '--out', b_out, '--score-field-suffix', 'B']
                     try:
                         nj_mod.main()
@@ -502,22 +488,10 @@ def main():
         armc_A_h, armc_B_h = run_normalize_and_join(eval_ret_A, eval_ret_B, blind_map, test_name='Test 1 (healthy)')
         run_c20(armc_A_h, armc_B_h, blind_map, ti, 'Test 1: healthy real-schema + blind map', expected_exit=0, expected_joint=True)
 
-        # Test 2: explicit runtime-failure records for all R2 candidates.
-        # The scorebook remains complete 30/30; C20 excludes the explicit failures,
-        # then returns a nonfatal missing-current-cell FAIL.
-        armc_A_no_R2 = []
-        armc_B_no_R2 = []
-        for r in armc_A_h:
-            new_r = {k: v for k, v in r.items()}
-            if new_r['reconstruction_id'] == 'R2':
-                new_r['evaluator_self_report'] = {'runtime_failure_observed': True, 'if_runtime_failure': 'synthetic preregistered runtime failure'}
-            armc_A_no_R2.append(new_r)
-        for r in armc_B_h:
-            new_r = {k: v for k, v in r.items()}
-            if new_r['reconstruction_id'] == 'R2':
-                new_r['evaluator_self_report'] = {'runtime_failure_observed': True, 'if_runtime_failure': 'synthetic preregistered runtime failure'}
-            armc_B_no_R2.append(new_r)
-        run_c20(armc_A_no_R2, armc_B_no_R2, blind_map, ti, 'Test 2: explicit R2 runtime failures (missing current statistical cell)', expected_exit=0, expected_joint=False)
+        # Test 2: missing R2
+        armc_A_no_R2 = [r for r in armc_A_h if r['reconstruction_id'] != 'R2']
+        armc_B_no_R2 = [r for r in armc_B_h if r['reconstruction_id'] != 'R2']
+        run_c20(armc_A_no_R2, armc_B_no_R2, blind_map, ti, 'Test 2: missing R2 (missing current cell)', expected_exit=0, expected_joint=False)
 
         # Test 3: degraded R1 (contract_compliance=0)
         armc_A_deg = []

@@ -1,0 +1,124 @@
+{
+  "$schema": "INSA-v0.3-authority-manifest-v1",
+  "schema_version": "1.2",
+  "record_kind": "authority-manifest",
+  "purpose": "Static authority manifest for INSA-ID-E1 (v4). All static authority policy is FROZEN at this file's content-addressed SHA. Dynamic execution-time information lives in preflight/execution-authority-witness.json (NOT in this manifest). This manifest remains byte-identical from protocol freeze through execution.",
+  "experiment_id": "INSA-ID-E1",
+  "declaration_author": "Hermes (operator)",
+  "frozen_at_utc_date": "2026-09-11",
+
+  "executor_identity_static": {
+    "executor_role": "intelligent-executor-under-test",
+    "model_family": "Anthropic Claude (Code CLI)",
+    "model_version_pinned": "claude-opus-4-7",
+    "invocation_substrate": "claude-code CLI",
+    "tool_posture": "constrained (per protocol §13)",
+    "session_creation_mechanism": "fresh session per M-commit boundary AND fresh session per Arm-C candidate AND fresh session per Arm-M candidate (per I-AUTH-05 freshness); no cross-session memory carryover",
+    "authentication_path_static": "OAuth via Claude Code CLI; auth-token fingerprint captured at preflight time in execution-authority-witness.json (NOT in this manifest)",
+    "executor_change_from_v01_preregistered": "v0.1 used claude-sonnet-4-6; INSA-ID-E1 uses claude-opus-4-7. Pre-registered, preregistered-bound deviation (proposal v5.1 §2(e)). Limits direct comparability of the v0.1 failure shape (R2-B deferrals) to INSA-ID-E1's outcome. The executor change does not become an unacknowledged explanation after outcomes are known."
+  },
+
+  "evaluator_identity_static": {
+    "evaluator_a": {
+      "model": "gpt-5.6-sol",
+      "substrate": "Codex CLI",
+      "role": "M and G scoring (independent of evaluator B); per-candidate raw scores only; per-candidate fresh session"
+    },
+    "evaluator_b": {
+      "model": "claude-opus-4-7",
+      "substrate": "Claude Code CLI, fresh session per I-AUTH-05",
+      "role": "M and G scoring (independent of evaluator A); per-candidate raw scores only; per-candidate fresh session"
+    }
+  },
+
+  "I_AUTH_01_capability_vspermission_separation_static": {
+    "status": "satisfied",
+    "capability_set_preregistered_static": [
+      "read_inputs (read-only access to inputs/*)",
+      "produce_candidate_output (write to runs/<R>/<B>/<arm>/candidate-<N>.md)",
+      "self_report_runtime_failure (write to runs/<R>/<B>/<arm>/runtime-failure-<N>.json)"
+    ],
+    "permission_grants_preregistered_static": [
+      "filesystem:read=inputs/**",
+      "filesystem:write=runs/**",
+      "network:disabled",
+      "tools:disabled (--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' for executor, per v0.1 §13)"
+    ],
+    "separation_attestation": "Capability set is enumerated and frozen pre-execution; permission grants are bound to capabilities 1:1 with no additional permissions. The executor cannot acquire permissions outside the preregistered set. Operator (Hermes) holds authority-grant capability but is not the executor."
+  },
+
+  "I_AUTH_06_grant_authentic_static": {
+    "status": "satisfied",
+    "grant_artifact_static": "Telegram approval at 2026-09-11 referencing proposal v5.1 SHA 1f84c3101d6add7d44ed821681946c10be8f5f5c (v5.1 protocol-authorization approval)",
+    "grant_issuer_static": "Frank (PI)",
+    "grant_recipient_static": "Hermes (operator)",
+    "grant_scope_static": "Protocol + frozen-artifact authoring (per proposal v5.1 §8). NOT execution authorization.",
+    "grant_excludes_static": [
+      "Execution authorization (requires separate Frank-as-PI execution GO recorded in execution-authority-witness.json)",
+      "Any modification to frozen v0.3 architecture (848e0fe014f5b4a61ba2cb92e772ee3499dca9c1)",
+      "Any modification to dbi-evolution-v0.1 protocol (blob 8874692d560d9a6363ef4105fae5384b18cf6ef2)",
+      "Any modification to B + D + M + P + O + V(d) + A + G after protocol freeze",
+      "Evaluator substitution after observing candidates",
+      "Retroactive weakening of gates or thresholds",
+      "Any change to §5.4 (proposal v5.1) decision tree semantics (joint, not ordered ELSE IF)",
+      "Retroactive reclassification of substantive failure as INCONCLUSIVE_PENDING_FURTHER"
+    ]
+  },
+
+  "I_AUTH_08_grant_traceable_static": {
+    "status": "satisfied",
+    "trace_chain_static": [
+      "Telegram approval message (Frank, 2026-09-11) -> proposal v5.1 (commit 1f84c31) -> this manifest -> MANIFEST.json grant_references block -> protocol §3"
+    ]
+  },
+
+  "I_AUTH_05_freshness_at_consequential_boundary_static": {
+    "status": "satisfied-by-design",
+    "consequential_action_boundary": "M-commit (per-(R, B, arm) candidate output write event); also per-candidate Arm-C scoring and Arm-M scoring",
+    "freshness_evidence_required_static": "session_creation_timestamp <= m_commit_timestamp for each candidate",
+    "freshness_window_seconds_static": 3600,
+    "freshness_window_rationale_static": "3600 seconds (1 hour) - sufficient for the longest expected per-(R, B, arm, candidate) generation cycle (estimated < 5 minutes per candidate) plus session-establishment overhead, while still detecting stale-session reuse. If actual per-candidate generation exceeds 3600 seconds, the candidate is treated as a per-candidate runtime failure per §5.5.1 (logged, no retry, unaffected candidates analyzed normally).",
+    "freshness_evidence_artifact_pattern_static": "runs/<R>/<B>/<arm>/evidence-<N>.json (per-candidate witness file)"
+  },
+
+  "INV_AUTH_1_executor_authority_manifest_recorded_static": {
+    "status": "satisfied",
+    "authority_manifest_sha_is_bound_externally_by_MANIFEST": true,
+    "pre_mutation_scope_statement_static": "Executor scope is exactly the capability set above. No scope expansion is permitted after this manifest freezes. Scope expansion triggers STOP per proposal v5.1 §8."
+  },
+
+  "INV_AUTH_2_grant_authentic_traceable_static": {
+    "status": "satisfied",
+    "see_I_AUTH_06_and_I_AUTH_08_static": true
+  },
+
+  "INV_AUTH_5_freshness_before_consequential_commit_static": {
+    "status": "satisfied-by-design",
+    "see_I_AUTH_05_static": true,
+    "freshness_window_seconds_static": 3600,
+    "freshness_window_enforcement_static": "Per-candidate evidence file runs/<R>/<B>/<arm>/evidence-<N>.json records session_creation_timestamp and m_commit_timestamp; difference must satisfy 0 < diff <= 3600 seconds. Per-candidate runtime failure if violated."
+  },
+
+  "dynamic_fields_NOT_in_this_manifest_v4": {
+    "auth_token_note": "Dynamic; lives in execution-authority-witness.json (permitted_authentication_fingerprint_evidence.auth_token_sha256). NEVER written to disk in plaintext.",
+    "telegram_message_id_note": "Dynamic; lives in execution-authority-witness.json (execution_GO.message_provenance.telegram_message_id).",
+    "telegram_message_timestamp_utc_note": "Dynamic; lives in execution-authority-witness.json (execution_GO.message_provenance.telegram_timestamp_utc and execution_GO.execution_GO_timestamp_utc).",
+    "session_creation_timestamps_note": "Dynamic; per-candidate, captured in runs/<R>/<B>/<arm>/evidence-<N>.json.",
+    "m_commit_timestamps_note": "Dynamic; per-candidate, captured in runs/<R>/<B>/<arm>/evidence-<N>.json.",
+    "draw_event_note": "Dynamic; lives in execution-authority-witness.json (execution_order_evidence.draw_event_sha256).",
+    "execution_order_list_note": "Dynamic; lives in execution-authority-witness.json (execution_order_evidence.execution_order_list_sha256).",
+    "manifest_self_note": "Computed at MANIFEST.json freeze; NOT a dynamic field. The manifest file does NOT contain its own SHA-256."
+  },
+
+  "static_policy_attestation": "All fields in this manifest are static policy. No field in this manifest is editable after the file's content SHA is recorded in MANIFEST.json. Any execution-time authority information lives in execution-authority-witness.json (NOT in this manifest).",
+
+  "execution_authority_witness_schema_reference": {
+    "witness_path": "preflight/execution-authority-witness.json",
+    "schema_version": "1.0",
+    "schema_location": "protocol/EXECUTION-ORDER.md §6 (verbatim schema definition)",
+    "creation_timing": "Created at execution preflight, AFTER the Frank-as-PI execution GO has been issued. The witness captures: (a) the execution GO identifier and message provenance, (b) the execution GO timestamp, (c) current authority verification (this manifest's SHA must be byte-identical to the frozen SHA), (d) per-session freshness evidence, (e) permitted authentication fingerprint evidence (SHA-256 of OAuth token, NEVER the token itself), (f) execution-order evidence (draw_event_sha256, execution_order_list_sha256).",
+    "self_referential_hash_prohibition": "The witness file does NOT contain its own SHA-256 inside its bytes. SHA-256s of dynamic artifacts are recorded externally in results/score-independent.md, in MANIFEST.json for frozen artifacts, or in sidecar files."
+  },
+
+  "modification_to_this_manifest_after_freeze": "forbidden (per proposal v5.1 §8 GO constraints)"
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "INSA-v0.3-preservation-dimensions-subset-b-v1",
+  "schema_version": "1.1",
+  "record_kind": "preservation-dimensions-subset-b",
+  "purpose": "Subset-(b) of P per proposal v5.1 §5.1 INV-P-1b: the 8 explicit C12 non-target preservation axes. Preserved verbatim from dbi-evolution-v0.1 §11.3 (PROTOCOL-v0.5-frozen-final.md). Subset-(b) is a SEPARATE PRESERVATION FAMILY from subset-(a) (the calibrated BIB 4-dim vector). The two subsets are kept disjoint by ID namespace (BIB-4D-* vs C12-*) and by criterion (Manhattan aggregate vs per-axis binary-failure).",
+  "experiment_id": "INSA-ID-E1",
+  "subset_role_in_P": "additional preservation gates (subset-(b)); disjoint from subset-(a); evaluated under the joint C12 BROKEN rule (proposal v5.1 §5.4 + v0.1 §11.3 PI pass 3 per-axis collapse rule)",
+  "binding": {
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
+    "v0_1_protocol_blob_sha1": "8874692d560d9a6363ef4105fae5384b18cf6ef2",
+    "v0_1_protocol_section": "§11.3 8 non-target C12 axes (PI pass 3 per-axis collapse rule)"
+  },
+  "axes": [
+    {
+      "id": "C12-1",
+      "label": "exact_date_preference",
+      "type": "binary",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 1",
+      "v_dd_value": "preserved/not-preserved",
+      "failure_convention_pr_INSA_ID_E1": "failure = false"
+    },
+    {
+      "id": "C12-2",
+      "label": "connection_count_5_to_10",
+      "type": "operator_counted",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 2",
+      "v_dd_value": "5 <= n <= 10",
+      "failure_convention_pr_INSA_ID_E1": "failure = (n < 5) OR (n > 10)"
+    },
+    {
+      "id": "C12-3",
+      "label": "selection_significance",
+      "type": "0-4 (integer)",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 3",
+      "v_dd_value": "0..4 (integer)",
+      "failure_convention_pr_INSA_ID_E1": "failure = (score == 0). This binary-failure convention for 0-4 axes is an INSA-ID-E1 PREREGISTERED RULE (proposal v5.1 §5.1 INV-P-1b), NOT an inherited v0.1 rule. v0.1 §11.3 specifies the per-axis gate but does not specify a per-axis binary conversion for 0-4 axes. The conversion is preregistered here for reproducibility."
+    },
+    {
+      "id": "C12-4",
+      "label": "end_of_report_synthesis",
+      "type": "binary",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 4",
+      "v_dd_value": "present/absent",
+      "failure_convention_pr_INSA_ID_E1": "failure = absent"
+    },
+    {
+      "id": "C12-5",
+      "label": "lifetime_framing",
+      "type": "0-4 (integer)",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 5",
+      "v_dd_value": "0..4 (integer)",
+      "failure_convention_pr_INSA_ID_E1": "failure = (score == 0). Same preregistered INSA-ID-E1 rule as C12-3."
+    },
+    {
+      "id": "C12-6",
+      "label": "warm_vivid_narrative_voice",
+      "type": "0-4 (integer)",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 6",
+      "v_dd_value": "0..4 (integer)",
+      "failure_convention_pr_INSA_ID_E1": "failure = (score == 0). Same preregistered INSA-ID-E1 rule as C12-3."
+    },
+    {
+      "id": "C12-7",
+      "label": "factual_discipline",
+      "type": "binary",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 7 (binary: no nearby events misrepresented as exact-date)",
+      "v_dd_value": "no-misrepresentation-as-exact-date/not-preserved",
+      "failure_convention_pr_INSA_ID_E1": "failure = no-misrepresentation violated",
+      "non_collapse_note_v4": "C12-7 'factual_discipline' is a v0.1 §11.3 binary axis. Subset-(a) BIB-4D-4 is named 'functional_completeness' in the original BIB rubric. These are SEPARATE dimensions in SEPARATE preservation families, evaluated by SEPARATE criteria (C12-7: per-axis binary; BIB-4D-4: contributes to a 4-dim Manhattan aggregate). NO one-to-one semantic identity is claimed or required between C12-7 and BIB-4D-4. v4 protocol does not assert that 'factual discipline' IS 'functional completeness' or vice versa; they are independently measured and gated."
+    },
+    {
+      "id": "C12-8",
+      "label": "avoidance_of_arbitrary_trivia",
+      "type": "binary",
+      "v0_1_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.3 axis 8",
+      "v_dd_value": "no arbitrary trivia / not-preserved",
+      "failure_convention_pr_INSA_ID_E1": "failure = arbitrary trivia present"
+    }
+  ],
+  "per_axis_gate": "Each axis is independently evaluated. A per-axis C12-axis-BROKEN call is a hard fail on that axis (per proposal v5.1 §5.4 STEP 1).",
+  "non_collapse_attestation_v4": "Subset-(b) is the 8-axis C12 set ONLY. The calibrated BIB 4-dim vector belongs to subset-(a). The two subsets are kept disjoint by ID namespace (BIB-4D-1..4 vs C12-1..8). v4 protocol does NOT claim any direct one-to-one semantic identity between subset-(a) and subset-(b) dimensions, even where display names happen to coincide in unrelated v0.1 §11.3 prose. The two families are independently measured, independently gated, and reported as separate disposition components (Modification_Success uses G_mod_*; Non-target_Identity_Preservation uses G_pres_subset_a_* and the C12 BROKEN rule).",
+  "frozen_at_utc_date": "2026-09-11",
+  "modification_permitted_after_freeze": false
+}

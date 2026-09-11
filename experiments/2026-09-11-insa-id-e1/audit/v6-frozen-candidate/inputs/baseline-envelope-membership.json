@@ -1,0 +1,649 @@
+{
+  "schema_version": "0.1",
+  "record_kind": "baseline-envelope-membership",
+  "purpose": "Enumerate the exact 85 candidate observations that constitute the BIB non-deviated envelope used by the DbI Evolution Experiment Protocol v0.4 as the operational reference for envelope-preservation. Membership is frozen at protocol freeze and may not change after Evolution results exist.",
+  "frozen_at_utc": "2026-09-06T19:30:00Z",
+  "frozen_by": "Hermes (operator), per Frank-as-PI adjudication pass 3 instruction",
+  "exclusion_rule": "The 5 BIB-001 R4 Block B candidates (DEV-002 documented quota-error retry contamination) are excluded. Their raw SHA-256 values are recorded below for verification.",
+  "excluded_r4b_candidates": [
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "24238464fa6b720e078365ed4b4ea00510ddbe778b491c9efb532a6811e5e271"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "9cadd7b79768f52b9de0d5ab62974146ceafe81268bdede44241018d35c38a12"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "67e167080fea0ae750052ce88469e6cea7e3b2afcd387b8329bbbb4fdd9bb09e"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "f841007903ef0bec4ff0f08c081e5fdbaf5cbd7775195b10204a356e5ebdf086"
+    },
+    {
+      "reconstruction_id": "R4",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "e2a202f628ec56e39a68104a0df3439b82f88adfbb0be85619ab05625d7b44d3"
+    }
+  ],
+  "exclusion_rationale": "BIB-001 R4 Block B candidates were captured under Claude OAuth session-limit (HTTP 429) infrastructure failure (DEV-002). The candidates are short refusal responses of 268-315 bytes, not Amazing Birthday reports. Both evaluators independently classified all 5 as IDENTITY-BREAKING. The BIB-001 evaluation phase formally excluded them from the operative 55-candidate non-deviated envelope (BIB-001 analysis/final-result.md Section A.5 sensitivity analysis). BIB-002's PATTERN_NOT_REPRODUCED outcome (0/30 IDENTITY-BREAKING) supports this exclusion.",
+  "included_observations": [
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "002f1c82d97a3f1dd3ba10c59b75635d32ea31db5c8c387315896c0e6e5b5e1a"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "e99a3b2d96b3a097100225fa2835072d27cd13c09cd595b4e28c47ad8714a05f"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "bbd707f57d9b4349c32f8ef6765f3b24863bb436110e5b5eda3882122d4492fc"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "c051d86fa6ca6e6c852a86e771a26d1c465f8f8a2e7f91ae9e1e4408cdf3b794"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "f44751bf275c176fd482c943e644f4c80ee5c774a11e30c0c101740de4f852d5"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "c3013d9c3de97dab7e6b303935751530c38c4a750a09a060857f99447ba865fd"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "b98e002a630525d4c8ad5ed2971a5cdcad94cfa4d62d69fd77d20a007351666b"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "ebabf8414f812cbd4d916b01759bda59085547c8a21fb4e1c1b1038f4a8ca6cb"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "a0a431fba0aec446df816091df5d7586b5af01b41f52db33362433c8674e8ffb"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R1",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "b4ca2cf5d7a496022c2c5fe1e9598c7a11918b78813e08fe6b301b7a05e8222b"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "9fda4f4161f62ac862acfe07a4e7ff68938c4ba3e6ea81d2e281a7b28a4cc479"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "043911758b8c927679d1962f27d763159ba0d7847caf155a7805b7cbb5884e4e"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "322995bb5d5bc56e249915828feedebf4542a4fe058871134d2d1eae93f3ef1c"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "ca9a0313807af379b96df4ac301679743435f781f2152adfe47caa5f632134ec"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "d256574458b4f7dc82b77b54fda33fa523b895e58c409723bf00fe38e17e4a78"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "d7fbbf24d2edc9219ab250696b598aa01fff91a16e0e32fa348afdcd409b11d0"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "2b0fd932752ec3ad1dc04fa432e3dc726a8d9f59cc9f5ee594bb034ecf0f8db5"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "869997bd4ba56843d52d7200a1e5f052e555efef4f9eb08062e3a50225b6ac7e"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "f6c73a428484c661ca18438ad1e877c9bd3da0c4f91a9388bd45bbd2cdd319dc"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R2",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "bf23c43b0a511267ebea3d53de709e776fad1e454cc58bff57297b683930e679"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "9dd4ff1250a87e55029b37801b095f12564b9e11ce88d4ea32c864939e5ef623"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "b2c13881281d5f48aabab09c1809db139c5eb468c68b0ee8bd11c28c9e9ad9b2"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "2880972f347985636bbe719ac4005f8258c516ddd48eb173ce130225bc511510"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "f8b97343be86e2896afc548911ca512afdafa4f0b196fa5bd0d34d70a3b81184"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "8b65160fda390073d0529f51603bc195aa32391777de3e4fd9acb2d5f9dc51dc"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "d71a98a9a8229bc937e3816597739baf5e689304bd8a7a0dc029b903158dbfb2"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "8a8329a6d200dcf971890d89d86850934cbd7214cc1f11cd22aa9cf76a70f756"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "fb4b7e890457b9e3d403aff22b967920cf50e8cdd59b591755e23fedf1d50b62"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "eba942aef2e6b4e9ed4894e2b5e0d38e93d1fab2fa41e672204781e9d0697ff3"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R3",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "98da87d0b6e960a10d8e91027a3b050ac5994161be29f2dda4f2a44dbc7b713d"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "0df23caab49e4e9b1390d12cca4dc292436af1a96fe9f9346b758a656db61933"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "6a818b34441fa37d741bfb37757121a9c107923ad1bcb361fbd9a58b25a6c648"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "cc73e9cc254b072b0f2f36e40fcaca3cd279992806cd606b9a4c48b0f071f850"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "543a7a8c066a933efc401ed620bd3e2050684466c85fa3758ae194b7effe6cff"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R4",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "e73339ab60bb22bd935c9425f2ba2cf3397b2ef29a884892f1b6220ffe766cf1"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "abe4289a2ae1c12ca55cfede317fef43c634df6a97840616dfd8693ccbb8a2dc"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "04d8068ed92728a6c5ca2d01bb2f5a9d7bdc697ddcff8446ba25205fc2ceadd4"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "a51f7597df513454ec6b02cddbf83917197b252ba979a33d1d13dcb8b04ed334"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "38137d8a1bba2629b637064eff0d221beab68e78dc787c7817a3cf2b8be61014"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "1659aea662fa04993793383b070c55d8cfbc493f70f9102b86613074613746cd"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "d40f5022bbe72d271432d5ff6be8b30afd1d6440347360244e9f9af7cdb678dc"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "4898ca32aa76c399df8e5f7aaf78e2aa045edcdb3d4cad9444fc3f667b9360a5"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "856630ebba708f900c6ae905b834385a2764daf42c3f8c2fd6746c440fba7a78"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "df2e7762b167f69fd13ee739c3a3bbc577e7880aa2996fc9f15153a7edac0a2a"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R5",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "e9427cf7f982a85192c26fa3a0f23e65153b68937bc639fc2273803a4ad338e6"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "c1e3b7dc9f5c179113deeb757d60c70750d0fd0a164dde5af0482bc4cbbe7f85"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "de928f211243c8af7396046a4b6e0cfa8ac5582830bd8cee5632dd5a6fa76eb9"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "ab125746afaec640dd0f53aa4cfeb59718fa67ef30f19d2826082ea64074fa95"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "e9199afc575c1b0fc46c1bf1d4779d026480826dbca30261486a551c744debe6"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "38b4e1b833a7d5c2c49e1763b8abf141e7a50ce35c6c76605a612cecaf94ef90"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "9698140341f278e9ac3cccb6a50096e43470bda2ea6695d447893c11c0bce622"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "bc795a66c374689d7f1b9e9ea7fcd572cd0ca20bc817e948357dd80ed1f0e1fb"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "6ff2e2865818fd9c515ffbc3035e113cf0992fc903a67aadc12cd1720886923b"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "029c4fc3d477ac2efdc3b1428a0d63e0e2a1550d2648f387582125a78fb2d9da"
+    },
+    {
+      "source_experiment": "DBI-BIB-001-RERUN-001",
+      "reconstruction_id": "R6",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "25b34e5409031f64202fd92207ead0ae92e074a883d52b9be3f0b564d15c7167"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "2aac80b56828de07bb8e54acaf97011a7993c9e739a1b8fdddf940591ca316d6"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "b37e2d1ad1f782d36f5e8c2148896f9c56bd5663f4c4d1911c47ec1ccefc07dd"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "b1088b903b22daeb8369d2ca2c6db235717f1bedb9050a3b1816774722cb1167"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "aa9356c5879de26007fe458968484ebf89f66946088997479d4b8ba6fcec4e4e"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "677818ae01c2ec47a59a379edb2917ea53dd384a9fc43b558792b871d0584116"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "427056ac60ba987a7ff877a6c26504fa7a234e27444750e35c569d45e4df6c7a"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "bdf226873c52f152741509ce12b4828f12f4371beb97bdf638394661885a48f6"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "338a4d8a6e28ee3aa8e775086cb24a6edd046e7d9708d6d463715197df295147"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "5ab08f7941cf5be82edf8572d270d5870ed40c9c05918ba3c4fd7782121e49ed"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R7",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "13650ed2fe36d7cdc96437c2027ec0e3efba3f5dd283fc80e60ed9e922fbe168"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "7ae3645fb3e1888d81f3247eb234b9dc38e5eb61176d5d996472346a24c72e07"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "d24442a61b415ae417e1aa6bb9f9f598cff11e6608c361e70e297c5d915032b1"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "c39fc9c1e2b1e5028d527532b0a013bd8e078fe81bc585543c889f036ec6495b"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "4111f9bb85354023bf94045ca518ded8a468fadc947485e3c45f3b29ba180ca1"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "7b23e15ed4de4cd4412929b2b8bd7fd4e1aa19b4aba461d6f06624c1bb696d2b"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "b9680b80a3b73a98f48383603bee6ac35f8c1046b3bff4b3df25183677d2a782"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "73779c90690048958798f9aa0c1a2540f5b444300c5d58e3d9a4a0a1ccd954e0"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "8961c6f711ca20d47e277bb8c5591b50b6238a18dac88464c0b9dc6bd40c5bea"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "9eee96e9674d10ceea7110c6ba717e0cef0ec77aa254f8346180a775e5483008"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R8",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "350ba6171e0e90adb0953212d259d8292ef4fc3bdcb2cccf5b2c75ccf5f1d45c"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "A",
+      "test_id": "T1",
+      "raw_sha256": "6ea29fbce55f03df18d611914be4b24e17da7359e34554217606f9b815a930dd"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "A",
+      "test_id": "T2",
+      "raw_sha256": "de3d187509914e7107d5f04a22f6c76f2e4dec0b23d49f87104f38aa9b49d780"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "A",
+      "test_id": "T3",
+      "raw_sha256": "7540e51ed5c802ff88db039d496a8748a5470f454f74b11d86795585f39a7fcb"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "A",
+      "test_id": "T4",
+      "raw_sha256": "638ce7c295498db73681a496d6429b2ab46439ef2ca056b0d43e0bd6f30675a1"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "A",
+      "test_id": "T5",
+      "raw_sha256": "1236f880b5122607bbfb109bb57439861cf659a2e4b79de5640d0eb771c579df"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "B",
+      "test_id": "T1",
+      "raw_sha256": "76f9ab1a9f9f268d0f01547523fabcd3601f1ecadaaef6e6fa21e3a7c7e1d66e"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "B",
+      "test_id": "T2",
+      "raw_sha256": "72356df8127524d7cdd32d9ff934941721ddf7875c61564d77344a79dbd3fac8"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "B",
+      "test_id": "T3",
+      "raw_sha256": "fae66fd3fcbea871d2686764bc05f713bb5ba2b0bf6dc7bfd4c14584b0e0a1a9"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "B",
+      "test_id": "T4",
+      "raw_sha256": "b0def6614e87f08218287df4e3a62a62db29ca2ba2547d2e9d933cca20ec0c3a"
+    },
+    {
+      "source_experiment": "DBI-BIB-002",
+      "reconstruction_id": "R9",
+      "block": "B",
+      "test_id": "T5",
+      "raw_sha256": "2ebe78f5f8ce405256d9c67662811904df463eb18d38d43312d0e2fb44bcc9a7"
+    }
+  ],
+  "membership_count": 85,
+  "count_verification": {
+    "BIB-001_RERUN_non_deviated": "R1=10 + R2=10 + R3=10 + R4=5(A only) + R5=10 + R6=10 = 55",
+    "BIB-002": "R7=10 + R8=10 + R9=10 = 30",
+    "total": "55 + 30 = 85",
+    "excluded": "BIB-001 R4/B = 5 (DEV-002 documented quota-error retry contamination)",
+    "grand_total_BIB": "85 included + 5 excluded = 90 BIB observations"
+  },
+  "deterministic_ordering_note": "Observations are listed in deterministic order: BIB-001 R1-R6 (excluding R4/B) ascending, then BIB-002 R7-R9 ascending. Within each reconstruction, block A then block B; within each block, T1-T5 ascending. This ordering is reproducible and auditable.",
+  "membership_lock_note": "This artifact is FROZEN at the protocol freeze commit. No membership changes are permitted after Evolution results exist. Any reanalysis that wants to use a different envelope must use this artifact as published at freeze or be classified as post-hoc.",
+  "verification_command": "python3 -c \"import json; m=json.load(open('inputs/baseline-envelope-membership.json')); print(len(m['included_observations']))\""
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "INSA-v0.3-test-invocations-v1",
+  "schema_version": "1.0",
+  "record_kind": "test-invocations",
+  "purpose": "Frozen content-addressed test invocation schedule for INSA-ID-E1 v6. Maps every candidate index 1..10 (per (R, B, arm) cell) to its exact frozen Birthdate <date including year> invocation. The 5 distinct test prompts T1..T5 are repeated twice (run-1 and run-2) within each (R, B) cell. The executor MUST consume the test invocation from this artifact via the blind map; it MUST NOT invent or select the birthdate at runtime.",
+  "experiment_id": "INSA-ID-E1",
+  "frozen_at_utc_date": "2026-09-11",
+  "frozen_by": "Hermes (operator)",
+  "frozen_test_corpus": {
+    "source": "experiments/2026-09-05-dbi-bib-001-rerun-001/inputs/test-corpus.txt",
+    "sha256": "a61a75053a4921e23922075be2164932b1eb543fff7c3c29b7baaea97d60f9a1",
+    "size_bytes": 153,
+    "tests": {
+      "T1": "Birthdate February 20, 1952",
+      "T2": "Birthdate June 23, 1956",
+      "T3": "Birthdate February 29, 1960",
+      "T4": "Birthdate November 9, 1989",
+      "T5": "Birthdate August 24, 1931"
+    }
+  },
+  "repetition_design": {
+    "design": "five frozen test prompts repeated twice per (R, B) cell",
+    "explanation": "Each (R, B, arm) cell has 10 candidates. The 5 test prompts T1..T5 are each invoked twice (run-1 and run-2) within the cell. The run_letter is the within-test-prompt repeat index; it is NOT a T-number, NOT a reconstruction, NOT an arm label. The candidate index n in 1..10 within the cell = (test_index - 1) * 2 + run_letter_position (1 or 2)."
+  },
+  "cell_layout": {
+    "R1/B1": {
+      "candidates_1_to_10": [
+        {
+          "candidate": 1,
+          "test_id": "T1",
+          "run": 1,
+          "invocation": "Birthdate February 20, 1952"
+        },
+        {
+          "candidate": 2,
+          "test_id": "T1",
+          "run": 2,
+          "invocation": "Birthdate February 20, 1952"
+        },
+        {
+          "candidate": 3,
+          "test_id": "T2",
+          "run": 1,
+          "invocation": "Birthdate June 23, 1956"
+        },
+        {
+          "candidate": 4,
+          "test_id": "T2",
+          "run": 2,
+          "invocation": "Birthdate June 23, 1956"
+        },
+        {
+          "candidate": 5,
+          "test_id": "T3",
+          "run": 1,
+          "invocation": "Birthdate February 29, 1960"
+        },
+        {
+          "candidate": 6,
+          "test_id": "T3",
+          "run": 2,
+          "invocation": "Birthdate February 29, 1960"
+        },
+        {
+          "candidate": 7,
+          "test_id": "T4",
+          "run": 1,
+          "invocation": "Birthdate November 9, 1989"
+        },
+        {
+          "candidate": 8,
+          "test_id": "T4",
+          "run": 2,
+          "invocation": "Birthdate November 9, 1989"
+        },
+        {
+          "candidate": 9,
+          "test_id": "T5",
+          "run": 1,
+          "invocation": "Birthdate August 24, 1931"
+        },
+        {
+          "candidate": 10,
+          "test_id": "T5",
+          "run": 2,
+          "invocation": "Birthdate August 24, 1931"
+        }
+      ]
+    },
+    "R2/B1": {
+      "candidates_1_to_10": "identical layout to R1/B1 (same 5 tests \u00d7 2 runs; reconstruction 2; block B)"
+    },
+    "R3/B1": {
+      "candidates_1_to_10": "identical layout to R1/B1 (same 5 tests \u00d7 2 runs; reconstruction 3; block B)"
+    }
+  },
+  "execution_path": "reconstruction-input (preflight/build-reconstruction-input.py) \u2192 application ready \u2192 frozen test invocation (this artifact) \u2192 birthday-report candidate output",
+  "executor_must_not_invent_birthdate": true,
+  "blind_map_obtains_birthdate_from_this_artifact": true
+}

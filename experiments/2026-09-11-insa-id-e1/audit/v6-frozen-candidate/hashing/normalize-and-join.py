@@ -1,47 +1,67 @@
 #!/usr/bin/env python3
 """
-INSA-ID-E1 v6.1 evaluator-return -> operator-side scorebook normalization/join.
+INSA-ID-E1 evaluator-return → operator-side scorebook normalization/join
+script (frozen pre-execution, v6).
 
 Takes the raw evaluator-return JSON (in the exact blinded schema from
 evaluation/evaluator-input-packet.md §7) and joins it against the locked
 operator-only blind map to produce the immutable operator-side scorebook.
 
-v6.1 requirements:
-  - The raw evaluator-return blind-ID set must equal the exact expected
-    60-blinded-IDs set for the requested arm. (Arm C: exactly 30 frozen
-    Arm-C blind IDs. Arm M: exactly 30 frozen Arm-M blind IDs.)
-  - No silent omissions. If an evaluator invocation fails, that candidate
-    must have an explicit failure record (runtime_failure_observed: true).
-  - The operator-side scorebook must contain EXACTLY the expected set
-    of blind IDs (the raw set minus failures).
-
 Inputs:
   --raw-returns PATH        JSON file (list of records in the evaluator-return
                             schema: blind_id, M_scores, G_subset_a_4dim_vector,
                             G_subset_b_axis_scores, evaluator_self_report).
+                            Evaluator-returned records MUST NOT contain
+                            reconstruction_id, block, arm, candidate, T-number,
+                            phase, or any other execution-provenance field.
   --blind-map PATH          Operator-only blind map (preflight/blind-map.json,
-                            locked in Phase 0). Map of blind_id -> tuple.
-  --arm STR                 "C" or "M". The script verifies that the raw
-                            evaluator-return blind-ID set equals the exact
-                            expected 30-blinded-IDs set for the requested arm.
-  --expected-current-cells  Comma-separated (R, B) cell strings (e.g., "R1/B1,R2/B1,R3/B1").
+                            locked in Phase 0). Maps blind_id -> (R, B, arm,
+                            candidate, birthdate, test_id, run). The test
+                            invocation (Birthdate) is the exact frozen test from
+                            inputs/test-invocations.json.
+  --arm STR                 "C" or "M". The script verifies that the blind-map's
+                            arm for every record matches this value (rejects
+                            Arm-M blind IDs in Arm-C scorebook, etc.).
+  --expected-current-cells  Comma-separated list of (R, B) cell strings the
+                            scorebook must cover (e.g., "R1/B,R2/B,R3/B").
   --out PATH                Output JSON file (immutable operator-side scorebook).
   --score-field-suffix STR  Suffix for the score field in the output ("A" or "B").
 
 Output (each record in --out):
-  Same as v6, plus complete 30-record arm coverage is enforced.
+  {
+    "blind_id": <from raw>,
+    "reconstruction_id": <from blind map; R/B/arm/candidate NOT from raw>,
+    "block": <from blind map>,
+    "arm": <from blind map>,
+    "candidate": <from blind map; uses the (R, B, test, run) canonical tuple>,
+    "birthdate": <from blind map; the exact frozen test invocation>,
+    "test_id": <from blind map; the frozen T-number like "T1", "T2", ...>,
+    "run": <from blind map; 1 or 2 (the within-test repeat index)>,
+    "scores_<X>": <from raw G_subset_a_4dim_vector>,
+    "M_scores": <from raw>,
+    "G_subset_b_axis_scores": <from raw; PRESERVED in locked scorebook>,
+    "evaluator_self_report": <from raw>,
+  }
 
 Rules enforced (fatal nonzero exit on any violation):
-  - The raw evaluator-return blind-ID set must equal the expected 30-blinded-IDs
-    set for the requested arm (intersection check). Missing or extra IDs are FATAL.
-  - Every raw record's blind_id must be in the blind map.
-  - No duplicate blind_id in the raw records.
-  - No duplicate (R, B, arm, candidate) tuple after the join.
-  - No raw record may contain any forbidden provenance field.
-  - For each (R, B, arm) cell, the expected 10 candidates must be present in the
-    output (with the failure record honoring runtime_failure_observed for
-    candidates that had evaluator runtime failures).
-  - C20 evidence (all 8 C12 axes) must survive in each output record.
+  - Every raw record's blind_id must be in the blind map (rejects unknown blind IDs).
+  - No duplicate blind_id in the raw records (rejects duplicate blind IDs).
+  - No duplicate (R, B, arm, candidate) tuple after the join (rejects duplicate tuples).
+  - Every raw record MUST NOT contain any of the forbidden provenance fields
+    (reconstruction_id, block, arm, candidate, T-number, phase, experiment_id).
+  - The scorebook is the requested arm; every record must have blind-map arm == arm.
+  - The set of (R, B) cells in the joined scorebook must exactly equal the set of
+    --expected-current-cells.
+  - The score field (scores_A or scores_B) must be a dict with all 4 BIB dimensions, each
+    an integer 0-4.
+  - The G_subset_b_axis_scores field must be a dict with all 8 C12 axes.
+  - The M_scores field must contain the expected keys.
+  - The evaluator_self_report.runtime_failure_observed must be a boolean.
+
+C20 and the operator-side analysis layer consume the operator-side scorebook directly.
+R/B/arm/candidate/birthdate are NEVER taken from the evaluator-returned data; they are
+recovered EXCLUSIVELY from the blind map (per proposal v5.1 §5.1 INV-G-1 + v6
+corrections). Operator metadata mismatch is FATAL.
 """
 
 import argparse
@@ -54,7 +74,6 @@ EXPECTED_BIB_DIMS = ['contract_compliance', 'selection_behavior', 'narrative_beh
 EXPECTED_C12_IDS = ['C12-1', 'C12-2', 'C12-3', 'C12-4', 'C12-5', 'C12-6', 'C12-7', 'C12-8']
 EXPECTED_M_KEYS = ['M1_pass', 'M2_pass', 'M3_pass', 'M4_pass', 'modification_conformance', 'candidate_all_pass']
 FORBIDDEN_PROVENANCE_FIELDS = ['reconstruction_id', 'block', 'arm', 'candidate', 'T-number', 'phase', 'experiment_id', 'birthdate', 'test_id', 'run']
-FROZEN_CANDIDATES_PER_CELL = 10
 
 
 def fail(msg):
@@ -63,11 +82,11 @@ def fail(msg):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='INSA-ID-E1 v6.1 evaluator-return normalizer + blind-map join')
+    ap = argparse.ArgumentParser(description='INSA-ID-E1 v6 evaluator-return normalizer + blind-map join')
     ap.add_argument('--raw-returns', required=True, help='JSON file of evaluator-returned records (exact schema in evaluation/evaluator-input-packet.md §7)')
     ap.add_argument('--blind-map', required=True, help='Operator-only blind map (preflight/blind-map.json)')
     ap.add_argument('--arm', required=True, choices=['C', 'M'], help='Expected arm of the scorebook')
-    ap.add_argument('--expected-current-cells', required=True, help='Comma-separated (R, B) cell strings (e.g., "R1/B1,R2/B1,R3/B1")')
+    ap.add_argument('--expected-current-cells', required=True, help='Comma-separated (R, B) cell strings the scorebook must cover (e.g., "R1/B,R2/B,R3/B")')
     ap.add_argument('--out', required=True, help='Output operator-side scorebook JSON')
     ap.add_argument('--score-field-suffix', required=True, choices=['A', 'B'], help='Suffix for the score field (A or B)')
     args = ap.parse_args()
@@ -79,32 +98,11 @@ def main():
     if not isinstance(blind_map, dict):
         fail(f'blind map {args.blind_map} missing "blind_id_to_tuple" mapping')
 
-    # v6.1: validate the blind map is the canonical 60-entry set
-    if len(blind_map) != 60:
-        fail(f'blind map {args.blind_map} has {len(blind_map)} entries; expected exactly 60 (frozen in Phase 0)')
-
-    # Determine the expected set of blind IDs for the requested arm
-    expected_arm_blind_ids = {
-        bid for bid, tup in blind_map.items()
-        if tup.get('arm') == args.arm
-    }
-    if len(expected_arm_blind_ids) != 30:
-        fail(f'blind map has {len(expected_arm_blind_ids)} blind IDs for arm {args.arm}; expected exactly 30')
-
     # Load raw evaluator returns
     with open(args.raw_returns) as f:
         raw_returns = json.load(f)
     if not isinstance(raw_returns, list):
         fail(f'raw returns {args.raw_returns} must be a JSON list of records')
-
-    # v6.1: validate raw blind-ID set equals expected arm blind-ID set
-    raw_blind_ids = {r.get('blind_id') for r in raw_returns}
-    if None in raw_blind_ids:
-        fail(f'raw returns has record(s) missing blind_id field')
-    missing = expected_arm_blind_ids - raw_blind_ids
-    extra = raw_blind_ids - expected_arm_blind_ids
-    if missing or extra:
-        fail(f'raw evaluator-return blind-ID set does not equal expected arm={args.arm} set: missing={sorted(missing)}; extra={sorted(extra)}; expected exactly 30 frozen {args.arm} blind IDs')
 
     expected_cells = set(s.strip() for s in args.expected_current_cells.split(','))
     arm = args.arm
@@ -188,18 +186,7 @@ def main():
         }
         out_records.append(out_record)
 
-    # v6.1: verify complete 30-record arm coverage (every (R, B, arm) cell has all 10 candidates
-    # OR an explicit failure record for missing ones, but no silent omissions)
-    actual_tuples = set((r['reconstruction_id'], r['block'], r['arm'], r['candidate']) for r in out_records)
-    expected_tuples = {(R, B, arm, n)
-                        for R in {'R1', 'R2', 'R3'}
-                        for B in {'B1'}
-                        for n in range(1, FROZEN_CANDIDATES_PER_CELL + 1)}
-    missing_tuples = expected_tuples - actual_tuples
-    if missing_tuples:
-        fail(f'operator-side scorebook incomplete: {len(missing_tuples)} of 30 expected arm={arm} tuples missing (silent omission not permitted; evaluator must have a record per candidate). missing: {sorted(missing_tuples)[:10]}...')
-
-    # Verify the set of (R, B) cells in the joined scorebook
+    # Verify the set of (R, B) cells exactly matches the expected current cells
     actual_cells = set(f'{r["reconstruction_id"]}/{r["block"]}' for r in out_records)
     if actual_cells != expected_cells:
         missing = expected_cells - actual_cells
@@ -215,10 +202,11 @@ def main():
         os.fsync(f.fileno())
     os.replace(tmp, args.out)
 
-    print(f'WROTE: {args.out} ({len(out_records)} records, {len(actual_cells)} cells, arm={arm})')
+    print(f'WROTE: {args.out} ({len(out_records)} records, {len(actual_cells)} cells)')
     print(f'  expected cells: {sorted(expected_cells)}')
     print(f'  actual cells:   {sorted(actual_cells)}')
-    print(f'  completeness check: 30/30 expected {arm} tuples present (no silent omissions)')
+    print(f'  arm:            {arm}')
+    print(f'  score field:    {score_field}')
 
 
 if __name__ == '__main__':

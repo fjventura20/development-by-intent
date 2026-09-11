@@ -1,6 +1,6 @@
 # INSA-ID-E1 — Audit Trail
 
-This directory preserves the protocol v1, v2, v3, v4, v5 + proposal v4, v5, v5.1 packages as audit history. Protocol v6 (frozen-candidate-rev6) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
+This directory preserves the protocol v1, v2, v3, v4, v5, v6 + proposal v4, v5, v5.1 packages as audit history. Protocol v6.1 (frozen-candidate-rev6.1) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
 
 ## v1 frozen-candidate (2026-09-11)
 
@@ -107,6 +107,33 @@ This directory preserves the protocol v1, v2, v3, v4, v5 + proposal v4, v5, v5.1
    - Clean-environment verification case: PASS (the verifier ran successfully in a fresh tempdir using only frozen repo artifacts + temporary files it created itself)
 - **v6 truthful freeze timestamps:** `frozen_at_utc_date` (date-only); `manifest_generated_at_utc` (set by the binding-verification script via `datetime.now(timezone.utc).isoformat()`).
 - **v6 no model dispatch, no evaluator invocation, no candidate generation:** confirmed (no `runs/`, no scorebooks, no synthesis files, no execution-authority witness, no C20-decision-record).
+
+## v6.1 frozen-candidate-rev6.1 (current; awaiting Frank-as-PI execution GO)
+
+- **v6 prior audit package:** `audit/v6-frozen-candidate/` (v6 commit `b875515f5aaa7ff9ef0af4b42c6117b5e8d83855`)
+- **v6.1 changes:**
+  - Phase-0 blind map now freezes all 60 blind IDs (30 Arm-C + 30 Arm-M) for the complete 3×1×2×10 execution tuple universe; no blind ID may be created, replaced, or modified after Phase 0.
+  - `inputs/test-invocations.json` explicitly enumerates candidate 1..10 for R1/B1, R2/B1, and R3/B1 (T1r1, T1r2, T2r1, T2r2, T3r1, T3r2, T4r1, T4r2, T5r1, T5r2), with no shorthand layout.
+  - `hashing/blind-map-builder.py` deterministically builds/validates the complete 60-entry map: exactly 60 unique IDs, 60 unique tuples, 30 C + 30 M, 10 per (R,B,arm) cell, exact candidate→test/run/birthdate mapping, no missing/extra tuple.
+  - `hashing/normalize-and-join.py` requires exactly the expected 30 blind IDs for each arm and rejects silent omissions; locked scorebooks require complete 30/30 arm coverage.
+  - `hashing/c20-derivation.py` consumes the complete operator-side Arm-C scorebooks and exact blind map, with exact 30-tuple completeness enforced.
+  - Structural tests use the actual 30-record arm schema and include missing-ID, extra-ID, wrong candidate→test, wrong candidate→run, wrong birthdate, duplicate tuple, and Arm-M substitution failures.
+  - Phase-3 language says the distinct Arm-M blind_id is already assigned and locked in Phase 0; it does not create a fresh ID after Phase 0.
+  - Clean-environment binding verification is reported as successful without claiming canonical MANIFEST equality from a dynamic-timestamped regeneration.
+
+## v6.1 frozen-candidate-rev6.1 (current; awaiting Frank-as-PI execution GO)
+
+- **v6 prior audit package:** `audit/v6-frozen-candidate/` (v6 commit `b875515f5aaa7ff9ef0af4b42c6117b5e8d83855`)
+- **v6.1 changes:**
+  - Phase-0 blind map now freezes all 60 blind IDs (30 Arm-C + 30 Arm-M) for the complete 3×1×2×10 execution tuple universe; no blind ID may be created, replaced, or modified after Phase 0.
+  - `inputs/test-invocations.json` explicitly enumerates candidate 1..10 for R1/B1, R2/B1, and R3/B1 (T1r1, T1r2, T2r1, T2r2, T3r1, T3r2, T4r1, T4r2, T5r1, T5r2), with no shorthand layout.
+  - `hashing/blind-map-builder.py` deterministically builds/validates the complete 60-entry map: exactly 60 unique IDs, 60 unique tuples, 30 C + 30 M, 10 per (R,B,arm) cell, exact candidate→test/run/birthdate mapping, no missing/extra tuple.
+  - `hashing/normalize-and-join.py` requires exactly the expected 30 blind IDs for each arm and rejects silent omissions; locked scorebooks require complete 30/30 arm coverage.
+  - `hashing/c20-derivation.py` consumes the complete operator-side Arm-C scorebooks and exact blind map, with exact 30-tuple completeness enforced.
+  - Structural tests use the actual 30-record arm schema and include missing-ID, extra-ID, wrong candidate→test, wrong candidate→run, wrong birthdate, duplicate tuple, and Arm-M substitution failures.
+  - Phase-3 language says the distinct Arm-M blind_id is already assigned and locked in Phase 0; it does not create a fresh ID after Phase 0.
+  - Clean-environment binding verification is reported as successful without claiming canonical MANIFEST equality from a dynamic-timestamped regeneration.
+- **v6.1 final SHAs:** MANIFEST=`29c8f0e5307a0f8babd1819fea37f2c2420d6f00eaf05f66d75f72a1f7bdeb7c`; protocol=`b268a799cb82ad774407233b94d1d7ffd4bdf14fdda3b285dac0c1338c2ec47c`; evaluator packet=`7ed8a72bd73ce59e1ded5146855cb2869c942f3703c767a6413690c3fd7251fa`; blind-map-builder=`c1f4722bf5b65bc34e5c3c1b0a3c1961b3a2b02bbfdf5c6502faeb77631ab3d`; normalize-and-join=`9adae7cd9e2c4c677aabb7a08acf15bafd730a8fcc835955ac3e77064f8ace2a`; C20=`2e0a35fe04fd60bf499c2f09a63b28911cd07f5fcff3ac12a51ee2492e122dd5`; binding-verification=`8879f53dcfe256b98327bd49feddccb7644ff23106f0e8d3d29fc46769948008`.
 
 ## Proposal lineage
 

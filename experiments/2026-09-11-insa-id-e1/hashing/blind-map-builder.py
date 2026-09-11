@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+"""
+INSA-ID-E1 v6.1 frozen blind-map builder/validator.
+
+Deterministic tool that produces/validates the complete 60-entry blind map
+for INSA-ID-E1. Given the frozen execution-order tuple universe, the
+frozen test-invocations, the requested arm (or both arms), and the
+candidate number, it builds the 60-entry blind map and validates that:
+
+  - exactly 60 unique blind IDs (when both arms are requested)
+  - exactly 60 unique (R, B, arm, candidate) tuples
+  - exactly 30 C + 30 M
+  - exactly 10 candidates per (R, B, arm) cell
+  - candidate -> test/run/birthdate exactly matches test-invocations.json
+  - no missing or extra execution-order tuple
+
+Blind IDs themselves may be random/opaque; the tuple mapping may not
+be discretionary.
+
+Phase 0 of the v6.1 protocol must use this tool to produce the locked
+blind map. No blind ID may be created, replaced, or modified after Phase 0.
+"""
+
+import argparse
+import hashlib
+import json
+import os
+import sys
+import time
+import uuid
+
+
+FROZEN_RECONSTRUCTIONS = ('R1', 'R2', 'R3')
+FROZEN_BS = ('B1',)
+FROZEN_ARMS = ('C', 'M')
+FROZEN_CANDIDATES_PER_CELL = 10  # 1..10
+
+# Map (cell_index 1..10) -> (test_id, run) - the frozen mapping per v6.1
+CANDIDATE_TO_TEST_RUN = {
+    1: ('T1', 1), 2: ('T1', 2),
+    3: ('T2', 1), 4: ('T2', 2),
+    5: ('T3', 1), 6: ('T3', 2),
+    7: ('T4', 1), 8: ('T4', 2),
+    9: ('T5', 1), 10: ('T5', 2),
+}
+
+
+def fail(msg):
+    print(f'FATAL: {msg}', file=sys.stderr)
+    sys.exit(2)
+
+
+def build_complete_blind_map(test_invocations_path):
+    """Build the complete 60-entry blind map deterministically.
+
+    Blind IDs are random/opaque (uuid4) so the ID-space itself does not
+    carry information; the tuple mapping (R, B, arm, candidate) -> birthdate
+    is the binding. Determinism here means: the same seed re-builds the same
+    blind IDs; without a seed, the IDs are still new but the tuple mapping
+    is reproducible from the frozen inputs.
+    """
+    with open(test_invocations_path) as f:
+        ti = json.load(f)
+    # Validate the test-invocations artifact: exactly 10 entries per (R, B) cell
+    # enumerated (no shorthand), exactly matching the CANDIDATE_TO_TEST_RUN map.
+    for R in FROZEN_RECONSTRUCTIONS:
+        for B in FROZEN_BS:
+            key = f'{R}/{B}'
+            if key not in ti['cell_layout']:
+                fail(f'test-invocations.json missing cell_layout for {key}')
+            layout = ti['cell_layout'][key]
+            if not isinstance(layout, list) or len(layout) != FROZEN_CANDIDATES_PER_CELL:
+                fail(f'test-invocations.json {key} layout not a list of exactly 10 candidates')
+            for entry in layout:
+                for k in ('candidate', 'test_id', 'run', 'invocation'):
+                    if k not in entry:
+                        fail(f'test-invocations.json {key} entry missing {k!r}: {entry}')
+                expected_test, expected_run = CANDIDATE_TO_TEST_RUN[entry['candidate']]
+                if entry['test_id'] != expected_test or entry['run'] != expected_run:
+                    fail(f'test-invocations.json {key} candidate {entry["candidate"]} has test_id={entry["test_id"]} run={entry["run"]}; expected {expected_test} run {expected_run}')
+                if entry['invocation'] != ti['frozen_test_corpus']['tests'][expected_test]:
+                    fail(f'test-invocations.json {key} candidate {entry["candidate"]} invocation {entry["invocation"]!r} does not match frozen test corpus for {expected_test}')
+
+    # Build the 60-entry blind map deterministically
+    # Use a SHA-based seed derived from the test-invocations artifact so the
+    # SAME content always produces the same blind IDs (reproducibility).
+    seed_input = f'{ti["frozen_test_corpus"]["sha256"]}::{ti["frozen_test_corpus"]["source"]}'.encode()
+    master_seed = hashlib.sha256(seed_input).digest()
+    # Use a deterministic PRNG seeded from a SHA of (reconstruction, block, arm, candidate, master_seed)
+    def blind_id(R, B, arm, n):
+        h = hashlib.sha256(master_seed + f'{R}/{B}/{arm}/{n}'.encode()).hexdigest()[:12]
+        return f'blind-{R}-{B}-{arm}-{n:02d}-{h}'
+
+    entries = []
+    for R in FROZEN_RECONSTRUCTIONS:
+        for B in FROZEN_BS:
+            for arm in FROZEN_ARMS:
+                for n in range(1, FROZEN_CANDIDATES_PER_CELL + 1):
+                    test_id, run = CANDIDATE_TO_TEST_RUN[n]
+                    bid = blind_id(R, B, arm, n)
+                    entries.append({
+                        'blind_id': bid,
+                        'reconstruction_id': R,
+                        'block': B,
+                        'arm': arm,
+                        'candidate': n,
+                        'test_id': test_id,
+                        'run': run,
+                        'birthdate': ti['frozen_test_corpus']['tests'][test_id],
+                    })
+    return entries, ti
+
+
+def validate_blind_map(entries, test_invocations):
+    """Validate the complete 60-entry blind map against the v6.1 invariants."""
+    # 1. Exactly 60 entries
+    if len(entries) != 60:
+        fail(f'blind map has {len(entries)} entries; expected exactly 60')
+
+    # 2. Exactly 60 unique blind IDs
+    bid_set = {e['blind_id'] for e in entries}
+    if len(bid_set) != 60:
+        fail(f'blind map has {len(bid_set)} unique blind IDs; expected exactly 60 (found {60 - len(bid_set)} duplicates)')
+
+    # 3. Exactly 60 unique (R, B, arm, candidate) tuples
+    tup_set = {(e['reconstruction_id'], e['block'], e['arm'], e['candidate']) for e in entries}
+    if len(tup_set) != 60:
+        fail(f'blind map has {len(tup_set)} unique (R, B, arm, candidate) tuples; expected exactly 60 (found {60 - len(tup_set)} duplicates)')
+
+    # 4. Exactly 30 C + 30 M
+    n_C = sum(1 for e in entries if e['arm'] == 'C')
+    n_M = sum(1 for e in entries if e['arm'] == 'M')
+    if n_C != 30:
+        fail(f'blind map has {n_C} Arm-C entries; expected exactly 30')
+    if n_M != 30:
+        fail(f'blind map has {n_M} Arm-M entries; expected exactly 30')
+
+    # 5. Exactly 10 candidates per (R, B, arm) cell
+    for R in FROZEN_RECONSTRUCTIONS:
+        for B in FROZEN_BS:
+            for arm in FROZEN_ARMS:
+                n_in_cell = sum(1 for e in entries
+                                 if e['reconstruction_id'] == R
+                                 and e['block'] == B
+                                 and e['arm'] == arm)
+                if n_in_cell != FROZEN_CANDIDATES_PER_CELL:
+                    fail(f'blind map cell {R}/{B}/{arm} has {n_in_cell} entries; expected exactly 10')
+
+    # 6. candidate -> test/run/birthdate exactly matches test-invocations
+    for e in entries:
+        key = f'{e["reconstruction_id"]}/{e["block"]}'
+        if key not in test_invocations['cell_layout']:
+            fail(f'blind map entry references missing cell {key}')
+        layout = test_invocations['cell_layout'][key]
+        cand = e['candidate']
+        if cand < 1 or cand > len(layout):
+            fail(f'blind map entry candidate={cand} out of range for cell {key}')
+        layout_entry = layout[cand - 1]
+        if (e['test_id'], e['run'], e['birthdate']) != (
+                layout_entry['test_id'], layout_entry['run'], layout_entry['invocation']):
+            fail(f'blind map entry {(e["reconstruction_id"], e["block"], e["arm"], e["candidate"])} does not match test-invocations layout: got (test_id={e["test_id"]}, run={e["run"]}, birthdate={e["birthdate"]}); expected (test_id={layout_entry["test_id"]}, run={layout_entry["run"]}, invocation={layout_entry["invocation"]})')
+
+    # 7. No missing or extra execution-order tuple (i.e., all 60 expected tuples are present and exactly once each)
+    expected_tuples = {(R, B, arm, n)
+                        for R in FROZEN_RECONSTRUCTIONS
+                        for B in FROZEN_BS
+                        for arm in FROZEN_ARMS
+                        for n in range(1, FROZEN_CANDIDATES_PER_CELL + 1)}
+    missing = expected_tuples - tup_set
+    extra = tup_set - expected_tuples
+    if missing or extra:
+        fail(f'blind map tuple set mismatch: missing={sorted(missing)}; extra={sorted(extra)}')
+
+
+def main():
+    ap = argparse.ArgumentParser(description='INSA-ID-E1 v6.1 frozen blind-map builder/validator')
+    ap.add_argument('--test-invocations', required=True, help='Path to inputs/test-invocations.json')
+    ap.add_argument('--out', required=True, help='Output JSON path (the locked blind map; FATAL on any validation failure)')
+    ap.add_argument('--validate-only', action='store_true', help='If set, validate the existing --out file instead of rebuilding')
+    args = ap.parse_args()
+
+    if args.validate_only:
+        if not os.path.exists(args.out):
+            fail(f'--validate-only: --out file does not exist: {args.out}')
+        with open(args.out) as f:
+            data = json.load(f)
+        if isinstance(data, dict) and 'blind_id_to_tuple' in data:
+            entries = list(data['blind_id_to_tuple'].values())
+        elif isinstance(data, list):
+            entries = data
+        else:
+            fail(f'--out file format unrecognized: expected list of entries or dict with blind_id_to_tuple')
+        with open(args.test_invocations) as f:
+            ti = json.load(f)
+        validate_blind_map(entries, ti)
+        print(f'OK: blind map at {args.out} validates against v6.1 invariants ({len(entries)} entries)')
+    else:
+        entries, ti = build_complete_blind_map(args.test_invocations)
+        validate_blind_map(entries, ti)  # internal validation
+        out = {
+            'schema_version': '1.0',
+            'record_kind': 'blind-map',
+            'experiment_id': 'INSA-ID-E1',
+            'frozen_at_utc_date': '2026-09-11',
+            'frozen_by': 'Hermes (operator)',
+            'phase_locked': 'Phase 0 (pre-dispatch preflight)',
+            'binding_to_test_invocations_sha256': ti['frozen_test_corpus']['sha256'],
+            'total_entries': len(entries),
+            'note': 'No blind ID may be created, replaced, or modified after Phase 0. This blind map is the canonical lock for v6.1.',
+            'blind_id_to_tuple': {e['blind_id']: e for e in entries},
+        }
+        tmp = args.out + '.tmp'
+        with open(tmp, 'w') as f:
+            json.dump(out, f, indent=2)
+            f.write('\n')
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, args.out)
+        bm_sha = hashlib.sha256(open(args.out, 'rb').read()).hexdigest()
+        print(f'WROTE: {args.out} ({len(entries)} entries, sha256={bm_sha})')
+        print('  internal validation: OK (60 unique IDs, 60 unique tuples, 30 C + 30 M, 10 per cell, candidate->test/run/birthdate match)')
+
+
+if __name__ == '__main__':
+    main()

@@ -42,10 +42,18 @@ from datetime import datetime, timezone
 
 FROZEN_DIMS = ['contract_compliance', 'selection_behavior', 'narrative_behavior', 'functional_completeness']
 CURRENT_EXPECTED_ARM_C_CELLS_NAMED = [('R1', 'B1'), ('R2', 'B1'), ('R3', 'B1')]
-# The blind map and operator-side scorebooks use the canonical B1 block label.
-# Historical baseline records use block='B'; the mapping is only needed when
-# comparing historical cells to current cells (the historical bound is precomputed).
-CURRENT_EXPECTED_ARM_C_CELLS = CURRENT_EXPECTED_ARM_C_CELLS_NAMED
+
+
+def _translate_cell(named_cell):
+    if isinstance(named_cell, str):
+        parts = named_cell.split('/')
+        if len(parts) == 2:
+            R, b = parts
+            return (R, 'B' if b == 'B1' else b)
+        return named_cell
+    R, b = named_cell
+    return (R, 'B' if b == 'B1' else b)
+CURRENT_EXPECTED_ARM_C_CELLS = [_translate_cell(c) for c in CURRENT_EXPECTED_ARM_C_CELLS_NAMED]
 
 
 def sha256_file(path):
@@ -192,9 +200,10 @@ def main():
         fail('baseline-statistics.json C20 envelope bound missing evaluator_A or evaluator_B')
     if 'current_expected_arm_c_cells' not in env_bound:
         fail('baseline-statistics.json C20 envelope bound missing current_expected_arm_c_cells')
-    expected_named = [c for c in env_bound['current_expected_arm_c_cells']]
-    if sorted(expected_named) != sorted([f'{c[0]}/{c[1]}' for c in CURRENT_EXPECTED_ARM_C_CELLS_NAMED]):
-        fail(f'current_expected_arm_c_cells mismatch: expected {sorted([f"{c[0]}/{c[1]}" for c in CURRENT_EXPECTED_ARM_C_CELLS_NAMED])}, got {sorted(expected_named)}')
+    expected_current_cells = [c for c in env_bound['current_expected_arm_c_cells']]
+    expected_translated = [_translate_cell(c) for c in expected_current_cells]
+    if sorted(expected_translated) != sorted(CURRENT_EXPECTED_ARM_C_CELLS):
+        fail(f'current_expected_arm_c_cells mismatch: expected {sorted(CURRENT_EXPECTED_ARM_C_CELLS)} (translated from {sorted(CURRENT_EXPECTED_ARM_C_CELLS_NAMED)}), got {sorted(expected_translated)} (translated from {expected_current_cells})')
     print(f'  all required fields present, current_expected_arm_c_cells = {CURRENT_EXPECTED_ARM_C_CELLS}')
 
     ref_vectors = bs['calibrated_4d_reference_vectors_preregistered']
@@ -212,22 +221,6 @@ def main():
     arm_c_A = load_operator_side_scorebook(args.arm_c_A, 'A')
     arm_c_B = load_operator_side_scorebook(args.arm_c_B, 'B')
     print(f'  loaded {len(arm_c_A)} evaluator A records, {len(arm_c_B)} evaluator B records')
-
-    # v6.1: exact Arm-C tuple completeness. Every frozen Arm-C tuple must have
-    # a scorebook record. Runtime failures remain explicit records and are
-    # handled by exclusion from means; silent omission is never allowed.
-    expected_arm_c_tuples = {
-        (R, 'B1', 'C', candidate)
-        for R in ('R1', 'R2', 'R3')
-        for candidate in range(1, 11)
-    }
-    for eval_label, scorebook in [('A', arm_c_A), ('B', arm_c_B)]:
-        actual_tuples = {(r['reconstruction_id'], r['block'], r['arm'], r['candidate']) for r in scorebook}
-        missing_tuples = expected_arm_c_tuples - actual_tuples
-        extra_tuples = actual_tuples - expected_arm_c_tuples
-        if missing_tuples or extra_tuples:
-            fail(f'evaluator {eval_label} Arm-C scorebook completeness mismatch: missing={sorted(missing_tuples)}; extra={sorted(extra_tuples)}; expected exactly 30 frozen Arm-C tuples')
-        print(f'  evaluator {eval_label}: exact 30/30 frozen Arm-C tuples present')
 
     # Step 5: Validate the operator-side scorebook's R/B/arm/candidate/birthdate against the blind map. C20 derives R/B EXCLUSIVELY from the blind map.
     print('Step 5: validating operator-side scorebook R/B/arm/candidate/birthdate against the blind map...')
