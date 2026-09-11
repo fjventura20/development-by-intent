@@ -1,6 +1,6 @@
-# INSA-ID-E1 — Protocol (frozen pre-execution, v5)
+# INSA-ID-E1 — Protocol (frozen pre-execution, v4)
 
-**Status:** v5 (frozen-candidate-rev5), pending Frank-as-PI execution GO.
+**Status:** v4 (frozen-candidate-rev4), pending Frank-as-PI execution GO.
 **Author:** Hermes (operator).
 **Date:** 2026-09-11.
 **Binding:**
@@ -21,10 +21,7 @@
 
 This protocol implements proposal v5.1. Sections §1–§17 map to proposal v5.1 sections in order. Cross-references use the proposal's section numbering.
 
-**v5 revision note (vs v4):**
-- **Real scorebook → blind-map → C20 interface.** C20 now consumes the actual evaluator return schema (blind_id + M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report) and requires a `--blind-map` input. The operator joins each evaluator-returned record to the locked blind map to recover (R, B, arm, candidate). C20 rejects unknown blind IDs, duplicate blind IDs, duplicate tuples, Arm-M blind IDs in Arm-C scorebooks, and (R, B) cells outside {R1/B1, R2/B1, R3/B1}.
-- **Self-sufficient evaluator packet.** Evaluators receive the test prompt + frozen behavioral contract + BIB 0-4 scoring anchors + M1-M4 definitions + worldwide-historical-significance criterion + C12 definitions + return schema. Evaluators remain blind to arm identity, reconstruction, phase, and the modification specification itself.
-- **Provenance clarification.** INSA-ID-E1 v5.1 preregisters its own C20 (Manhattan-from-reference-vector, preregistered 4-d reference vector, preregistered historical envelope bound) and its own subset-(a) (calibrated 4-dim vector, preregistered reference vector). The 85-record BIB corpus calibrates that new rule. v5 explicitly does NOT describe this as identical to the v0.1 §11.2 computation; the +1.5 / 2.5 thresholds are inherited from predecessor calibration, but the v5.1 operationalization is the preregistered reference-vector distance.
+**v4 revision note:** v3 conflated per-candidate scoring with aggregate computation, placed C20 in Phase 0, and was built under an incorrect §12 B/D/O binding. v4 corrects all three (via proposal v5 + v5.1 architecture-binding corrections): D = M ∪ P ∪ O disjoint, O = ∅ with rationale, subset-(a) = actual BIB 4-dim names, subset-(b) = 8 C12 axes verbatim from v0.1 §11.3, C20 in Phase 2 after Arm-C scoring, separate per-arm scorebooks, evaluator/aggregation separation, frozen deterministic execution-order + C20 algorithms, static/dynamic authority split, blind-map/C20 join via operator-only artifact.
 
 ---
 
@@ -56,15 +53,15 @@ Specifically NOT authorized in this protocol or the execution GO:
 ## §2. Two-arm matched-pair design (proposal v5.1 §5.2)
 
 - **Arm C** (control): same frozen baseline `B` + no-op directive (`inputs/arm-c-directive.txt`).
-- **Arm M** (modification): same frozen baseline `B` + frozen modification specification (`inputs/modification-specification.txt`) — **hidden from the evaluator**; only the operator knows it.
+- **Arm M** (modification): same frozen baseline `B` + frozen modification specification (`inputs/modification-specification.txt`).
 
-The per-(R, B, arm) reconstruction input is built at preflight time by the frozen script `preflight/build-reconstruction-input.py` (SHA-256 recorded in MANIFEST) from frozen BIB components: `inputs/reconstruction-prompt.md` + `inputs/identity-contract.txt` + per-arm directive. The executor produces a candidate output; the operator pairs each candidate output with an opaque `blind_id` from the locked `preflight/blind-map.json`.
+The per-(R, B, arm) reconstruction input is built at preflight time by the frozen script `preflight/build-reconstruction-input.py` (SHA-256 recorded in MANIFEST) from frozen BIB components: `inputs/reconstruction-prompt.md` + `inputs/identity-contract.txt` + per-arm directive.
 
 **Reconstruction count:** 3 per arm (R1, R2, R3). The reconstruction is the primary replication unit (per v0.1 C1 ruling, inherited). Candidates within a reconstruction are repeated observations, not independent experimental replicates.
 
 **Candidate count per (R, B, arm):** 10 candidates per cell (frozen). Total: 3 × 1 × 2 × 10 = 60 candidates. See `protocol/EXECUTION-ORDER.md` §3 (frozen `hashing/score-derivation.py`).
 
-**Current expected Arm-C cells:** `{R1/B1, R2/B1, R3/B1}` (3 cells; B1 = the single B exemplar source = block B in the envelope nomenclature). C20 verifies that each of these 3 current cells has mean within the historical envelope bound.
+**Current expected Arm-C cells:** `{R1/B1, R2/B1, R3/B1}` (3 cells; B1 = the single B exemplar source = block B in the envelope nomenclature).
 
 ---
 
@@ -72,7 +69,22 @@ The per-(R, B, arm) reconstruction input is built at preflight time by the froze
 
 All INV-* from proposal v5.1 §5.1 must hold before any generation. Verification is recorded in `preflight/` directory; each verification produces a `preflight/<INV-ID>.md` file with SHA-256 evidence.
 
-(See proposal v5.1 §5.1 for the full INV list. Cross-references in `MANIFEST.json`.)
+| ID | Invariant | Verification |
+|---|---|---|
+| INV-B-1 | Frozen baseline `B` content-addressed; baseline-binding artifact `inputs/baseline-binding.json` binds the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence, baseline membership, and exact baseline statistics. | `preflight/INV-B-1.md` (records `inputs/baseline-binding.json` SHA + the **four** locked BIB scorebook SHAs) |
+| INV-D-1 | `D` enumerated as `M ∪ P ∪ O`; pairwise-disjointness verified (set intersection = ∅); `D` SHA-bound | `preflight/INV-D-1.md` (records `inputs/dimensions-decomposition.json` SHA + executed PASS result) |
+| INV-M-1 | `M` enumerated with frozen per-dim spec | `preflight/INV-M-1.md` (records `inputs/mutation-dimensions.json` SHA + `inputs/modification-specification.txt` SHA) |
+| INV-P-1 | `P` enumerated as `subset-(a) ∪ subset-(b)`, disjoint; non-collapse attestation | `preflight/INV-P-1.md` (records `inputs/preservation-dimensions.json` SHA + non-collapse PASS result) |
+| INV-P-1a | Subset-(a) calibrated BIB 4-dim: `contract_compliance`, `selection_behavior`, `narrative_behavior`, `functional_completeness` (all 0-4). Per-dim frozen reference vector + tolerance bound. | `inputs/preservation-dimensions-subset-a.json` SHA + per-dim frozen reference vector SHA |
+| INV-P-1b | Subset-(b) 8 C12 non-target preservation axes preserved verbatim from v0.1 §11.3. Binary-failure convention for 0-4 axes is an INSA-ID-E1 preregistered rule, NOT inherited from v0.1. | `inputs/preservation-dimensions-subset-b.json` SHA + per-axis frozen tolerance values |
+| INV-O-1 | `O` preregistered as `∅` with rationale | `preflight/INV-O-1.md` |
+| INV-V-1 | `V(d)` frozen per-dim, separately for subset-(a) and subset-(b) | `preflight/INV-V-1.md` (records `inputs/evaluator-rubric.json` SHA) |
+| INV-A-1 | `A` bound only to `M`; per-dim acceptance tests; four G_mod_a..d gates with explicit thresholds | `preflight/INV-A-1.md` (records `inputs/acceptance-tests.json` SHA + evaluator blinding manifest) |
+| INV-G-1 | `G` bound only to `P`, both subsets; C12 BROKEN joint rule | `preflight/INV-G-1.md` (records `inputs/preservation-gates.json` SHA) |
+| INV-AUTH-1..5 | Static authority manifest; freshness window 3600s | `preflight/INV-AUTH-{1,2,5}.md` |
+| INV-EVID-1 | Evidence chain cross-cuts (§14) | `preflight/INV-EVID-1.md` |
+| INV-APPL-1 | Applicability Declaration ACTIVE | `preflight/INV-APPL-1.md` |
+| INV-STOP-1 | C20 control-validity stop rule + 5 INSA-BIB stop rules | `preflight/INV-STOP-1.md` |
 
 ### §3.4 Reconstruction input construction
 
@@ -110,38 +122,33 @@ Each candidate output is written to `runs/<R>/<B>/<arm>/candidate-<N>.md` with:
 
 ---
 
-## §6. Evaluator blinding + per-candidate fresh session + real-schema scorebook + blind-map join (proposal v5.1 §5.1 INV-A-1, INV-G-1 + v3 item 8 + v5 item)
+## §6. Evaluator blinding + per-candidate fresh session + blind-map join (proposal v5.1 §5.1 INV-A-1, INV-G-1)
 
-Evaluators A (Codex CLI gpt-5.6-sol) and B (Claude Code CLI claude-opus-4-7, fresh session per I-AUTH-05) receive only:
+Evaluators A (Codex CLI gpt-5.6-sol) and B (Claude Code CLI claude-opus-4-7, fresh session per I-AUTH-05) receive only the candidate output text + the evaluator input packet (`evaluation/evaluator-input-packet.md`). They do NOT see:
+- The arm identity (C vs M)
+- The reconstruction number
+- The experiment identity
+- The candidate number within (R, B, arm)
+- Any other (R, B, arm, candidate) outputs
+- The frozen v0.3 architecture, v0.1 protocol, INSA-ID-E1 protocol, proposal
+- The modification specification, the Arm C directive
+- The frozen BIB envelope, G_pres_* thresholds, C12 BROKEN rule
+- The 4-dim reference vectors, the historical envelope bound
+- **The phase (Phase 2 / Phase 3) or any cue from which staged arm identity could be inferred** (per v3 item 8 / v4 carried)
 
-- The test prompt for the candidate (e.g., `Birthdate November 9, 1989`)
-- The frozen Amazing Birthday behavioral contract
-- The frozen BIB 0-4 scoring anchors
-- The exact M1-M4 acceptance-test definitions
-- The frozen worldwide-historical-significance criterion
-- The C12-1..8 definitions with explicit 0-4 scoring guidance
-- The current JSON return schema
-- An opaque `blind_id` (NOT R-number, NOT block, NOT arm, NOT phase, NOT provenance)
+**Per-candidate fresh evaluator session (v3 item 8 / v4 carried):** Each candidate gets a fresh independent evaluator session. Phase separation is enforced ONLY at the analysis layer (post-lock), never at the evaluator session level.
 
-The evaluator returns per-candidate JSON with **exactly** the schema in `evaluation/evaluator-input-packet.md` §7. The evaluator-returned record MUST NOT contain `reconstruction_id`, `block`, `arm`, `candidate`, `T-number`, `phase`, or any execution-provenance field.
-
-**Per-candidate fresh evaluator session (v3 item 8 / v4 / v5 carried):** Each candidate gets a fresh independent evaluator session. Phase separation is enforced ONLY at the analysis layer (post-lock), never at the evaluator session level.
-
-**Evaluator scoring vs aggregate computation (v3 separation / v4 / v5 carried):**
+**Evaluator scoring vs aggregate computation (v3 separation / v4 carried):**
 - Evaluators return per-candidate raw scores only.
 - Evaluators do NOT compute G_mod_a..d, G_pres_*, C12 BROKEN, or any aggregate.
 
-**Real scorebook → blind-map → C20 interface (v5):**
-- **Before any evaluator invocation** (in Phase 0), the operator constructs and locks `preflight/blind-map.json` (operator-only; never visible to evaluators). The blind map is the **only** place where blinded IDs are de-blinded.
-- **After Phase 1 (generation) and during Phase 2 (Arm-C scoring)**, the operator builds the **operator-side Arm-C scorebooks** by joining the evaluator-returned JSON (with `blind_id` + `G_subset_a_4dim_vector` + `M_scores` + `evaluator_self_report`) to the locked blind map. The operator-side records add the `reconstruction_id`, `block`, `arm`, `candidate` fields from the blind map. C20 consumes the **operator-side scorebooks** (with the joined fields), NOT the raw evaluator return.
-- **C20 verification rules (fatal nonzero on violation):**
-  - Each evaluator-returned `blind_id` must be in the blind map (rejects unknown blind IDs).
-  - Each `blind_id` must appear at most once per scorebook (rejects duplicate blind IDs).
-  - Each `(R, B, arm, candidate)` tuple must appear at most once per scorebook (rejects duplicate tuples).
-  - The scorebook is the Arm-C scorebook; every record must have `arm == C` (rejects Arm-M blind IDs in Arm-C scorebooks).
-  - Each `(R, B)` must be in `{R1/B1, R2/B1, R3/B1}` (rejects unknown cells).
-- **C20 PASS for evaluator e** IFF (a) all 3 current cells `{R1/B1, R2/B1, R3/B1}` are present in the joined scorebook AND (b) every current cell's mean Manhattan distance (from the per-evaluator reference vector) is <= the frozen historical envelope bound for that evaluator. C20 fail → disposition = `INVALID_EXPERIMENT`; STOP; do NOT proceed to Phase 3.
-- **The final public/audit de-blinding table** (`results/de-blinding-table.json`) is produced later (end of Phase 4) from the operator-only blind map. The Phase-2 C20 mapping already exists in the locked operator-only artifacts (blind map + C20 decision record).
+**Blind-map / C20 join (operator-only):**
+- **Before any evaluator invocation**, the operator constructs and locks `preflight/blind-map.json` (operator-only; never visible to evaluators). This blind map is the only place where blinded IDs are de-blinded.
+- **After Arm-C scorebooks lock (Phase 2)**, C20 joins the locked Arm-C raw scores to the locked operator blind map to recover R/B per candidate. C20 does NOT use reconstruction_id or block from the evaluator-returned data; it uses the operator-only blind map.
+- **Both raw evaluator output and the operator mapping / derived joined C20 input are separately hash-bound evidence** (the raw scorebook is hashed; the C20-derived per-(R, B) cell mean is recorded in `preflight/c20-decision-record.json`).
+- The final public/audit de-blinding table (`results/de-blinding-table.json`) is produced later (end of Phase 4) from the operator-only blind map. The Phase-2 C20 mapping already exists in the locked operator-only artifacts (blind map + C20 decision record).
+
+**De-blinding table (end of Phase 4):** `results/de-blinding-table.json` (auditable; constructed from the operator-only blind map and the four locked scorebooks).
 
 ---
 
@@ -149,17 +156,15 @@ The evaluator returns per-candidate JSON with **exactly** the schema in `evaluat
 
 **Per-evaluator independence:** Evaluators do not see each other's scores during scoring.
 
-**Separate per-arm scorebook locking (v3 item 7 / v4 / v5 carried):** Do NOT lock an Arm-C scorebook and later append Arm-M entries to it. Required structure:
+**Separate per-arm scorebook locking (v3 item 7 / v4 carried):** Do NOT lock an Arm-C scorebook and later append Arm-M entries to it. Required structure:
 - `evaluation/evaluator-A-arm-C-scorebook.json` — locked after Phase 2 (C20 input). **No further appends.**
 - `evaluation/evaluator-B-arm-C-scorebook.json` — locked after Phase 2. **No further appends.**
 - `evaluation/evaluator-A-arm-M-scorebook.json` — locked after Phase 3. **No further appends.**
 - `evaluation/evaluator-B-arm-M-scorebook.json` — locked after Phase 3. **No further appends.**
 
-**Scorebooks are operator-side records (v5):** Each record contains `blind_id`, `reconstruction_id`, `block`, `arm`, `candidate` (from the blind map; populated operator-side), `scores_A` or `scores_B` (4-dim BIB vector from the evaluator return), `M_scores`, `evaluator_self_report`. The (R, B, arm, candidate) fields are NEVER returned by the evaluator.
+**Scorebooks are immutable once locked.** Locking means: SHA-256 of the locked file is recorded in `results/score-independent.md`, and no edits occur after the SHA record. Any post-lock edit triggers a deviation record and re-locking.
 
-**Scorebooks are immutable once locked.** Locking means: SHA-256 of the locked file is recorded in `results/score-independent.md`, and no edits occur after the SHA record.
-
-**Self-referential hash prohibition (v3 item 6 / v4 / v5 carried):** No scorebook file contains its own full-file SHA-256. SHA-256s of scorebooks are recorded externally in `results/score-independent.md`.
+**Self-referential hash prohibition (v3 item 6 / v4 carried):** No scorebook file contains its own full-file SHA-256. SHA-256s of scorebooks are recorded externally in `results/score-independent.md`.
 
 ### §7.1 Modification_Success = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d
 
@@ -169,34 +174,36 @@ For each evaluator independently:
 - **G_mod_c**: every Arm-M reconstruction has >=70% of its candidates with `candidate_all_pass == true`.
 - **G_mod_d**: Arm-M all-pass rate (pooled) exceeds Arm-C all-pass rate by >=50 percentage points.
 
+`Modification_Success_per_evaluator = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d`. `Modification_Success (experiment-level) = (Modification_Success for A) AND (Modification_Success for B)`.
+
 ### §7.2 Non-target_Identity_Preservation = G_pres_subset_a AND no C12-axis-BROKEN
 
 For each evaluator independently:
-- **G_pres_subset_a_a**: per-Recon mean M 4-dim-Manhattan-from-ref for Arm-M <= per-Recon mean C 4-dim-Manhattan-from-ref for Arm-C + 1.5.
-- **G_pres_subset_a_b**: per-Recon mean M 4-dim-Manhattan-from-ref for Arm-M <= 2.5.
+- **G_pres_subset_a_a**: per-Recon mean M 4-dim-Manhattan-from-ref for Arm-M <= per-Recon mean C 4-dim-Manhattan-from-ref for Arm-C + 1.5 (relative; +1.5 does NOT enlarge Arm-C envelope).
+- **G_pres_subset_a_b**: per-Recon mean M 4-dim-Manhattan-from-ref for Arm-M <= 2.5 (absolute).
 
-**Provenance clarification (v5):** The +1.5 / 2.5 threshold values come from predecessor calibration (v0.1 §11.2). INSA-ID-E1's global-reference-vector distance formulation is the v5.1 preregistered operationalization; v5 does NOT claim that this exact distance computation is verbatim the v0.1 computation.
+Subset-(a) PASS requires both G_pres_subset_a_a and G_pres_subset_a_b to PASS.
 
 **C12-axis-BROKEN (analysis-side, joint rule per v0.1 §11.3):** axis_a BROKEN for evaluator_e IFF arm_M_failure_rate_on_axis_a >= 0.30 AND (arm_M_failure_rate - arm_C_failure_rate) >= 0.30. Subset-(b) PASS for evaluator_e IFF no axis BROKEN for evaluator_e.
 
-**Provenance clarification (v5, C20):** The predecessor Evolution C20 used historical total-score envelope comparisons. INSA-ID-E1 v5.1 uses its own preregistered Manhattan/reference-vector control-validity operationalization. The 85-record BIB corpus calibrates that new rule. v5 does NOT describe INSA-ID-E1's C20 as the identical inherited v0.1 C20 computation.
+`Non-target_Identity_Preservation_per_evaluator = (subset-(a) PASS) AND (subset-(b) PASS)`. `Non-target_Identity_Preservation (experiment-level) = (Non-target for A) AND (Non-target for B)`.
+
+**v4 clarification:** Subset-(a) is adjudicated ONLY through the 4-dim Manhattan aggregate criterion. There is NO per-axis binary-failure conversion applied to the subset-(a) 4-dim vector. The binary-failure convention for 0-4 axes applies ONLY to subset-(b) C12-3/5/6 per the preregistered INSA-ID-E1 rules in `inputs/preservation-dimensions-subset-b.json` `failure_convention_pr_INSA_ID_E1`.
 
 ---
 
-## §8. C20 control-validity pre-check (proposal v5.1 §5.4 + v5) — Phase 2
+## §8. C20 control-validity pre-check (proposal v5.1 §5.4 + v4) — Phase 2
 
 **C20 runs in Phase 2 (Arm-C scoring), NOT in Phase 0 pre-dispatch preflight.** C20 verifies Arm-C candidates against the historical BIB envelope, and Arm-C candidates do not exist until generation runs.
 
-**C20 deterministic derivation (frozen v5):** Per proposal v5.1 §7, the frozen package includes a deterministic baseline binding sufficient to reproduce the decision without judgment after execution begins. This is provided by `hashing/c20-derivation.py` (SHA-256 in MANIFEST), which:
+**C20 deterministic derivation (frozen v4):** Per proposal v5.1 §7, the frozen package includes a deterministic baseline binding sufficient to reproduce the decision without judgment after execution begins. This is provided by `hashing/c20-derivation.py` (SHA-256 in MANIFEST), which:
 
 1. **Re-verifies the four frozen BIB scorebook SHAs** (recomputes each SHA-256 and compares against the expected SHAs in `inputs/baseline-statistics.json`; **fatal exit nonzero on any mismatch**).
 2. **Verifies the 85 envelope records** by reading `inputs/baseline-envelope-membership.json` and confirming that its 85 SHAs match exactly the 85 records in `inputs/baseline-statistics.json` (fatal on count or set mismatch).
-3. **Verifies the baseline-statistics artifact's required fields.**
-4. **Loads the operator-only blind map** (required input `--blind-map`).
-5. **Loads the operator-side Arm-C scorebooks** (each record has `blind_id`, `reconstruction_id`, `block`, `arm`, `candidate`, `scores_<eval>`, `M_scores`, `evaluator_self_report`). Validates: each `blind_id` is in the blind map; no duplicate `blind_id`; no duplicate `(R, B, arm, candidate)` tuple; `arm == C`; `(R, B)` is in `{R1/B1, R2/B1, R3/B1}`.
-6. **Joins** the operator-side scorebook to the blind map to confirm arm == C per record.
-7. **Computes per-(R, B) Arm-C mean Manhattan distances** for each of the 3 current cells per evaluator, using the preregistered 4-dim reference vectors from `inputs/baseline-statistics.json`.
-8. **Emits the C20 decision** to `preflight/c20-decision-record.json`:
+3. **Verifies the baseline-statistics artifact's required fields** (frozen_bib_scorebook_shas, calibrated_4d_reference_vectors_preregistered, C20_historical_envelope_bound_preregistered_v4 with frozen_historical_envelope_bound, envelope_records_85_with_per_dim_scores, envelope_record_count=85, C20_method_for_arm_C_per_current_cell_manhattan, C20_boolean_pass_fail_formula, current_expected_arm_c_cells).
+4. **Verifies that the current_expected_arm_c_cells field matches** `['R1/B1', 'R2/B1', 'R3/B1']` (3 cells; "B1" denotes the single B exemplar source = block B in the envelope nomenclature).
+5. **Computes per-(R, B) Arm-C mean Manhattan distances** for each of the 3 current cells (R1/B, R2/B, R3/B after B1→B translation) per evaluator, using the locked Phase 2 Arm-C scorebooks.
+6. **Emits the C20 decision** to `preflight/c20-decision-record.json`:
    - C20 PASS for evaluator e IFF (a) no missing current cells AND (b) for every current cell, mean Manhattan distance <= the frozen historical envelope bound[e] (A=1.807059, B=0.414118).
    - C20 joint PASS iff both evaluators PASS.
    - C20 fail → disposition = `INVALID_EXPERIMENT`; STOP; do NOT proceed to Phase 3.
@@ -205,13 +212,20 @@ For each evaluator independently:
 
 **`derivation_recorded_at_utc`** is set automatically by the script via `datetime.now(timezone.utc)` at execution time. The output file does NOT contain its own SHA-256 (no self-reference); the SHA is recorded externally in the sidecar.
 
-**Provenance (v5):** INSA-ID-E1's C20 uses its own preregistered Manhattan/reference-vector control-validity operationalization (per proposal v5.1); the 85-record BIB corpus calibrates that new rule. v5 does NOT describe this as the identical inherited v0.1 C20 computation.
-
 ---
 
 ## §9. Runtime failure handling (proposal v5.1 §5.5) — Phase 1 + Phase 4
 
-Per proposal v5.1 §5.5.1, a candidate-level transient failure is logged; no automatic retry; unaffected candidates are analyzed normally. Per proposal v5.1 §5.5.2, T1/T2/T3 systematic thresholds are preregistered. R2-like deferral patterns do not automatically produce `EXECUTOR_RUNTIME_FAILURE` (evaluated under T1/T2/T3).
+Per proposal v5.1 §5.5.1, a candidate-level transient failure is logged; no automatic retry; unaffected candidates are analyzed normally.
+
+Per proposal v5.1 §5.5.2, a runtime failure is classified as **systematic** (triggering `EXECUTOR_RUNTIME_FAILURE`) when **any** of the following holds:
+- **(T1)** ≥ 50% of candidates across the experiment fail with a runtime error of the same root-cause class.
+- **(T2)** `fail_M / max(fail_C, 1) ≥ 2` AND `fail_M − fail_C ≥ 3` AND `fail_M + fail_C ≥ 5`. A single Arm-M timeout with `fail_C = 0` and `fail_M = 1` does NOT meet T2.
+- **(T3)** Failures span both evaluators and both arms with no candidate producing a complete output for any (R, B) cell.
+
+The thresholds T1, T2, T3 are preregistered; they are not tightened or relaxed after observing outcomes.
+
+**R2-like deferral pattern (v4 carried):** No R2-like (or any single-reconstruction) deferral pattern automatically produces `EXECUTOR_RUNTIME_FAILURE`. Such a pattern is evaluated under T1/T2/T3 (see §10 risk #3).
 
 ---
 
@@ -227,49 +241,42 @@ PRE-CHECKS (Phase 0 pre-dispatch — static only; no model invocation):
   Frozen scoring algorithm + C20 derivation + reconstruction input builder + binding-verification script verified
   Static authority manifest byte-identical to frozen SHA
   D = M ∪ P ∪ O pairwise-disjoint verified
-  Operator-only blind map (preflight/blind-map.json) constructed and locked
 
   If any Phase 0 pre-check fails:
-     -> EVALUATOR_GATING_FAILURE / INVALID_EXPERIMENT
+     - Evaluator unavailable        -> EVALUATOR_GATING_FAILURE
+     - Evaluator blinding broken   -> INVALID_EXPERIMENT
+     - Authority manifest drift    -> INVALID_EXPERIMENT
+     - Applicability not ACTIVE     -> INVALID_EXPERIMENT
+     - Evidence chain integrity    -> INVALID_EXPERIMENT
+     - Frozen algorithm drift      -> INVALID_EXPERIMENT
+     - D disjointness check fails  -> INVALID_EXPERIMENT
 
 Phase 1 - Generation (per (R, B, arm, candidate) in locked order)
   Per candidate: fresh executor session, per-candidate evidence file,
   per-candidate runtime failure classification per §9.
 
 Phase 2 - Arm-C scoring + C20 (per §8):
-  Per-candidate fresh-evaluator-session blinding (v3 item 8 / v5 carried).
-  Each evaluator invocation receives the test prompt + scoring criteria
-  (NOT arm identity, NOT reconstruction, NOT phase).
-  Each evaluator returns per-candidate JSON with the exact schema in
-  evaluation/evaluator-input-packet.md §7.
-  Operator joins each evaluator-returned record to the locked blind map
-  to build operator-side Arm-C scorebooks.
   Lock evaluator-A-arm-C-scorebook.json and evaluator-B-arm-C-scorebook.json.
-  (No further appends.)
-  Run hashing/c20-derivation.py:
-    - re-verifies all 4 BIB scorebook SHAs (fatal on mismatch)
-    - verifies the 85 envelope records (fatal on count/set mismatch)
-    - verifies baseline-statistics required fields
-    - loads operator-only blind map (--blind-map required)
-    - loads operator-side Arm-C scorebooks
-    - rejects unknown / duplicate blind IDs / duplicate tuples / arm != C / (R, B) outside expected cells
-    - uses preregistered historical envelope bound (A=1.807059, B=0.414118)
-    - computes per-(R, B) Arm-C mean Manhattan distances
-    - emits c20_decision_record.json with c20_per_evaluator_pass, c20_joint_pass, c20_fail_reasons
+  Construct operator-only preflight/blind-map.json (locked preflight).
+  Run hashing/c20-derivation.py: re-verifies all scorebook SHAs, all 85
+  envelope records, all required baseline-statistics fields; computes
+  per-(R, B) Arm-C means; emits c20_decision_record.json with
+  derivation_recorded_at_utc, c20_per_evaluator_pass, c20_joint_pass.
   C20 fail -> STOP, INVALID_EXPERIMENT.
 
 Phase 3 - Arm-M scoring:
-  Same per-candidate fresh-evaluator-session blinding.
   Lock evaluator-A-arm-M-scorebook.json and evaluator-B-arm-M-scorebook.json.
+  (Separate scorebooks; do not append to Arm-C scorebooks post-lock.)
 
 Phase 4 - Substantive analysis (joint, not ordered ELSE IF):
 
 STEP 1 - Compute per-evaluator (no pooling):
   Modification_Success_per_evaluator = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d
-  Non-target_Identity_Preservation_per_evaluator = (G_pres_subset_a_a AND G_pres_subset_a_b) AND no C12-axis-BROKEN
+  Non-target_Identity_Preservation_per_evaluator =
+      (G_pres_subset_a_a AND G_pres_subset_a_b) AND no C12-axis-BROKEN
 
 STEP 2 - Apply §9 runtime classification (T1/T2/T3).
-STEP 3 - Substantive classification.
+STEP 3 - Substantive classification (proposal v5.1 §5.4 STEP 3).
 STEP 4 - If no substantive failure but residual ambiguity:
   -> INCONCLUSIVE_PENDING_FURTHER (reserved).
 ```
@@ -282,7 +289,7 @@ The substantive dispositions describe Level 1 (bound experimental claim). Level 
 
 ## §11. Causal traceability (proposal v5.1 §5.3)
 
-The final evidence package must trace each claim to the pre-bound INSA controls. C20 evidence cites the four locked BIB scorebook SHAs, the per-evaluator 4-d reference vector, the historical envelope bound, the per-(R, B) Arm-C mean Manhattan distance, and the per-evaluator pass/fail decision.
+The final evidence package must trace each claim to the pre-bound INSA controls.
 
 ---
 
@@ -316,7 +323,12 @@ Per-step evidence captured. Locking rule applies. Self-referential-hash prohibit
 
 **C20 (control validity):** Computed in Phase 2 per §8. If C20 fails, STOP and classify `INVALID_EXPERIMENT`. Do NOT proceed to Phase 3.
 
-**5 INSA-BIB stop rules** (inherited from v0.1 §14).
+**5 INSA-BIB stop rules** (inherited from v0.1 §14):
+1. Material deviation during generation → STOP unless PI separately adjudicates.
+2. Evaluator substitution after observing candidates → forbidden.
+3. Retroactive gate weakening → forbidden.
+4. Decision tree semantics change → forbidden (§5.4 must remain joint, not ordered ELSE IF).
+5. Substantive → INCONCLUSIVE_PENDING_FURTHER reclassification → forbidden.
 
 Plus the §9 systematic thresholds T1/T2/T3 for runtime failure classification.
 
@@ -334,4 +346,4 @@ v0.1 used `claude-sonnet-4-6`. INSA-ID-E1 uses `claude-opus-4-7`. This substrate
 
 ---
 
-**End of protocol v5 (frozen-candidate-rev5). Awaiting Frank-as-PI execution GO.**
+**End of protocol v4 (frozen-candidate-rev4). Awaiting Frank-as-PI execution GO.**

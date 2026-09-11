@@ -1,0 +1,78 @@
+{
+  "$schema": "INSA-v0.3-dimensions-decomposition-v1",
+  "schema_version": "1.1",
+  "record_kind": "dimensions-decomposition",
+  "purpose": "Frozen D = M ∪ P ∪ O decomposition per INSA v0.3 §12 + proposal v5.1. Pairwise-disjointness verified at freeze time. O = ∅ with frozen rationale. v4 corrections: actual finalized SHAs (no <filled at freeze> placeholders); non-collapse check executed and PASS result recorded.",
+  "experiment_id": "INSA-ID-E1",
+  "frozen_at_utc_date": "2026-09-11",
+  "frozen_by": "Hermes (operator)",
+  "D_definition": "D := M ∪ P ∪ O, pairwise disjoint; D is the complete set of scored behavioral dimensions.",
+  "M": {
+    "id": "M",
+    "label": "target mutation dimensions",
+    "cardinality": 1,
+    "enumeration_artifact": "inputs/mutation-dimensions.json",
+    "enumeration_sha256": "ea1ed2d04c50f157bb3df0daa48fcc9d1ed2d6e57c0cd3eeaf8ab3ecdfc71796",
+    "specification_artifact": "inputs/modification-specification.txt",
+    "specification_sha256": "4a6af1d75ae8b812c2b9bf8d696f59e31ced0da415016b8c2586f40e27246fe7",
+    "dimensions": [
+      {
+        "id": "M-1",
+        "label": "near_date_historical_event_addition",
+        "type": "additive"
+      }
+    ]
+  },
+  "P": {
+    "id": "P",
+    "label": "required preservation dimensions",
+    "cardinality": 12,
+    "definition": "P := subset-(a) ∪ subset-(b) (disjoint union)",
+    "subset_a_artifact": "inputs/preservation-dimensions-subset-a.json",
+    "subset_a_sha256": "74308b4efa836e8d826aec8de33505e1fcd45458f8a7194eb8970207b7043912",
+    "subset_a_role": "calibrated BIB 4-dim behavior vector (primary identity metric); actual BIB dim names verified from experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl",
+    "subset_a_dimensions": [
+      {"id": "BIB-4D-1", "label": "contract_compliance", "type": "0-4"},
+      {"id": "BIB-4D-2", "label": "selection_behavior", "type": "0-4"},
+      {"id": "BIB-4D-3", "label": "narrative_behavior", "type": "0-4"},
+      {"id": "BIB-4D-4", "label": "functional_completeness", "type": "0-4"}
+    ],
+    "subset_b_artifact": "inputs/preservation-dimensions-subset-b.json",
+    "subset_b_sha256": "d1683d60d714d0613338c905089f0b6be412bda0d2af43eac3232b8c2e680b5c",
+    "subset_b_role": "8 C12 non-target preservation axes preserved verbatim from v0.1 §11.3; subset-(b) is a SEPARATE PRESERVATION FAMILY from subset-(a); v4 protocol does NOT claim any direct one-to-one semantic identity between subset-(a) and subset-(b) dimensions",
+    "subset_b_axes": [
+      {"id": "C12-1", "label": "exact_date_preference", "type": "binary"},
+      {"id": "C12-2", "label": "connection_count_5_to_10", "type": "operator_counted"},
+      {"id": "C12-3", "label": "selection_significance", "type": "0-4"},
+      {"id": "C12-4", "label": "end_of_report_synthesis", "type": "binary"},
+      {"id": "C12-5", "label": "lifetime_framing", "type": "0-4"},
+      {"id": "C12-6", "label": "warm_vivid_narrative_voice", "type": "0-4"},
+      {"id": "C12-7", "label": "factual_discipline", "type": "binary"},
+      {"id": "C12-8", "label": "avoidance_of_arbitrary_trivia", "type": "binary"}
+    ]
+  },
+  "O": {
+    "id": "O",
+    "label": "out-of-scope dimensions",
+    "cardinality": 0,
+    "value": "∅ (empty set)",
+    "rationale": "The BIB 4-dim vector (subset-(a)) + 8 C12 axes (subset-(b)) exhaust the scored dimensions tracked by the frozen evaluator rubric. No additional dimensions are scored in this experiment. Any candidate output dimension not in D = M ∪ P is unscored and therefore not a basis for any gate."
+  },
+  "D_cardinality_total": 13,
+  "D_cardinality_breakdown": "1 (M) + 4 (subset-a) + 8 (subset-b) + 0 (O) = 13",
+  "pairwise_disjoint_verification": {
+    "method": "set intersection assertion in Python; intersection of M ids, subset-(a) ids, subset-(b) ids, O ids must equal empty set",
+    "M_ids": ["M-1"],
+    "subset_a_ids": ["BIB-4D-1", "BIB-4D-2", "BIB-4D-3", "BIB-4D-4"],
+    "subset_b_ids": ["C12-1", "C12-2", "C12-3", "C12-4", "C12-5", "C12-6", "C12-7", "C12-8"],
+    "O_ids": [],
+    "intersection_M_sub_a": "set() (empty)",
+    "intersection_M_sub_b": "set() (empty)",
+    "intersection_sub_a_sub_b": "set() (empty)",
+    "verification_command": "python3 -c \"M={'M-1'}; A={'BIB-4D-1','BIB-4D-2','BIB-4D-3','BIB-4D-4'}; B={'C12-1','C12-2','C12-3','C12-4','C12-5','C12-6','C12-7','C12-8'}; assert M&A==set() and M&B==set() and A&B==set(); print('PASS')\"",
+    "result": "PASS (executed at freeze time on 2026-09-11)",
+    "executed_at_utc_date": "2026-09-11"
+  },
+  "D_binding_completeness": true,
+  "modification_permitted_after_freeze": false
+}

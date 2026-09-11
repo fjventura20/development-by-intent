@@ -1,6 +1,6 @@
-# INSA-ID-E1 — Execution Order (frozen pre-execution, v5)
+# INSA-ID-E1 — Execution Order (frozen pre-execution, v4)
 
-**Status:** v5 (frozen-candidate-rev5), pending Frank-as-PI execution GO.
+**Status:** v4 (frozen-candidate-rev4), pending Frank-as-PI execution GO.
 **Author:** Hermes (operator).
 **Date:** 2026-09-11.
 **Binding:**
@@ -94,11 +94,11 @@ python3 hashing/score-derivation.py \
 
 ---
 
-## §5. Phases (per Frank-as-PI v3 review; v5 carries forward)
+## §5. Phases (per Frank-as-PI v3 review)
 
 Five explicit phases. **No phase may be skipped or reordered.** Each transition requires explicit operator log + timestamp.
 
-### Phase 0 — Pre-dispatch preflight (static only; no model invocation; **v5 also constructs and locks the operator-only blind map here**)
+### Phase 0 — Pre-dispatch preflight (static only; no model invocation)
 
 1. Verify all 16+ frozen pre-execution artifact SHAs match `MANIFEST.json` (run `hashing/binding-verification.py`).
 2. Verify v0.3 architecture blob unchanged.
@@ -109,7 +109,7 @@ Five explicit phases. **No phase may be skipped or reordered.** Each transition 
 7. Run frozen scoring algorithm per §3; lock `hashing/execution-order-list.json`; record its SHA-256 in witness.
 8. Verify evaluator blinding packet frozen; no arm identity, no phase indication.
 9. Verify `freshness_window_seconds = 3600`.
-10. **Construct and lock the operator-only blind map** at `preflight/blind-map.json` (per §6 of protocol). **This is constructed and locked HERE in Phase 0, before any evaluator invocation.** Phase 2 USES this already-locked blind map; it does NOT construct or mutate the blind map.
+10. Construct and lock the **operator-only blind map** at `preflight/blind-map.json` (per §6 of protocol). This blind map is the ONLY place where blinded IDs are de-blinded. Evaluators never see it.
 
 **C20 does NOT run in Phase 0.** C20 requires Arm-C candidates to exist, which requires Phase 1.
 
@@ -121,9 +121,8 @@ For each (R, B, arm, candidate) tuple in the locked `hashing/execution-order-lis
 
 1. The executor (claude-opus-4-7 via Claude Code CLI, **fresh session per candidate**) receives the per-tuple clean-room input: `preflight/reconstruction-input-<R>-<B>-<arm>.txt`.
 2. The executor produces the candidate output and commits it to `runs/<R>/<B>/<arm>/candidate-<N>.md` with the per-candidate evidence file.
-3. The operator pairs each candidate output with the opaque `blind_id` from the locked blind map.
-4. Per-candidate freshness witness captured.
-5. Runtime failures logged per protocol §9 (no automatic retry; unaffected candidates analyzed normally).
+3. Per-candidate freshness witness captured.
+4. Runtime failures logged per protocol §9 (no automatic retry; unaffected candidates analyzed normally).
 
 **Phase 1 STOP conditions:** Material deviation; systematic T1/T2/T3 substrate failure.
 
@@ -131,18 +130,15 @@ For each (R, B, arm, candidate) tuple in the locked `hashing/execution-order-lis
 
 After Phase 1 completes for **all Arm-C tuples**:
 
-1. **Per-candidate fresh-evaluator-session blinding (v3 item 8 / v5 carried):** For each (blind_id, candidate output) pair, the operator constructs an evaluator invocation that contains only: the test prompt (with the birthdate substituted for the blind_id by the operator), the frozen behavioral contract, the BIB 0-4 scoring anchors, the M1-M4 definitions, the worldwide-historical-significance criterion, the C12 definitions, and the current JSON return schema. Evaluator-A and Evaluator-B each score in a **fresh independent session** (per candidate, not per cell). The evaluator receives only the opaque blind_id; it does NOT see arm identity, reconstruction, phase, or any other provenance.
-2. Each evaluator returns per-candidate JSON with the exact schema in `evaluation/evaluator-input-packet.md` §7 (blind_id, M_scores, G_subset_a_4dim_vector, G_subset_b_axis_scores, evaluator_self_report). **The evaluator-returned record MUST NOT contain reconstruction_id, block, arm, candidate, T-number, phase, or any execution-provenance field.**
-3. **The operator joins each evaluator-returned record to the already-locked blind map** (constructed and locked in Phase 0) to build the operator-side Arm-C scorebooks: `evaluation/evaluator-A-arm-C-scorebook.json` and `evaluation/evaluator-B-arm-C-scorebook.json`. The operator adds `reconstruction_id`, `block`, `arm`, `candidate` from the blind map to each record. **No further appends** after lock.
-4. Run `hashing/c20-derivation.py` with `--blind-map preflight/blind-map.json` (required input):
+1. **Per-candidate fresh-evaluator-session blinding (v3 item 8 / v4 carried):** Evaluator-A and Evaluator-B score each Arm-C candidate in a **fresh independent session** (per candidate, not per cell). The evaluator receives only the blinded evaluator input packet. No evaluator session is told "this is Phase 2" or "control" or any cue from which staged arm identity could be inferred.
+2. Lock `evaluation/evaluator-A-arm-C-scorebook.json` and `evaluation/evaluator-B-arm-C-scorebook.json`. **No further appends.**
+3. Run `hashing/c20-derivation.py`:
    - Re-verifies the four frozen BIB scorebook SHAs (fatal on mismatch)
    - Verifies the 85 envelope records match `inputs/baseline-envelope-membership.json` (fatal on count or set mismatch)
    - Verifies the baseline-statistics artifact's required fields (fatal on missing fields)
-   - Loads the operator-only blind map; rejects unknown / duplicate blind IDs
-   - Loads the operator-side Arm-C scorebooks; rejects duplicate tuples / arm != C / (R, B) outside {R1/B1, R2/B1, R3/B1}
-   - Computes per-(R, B) Arm-C mean Manhattan distances for the 3 current cells
+   - Computes per-(R, B) Arm-C mean Manhattan distances for the 3 current cells {R1/B, R2/B, R3/B}
    - Emits `preflight/c20-decision-record.json` with `c20_per_evaluator_pass`, `c20_joint_pass`, `c20_fail_reasons`, `derivation_recorded_at_utc`
-5. C20 decision (joint): C20 FAILS if C20 fails for either evaluator.
+4. C20 decision (joint): C20 FAILS if C20 fails for either evaluator.
 
 **Phase 2 STOP conditions:** C20 FAILS for either evaluator → STOP, classify `INVALID_EXPERIMENT`. Do NOT proceed to Phase 3.
 
@@ -150,7 +146,7 @@ After Phase 1 completes for **all Arm-C tuples**:
 
 If C20 PASSES (Phase 2):
 
-1. **Per-candidate fresh-evaluator-session blinding (continued):** Evaluator-A and Evaluator-B score each Arm-M candidate in a fresh independent session. The evaluator receives the test prompt (the SAME birthdate used for the Arm-C candidate with the same blind_id) but the evaluator does NOT know whether it is scoring control or treatment. The modification specification itself is hidden.
+1. **Per-candidate fresh-evaluator-session blinding (continued):** Evaluator-A and Evaluator-B score each Arm-M candidate in a fresh independent session. No phase cue.
 2. Lock `evaluation/evaluator-A-arm-M-scorebook.json` and `evaluation/evaluator-B-arm-M-scorebook.json`. **No further appends.**
 3. The Arm-C scorebooks remain locked and untouched. No cross-arm appends.
 
@@ -218,8 +214,7 @@ The static authority manifest is byte-identical at freeze. A separate **executio
   "blind_map_evidence": {
     "blind_map_path": "preflight/blind-map.json",
     "blind_map_sha256": "<64-hex>",
-    "blind_map_locked_at_utc": "<UTC>",
-    "blind_map_phase": "locked in Phase 0 (pre-dispatch preflight); used by Phase 2 C20 join"
+    "blind_map_locked_at_utc": "<UTC>"
   },
   "c20_evidence": {
     "c20_decision_record_path": "preflight/c20-decision-record.json",
@@ -233,13 +228,13 @@ The static authority manifest is byte-identical at freeze. A separate **executio
 
 ---
 
-## §7. Reconstruction input (carried from v3/v4; preserved in v5)
+## §7. Reconstruction input (carried from v3; preserved in v4)
 
 The per-(R, B, arm) reconstruction input is built at preflight time by the frozen script `preflight/build-reconstruction-input.py` (content-addressed in MANIFEST) as the concatenation of:
 
 1. `inputs/reconstruction-prompt.md` (BIB c3692150 blob `2e37f47d…`, byte-identical)
 2. `inputs/identity-contract.txt` (BIB c3692150 blob `7ef4356f…`, byte-identical)
-3. For Arm-M only: `inputs/modification-specification.txt` (hidden from the evaluator)
+3. For Arm-M only: `inputs/modification-specification.txt`
 4. For Arm-C only: `inputs/arm-c-directive.txt`
 
 For each (R, B, arm) tuple, the resulting `preflight/reconstruction-input-<R>-<B>-<arm>.txt` is the per-tuple clean-room input for Phase 1 generation.
@@ -254,4 +249,4 @@ This artifact's authorization boundary is protocol + frozen-artifact preparation
 
 ---
 
-**End of EXECUTION-ORDER.md v5 (frozen-candidate-rev5).**
+**End of EXECUTION-ORDER.md v4 (frozen-candidate-rev4).**

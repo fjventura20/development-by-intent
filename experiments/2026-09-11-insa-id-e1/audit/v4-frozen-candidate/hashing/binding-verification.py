@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-INSA-ID-E1 frozen binding-verification script (frozen pre-execution, v5).
+INSA-ID-E1 frozen binding-verification script (frozen pre-execution, v4).
 
-Single authoritative source of truth for the v5 MANIFEST.json. Run this
+Single authoritative source of truth for the v4 MANIFEST.json. Run this
 script at protocol freeze to (re)produce the final MANIFEST.json. The script:
 
   1. Hashes every listed frozen/supporting artifact.
@@ -11,39 +11,31 @@ script at protocol freeze to (re)produce the final MANIFEST.json. The script:
      references the finalized baseline-statistics SHA; baseline-statistics
      references the four frozen BIB scorebook SHAs; dimensions-decomposition
      references the finalized mutation-dimensions + subset-(a) + subset-(b) SHAs).
-  4. Runs the C20 derivation in 8 synthetic modes (healthy / missing-cell /
-     out-of-envelope / unknown-blind-id / duplicate-blind-id / arm-M-in-arm-C /
-     tampered-scorebook / tampered-membership) using the actual frozen artifacts
-     AND the real evaluator-return schema (blind_id + M_scores + G_subset_a_4dim_vector
-     + G_subset_b_axis_scores + evaluator_self_report).
-  5. **v5 NEW: Evaluator-interface structural validation.** Statically verifies that
-     the evaluator packet contains the required BIB dimensions, M1-M4 definitions,
-     the test prompt template, and the exact return schema. Verifies that C20
-     accepts the real schema and requires --blind-map.
-  6. Emits the final MANIFEST.json (content-addressed, no self-reference).
-  7. Exits nonzero on any mismatch.
+  4. Emits the final MANIFEST.json (content-addressed, no self-reference).
+  5. Runs the C20 derivation in three synthetic modes (healthy / missing-cell /
+     out-of-envelope) using the actual frozen artifacts, asserts the expected
+     outcomes, and reports.
+  6. Exits nonzero on any mismatch.
 
 This script is itself a frozen artifact (content-addressed in MANIFEST).
 Structural-only; does NOT invoke any executor or evaluator.
 
 Usage:
   cd experiments/2026-09-11-insa-id-e1
-  python3 hashing/binding-verification.py --v5-experiment-dir .
+  python3 hashing/binding-verification.py --v4-experiment-dir .
 """
 
 import argparse
 import hashlib
 import json
 import os
-import pickle
-import re
 import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
 
 
-# 20 frozen pre-execution artifacts (per proposal v5.1 §7)
+# 16 frozen pre-execution artifacts (per proposal v5.1 §7)
 FROZEN_ARTIFACTS = [
     'inputs/baseline-binding.json',
     'inputs/baseline-statistics.json',
@@ -67,26 +59,15 @@ FROZEN_ARTIFACTS = [
     'protocol/EXECUTION-ORDER.md',
 ]
 
-# 5 supporting artifacts
+# 4 supporting artifacts (referenced from MANIFEST but not in proposal §7)
 SUPPORTING_ARTIFACTS = [
+    'inputs/reconstruction-prompt.md',  # also supporting; legacy alias for the v2 build-reconstruction-input
     'evaluation/evaluator-input-packet.md',
     'hashing/score-derivation.py',
     'hashing/c20-derivation.py',
     'hashing/binding-verification.py',  # self-binding
     'preflight/build-reconstruction-input.py',
 ]
-
-# Expected BIB 4-dim names (proposal v5.1 §5.1 INV-P-1a)
-EXPECTED_BIB_DIMS = ['contract_compliance', 'selection_behavior', 'narrative_behavior', 'functional_completeness']
-
-# Expected C12 axis IDs (proposal v5.1 §5.1 INV-P-1b)
-EXPECTED_C12_IDS = ['C12-1', 'C12-2', 'C12-3', 'C12-4', 'C12-5', 'C12-6', 'C12-7', 'C12-8']
-
-# Required return schema fields
-EXPECTED_RETURN_TOP_KEYS = {'blind_id', 'M_scores', 'G_subset_a_4dim_vector', 'G_subset_b_axis_scores', 'evaluator_self_report'}
-
-# Forbidded provenance fields in evaluator return
-FORBIDDEN_EVALUATOR_FIELDS = {'reconstruction_id', 'block', 'arm', 'candidate', 'T-number', 'phase', 'experiment_id'}
 
 
 def sha256_file(path):
@@ -108,13 +89,13 @@ def fail(msg):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='INSA-ID-E1 v5 binding-verification + MANIFEST generator')
-    ap.add_argument('--v5-experiment-dir', required=True, help='Path to experiments/2026-09-11-insa-id-e1/')
-    ap.add_argument('--repo-dir', default=None, help='Path to the git repo root (default: parent of --v5-experiment-dir)')
-    ap.add_argument('--skip-c20-synthetic', action='store_true', help='Skip the C20 synthetic test runs')
+    ap = argparse.ArgumentParser(description='INSA-ID-E1 v4 binding-verification + MANIFEST generator')
+    ap.add_argument('--v4-experiment-dir', required=True, help='Path to experiments/2026-09-11-insa-id-e1/')
+    ap.add_argument('--repo-dir', default=None, help='Path to the git repo root (default: parent of --v4-experiment-dir)')
+    ap.add_argument('--skip-c20-synthetic', action='store_true', help='Skip the C20 synthetic test runs (for faster binding-only verification)')
     args = ap.parse_args()
 
-    exp_dir = os.path.abspath(args.v5_experiment_dir)
+    exp_dir = os.path.abspath(args.v4_experiment_dir)
     repo_dir = os.path.abspath(args.repo_dir) if args.repo_dir else os.path.dirname(exp_dir)
 
     record_frozen_at_utc_date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
@@ -136,6 +117,8 @@ def main():
     # Step 2: Verifies important cross-artifact SHA references.
     print()
     print('Step 2: verifying cross-artifact SHA references...')
+
+    # 2a. baseline-binding.json references finalized baseline-statistics SHA
     bb_sha = file_info['inputs/baseline-binding.json']['sha256']
     bs_sha = file_info['inputs/baseline-statistics.json']['sha256']
     bb_data = json.load(open(os.path.join(exp_dir, 'inputs/baseline-binding.json')))
@@ -143,6 +126,7 @@ def main():
         fail(f"baseline-binding.json references baseline-statistics SHA {bb_data['baseline_statistics']['sha256']} but actual is {bs_sha}")
     print(f'  baseline-binding.json -> baseline-statistics.json: OK ({bs_sha[:16]}...)')
 
+    # 2b. baseline-statistics.json references the four frozen BIB scorebook SHAs
     bs_data = json.load(open(os.path.join(exp_dir, 'inputs/baseline-statistics.json')))
     for key, path in [
         ('BIB-001_evaluator_A', 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl'),
@@ -156,7 +140,9 @@ def main():
             fail(f'baseline-statistics.json {key} expected {expected}, got actual {actual}')
         print(f'  baseline-statistics.json -> {key}: OK')
 
+    # 2c. dimensions-decomposition.json references finalized subset-a, subset-b, and mutation-dimensions SHAs
     dd_data = json.load(open(os.path.join(exp_dir, 'inputs/dimensions-decomposition.json')))
+    dd_sha = file_info['inputs/dimensions-decomposition.json']['sha256']
     if dd_data['P']['subset_a_sha256'] != file_info['inputs/preservation-dimensions-subset-a.json']['sha256']:
         fail('dimensions-decomposition.json subset_a_sha256 mismatch')
     if dd_data['P']['subset_b_sha256'] != file_info['inputs/preservation-dimensions-subset-b.json']['sha256']:
@@ -167,6 +153,7 @@ def main():
         fail('dimensions-decomposition.json M specification_sha256 mismatch')
     print(f'  dimensions-decomposition.json -> subset-a, subset-b, mutation-dimensions, modification-specification: OK')
 
+    # 2d. preservation-dimensions.json references finalized subset-a and subset-b SHAs
     pd_data = json.load(open(os.path.join(exp_dir, 'inputs/preservation-dimensions.json')))
     if pd_data['binding']['subset_a_sha256'] != file_info['inputs/preservation-dimensions-subset-a.json']['sha256']:
         fail('preservation-dimensions.json subset_a_sha256 mismatch')
@@ -174,6 +161,7 @@ def main():
         fail('preservation-dimensions.json subset_b_sha256 mismatch')
     print(f'  preservation-dimensions.json -> subset-a, subset-b: OK')
 
+    # 2e. acceptance-tests.json references finalized mutation-dimensions SHA
     at_data = json.load(open(os.path.join(exp_dir, 'inputs/acceptance-tests.json')))
     if at_data['binding']['M_artifact_sha256'] != file_info['inputs/mutation-dimensions.json']['sha256']:
         fail('acceptance-tests.json M_artifact_sha256 mismatch')
@@ -181,6 +169,7 @@ def main():
         fail('acceptance-tests.json M_specification_sha256 mismatch')
     print(f'  acceptance-tests.json -> mutation-dimensions, modification-specification: OK')
 
+    # 2f. preservation-gates.json references finalized subset-a, subset-b, baseline-statistics SHAs
     pg_data = json.load(open(os.path.join(exp_dir, 'inputs/preservation-gates.json')))
     if pg_data['binding']['P_subset_a_sha256'] != file_info['inputs/preservation-dimensions-subset-a.json']['sha256']:
         fail('preservation-gates.json P_subset_a_sha256 mismatch')
@@ -188,253 +177,121 @@ def main():
         fail('preservation-gates.json P_subset_b_sha256 mismatch')
     print(f'  preservation-gates.json -> subset-a, subset-b: OK')
 
+    # 2g. baseline-statistics.json 85 envelope records match baseline-envelope-membership.json
     em_data = json.load(open(os.path.join(exp_dir, 'inputs/baseline-envelope-membership.json')))
     env_shas = sorted(obs['raw_sha256'] for obs in em_data['included_observations'])
     rec_shas = sorted(r['raw_sha256'] for r in bs_data['envelope_records_85_with_per_dim_scores'])
     if env_shas != rec_shas:
-        fail('envelope membership mismatch: 85 SHAs differ between baseline-envelope-membership.json and baseline-statistics.json')
+        fail(f'envelope membership mismatch: 85 SHAs differ between baseline-envelope-membership.json and baseline-statistics.json')
     print(f'  baseline-envelope-membership.json <-> baseline-statistics.json envelope records: OK (all 85 match)')
 
+    # 2h. authority-manifest.json (static-only; no SHAs to cross-check beyond reference to frozen v0.3 + v0.1)
     print(f'  authority-manifest.json: static-only (no dynamic SHAs); all dynamic fields listed as NOT in this manifest')
 
-    # Step 3: v5 NEW - Evaluator-interface structural validation
+    # Step 3: Run the D = M ∪ P ∪ O pairwise-disjoint check (executable)
     print()
-    print('Step 3: v5 evaluator-interface structural validation...')
-
-    # Load evaluator packet
-    ep_content = open(os.path.join(exp_dir, 'evaluation/evaluator-input-packet.md')).read()
-    ep_sha = file_info['evaluation/evaluator-input-packet.md']['sha256']
-
-    # 3a. Evaluator packet contains the 4 correct BIB dimensions
-    for dim in EXPECTED_BIB_DIMS:
-        if dim not in ep_content:
-            fail(f'evaluator packet missing required BIB dimension: {dim!r}')
-    print(f'  evaluator packet contains the 4 BIB dimensions: OK ({EXPECTED_BIB_DIMS})')
-
-    # 3b. Evaluator packet contains M1-M4 definitions
-    for m in ['M1', 'M2', 'M3', 'M4']:
-        if f'`{m}`' not in ep_content and f'`{m}_pass`' not in ep_content and f'`{m}_pass`' not in ep_content:
-            # the names like M1_pass, M1 are present as the M_scores field
-            if f'{m}_pass' not in ep_content:
-                fail(f'evaluator packet missing M definition: {m!r}')
-    print(f'  evaluator packet contains M1-M4 definitions: OK')
-
-    # 3c. Evaluator packet contains the frozen BIB scoring anchors (0-4)
-    if '0-4' not in ep_content and '0..4' not in ep_content:
-        fail('evaluator packet missing BIB scoring anchors (0-4)')
-    print(f'  evaluator packet contains the BIB 0-4 scoring anchors: OK')
-
-    # 3d. Evaluator packet requires the exact test prompt template
-    if 'Birthdate' not in ep_content:
-        fail('evaluator packet missing test prompt template (Birthdate)')
-    print(f'  evaluator packet requires the exact test prompt template (Birthdate): OK')
-
-    # 3e. Evaluator packet contains the C12-1..8 definitions
-    for c in EXPECTED_C12_IDS:
-        if c not in ep_content:
-            fail(f'evaluator packet missing C12 axis: {c!r}')
-    print(f'  evaluator packet contains C12-1..8 definitions: OK')
-
-    # 3f. Evaluator packet current return schema is documented
-    if 'blind_id' not in ep_content or 'M_scores' not in ep_content or 'G_subset_a_4dim_vector' not in ep_content or 'G_subset_b_axis_scores' not in ep_content or 'evaluator_self_report' not in ep_content:
-        fail('evaluator packet does not document the full current return schema (blind_id, M_scores, G_subset_a_4dim_vector, G_subset_b_axis_scores, evaluator_self_report)')
-    print(f'  evaluator packet documents the current return schema: OK')
-
-    # 3g. Evaluator packet does NOT contain modification specification, arm identity, phase, etc. (allowed to be referenced as "hidden", not as content)
-    # The packet is allowed to mention "hidden" in the description, but the modification-specification.txt content should not be quoted
-    mod_spec = open(os.path.join(exp_dir, 'inputs/modification-specification.txt')).read().strip()
-    if mod_spec in ep_content:
-        fail('evaluator packet contains the modification specification text; must be hidden from the evaluator')
-    print(f'  evaluator packet does NOT contain modification specification text: OK')
-
-    # 3h. C20 script accepts the evaluator return schema (--blind-map required, rejects unknown blind IDs, etc.)
-    c20_content = open(os.path.join(exp_dir, 'hashing/c20-derivation.py')).read()
-    if "'--blind-map'" not in c20_content and '"--blind-map"' not in c20_content:
-        fail('c20-derivation.py missing --blind-map required argument')
-    if 'unknown blind_id' not in c20_content:
-        fail('c20-derivation.py does not reject unknown blind_ids')
-    if 'duplicate blind_id' not in c20_content:
-        fail('c20-derivation.py does not reject duplicate blind_ids')
-    print(f'  c20-derivation.py accepts the evaluator return schema via --blind-map and rejects bad inputs: OK')
-
-    # Step 4: D = M ∪ P ∪ O pairwise-disjoint check
-    print()
-    print('Step 4: running D = M ∪ P ∪ O pairwise-disjoint check...')
+    print('Step 3: running D = M ∪ P ∪ O pairwise-disjoint check...')
     m_ids = {d['id'] for d in json.load(open(os.path.join(exp_dir, 'inputs/mutation-dimensions.json')))['M_enumeration']}
     a_ids = {d['id'] for d in json.load(open(os.path.join(exp_dir, 'inputs/preservation-dimensions-subset-a.json')))['dimensions']}
     b_ids = {d['id'] for d in json.load(open(os.path.join(exp_dir, 'inputs/preservation-dimensions-subset-b.json')))['axes']}
     o_ids = set()
-    if not (len(m_ids & a_ids) == len(m_ids & b_ids) == len(a_ids & b_ids) == len(m_ids & o_ids) == len(a_ids & o_ids) == len(b_ids & o_ids) == 0):
-        fail(f'D = M ∪ P ∪ O is NOT pairwise disjoint')
+    inter_ma = m_ids & a_ids
+    inter_mb = m_ids & b_ids
+    inter_ab = a_ids & b_ids
+    inter_mo = m_ids & o_ids
+    inter_ao = a_ids & o_ids
+    inter_bo = b_ids & o_ids
+    if not (len(inter_ma) == len(inter_mb) == len(inter_ab) == len(inter_mo) == len(inter_ao) == len(inter_bo) == 0):
+        fail(f'D = M ∪ P ∪ O is NOT pairwise disjoint: M∩A={inter_ma}, M∩B={inter_mb}, A∩B={inter_ab}, M∩O={inter_mo}, A∩O={inter_ao}, B∩O={inter_bo}')
     print(f'  M ids: {sorted(m_ids)}; subset-(a) ids: {sorted(a_ids)}; subset-(b) ids: {sorted(b_ids)}; O ids: {sorted(o_ids)}')
     print(f'  D = M ∪ P ∪ O is pairwise disjoint: PASS')
 
-    # Step 5: C20 derivation synthetic tests (8 cases) - all use the real evaluator return schema
+    # Step 4: Run the C20 derivation in 3 synthetic modes (using actual frozen artifacts)
     if not args.skip_c20_synthetic:
         print()
-        print('Step 5: running C20 derivation synthetic tests (using actual frozen artifacts + real schema)...')
+        print('Step 4: running C20 derivation synthetic tests (using actual frozen artifacts)...')
         envelope_records = bs_data['envelope_records_85_with_per_dim_scores']
-        if not os.path.exists('/tmp/bib_data.pkl'):
-            fail('/tmp/bib_data.pkl not found; cannot run synthetic tests')
+        dims = ['contract_compliance', 'selection_behavior', 'narrative_behavior', 'functional_completeness']
 
-        # Build the blind map (3 R x 1 B x 1 arm=C x 5 tests = 15 entries)
-        blind_map = {'schema_version': '1.0', 'lock_timestamp_utc': '2026-09-11T13:00:00Z', 'blind_id_to_tuple': {}}
-        counter = 0
-        for r in envelope_records:
-            if r['reconstruction_id'] in ('R1','R2','R3') and r['block'] == 'B':
-                counter += 1
-                bid = f'blind-{counter:03d}'
-                blind_map['blind_id_to_tuple'][bid] = {
-                    'reconstruction_id': r['reconstruction_id'],
-                    'block': r['block'],
-                    'arm': 'C',
-                    'candidate': r['test_id'],
-                }
+        def write_json(p, d):
+            with open(p, 'w') as f:
+                json.dump(d, f, indent=2)
+                f.write('\n')
 
-        def build_evaluator_returns(evaluator, block='B'):
-            out = []
-            for r in envelope_records:
-                if r['reconstruction_id'] in ('R1','R2','R3') and r['block'] == block:
-                    bid = None
-                    for k, v in blind_map['blind_id_to_tuple'].items():
-                        if v['reconstruction_id'] == r['reconstruction_id'] and v['block'] == r['block'] and v['candidate'] == r['test_id']:
-                            bid = k
-                            break
-                    if bid is None:
-                        continue
-                    out.append({
-                        'blind_id': bid,
-                        'M_scores': {'M1_pass': True, 'M2_pass': True, 'M3_pass': True, 'M4_pass': True, 'modification_conformance': 4, 'candidate_all_pass': True},
-                        'G_subset_a_4dim_vector': dict(r[f'scores_{evaluator}']),
-                        'G_subset_b_axis_scores': {'C12-1': True, 'C12-2': 7, 'C12-3': 3, 'C12-4': True, 'C12-5': 3, 'C12-6': 3, 'C12-7': True, 'C12-8': True},
-                        'evaluator_self_report': {'runtime_failure_observed': False},
-                    })
-            return out
-
-        def operator_join(evaluator_returns, blind_map, eval_id):
-            out = []
-            for er in evaluator_returns:
-                bid = er['blind_id']
-                tup = blind_map['blind_id_to_tuple'][bid]
-                scores_4d = er['G_subset_a_4dim_vector']
-                out.append({
-                    'blind_id': bid, 'reconstruction_id': tup['reconstruction_id'],
-                    'block': tup['block'], 'arm': tup['arm'], 'candidate': tup['candidate'],
-                    f'scores_{eval_id}': scores_4d, 'M_scores': er['M_scores'],
-                    'evaluator_self_report': er['evaluator_self_report'],
-                })
-            return out
-
-        eval_ret_A = build_evaluator_returns('A', 'B')
-        eval_ret_B = build_evaluator_returns('B', 'B')
-        armc_A = operator_join(eval_ret_A, blind_map, 'A')
-        armc_B = operator_join(eval_ret_B, blind_map, 'B')
-
-        def run_c20(armc_A_data, armc_B_data, blind_map_data, label, expected_exit=0, expected_joint=None):
+        def run_c20(armc_A, armc_B, label, expected_joint, fake_a_a=None, fake_mem=None):
             with tempfile.TemporaryDirectory() as tmpdir:
-                a_path = f'{tmpdir}/armc-A.json'
-                b_path = f'{tmpdir}/armc-B.json'
-                bm_path = f'{tmpdir}/blind-map.json'
-                with open(a_path, 'w') as f: json.dump(armc_A_data, f, indent=2); f.write('\n')
-                with open(b_path, 'w') as f: json.dump(armc_B_data, f, indent=2); f.write('\n')
-                with open(bm_path, 'w') as f: json.dump(blind_map_data, f, indent=2); f.write('\n')
-                out_path = f'{tmpdir}/c20.json'
-                r = subprocess.run([
+                a = f'{tmpdir}/armc-A.json'
+                b = f'{tmpdir}/armc-B.json'
+                write_json(a, armc_A)
+                write_json(b, armc_B)
+                out = f'{tmpdir}/c20.json'
+                a_a = fake_a_a or os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl')
+                env = fake_mem or os.path.join(exp_dir, 'inputs/baseline-envelope-membership.json')
+                result = subprocess.run([
                     'python3', os.path.join(exp_dir, 'hashing/c20-derivation.py'),
-                    '--envelope', os.path.join(exp_dir, 'inputs/baseline-envelope-membership.json'),
+                    '--envelope', env,
                     '--baseline-stats', os.path.join(exp_dir, 'inputs/baseline-statistics.json'),
-                    '--arm-c-A', a_path, '--arm-c-B', b_path, '--blind-map', bm_path,
-                    '--frozen-A-A', os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl'),
+                    '--arm-c-A', a, '--arm-c-B', b,
+                    '--frozen-A-A', a_a,
                     '--frozen-A-B', os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl'),
                     '--frozen-B-A', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl'),
                     '--frozen-B-B', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl'),
-                    '--out', out_path,
+                    '--out', out,
                 ], capture_output=True, text=True, cwd=exp_dir)
-                if expected_joint is not None:
-                    if r.returncode != 0:
-                        fail(f'{label}: expected exit 0, got {r.returncode}; stderr: {r.stderr[-200:]}')
-                    out = json.load(open(out_path))
-                    if out['c20_joint_pass'] != expected_joint:
-                        fail(f'{label}: expected c20_joint_pass={expected_joint}, got {out["c20_joint_pass"]}')
-                    print(f'  {label}: c20_joint_pass={out["c20_joint_pass"]} (expected {expected_joint})')
-                else:
-                    if r.returncode == 0:
-                        fail(f'{label}: expected FATAL exit, got exit 0')
-                    err = r.stderr.strip().split('\n')[-1] if r.stderr else 'no stderr'
-                    print(f'  {label}: FATAL exit as expected (stderr: {err[:120]})')
+                if expected_joint is None:
+                    # Expect FATAL (nonzero) exit
+                    if result.returncode != 0:
+                        print(f'  {label}: FATAL exit as expected (exit={result.returncode})')
+                        return True
+                    print(f'  {label}: ERROR — expected FATAL exit but got exit=0')
+                    return False
+                if result.returncode != 0:
+                    print(f'  {label}: ERROR — expected exit 0 but got {result.returncode}; stderr: {result.stderr[-300:]}')
+                    return False
+                c20_out = json.load(open(out))
+                if c20_out['c20_joint_pass'] != expected_joint:
+                    print(f'  {label}: ERROR — expected c20_joint_pass={expected_joint} but got {c20_out["c20_joint_pass"]}')
+                    return False
+                print(f'  {label}: c20_joint_pass={c20_out["c20_joint_pass"]} (as expected)')
+                return True
 
-        # Test 1: healthy
-        run_c20(armc_A, armc_B, blind_map, 'Test 1: healthy real-schema + blind map', expected_exit=0, expected_joint=True)
+        # Healthy current cells
+        healthy_A = [{'reconstruction_id': r['reconstruction_id'], 'block': r['block'], 'scores': r['scores_A']}
+                     for r in envelope_records if r['reconstruction_id'] in ('R1','R2','R3') and r['block']=='B']
+        healthy_B = [{'reconstruction_id': r['reconstruction_id'], 'block': r['block'], 'scores': r['scores_B']}
+                     for r in envelope_records if r['reconstruction_id'] in ('R1','R2','R3') and r['block']=='B']
+        run_c20(healthy_A, healthy_B, 'healthy current cells (R1/B, R2/B, R3/B)', expected_joint=True)
 
-        # Test 2: missing R2
-        run_c20([r for r in armc_A if r['reconstruction_id'] != 'R2'],
-                [r for r in armc_B if r['reconstruction_id'] != 'R2'],
-                blind_map, 'Test 2: missing R2 (missing current cell)', expected_exit=0, expected_joint=False)
+        # Missing R2/B
+        missing_A = [c for c in healthy_A if c['reconstruction_id'] != 'R2']
+        missing_B = [c for c in healthy_B if c['reconstruction_id'] != 'R2']
+        run_c20(missing_A, missing_B, 'missing R2/B (expected FAIL)', expected_joint=False)
 
-        # Test 3: degraded R1
+        # Degraded R1/B
         degraded_A = []
-        for r in armc_A:
-            new_r = {k: v for k, v in r.items()}
-            if new_r['reconstruction_id'] == 'R1':
-                new_r['scores_A'] = dict(new_r['scores_A'])
-                new_r['scores_A']['contract_compliance'] = 0
-            degraded_A.append(new_r)
-        run_c20(degraded_A, armc_B, blind_map, 'Test 3: degraded R1 (contract_compliance=0)', expected_exit=0, expected_joint=False)
+        for r in envelope_records:
+            if r['reconstruction_id'] == 'R1' and r['block'] == 'B':
+                scores = dict(r['scores_A'])
+                scores['contract_compliance'] = 0
+                degraded_A.append({'reconstruction_id': 'R1', 'block': 'B', 'scores': scores})
+            elif r['reconstruction_id'] in ('R2', 'R3') and r['block'] == 'B':
+                degraded_A.append({'reconstruction_id': r['reconstruction_id'], 'block': 'B', 'scores': dict(r['scores_A'])})
+        run_c20(degraded_A, healthy_B, 'degraded R1/B (contract_compliance=0; expected FAIL)', expected_joint=False)
 
-        # Test 4: unknown blind ID
-        unknown = [dict(r) for r in armc_A]
-        unknown[0]['blind_id'] = 'blind-unknown-999'
-        run_c20(unknown, armc_B, blind_map, 'Test 4: unknown blind ID', expected_exit=2)
-
-        # Test 5: duplicate blind ID
-        dup = [dict(r) for r in armc_A]
-        dup.append(dict(dup[0]))
-        dup[-1]['reconstruction_id'] = 'R1'
-        dup[-1]['block'] = 'B'
-        dup[-1]['candidate'] = 'T6'
-        run_c20(dup, armc_B, blind_map, 'Test 5: duplicate blind ID', expected_exit=2)
-
-        # Test 6: Arm-M blind ID in Arm-C
-        arm_m = [dict(r) for r in armc_A]
-        arm_m[0]['arm'] = 'M'
-        run_c20(arm_m, armc_B, blind_map, 'Test 6: Arm-M blind ID in Arm-C scorebook', expected_exit=2)
-
-        # Test 7: tampered historical scorebook
+        # Tampered scorebook
+        fake_sb = '/tmp/fake-tampered-A.jsonl'
         import shutil
         real_sb = os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl')
-        fake_sb = '/tmp/fake-tampered-v5.jsonl'
         shutil.copy(real_sb, fake_sb)
         with open(fake_sb, 'ab') as f:
             f.write(b'TAMPERED\n')
         try:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                a_path = f'{tmpdir}/armc-A.json'
-                b_path = f'{tmpdir}/armc-B.json'
-                bm_path = f'{tmpdir}/blind-map.json'
-                with open(a_path, 'w') as f: json.dump(armc_A, f, indent=2); f.write('\n')
-                with open(b_path, 'w') as f: json.dump(armc_B, f, indent=2); f.write('\n')
-                with open(bm_path, 'w') as f: json.dump(blind_map, f, indent=2); f.write('\n')
-                out_path = f'{tmpdir}/c20.json'
-                r = subprocess.run([
-                    'python3', os.path.join(exp_dir, 'hashing/c20-derivation.py'),
-                    '--envelope', os.path.join(exp_dir, 'inputs/baseline-envelope-membership.json'),
-                    '--baseline-stats', os.path.join(exp_dir, 'inputs/baseline-statistics.json'),
-                    '--arm-c-A', a_path, '--arm-c-B', b_path, '--blind-map', bm_path,
-                    '--frozen-A-A', fake_sb,
-                    '--frozen-A-B', os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl'),
-                    '--frozen-B-A', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl'),
-                    '--frozen-B-B', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl'),
-                    '--out', out_path,
-                ], capture_output=True, text=True, cwd=exp_dir)
-                if r.returncode == 0:
-                    fail(f'Test 7: tampered historical scorebook: expected FATAL exit, got exit 0')
-                err = r.stderr.strip().split('\n')[-1] if r.stderr else 'no stderr'
-                print(f'  Test 7: tampered historical scorebook: FATAL exit as expected (stderr: {err[:120]})')
+            run_c20(healthy_A, healthy_B, 'tampered BIB-001 evaluator A scorebook (expected FATAL)', expected_joint=None, fake_a_a=fake_sb)
         finally:
             os.remove(fake_sb)
 
-        # Test 8: tampered baseline membership
-        fake_mem = '/tmp/fake-mem-v5.json'
+        # Tampered baseline membership
+        fake_mem = '/tmp/fake-membership.json'
         shutil.copy(os.path.join(exp_dir, 'inputs/baseline-envelope-membership.json'), fake_mem)
         fake_data = json.load(open(fake_mem))
         fake_data['included_observations'] = fake_data['included_observations'][:84]
@@ -442,35 +299,13 @@ def main():
             json.dump(fake_data, f, indent=2)
             f.write('\n')
         try:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                a_path = f'{tmpdir}/armc-A.json'
-                b_path = f'{tmpdir}/armc-B.json'
-                bm_path = f'{tmpdir}/blind-map.json'
-                with open(a_path, 'w') as f: json.dump(armc_A, f, indent=2); f.write('\n')
-                with open(b_path, 'w') as f: json.dump(armc_B, f, indent=2); f.write('\n')
-                with open(bm_path, 'w') as f: json.dump(blind_map, f, indent=2); f.write('\n')
-                out_path = f'{tmpdir}/c20.json'
-                r = subprocess.run([
-                    'python3', os.path.join(exp_dir, 'hashing/c20-derivation.py'),
-                    '--envelope', fake_mem,
-                    '--baseline-stats', os.path.join(exp_dir, 'inputs/baseline-statistics.json'),
-                    '--arm-c-A', a_path, '--arm-c-B', b_path, '--blind-map', bm_path,
-                    '--frozen-A-A', os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl'),
-                    '--frozen-A-B', os.path.join(repo_dir, 'experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl'),
-                    '--frozen-B-A', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl'),
-                    '--frozen-B-B', os.path.join(repo_dir, 'experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl'),
-                    '--out', out_path,
-                ], capture_output=True, text=True, cwd=exp_dir)
-                if r.returncode == 0:
-                    fail(f'Test 8: tampered baseline membership: expected FATAL exit, got exit 0')
-                err = r.stderr.strip().split('\n')[-1] if r.stderr else 'no stderr'
-                print(f'  Test 8: tampered baseline membership: FATAL exit as expected (stderr: {err[:120]})')
+            run_c20(healthy_A, healthy_B, 'tampered baseline membership (1 obs removed; expected FATAL)', expected_joint=None, fake_mem=fake_mem)
         finally:
             os.remove(fake_mem)
 
-    # Step 6: Build and emit MANIFEST.json
+    # Step 5: Build and emit MANIFEST.json
     print()
-    print('Step 6: building and emitting MANIFEST.json...')
+    print('Step 5: building and emitting MANIFEST.json...')
     proposal_commit_sha = subprocess.run(
         ['git', '-C', repo_dir, 'log', '--format=%H', '-1', 'origin/feature/insa-id-e1-proposal', '--', 'docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md'],
         capture_output=True, text=True).stdout.strip()
@@ -478,9 +313,24 @@ def main():
     v01_protocol_sha = sha256_file(os.path.join(repo_dir, 'experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md'))
     v01_protocol_blob = git_blob_sha(repo_dir, 'experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md')
 
-    proposal_section_7_set = set(FROZEN_ARTIFACTS)
-    frozen_artifacts = [file_info[p] for p in FROZEN_ARTIFACTS]
-    supporting_artifacts = [file_info[p] for p in SUPPORTING_ARTIFACTS if p not in proposal_section_7_set]
+    # Distinguish §7 frozen vs supporting
+    proposal_section_7_set = {
+        'inputs/baseline-binding.json', 'inputs/baseline-statistics.json',
+        'inputs/dimensions-decomposition.json', 'inputs/baseline-envelope-membership.json',
+        'inputs/intent-document.txt', 'inputs/identity-contract.txt', 'inputs/reconstruction-prompt.md',
+        'inputs/modification-specification.txt', 'inputs/arm-c-directive.txt',
+        'inputs/mutation-dimensions.json',
+        'inputs/preservation-dimensions-subset-a.json', 'inputs/preservation-dimensions-subset-b.json',
+        'inputs/preservation-dimensions.json',
+        'inputs/evaluator-rubric.json',
+        'inputs/acceptance-tests.json', 'inputs/preservation-gates.json',
+        'inputs/applicability-declaration.json', 'inputs/authority-manifest.json',
+        'protocol/INSA-ID-E1-protocol.md', 'protocol/EXECUTION-ORDER.md',
+    }
+    frozen_artifacts = [file_info[p] for p in FROZEN_ARTIFACTS if p in proposal_section_7_set]
+    supporting_artifacts = [file_info[p] for p in FROZEN_ARTIFACTS + SUPPORTING_ARTIFACTS if p not in proposal_section_7_set]
+
+    # Dedup supporting (in case inputs/reconstruction-prompt.md appears in both lists)
     seen = set()
     dedup_supporting = []
     for a in supporting_artifacts:
@@ -493,15 +343,15 @@ def main():
         '$schema': 'INSA-v0.3-MANIFEST-v1',
         'schema_version': '2.0',
         'record_kind': 'experiment-manifest',
-        'purpose': 'Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v5 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[] (verified by the binding-verification script).',
+        'purpose': 'Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v4 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[] (verified by the binding-verification script).',
         'experiment_id': 'INSA-ID-E1',
         'experiment_short_name': 'insa-id-e1',
-        'experiment_status': 'frozen-candidate-rev5 (awaiting Frank-as-PI execution GO)',
-        'experiment_revision': 'v5 (per proposal v5.1)',
+        'experiment_status': 'frozen-candidate-rev4 (awaiting Frank-as-PI execution GO)',
+        'experiment_revision': 'v4 (per proposal v5.1)',
         'binding_verification_script': {
             'artifact': 'hashing/binding-verification.py',
             'sha256': file_info['hashing/binding-verification.py']['sha256'],
-            'role': 'Single authoritative source of truth for this MANIFEST. Re-runs all SHA verifications, cross-reference checks, D disjointness check, evaluator-interface structural validation, and the C20 synthetic test suite (8 cases using the real evaluator return schema). Exits nonzero on any mismatch.'
+            'role': 'Single authoritative source of truth for this MANIFEST. Re-runs all SHA verifications, cross-reference checks, D disjointness check, and the C20 synthetic test suite (healthy/missing-cell/out-of-envelope/tampered-scorebook/tampered-membership). Exits nonzero on any mismatch.'
         },
         'audit_trail': {
             'v1_frozen_candidate_path': 'experiments/2026-09-11-insa-id-e1/audit/v1-frozen-candidate/',
@@ -513,15 +363,12 @@ def main():
             'v3_frozen_candidate_path': 'experiments/2026-09-11-insa-id-e1/audit/v3-frozen-candidate/',
             'v3_commit_sha': '2d0cf74054a48c578bb8cb65ce985e4767600809',
             'v3_manifest_sha256': '54487cf090165ce5ae5974b8daf9157ea218c05ef17bceaa4a42a9e25cff3d1f',
-            'v4_frozen_candidate_path': 'experiments/2026-09-11-insa-id-e1/audit/v4-frozen-candidate/',
-            'v4_commit_sha': '1b70d65301854e04ee22f7e3407b40cf47de480e',
-            'v4_manifest_sha256': '2e08e6e1b52b821be8cece45ca4006ebd24c1d74bbfca8e58a87696fce6f35d7',
-            'v1_v2_v3_v4_defects_summary': 'See experiments/2026-09-11-insa-id-e1/audit/AUDIT_TRAIL.md'
+            'v1_v2_v3_defects_summary': 'See experiments/2026-09-11-insa-id-e1/audit/AUDIT_TRAIL.md'
         },
         'frozen_at_utc_date': record_frozen_at_utc_date,
         'frozen_by': 'Hermes (operator)',
         'manifest_generated_at_utc': record_run_at_utc,
-        'manifest_generation_method': 'hashing/binding-verification.py v5 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable)',
+        'manifest_generation_method': 'hashing/binding-verification.py v4 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable)',
         'insa_frozen_architecture_reference': {
             'git_blob_sha1': '848e0fe014f5b4a61ba2cb92e772ee3499dca9c1',
             'commit_sha': 'd2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b',
@@ -541,7 +388,7 @@ def main():
             'v0_1_protocol_sha256': v01_protocol_sha,
             'v0_1_protocol_git_blob_sha1': v01_protocol_blob,
             'modification_permitted': False,
-            'relationship_to_INSA_ID_E1': 'Referenced for v0.1 §11.2 (BIB 4-dim preservation criterion), §11.3 (8 C12 axes), §14 (stop rules). NOT modified by INSA-ID-E1. Per proposal v5.1 §7, INSA-ID-E1 v5 uses its own preregistered Manhattan/reference-vector C20 operationalization; the +1.5 / 2.5 thresholds and the 85-record BIB corpus are inherited from predecessor calibration, but the v5 distance computation is not claimed identical to v0.1.'
+            'relationship_to_INSA_ID_E1': 'Referenced for v0.1 §11.2 (BIB 4-dim preservation criterion), §11.3 (8 C12 axes), §14 (stop rules). NOT modified by INSA-ID-E1.'
         },
         'bib_frozen_source_reference': {
             'frozen_source_commit_sha1': 'c369215024c9f8a849daf11bd4b872d7ee566a7a',
@@ -575,7 +422,10 @@ def main():
         },
         'D_binding': {
             'D_definition': 'D := M ∪ P ∪ O, pairwise disjoint',
-            'M_cardinality': 1, 'P_cardinality': 12, 'O_cardinality': 0, 'D_cardinality_total': 13,
+            'M_cardinality': 1,
+            'P_cardinality': 12,
+            'O_cardinality': 0,
+            'D_cardinality_total': 13,
             'decomposition_artifact': 'inputs/dimensions-decomposition.json',
             'decomposition_sha256': file_info['inputs/dimensions-decomposition.json']['sha256'],
             'M_artifact': 'inputs/mutation-dimensions.json',
@@ -589,9 +439,13 @@ def main():
             'O_value': '∅',
             'O_rationale': 'The BIB 4-dim vector (subset-(a)) + 8 C12 axes (subset-(b)) exhaust the scored dimensions tracked by the frozen evaluator rubric.',
             'pairwise_disjoint_verification': {
-                'method': 'set intersection assertion in Python',
-                'M_ids': sorted(m_ids), 'subset_a_ids': sorted(a_ids), 'subset_b_ids': sorted(b_ids), 'O_ids': sorted(o_ids),
-                'result': 'PASS (executed at freeze time)', 'verification_command': 'python3 -c "M=set([\"M-1\"]); A=set([\"BIB-4D-1\",\"BIB-4D-2\",\"BIB-4D-3\",\"BIB-4D-4\"]); B=set([\"C12-1\",\"C12-2\",\"C12-3\",\"C12-4\",\"C12-5\",\"C12-6\",\"C12-7\",\"C12-8\"]); assert M&A==set() and M&B==set() and A&B==set(); print(\"PASS\")"'
+                'method': 'set intersection assertion in Python; intersection of M ids, subset-(a) ids, subset-(b) ids, O ids must equal empty set',
+                'M_ids': sorted(m_ids),
+                'subset_a_ids': sorted(a_ids),
+                'subset_b_ids': sorted(b_ids),
+                'O_ids': sorted(o_ids),
+                'result': 'PASS (executed at freeze time; recorded here)',
+                'verification_command': 'python3 -c "M=set([\"M-1\"]); A=set([\"BIB-4D-1\",\"BIB-4D-2\",\"BIB-4D-3\",\"BIB-4D-4\"]); B=set([\"C12-1\",\"C12-2\",\"C12-3\",\"C12-4\",\"C12-5\",\"C12-6\",\"C12-7\",\"C12-8\"]); assert M&A==set() and M&B==set() and A&B==set(); print(\"PASS\")"'
             }
         },
         'baseline_statistics_binding': {
@@ -609,8 +463,7 @@ def main():
             'C20_pass_fail_formula': 'C20(e) = (missing_current_cells[e] is empty) AND (max over current (R, B) cells in {R1/B1, R2/B1, R3/B1} of mean_4dim_Manhattan_Arm_C(R, B) <= frozen_historical_envelope_bound[e]) for each evaluator e in {A, B}; C20_joint = C20(A) AND C20(B).',
             'current_expected_arm_c_cells': ['R1/B1', 'R2/B1', 'R3/B1'],
             'c20_derivation_script_artifact': 'hashing/c20-derivation.py',
-            'c20_derivation_script_sha256': file_info['hashing/c20-derivation.py']['sha256'],
-            'c20_provenance_v5': 'INSA-ID-E1 uses its own preregistered Manhattan/reference-vector control-validity operationalization (per proposal v5.1). The predecessor Evolution C20 used historical total-score envelope comparisons; v5 does NOT describe INSA-ID-E1\'s C20 as the identical inherited v0.1 C20 computation. The 85-record BIB corpus calibrates the new rule.'
+            'c20_derivation_script_sha256': file_info['hashing/c20-derivation.py']['sha256']
         },
         'V_d_binding': {
             'artifact': 'inputs/evaluator-rubric.json',
@@ -623,8 +476,7 @@ def main():
                     'B': {'contract_compliance': 3.988235, 'selection_behavior': 3.988235, 'narrative_behavior': 4.0, 'functional_completeness': 4.0}
                 }
             },
-            'subset_b_tolerances': '8 C12 axes with binary-failure convention for 0-4 axes (failure = score == 0) per inputs/preservation-dimensions-subset-b.json failure_convention_pr_INSA_ID_E1 (preregistered INSA-ID-E1 rule, not inherited from v0.1)',
-            'provenance_v5': 'The BIB 4-dim dimensions and the +1.5 / 2.5 threshold values come from predecessor calibration. INSA-ID-E1\'s global-reference-vector distance formulation is the v5.1 preregistered operationalization; v5 does NOT claim that this exact distance computation is verbatim the v0.1 computation.'
+            'subset_b_tolerances': '8 C12 axes with binary-failure convention for 0-4 axes (failure = score == 0) per inputs/preservation-dimensions-subset-b.json failure_convention_pr_INSA_ID_E1 (preregistered INSA-ID-E1 rule, not inherited from v0.1)'
         },
         'A_binding': {
             'artifact': 'inputs/acceptance-tests.json',
@@ -674,9 +526,8 @@ def main():
         'c20_derivation_summary': {
             'artifact': 'hashing/c20-derivation.py',
             'sha256': file_info['hashing/c20-derivation.py']['sha256'],
-            'role': 'Frozen deterministic C20 derivation (v5). Consumes the ACTUAL evaluator return schema + the operator-only blind map. Re-verifies all inputs; rejects unknown / duplicate blind IDs, duplicate tuples, Arm-M in Arm-C, (R, B) outside current expected cells. Uses the preregistered historical envelope bound (A=1.807059, B=0.414118). No TBD values. derivation_recorded_at_utc set automatically.',
-            'interface_v5': '--blind-map is a REQUIRED input. Each record in the operator-side Arm-C scorebook has fields: blind_id, reconstruction_id, block, arm, candidate, scores_<eval>, M_scores, evaluator_self_report. C20 verifies each blind_id is in the blind map; rejects duplicates, arm != C, and (R, B) outside {R1/B1, R2/B1, R3/B1}.',
-            'verified_during_v5_freeze': '8 test cases using real schema: (1) healthy -> c20_joint_pass=True; (2) missing R2/B -> False; (3) degraded R1/B (contract_compliance=0) -> False; (4) unknown blind_id -> FATAL; (5) duplicate blind_id -> FATAL; (6) Arm-M blind_id in Arm-C scorebook -> FATAL; (7) tampered BIB-001 evaluator A scorebook -> FATAL; (8) tampered baseline membership (1 obs removed) -> FATAL.'
+            'role': 'Frozen deterministic C20 derivation. Re-verifies the four locked BIB scorebook SHAs (fatal on mismatch); verifies the baseline-envelope-membership.json 85-SHA set matches the 85 records in baseline-statistics.json (fatal on count mismatch); verifies baseline-statistics.json required fields; uses the preregistered historical envelope bound (A=1.807059, B=0.414118); computes per-(R, B) Arm-C means from the Phase 2 Arm-C scorebooks; emits c20_per_evaluator_pass, c20_joint_pass, c20_fail_reasons, derivation_recorded_at_utc. No manual post-write editing.',
+            'verified_during_v4_freeze': '5 test cases: (a) healthy current cells -> c20_joint_pass=True; (b) missing R2/B -> c20_joint_pass=False with reason "missing current cells"; (c) degraded R1/B (contract_compliance=0) -> c20_joint_pass=False with reason "worst current cell mean > frozen historical envelope bound"; (d) tampered BIB-001 evaluator A scorebook -> FATAL exit 2; (e) tampered baseline membership (1 obs removed) -> FATAL exit 2.'
         },
         'execution_order_binding': {
             'artifact': 'protocol/EXECUTION-ORDER.md',
@@ -685,7 +536,13 @@ def main():
                 'artifact': 'hashing/score-derivation.py',
                 'sha256': file_info['hashing/score-derivation.py']['sha256'],
                 'algorithm': 'HMAC-SHA256(draw_event_key, per-tuple-salt)[:8] as little-endian uint64; sort ascending; lex tie-break (R, B, arm, candidate). Per-tuple salt = sha256("INSA-ID-E1:" + R + ":" + B + ":" + arm + ":" + candidate).',
-                'frozen_constants': {'reconstructions': ['R1', 'R2', 'R3'], 'bs': ['B1'], 'arms': ['C', 'M'], 'candidates_per_cell': 10, 'total_tuples': 60},
+                'frozen_constants': {
+                    'reconstructions': ['R1', 'R2', 'R3'],
+                    'bs': ['B1'],
+                    'arms': ['C', 'M'],
+                    'candidates_per_cell': 10,
+                    'total_tuples': 60
+                },
                 'reproducibility': 'Same seed file -> identical output SHA; different seed file -> different output. Zero operator discretion after GO.'
             },
             'frozen_reconstruction_input_builder': {
@@ -693,37 +550,36 @@ def main():
                 'sha256': file_info['preflight/build-reconstruction-input.py']['sha256'],
                 'algorithm': 'For each (R, B, arm): concatenate reconstruction-prompt + identity-contract + (M-directive or C-directive). 6 output files, byte-identical for each (R, B, arm) tuple.'
             },
-            'blind_map_timing_v5': 'preflight/blind-map.json is constructed and locked in Phase 0 (pre-dispatch preflight), BEFORE any evaluator invocation. Phase 2 USES the already-locked blind map; it does NOT construct or mutate the blind map in Phase 2.',
-            'phases_v5': {
-                'phase_0': 'Pre-dispatch preflight (static only; no model invocation). Constructs and locks the operator-only blind map (preflight/blind-map.json). C20 NOT in Phase 0.',
+            'phases_v4': {
+                'phase_0': 'Pre-dispatch preflight (static only; no model invocation). C20 NOT in Phase 0.',
                 'phase_1': 'Generation (per (R, B, arm, candidate) in locked order). Fresh executor session per candidate.',
-                'phase_2': 'Arm-C scoring (per-candidate fresh evaluator sessions; evaluator sees only the test prompt + scoring criteria + opaque blind_id; NOT arm, NOT reconstruction, NOT phase). Operator joins evaluator-returned records to the locked blind map to build operator-side Arm-C scorebooks. Lock evaluator-A-arm-C-scorebook.json and evaluator-B-arm-C-scorebook.json. Run hashing/c20-derivation.py with --blind-map (required). C20 FAIL -> STOP, INVALID_EXPERIMENT. C20 PASS -> proceed.',
+                'phase_2': 'Arm-C scoring (per-candidate fresh evaluator sessions) + C20 control-validity gate (hashing/c20-derivation.py). C20 FAIL -> STOP, INVALID_EXPERIMENT. C20 PASS -> proceed.',
                 'phase_3': 'Arm-M scoring (per-candidate fresh evaluator sessions, separate immutable scorebooks).',
                 'phase_4': 'Substantive analysis (joint, not ordered ELSE IF) per proposal v5.1 §5.4 STEP 3 + §4.1 Level 1/Level 2.',
                 'phase_5': 'Synthesis (PI adjudication).'
             }
         },
         'evaluator_binding_summary': {
-            'evaluator_a': {'model': 'gpt-5.6-sol', 'substrate': 'Codex CLI', 'role': 'per-candidate raw M + G scoring, fresh session per candidate; returns the exact evaluator schema in evaluation/evaluator-input-packet.md §7'},
-            'evaluator_b': {'model': 'claude-opus-4-7', 'substrate': 'Claude Code CLI, fresh session per I-AUTH-05', 'role': 'per-candidate raw M + G scoring, fresh session per candidate; returns the exact evaluator schema in evaluation/evaluator-input-packet.md §7'},
+            'evaluator_a': {'model': 'gpt-5.6-sol', 'substrate': 'Codex CLI', 'role': 'per-candidate raw M + G scoring, fresh session per candidate'},
+            'evaluator_b': {'model': 'claude-opus-4-7', 'substrate': 'Claude Code CLI, fresh session per I-AUTH-05', 'role': 'per-candidate raw M + G scoring, fresh session per candidate'},
             'blinding_discipline': {
                 'artifact': 'evaluation/evaluator-input-packet.md',
                 'sha256': file_info['evaluation/evaluator-input-packet.md']['sha256'],
-                'de_blinding_artifact': 'results/de-blining-table.json (produced at scoring time, auditable)',
-                'v5_separation': 'v5 separates per-candidate scoring (evaluator-side) from aggregate computation (analysis-side, post-lock). Evaluators return per-candidate raw scores only in the exact schema: blind_id, M_scores, G_subset_a_4dim_vector, G_subset_b_axis_scores, evaluator_self_report. No reconstruction_id, no block, no arm, no candidate, no T-number, no phase, no execution-provenance. Blind-map/C20 join is operator-only: evaluators see only opaque blind IDs; the operator-only blind map (locked preflight) de-blinds for C20. Evaluator packet is SELF-SUFFICIENT: it includes the test prompt, frozen behavioral contract, BIB 0-4 scoring anchors, M1-M4 definitions, worldwide-historical-significance criterion, C12 definitions, and the return schema. The evaluator knows what behavior to score without knowing whether the candidate is control or treatment. The modification specification itself is hidden.'
+                'de_blinding_artifact': 'results/de-blinding-table.json (produced at scoring time, auditable)',
+                'v4_separation': 'v4 separates per-candidate scoring (evaluator-side) from aggregate computation (analysis-side, post-lock). Evaluators return per-candidate raw scores only. No G_pres_*, no G_mod_*, no C12 BROKEN, no phase indication. Blind-map/C20 join is operator-only: evaluators see only opaque blind IDs; the operator-only blind map (locked preflight) de-blinds for C20.'
             }
         },
-        'scorebook_structure_v5': {
+        'scorebook_structure_v4': {
             'separate_per_arm_locking': True,
-            'evaluator_A_arm_C_scorebook': 'evaluation/evaluator-A-arm-C-scorebook.json (operator-side; locked after Phase 2; no further appends)',
-            'evaluator_B_arm_C_scorebook': 'evaluation/evaluator-B-arm-C-scorebook.json (operator-side; locked after Phase 2; no further appends)',
-            'evaluator_A_arm_M_scorebook': 'evaluation/evaluator-A-arm-M-scorebook.json (operator-side; locked after Phase 3; no further appends)',
-            'evaluator_B_arm_M_scorebook': 'evaluation/evaluator-B-arm-M-scorebook.json (operator-side; locked after Phase 3; no further appends)',
-            'self_referential_hash_prohibition': 'No scorebook file contains its own full-file SHA-256. SHA-256s recorded externally in results/score-independent.md. C20 decision record (preflight/c20-decision-record.json) also does NOT contain its own full-file SHA-256.'
+            'evaluator_A_arm_C_scorebook': 'evaluation/evaluator-A-arm-C-scorebook.json (locked after Phase 2; no further appends)',
+            'evaluator_B_arm_C_scorebook': 'evaluation/evaluator-B-arm-C-scorebook.json (locked after Phase 2; no further appends)',
+            'evaluator_A_arm_M_scorebook': 'evaluation/evaluator-A-arm-M-scorebook.json (locked after Phase 3; no further appends)',
+            'evaluator_B_arm_M_scorebook': 'evaluation/evaluator-B-arm-M-scorebook.json (locked after Phase 3; no further appends)',
+            'self_referential_hash_prohibition': 'No scorebook file contains its own full-file SHA-256. SHA-256s recorded externally (results/score-independent.md for dynamic scorebooks; sidecar files).'
         },
         'stop_conditions_inherited': {
             'C20_phase': 'Phase 2 (Arm-C scoring), NOT Phase 0',
-            'C20_definition': 'Computed deterministically by hashing/c20-derivation.py from inputs/baseline-statistics.json (frozen historical envelope bound A=1.807059, B=0.414118) + the operator-side Arm-C scorebooks + the operator-only blind map. C20 PASS for evaluator e IFF (a) no missing current cells in {R1/B1, R2/B1, R3/B1} AND (b) every current cell mean Manhattan <= frozen historical envelope bound[e]. C20 FAIL -> INVALID_EXPERIMENT.',
+            'C20_definition': 'Computed deterministically by hashing/c20-derivation.py. C20 PASS for evaluator e IFF (a) no missing current cells in {R1/B1, R2/B1, R3/B1} AND (b) every current cell mean Manhattan <= frozen historical envelope bound[e]. C20 FAIL -> INVALID_EXPERIMENT.',
             'v0_1_5_stop_rules': [
                 'Material deviation during generation -> STOP unless PI separately adjudicates',
                 'Evaluator substitution after observing candidates -> forbidden',
@@ -736,11 +592,11 @@ def main():
             'protocol_section_reference': 'protocol/INSA-ID-E1-protocol.md §15'
         },
         'evidence_chain_summary': {
-            'evidence_profile': 'per-step evidence capture per proposal v5.1 §14; per-candidate evidence file runs/<R>/<B>/<arm>/evidence-<N>.json; locked operator-side evaluator scorebooks evaluation/evaluator-{A,B}-arm-{C,M}-scorebook.json (separate per arm, blind-map joined at scorebook-build time); operator-only blind map preflight/blind-map.json (locked in Phase 0); C20 derivation record preflight/c20-decision-record.json; synthesis results/score-independent.md + results/analysis.md + results/disposition.md + results/unblinded-analysis-results.json + results/de-blinding-table.json',
+            'evidence_profile': 'per-step evidence capture per proposal v5.1 §14; per-candidate evidence file runs/<R>/<B>/<arm>/evidence-<N>.json; locked evaluator scorebooks evaluation/evaluator-{A,B}-arm-{C,M}-scorebook.json (separate per arm, v3 item 7); C20 derivation record preflight/c20-decision-record.json; synthesis results/score-independent.md + results/analysis.md + results/disposition.md + results/unblinded-analysis-results.json + results/de-blinding-table.json',
             'satisfies_INV_EVID_1': True,
             'manifest_role': 'MANIFEST.json itself is part of the evidence chain: it content-addresses every pre-execution artifact and the v0.3 + v0.1 references. No manifest self-reference inside the file.'
         },
-        'four_gates_modification_success_v5': {
+        'four_gates_modification_success_v4': {
             'G_mod_a': 'ForEach evaluator independently: mean(modification_conformance for all Arm-M candidates) >= 3.5',
             'G_mod_b': 'ForEach evaluator independently: count(candidate_all_pass==True for all Arm-M candidates) / count(total Arm-M candidates) >= 0.80',
             'G_mod_c': 'ForEach evaluator independently: AND over R in {R1, R2, R3}: count(candidate_all_pass==True for Arm-M candidates in R) / count(total Arm-M candidates in R) >= 0.70',
@@ -748,15 +604,15 @@ def main():
             'Modification_Success_per_evaluator': 'G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d',
             'Modification_Success_experiment_level': 'Modification_Success_per_A AND Modification_Success_per_B'
         },
-        'c12_broken_rule_v5': {
+        'c12_broken_rule_v4': {
             'definition_per_evaluator_e_and_axis_a': 'axis_a is BROKEN for evaluator_e IF AND ONLY IF BOTH arm_M_failure_rate_on_axis_a >= 0.30 AND (arm_M_failure_rate_on_axis_a - arm_C_failure_rate_on_axis_a) >= 0.30',
             'subset_b_pass_per_evaluator': 'subset-(b) gate PASSES for evaluator_e IF AND ONLY IF no axis in {C12-1..C12-8} is BROKEN for evaluator_e',
             'Non_target_Identity_Preservation_per_evaluator': '(G_pres_subset_a_a AND G_pres_subset_a_b) AND (no C12-axis-BROKEN for evaluator_e)',
             'Non_target_Identity_Preservation_experiment_level': 'Non_target_Identity_Preservation_per_A AND Non_target_Identity_Preservation_per_B'
         },
-        'executor_change_documentation_v5': {
+        'executor_change_documentation_v4': {
             'v0_1_executor': 'claude-sonnet-4-6',
-            'v5_executor': 'claude-opus-4-7',
+            'v4_executor': 'claude-opus-4-7',
             'rationale': 'Pre-registered, preregistered-bound deviation (proposal v5.1 §2(e)). Limits direct comparability of the v0.1 failure shape (R2-B deferrals) to INSA-ID-E1\'s outcome.',
             'evaluator_substrate_unchanged': 'evaluator A (gpt-5.6-sol via Codex CLI) + evaluator B (claude-opus-4-7 fresh session via Claude Code CLI) match v0.1\'s evaluator substrate.'
         },
@@ -766,10 +622,10 @@ def main():
             'no_model_dispatch_until_execution_GO': True
         },
         'modification_to_frozen_artifacts_after_this_manifest': 'forbidden (per proposal v5.1 §8 GO constraints)',
-        'evidence_integrity_attestation': 'All SHA fields in this MANIFEST are valid 64-hex SHA-256 values; the MANIFEST itself does not contain its own SHA-256 (no self-reference). All cross-artifact SHA references verified by the binding-verification script at freeze time. The v5 binding-verification script also statically validates: (1) evaluator packet contains the 4 correct BIB dimensions + M1-M4 definitions + 0-4 scoring anchors + test prompt template + C12 definitions; (2) C20 accepts the exact evaluator return structure and requires --blind-map; (3) synthetic tests use no evaluator-forbidden provenance fields.'
+        'evidence_integrity_attestation': 'All SHA fields in this MANIFEST are valid 64-hex SHA-256 values; the MANIFEST itself does not contain its own SHA-256 (no self-reference). All cross-artifact SHA references verified by the binding-verification script at freeze time.'
     }
 
-    # Write MANIFEST.json
+    # Write MANIFEST.json (without self_sha inside the file)
     manifest_text = json.dumps(manifest, indent=2, sort_keys=False) + '\n'
     manifest_path = os.path.join(exp_dir, 'MANIFEST.json')
     tmp = manifest_path + '.tmp'
@@ -778,9 +634,10 @@ def main():
         f.flush()
         os.fsync(f.fileno())
     os.replace(tmp, manifest_path)
+
     new_manifest_sha = sha256_file(manifest_path)
     print()
-    print(f'MANIFEST.json v5 written: {len(manifest_text)} bytes, SHA-256: {new_manifest_sha}')
+    print(f'MANIFEST.json v4 written: {len(manifest_text)} bytes, SHA-256: {new_manifest_sha}')
 
     # Write sidecar
     sidecar_path = os.path.join(exp_dir, 'MANIFEST.sha256.txt')
@@ -788,18 +645,18 @@ def main():
         f.write(f'{new_manifest_sha}  MANIFEST.json\n')
 
     print()
-    print('=== v5 binding-verification + MANIFEST generation complete ===')
+    print('=== v4 binding-verification + MANIFEST generation complete ===')
     print(f'  proposal v5.1 SHA: 1f84c3101d6add7d44ed821681946c10be8f5f5c')
     print(f'  binding-verification script SHA: {file_info["hashing/binding-verification.py"]["sha256"]}')
     print(f'  c20-derivation.py SHA: {file_info["hashing/c20-derivation.py"]["sha256"]}')
-    print(f'  protocol v5 SHA: {file_info["protocol/INSA-ID-E1-protocol.md"]["sha256"]}')
-    print(f'  EXECUTION-ORDER v5 SHA: {file_info["protocol/EXECUTION-ORDER.md"]["sha256"]}')
+    print(f'  protocol v4 SHA: {file_info["protocol/INSA-ID-E1-protocol.md"]["sha256"]}')
+    print(f'  EXECUTION-ORDER v4 SHA: {file_info["protocol/EXECUTION-ORDER.md"]["sha256"]}')
     print(f'  baseline-binding.json SHA: {file_info["inputs/baseline-binding.json"]["sha256"]}')
     print(f'  baseline-statistics.json SHA: {file_info["inputs/baseline-statistics.json"]["sha256"]}')
     print(f'  dimensions-decomposition.json SHA: {file_info["inputs/dimensions-decomposition.json"]["sha256"]}')
     print(f'  authority-manifest.json SHA: {file_info["inputs/authority-manifest.json"]["sha256"]}')
     print(f'  evaluator-input-packet.md SHA: {file_info["evaluation/evaluator-input-packet.md"]["sha256"]}')
-    print(f'  MANIFEST.json v5 SHA: {new_manifest_sha}')
+    print(f'  MANIFEST.json v4 SHA: {new_manifest_sha}')
 
 
 if __name__ == '__main__':

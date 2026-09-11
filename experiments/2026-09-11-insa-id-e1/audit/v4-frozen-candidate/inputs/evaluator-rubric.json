@@ -1,0 +1,59 @@
+{
+  "$schema": "INSA-v0.3-evaluator-rubric-v1",
+  "schema_version": "1.1",
+  "record_kind": "evaluator-rubric",
+  "purpose": "Frozen V(d) per proposal v5.1 §5.1 INV-V-1: per-dimension tolerance values defined separately for subset-(a) and subset-(b). Subset-(a) tolerance values for the BIB 4-dim vector aggregate Manhattan criterion; subset-(b) per-axis tolerances.",
+  "experiment_id": "INSA-ID-E1",
+  "frozen_at_utc_date": "2026-09-11",
+  "frozen_by": "Hermes (operator)",
+  "binding": {
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
+    "P_subset_a": "inputs/preservation-dimensions-subset-a.json",
+    "P_subset_a_sha256": "74308b4efa836e8d826aec8de33505e1fcd45458f8a7194eb8970207b7043912",
+    "P_subset_b": "inputs/preservation-dimensions-subset-b.json",
+    "P_subset_b_sha256": "d1683d60d714d0613338c905089f0b6be412bda0d2af43eac3232b8c2e680b5c",
+    "baseline_statistics": "inputs/baseline-statistics.json"
+  },
+  "V_d_subset_a": {
+    "metric": "BIB 4-dim Manhattan distance (aggregate, from per-evaluator reference vector)",
+    "reference_vector_source": "inputs/baseline-statistics.json calibrated_4d_reference_vectors (computed deterministically from the 85 envelope observations)",
+    "G_pres_subset_a_a_relative_tolerance": 1.5,
+    "G_pres_subset_a_a_relative_formula": "Arm M within-Recon mean 4-dim Manhattan distance <= Arm C within-Recon mean 4-dim Manhattan distance + 1.5",
+    "G_pres_subset_a_b_absolute_tolerance": 2.5,
+    "G_pres_subset_a_b_absolute_formula": "Arm M within-Recon mean 4-dim Manhattan distance <= 2.5",
+    "per_dim_tolerance": "none (aggregate Manhattan only)",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 applies ONLY to G_pres_subset_a_a. Arm-C validity envelope (C20) is not enlarged by the +1.5.",
+    "calibrated_4d_reference_vectors_preregistered": {
+      "evaluator_A": {
+        "contract_compliance": 3.529412,
+        "selection_behavior": 3.964706,
+        "narrative_behavior": 3.847059,
+        "functional_completeness": 3.494118
+      },
+      "evaluator_B": {
+        "contract_compliance": 3.988235,
+        "selection_behavior": 3.988235,
+        "narrative_behavior": 4.0,
+        "functional_completeness": 4.0
+      }
+    },
+    "v4_clarification": "Subset-(a) is adjudicated ONLY through the 4-dim Manhattan aggregate criterion. There is no per-axis binary-failure conversion applied to the subset-(a) 4-dim vector (no 'failure = score == 0', no 'failure = binary(>=3)'); those conversions belong ONLY to subset-(b) C12 axes per the preregistered INSA-ID-E1 rules in subset-(b) failure_convention_pr_INSA_ID_E1 fields."
+  },
+  "V_d_subset_b": {
+    "metric": "8 C12 axes, independently evaluated; aggregate C12 BROKEN rule per proposal v5.1 §5.4",
+    "C12_axes": [
+      {"id": "C12-1", "name": "exact_date_preference", "tolerance": "binary: preserved/not-preserved", "failure_per_preregistered_INSA_ID_E1_rule": "score == false"},
+      {"id": "C12-2", "name": "connection_count_5_to_10", "tolerance": "5 <= n <= 10", "failure_per_preregistered_INSA_ID_E1_rule": "n < 5 OR n > 10"},
+      {"id": "C12-3", "name": "selection_significance", "tolerance": "0..4 (integer)", "failure_per_preregistered_INSA_ID_E1_rule": "score == 0 (INSA-ID-E1 preregistered binary-failure convention for 0-4 axes)"},
+      {"id": "C12-4", "name": "end_of_report_synthesis", "tolerance": "binary: present/absent", "failure_per_preregistered_INSA_ID_E1_rule": "score == absent"},
+      {"id": "C12-5", "name": "lifetime_framing", "tolerance": "0..4 (integer)", "failure_per_preregistered_INSA_ID_E1_rule": "score == 0 (INSA-ID-E1 preregistered binary-failure convention for 0-4 axes)"},
+      {"id": "C12-6", "name": "warm_vivid_narrative_voice", "tolerance": "0..4 (integer)", "failure_per_preregistered_INSA_ID_E1_rule": "score == 0 (INSA-ID-E1 preregistered binary-failure convention for 0-4 axes)"},
+      {"id": "C12-7", "name": "factual_discipline", "tolerance": "binary: no-misrepresentation-as-exact-date", "failure_per_preregistered_INSA_ID_E1_rule": "no-misrepresentation violated"},
+      {"id": "C12-8", "name": "avoidance_of_arbitrary_trivia", "tolerance": "binary: no arbitrary trivia", "failure_per_preregistered_INSA_ID_E1_rule": "arbitrary trivia present"}
+    ],
+    "broken_rule_preregistered": "axis_a is BROKEN for evaluator_e IF AND ONLY IF BOTH arm_M_failure_rate_on_axis_a >= 0.30 AND (arm_M_failure_rate_on_axis_a - arm_C_failure_rate_on_axis_a) >= 0.30 (per proposal v5.1 §5.4 + v0.1 §11.3 PI pass 3)",
+    "v4_clarification": "The failure conversions on the 0-4 axes C12-3/5/6 are an INSA-ID-E1 PREREGISTERED rule (proposal v5.1 §5.1 INV-P-1b), NOT an inherited v0.1 rule. v0.1 §11.3 specifies the per-axis gate but does not specify a per-axis binary conversion for 0-4 axes. The conversion is preregistered here for reproducibility."
+  },
+  "v0_1_2_5_calibration_context": "The 2.5 absolute Manhattan tolerance on G_pres_subset_a_b (subset-(a)) is inherited from v0.1 §11.2 BIB historical calibration. The BIB historical mean 4-dim Manhattan distance was calibrated at < 2.5 for the non-deviated envelope; this is the same number used in v0.1.",
+  "modification_to_V_d_after_freeze": "forbidden (per proposal v5.1 §8 GO constraints and INV-V-1)"
+}

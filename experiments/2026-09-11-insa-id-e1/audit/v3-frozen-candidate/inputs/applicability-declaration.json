@@ -1,0 +1,42 @@
+{
+  "$schema": "INSA-v0.3-applicability-declaration-v1",
+  "schema_version": "1.0",
+  "record_kind": "applicability-declaration",
+  "purpose": "INSA v0.3 §5 Applicability Declaration for INSA-ID-E1. Per proposal v5.1 §5.1 INV-APPL-1, this declaration must be ACTIVE for State, Identity, and Evidence before any pre-execution gate passes.",
+  "experiment_id": "INSA-ID-E1",
+  "declaration_author": "Hermes (operator)",
+  "declaration_frozen_at_utc": "2026-09-11T00:00:00Z",
+  "insa_frozen_architecture": {
+    "blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
+    "architecture_version": "v0.3"
+  },
+  "applicable_dimensions": {
+    "state": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1 exercises the Safe Evolution Contract (§12) which requires state-aware evolution: the executor must commit a consequential change against a frozen pre-mutation state, with freshness evidence captured at the M-commit boundary (INV-AUTH-5). State applies because the experiment is a controlled, state-mutating evolution of a governed intelligent executor against a frozen baseline.",
+      "evidence_artifact_pattern": "runs/<R>/<B>/<arm>/evidence-<N>.json (per-candidate evidence; created during Phase 1 generation)"
+    },
+    "identity": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1's preservation model is built on identity-preservation gates (proposal v5.1 §5.1 INV-P-1, §5.2 subset-(a) and subset-(b)). The frozen baseline B (inputs/baseline-binding.json) content-addresses the identity contract as part of the baseline bundle. Identity applies because the experiment tests whether declared preservation dimensions are preserved under a targeted behavioral modification.",
+      "evidence_artifact_pattern": "subset-(a) and subset-(b) gates in inputs/preservation-gates.json"
+    },
+    "evidence": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1 produces a per-step evidence profile (proposal v5.1 §5.1 INV-EVID-1, §14 evidence-chain cross-cut) including locked evaluator scorebooks, raw candidate outputs, and causal-trace per §5.3. Evidence applies because architectural claim verification requires auditable, content-addressed evidence at every consequential step.",
+      "evidence_artifact_pattern": "evaluation/evaluator-{A,B}-arm-C-scorebook.json + evaluation/evaluator-{A,B}-arm-M-scorebook.json + results/score-independent.md + results/analysis.md + results/disposition.md + results/unblinded-analysis-results.json + results/de-blinding-table.json"
+    }
+  },
+  "non_applicable_dimensions": [],
+  "O_is_empty_attestation": "O = ∅ (per proposal v5.1 §5.1); the BIB 4-dim vector + 8 C12 axes exhaust the scored dimensions tracked by the frozen evaluator rubric. Any candidate output dimension not in D = M ∪ P is unscored and therefore not a basis for any gate.",
+  "modification_to_architecture": false,
+  "frozen_artifact_binding_required": true,
+  "binding_complete": true,
+  "binding_completeness_attestation": "All B + D + M + P + O + V(d) + A + G terms are content-addressed in MANIFEST.json. INV-D-1, INV-O-1, INV-P-1a, INV-P-1b, INV-V-1, INV-A-1, INV-G-1 all carry pre-mutation SHAs. INV-AUTH-1..5 captured in inputs/authority-manifest.json (static-only). INV-EVID-1 captured by content-addressing of all pre-execution artifacts. INV-APPL-1 satisfied by this declaration (State/Identity/Evidence ACTIVE). INV-STOP-1 references v0.1 C20 + BIB stop rules via protocol §15.",
+  "pi_adjudication": {
+    "adjudicator": "Frank (PI)",
+    "proposal_approval_artifact": "Telegram approval at 2026-09-11 referencing proposal SHA ed95705 (initial v5) and subsequently corrected to v5.1 SHA 1f84c3101d6add7d44ed821681946c10be8f5f5c (after the v5.1 cleanup commit)",
+    "approval_scope": "Protocol + frozen-artifact authoring per proposal v5.1. NOT execution authorization (separate Frank-as-PI GO required per proposal v5.1 §8)."
+  }
+}
