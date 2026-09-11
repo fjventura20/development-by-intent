@@ -1,6 +1,6 @@
 # INSA-ID-E1 — Targeted Evolution With Preservation (proposal)
 
-**Status:** DRAFT v2 — incorporates Frank's six tightening changes + the explicit framing sentence. Awaiting Frank's review before commit. Not committed.
+**Status:** v2 — Frank's six tightening changes incorporated. Committed on `feature/insa-id-e1-proposal` @ `5f9365f`. Awaiting Frank's review of the proposal text itself before protocol authoring begins.
 **Author:** Hermes (operator).
 **Date:** 2026-09-10
 **Frozen architecture this proposal tests:** INSA v0.3 (source blob `848e0fe014f5b4a61ba2cb92e772ee3499dca9c1`, commit `d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b`).
