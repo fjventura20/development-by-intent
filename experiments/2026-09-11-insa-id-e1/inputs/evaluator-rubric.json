@@ -1,0 +1,37 @@
+{
+  "$schema": "INSA-v0.3-evaluator-rubric-v1",
+  "schema_version": "1.0",
+  "record_kind": "evaluator-rubric",
+  "purpose": "Frozen V(d) per proposal v4 §5.1 INV-V-1: per-dimension tolerance values defined separately for subset-(a) and subset-(b).",
+  "experiment_id": "INSA-ID-E1",
+  "binding": {
+    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "P_subset_a": "inputs/preservation-dimensions-subset-a.json",
+    "P_subset_b": "inputs/preservation-dimensions-subset-b.json"
+  },
+  "V_d_subset_a": {
+    "metric": "BIB 4-dim Manhattan distance (aggregate)",
+    "G_pres_a_relative_tolerance": 1.5,
+    "G_pres_a_relative_formula": "Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5",
+    "G_pres_b_absolute_tolerance": 2.5,
+    "G_pres_b_absolute_formula": "Arm M within-Recon Manhattan mean <= 2.5",
+    "per_dim_tolerance": "none (aggregate Manhattan only)",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 applies ONLY to G_pres_a. Arm C validity envelope (C20) is not enlarged."
+  },
+  "V_d_subset_b": {
+    "metric": "8 C12 axes, independently evaluated",
+    "C12_axes": [
+      {"id": "C12-1", "name": "exact_date_preference", "tolerance": "binary: preserved/not-preserved"},
+      {"id": "C12-2", "name": "connection_count_5_to_10", "tolerance": "5 <= n <= 10"},
+      {"id": "C12-3", "name": "selection_significance", "tolerance": "per-criterion 0-4 range (within historical BIB calibration)"},
+      {"id": "C12-4", "name": "end_of_report_synthesis", "tolerance": "binary: present/absent"},
+      {"id": "C12-5", "name": "lifetime_framing", "tolerance": "per-criterion 0-4 range"},
+      {"id": "C12-6", "name": "warm_vivid_narrative_voice", "tolerance": "per-criterion 0-4 range"},
+      {"id": "C12-7", "name": "factual_discipline", "tolerance": "binary: no nearby events misrepresented as exact-date"},
+      {"id": "C12-8", "name": "avoidance_of_arbitrary_trivia", "tolerance": "binary: no arbitrary trivia"}
+    ]
+  },
+  "v01_2_5_calibration_context": "The 2.5 absolute Manhattan tolerance on G_pres_b (subset-(a)) is inherited from v0.1 §11.2 BIB historical calibration. The BIB historical mean Manhattan distance was calibrated at < 2.5 for the non-deviated envelope; this is the same number used in v0.1.",
+  "modification_to_V_d_after_freeze": "forbidden (per proposal v4 §8 GO constraints and INV-V-1)",
+  "frozen_at_utc": "2026-09-11T00:00:00Z"
+}

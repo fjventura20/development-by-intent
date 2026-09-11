@@ -1,0 +1,306 @@
+{
+  "$schema": "INSA-v0.3-MANIFEST-v1",
+  "schema_version": "1.0",
+  "record_kind": "experiment-manifest",
+  "purpose": "Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1. SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. No artifact may be modified after this manifest freezes; any material deviation triggers STOP per proposal v4 \u00a78.",
+  "experiment_id": "INSA-ID-E1",
+  "experiment_short_name": "insa-id-e1",
+  "experiment_status": "frozen-candidate (awaiting Frank-as-PI execution GO)",
+  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "frozen_by": "Hermes (operator)",
+  "insa_frozen_architecture_reference": {
+    "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
+    "architecture_version": "v0.3",
+    "sha256_note": "The INSA v0.3 architecture source is bound by git blob SHA-1 (the immutable identity handle in git history). The v0.3 file is at d2c2ad9 INSA-ARCHITECTURE-v0.3-candidate.md and is not modified by INSA-ID-E1. Verification command: git cat-file -p 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "modification_permitted": false
+  },
+  "proposal_binding": {
+    "path": "docs/proposals/2026-09-10-INSA-ID-E1-proposal.md",
+    "sha256": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "version": "v4",
+    "note": "Proposal SHA-256 should be re-verified at execution preflight time. The Frank-as-PI approval referenced proposal SHA ed95705 (commit SHA)."
+  },
+  "v0_1_protocol_reference": {
+    "path": "experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md",
+    "sha256": "079138163f0b59f71002480feffc008d9b350d460731c5d51f037163b17c2ab4",
+    "git_blob_sha1": "8874692d560d9a6363ef4105fae5384b18cf6ef2",
+    "modification_permitted": false,
+    "relationship_to_INSA_ID_E1": "Referenced for v0.1 \u00a711.2 (BIB 4-dim preservation criterion), \u00a711.3 (8 C12 axes), \u00a711.4 (inter-evaluator agreement), \u00a714 (stop rules), \u00a715 (statistical interpretation). NOT modified by INSA-ID-E1; INSA-ID-E1 inherits specific sections verbatim."
+  },
+  "bib_frozen_source_reference": {
+    "frozen_source_commit_sha1": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "intent_git_blob_sha1_at_c3692150": "7b10cb0641ab68572c7cf9d89a9c49f1afdc3428",
+    "intent_sha256_on_disk": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
+    "identity_contract_git_blob_sha1_at_c3692150": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+    "identity_contract_sha256_on_disk": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+    "reconstruction_prompt_git_blob_sha1_at_c3692150": "2e37f47d99059238bd9484560e310d2f89744069",
+    "reconstruction_prompt_sha256_on_disk": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+    "binding_rule": "On-disk SHA-256 must match the value in this manifest. The git blob SHA-1 (from c3692150) is the historical identity handle that proves the file content is byte-identical to the frozen BIB source. Verification command: git show c3692150:<source-path> | sha256sum",
+    "byte_identity_to_frozen_source": true
+  },
+  "frozen_artifacts": [
+    {
+      "path": "inputs/intent-document.txt",
+      "sha256": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
+      "size_bytes": 1357,
+      "git_blob_sha1": "7b10cb0641ab68572c7cf9d89a9c49f1afdc3428"
+    },
+    {
+      "path": "inputs/identity-contract.txt",
+      "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+      "size_bytes": 3483,
+      "git_blob_sha1": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a"
+    },
+    {
+      "path": "inputs/baseline-envelope-membership.json",
+      "sha256": "84be2b9663077e45a6f26becf6a105eb2141c56a2c5ddc367399012ec29dc048",
+      "size_bytes": 23901,
+      "git_blob_sha1": "c38196e0a737e2578c04adc439a815684501ba68"
+    },
+    {
+      "path": "inputs/modification-specification.txt",
+      "sha256": "3a00b7417e15444cbf4517f3259b8e1eac405bc695583e2301204322b03542a4",
+      "size_bytes": 880,
+      "git_blob_sha1": "747d680e0c0689e4c4a81059d9bf25672d9959df"
+    },
+    {
+      "path": "inputs/arm-c-directive.txt",
+      "sha256": "af1d1149729e6c433cee5b58483edaaab7d9e62396336284f967de0da40a51f8",
+      "size_bytes": 845,
+      "git_blob_sha1": "96880ca78031ef29a431b2034e21ec97e2867117"
+    },
+    {
+      "path": "inputs/applicability-declaration.json",
+      "sha256": "4d8b0e54490560a7c51bdf9f99cc73f1798ff7e23ca4d9993357507f9fc067f9",
+      "size_bytes": 3402,
+      "git_blob_sha1": "0936769549ba705297eff278e696364757056065"
+    },
+    {
+      "path": "inputs/authority-manifest.json",
+      "sha256": "9791d9f8a3589d39db319d25e4f99e107df58b37e5247a056f407e04de2908d8",
+      "size_bytes": 5482,
+      "git_blob_sha1": "b653871082e9ae8f978f4b376fad1be5ff6702f6"
+    },
+    {
+      "path": "inputs/evaluator-rubric.json",
+      "sha256": "8ac972cce0770beba908b9f37e7ccc8b68653a2f435cf9b80535499aa5f31332",
+      "size_bytes": 2429,
+      "git_blob_sha1": "37c28fc34b22396141df234aa56ed06edb05f726"
+    },
+    {
+      "path": "inputs/preservation-dimensions-subset-a.json",
+      "sha256": "8d4d46ff5df9e176813c80ab14cbe2cc68232d12989e7667aac5e6062425942a",
+      "size_bytes": 3643,
+      "git_blob_sha1": "f15b47ab6e50239fca1dadd2b03b5d67ae3a5959"
+    },
+    {
+      "path": "inputs/preservation-dimensions-subset-b.json",
+      "sha256": "2c5ab0ee638a4efd62a6332a2995b42825ff810effb430e72ca541056a80ffd7",
+      "size_bytes": 3825,
+      "git_blob_sha1": "8eaba9b850180064adbff9a247aeafe1c6e88c87"
+    },
+    {
+      "path": "inputs/preservation-dimensions.json",
+      "sha256": "53ae0a2273d455890ca374dbc4e3e3b96fedfff32e8131eabccdbc00aff4dd68",
+      "size_bytes": 2111,
+      "git_blob_sha1": "f57c3a82c06242f0f436412a7489492c7d4b3401"
+    },
+    {
+      "path": "inputs/mutation-dimensions.json",
+      "sha256": "cc2edebb36bdd2ffe29723e75975d9eccfa8b796e6008c0c72a1fb05ef34037b",
+      "size_bytes": 2945,
+      "git_blob_sha1": "e182331119828334d03c4429463fffd037ccb730"
+    },
+    {
+      "path": "inputs/acceptance-tests.json",
+      "sha256": "d2f404f1e95c508031b94bf43459f1f611ac93a977e300883728578872e2afb5",
+      "size_bytes": 3512,
+      "git_blob_sha1": "cc208be270b477d20c5296f887cb8fc660423fc8"
+    },
+    {
+      "path": "inputs/preservation-gates.json",
+      "sha256": "41fe30ebeb38f323df7f3c4f37d9c0d247aa4a05a6cfe3e643903be00ae520a5",
+      "size_bytes": 2960,
+      "git_blob_sha1": "f7873c6f8f37b3bffbf5260444860260eddc9a0f"
+    },
+    {
+      "path": "protocol/INSA-ID-E1-protocol.md",
+      "sha256": "cc809fa0de3817776a02e1ee4a51c6d43a9d46364645db5d42a20202c463a11f",
+      "size_bytes": 20958,
+      "git_blob_sha1": "5f30cff8967bdb04667c88135f8b6098f26a10b6"
+    },
+    {
+      "path": "protocol/EXECUTION-ORDER.md",
+      "sha256": "fe31beab2be6a03986c386d071258ba8468207bf7063b33a99ddbe97dc322a06",
+      "size_bytes": 5265,
+      "git_blob_sha1": "3f2243c67783019c752bbbea88b71dae77e4538c"
+    }
+  ],
+  "supporting_artifacts": [
+    {
+      "path": "inputs/reconstruction-prompt.md",
+      "sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
+      "size_bytes": 1556,
+      "git_blob_sha1": "2e37f47d99059238bd9484560e310d2f89744069"
+    },
+    {
+      "path": "evaluation/evaluator-input-packet.md",
+      "sha256": "f90e932d532fe4723a1747045bce05782d62b1bf5354f655545868f7ab29521b",
+      "size_bytes": 4399,
+      "git_blob_sha1": "f6bdebbd58e31bf8d0548bf9ab33d4c88b83e9d4"
+    }
+  ],
+  "artifact_counts": {
+    "frozen_proposal_section_7": 16,
+    "supporting": 2,
+    "total_excluding_self": 18
+  },
+  "contract_tuple_binding_verification": {
+    "B": {
+      "artifact": "inputs/baseline-envelope-membership.json",
+      "sha256": "84be2b9663077e45a6f26becf6a105eb2141c56a2c5ddc367399012ec29dc048",
+      "inherits_from": "dbi-evolution-v0.1 frozen protocol \u00a711.1 (85-observation BIB non-deviated envelope)"
+    },
+    "D": {
+      "artifact": "inputs/intent-document.txt",
+      "sha256": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
+      "git_blob_sha1_at_c3692150": "7b10cb0641ab68572c7cf9d89a9c49f1afdc3428",
+      "byte_identity_to_frozen_source": true
+    },
+    "M": {
+      "artifact_primary": "inputs/modification-specification.txt",
+      "sha256_primary": "3a00b7417e15444cbf4517f3259b8e1eac405bc695583e2301204322b03542a4",
+      "artifact_enumeration": "inputs/mutation-dimensions.json",
+      "sha256_enumeration": "cc2edebb36bdd2ffe29723e75975d9eccfa8b796e6008c0c72a1fb05ef34037b",
+      "inherits_from": "dbi-evolution-v0.1 frozen modification-specification.txt"
+    },
+    "P": {
+      "artifact_binding": "inputs/preservation-dimensions.json",
+      "sha256_binding": "53ae0a2273d455890ca374dbc4e3e3b96fedfff32e8131eabccdbc00aff4dd68",
+      "artifact_subset_a": "inputs/preservation-dimensions-subset-a.json",
+      "sha256_subset_a": "8d4d46ff5df9e176813c80ab14cbe2cc68232d12989e7667aac5e6062425942a",
+      "artifact_subset_b": "inputs/preservation-dimensions-subset-b.json",
+      "sha256_subset_b": "2c5ab0ee638a4efd62a6332a2995b42825ff810effb430e72ca541056a80ffd7",
+      "definition": "P := subset-(a) \u222a subset-(b), disjoint",
+      "non_collapse_attestation": true
+    },
+    "O": {
+      "artifact": "inputs/identity-contract.txt",
+      "sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+      "git_blob_sha1_at_c3692150": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
+      "byte_identity_to_frozen_source": true
+    },
+    "V_d": {
+      "artifact": "inputs/evaluator-rubric.json",
+      "sha256": "8ac972cce0770beba908b9f37e7ccc8b68653a2f435cf9b80535499aa5f31332",
+      "covers": [
+        "subset-(a) BIB 4-dim Manhattan tolerances (G_pres_a +1.5, G_pres_b 2.5 abs)",
+        "subset-(b) per-axis tolerances"
+      ]
+    },
+    "A": {
+      "artifact": "inputs/acceptance-tests.json",
+      "sha256": "d2f404f1e95c508031b94bf43459f1f611ac93a977e300883728578872e2afb5",
+      "binding": "A bound only to M (per proposal v4 \u00a75.1 INV-A-1)",
+      "evaluator_blinding_manifest_included": true
+    },
+    "G": {
+      "artifact": "inputs/preservation-gates.json",
+      "sha256": "41fe30ebeb38f323df7f3c4f37d9c0d247aa4a05a6cfe3e643903be00ae520a5",
+      "binding": "G bound only to P, covering both subset-(a) and subset-(b) (per proposal v4 \u00a75.1 INV-G-1)",
+      "evaluator_blinding_manifest_included": true
+    },
+    "complete": true,
+    "all_terms_content_addressed": true
+  },
+  "applicability_declaration_summary": {
+    "artifact": "inputs/applicability-declaration.json",
+    "sha256": "4d8b0e54490560a7c51bdf9f99cc73f1798ff7e23ca4d9993357507f9fc067f9",
+    "state": "ACTIVE",
+    "identity": "ACTIVE",
+    "evidence": "ACTIVE",
+    "satisfies_INV_APPL_1": true
+  },
+  "authority_manifest_summary": {
+    "artifact": "inputs/authority-manifest.json",
+    "sha256": "9791d9f8a3589d39db319d25e4f99e107df58b37e5247a056f407e04de2908d8",
+    "I_AUTH_01_capability_vs_permission_separated": true,
+    "I_AUTH_06_grant_authentic": true,
+    "I_AUTH_08_grant_traceable": true,
+    "I_AUTH_05_freshness_at_m_commit": "satisfied-by-design",
+    "INV_AUTH_1_executor_authority_recorded": true,
+    "INV_AUTH_2_grant_traceable": true,
+    "INV_AUTH_5_freshness_protocol": "per-candidate freshness witness at M-commit boundary",
+    "satisfies_INV_AUTH_1_2_5": true,
+    "execution_GO_required": true,
+    "execution_GO_distinct_from_protocol_authorization": true
+  },
+  "preservation_model_binding": {
+    "subset_a_artifact": "inputs/preservation-dimensions-subset-a.json",
+    "subset_a_sha256": "8d4d46ff5df9e176813c80ab14cbe2cc68232d12989e7667aac5e6062425942a",
+    "subset_a_role": "calibrated BIB 4-dim behavior vector, primary identity metric (inherited from v0.1 \u00a711.2)",
+    "subset_b_artifact": "inputs/preservation-dimensions-subset-b.json",
+    "subset_b_sha256": "2c5ab0ee638a4efd62a6332a2995b42825ff810effb430e72ca541056a80ffd7",
+    "subset_b_role": "8 C12 non-target preservation axes (inherited from v0.1 \u00a711.3)",
+    "P_binding_artifact": "inputs/preservation-dimensions.json",
+    "P_binding_sha256": "53ae0a2273d455890ca374dbc4e3e3b96fedfff32e8131eabccdbc00aff4dd68",
+    "non_collapse_attestation_present": true,
+    "non_collapse_check_command": "diff <(jq '.dimensions | map(.id)' inputs/preservation-dimensions-subset-a.json) <(jq '.axes | map(.id)' inputs/preservation-dimensions-subset-b.json)",
+    "non_collapse_check_expected": "empty diff (subset-(a) IDs BIB-4D-1..4 disjoint from subset-(b) IDs C12-1..8)",
+    "satisfies_INV_P_1_and_INV_P_1a_and_INV_P_1b": true
+  },
+  "evaluator_binding_summary": {
+    "evaluator_a": {
+      "model": "gpt-5.6-sol",
+      "substrate": "Codex CLI",
+      "role": "M and G scoring (independent of evaluator B)"
+    },
+    "evaluator_b": {
+      "model": "claude-opus-4-7",
+      "substrate": "Claude Code CLI, fresh session per I-AUTH-05",
+      "role": "M and G scoring (independent of evaluator A)"
+    },
+    "blinding_discipline": {
+      "artifact": "evaluation/evaluator-input-packet.md",
+      "sha256": "f90e932d532fe4723a1747045bce05782d62b1bf5354f655545868f7ab29521b",
+      "de_blinding_artifact": "results/de-blinding-table.json (produced at scoring time, auditable)"
+    }
+  },
+  "execution_order_binding": {
+    "artifact": "protocol/EXECUTION-ORDER.md",
+    "sha256": "fe31beab2be6a03986c386d071258ba8468207bf7063b33a99ddbe97dc322a06",
+    "draw_mechanism": "OS-CSPRNG (os.urandom) with sha256-derived seed",
+    "draw_event_at": "execution preflight time (NOT protocol freeze time)",
+    "ordering_artifact": "hashing/execution-order-list.json (immutable, content-addressed, produced at preflight)",
+    "seed_artifact": "hashing/execution-order-seed.txt (immutable, content-addressed, produced at preflight)",
+    "candidate_count": 60,
+    "reconstructions": 3,
+    "arms": 2,
+    "candidates_per_arm_per_reconstruction": 10
+  },
+  "stop_conditions_inherited": {
+    "C20": "Arm C fails frozen BIB non-deviated envelope on its own -> STOP, classify INVALID_EXPERIMENT (per proposal v4 \u00a75.4 pre-check + protocol \u00a78 + v0.1 \u00a711.2 PI freeze correction 1, C-1)",
+    "v0_1_5_stop_rules": [
+      "Material deviation during generation -> STOP unless PI separately adjudicates",
+      "Evaluator substitution after observing candidates -> forbidden",
+      "Retroactive gate weakening -> forbidden",
+      "Decision tree semantics change -> forbidden (\u00a75.4 must remain joint, not ordered ELSE IF)",
+      "Substantive -> INCONCLUSIVE_PENDING_FURTHER reclassification -> forbidden"
+    ],
+    "v0_3_T1_T2_T3": "Runtime failure systematic thresholds (proposal v4 \u00a75.5.2)",
+    "satisfies_INV_STOP_1": true,
+    "protocol_section_reference": "protocol/INSA-ID-E1-protocol.md \u00a715"
+  },
+  "evidence_chain_summary": {
+    "evidence_profile": "per-step evidence capture per proposal v4 \u00a714; per-candidate evidence file runs/<R>/<B>/<arm>/evidence-<N>.json; locked evaluator scorebooks evaluation/evaluator-A-scorebook.json + evaluation/evaluator-B-scorebook.json; synthesis results/score-independent.md + results/analysis.md + results/disposition.md + results/unblinded-analysis-results.json + results/de-blinding-table.json",
+    "satisfies_INV_EVID_1": true,
+    "manifest_role": "MANIFEST.json itself is part of the evidence chain: it content-addresses every pre-execution artifact and the v0.3 + v0.1 references, providing the cross-cut index that the evidence chain is anchored to."
+  },
+  "modification_to_frozen_artifacts_after_this_manifest": "forbidden (per proposal v4 \u00a78 GO constraints)",
+  "execution_authorization_status": {
+    "protocol_authorization": "GRANTED (Frank-as-PI approval at 2026-09-11 referencing proposal SHA ed95705; covers protocol + frozen-artifact authoring)",
+    "execution_authorization": "NOT GRANTED (separate Frank-as-PI GO required, referencing this manifest SHA + protocol SHA + 16 frozen artifact SHAs + v0.3 blob SHA + authority manifest SHA)",
+    "no_model_dispatch_until_execution_GO": true
+  }
+}

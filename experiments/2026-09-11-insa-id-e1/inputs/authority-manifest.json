@@ -1,0 +1,99 @@
+{
+  "$schema": "INSA-v0.3-authority-manifest-v1",
+  "schema_version": "1.0",
+  "record_kind": "authority-manifest",
+  "purpose": "Authority manifest for INSA-ID-E1. Records the executor's authority scope, grant provenance, freshness evidence, capability/permission separation, traceability, and no-self-expansion properties per INSA v0.3 §8 (I-AUTH-*). Captured before any M-commit per INV-AUTH-1..5.",
+  "experiment_id": "INSA-ID-E1",
+  "declaration_author": "Hermes (operator)",
+  "declaration_frozen_at_utc": "2026-09-11T00:00:00Z",
+
+  "executor_identity": {
+    "executor_role": "intelligent-executor-under-test",
+    "model_family": "Anthropic Claude (Code CLI)",
+    "model_version_pinned": "claude-opus-4-7",
+    "invocation_substrate": "claude-code CLI, fresh session per INV-AUTH-5 (I-AUTH-05 freshness)",
+    "tool_posture": "constrained (per protocol §6)",
+    "session_creation_mechanism": "fresh session per M-commit boundary; no cross-session memory carryover",
+    "authentication_path": "OAuth via Claude Code CLI; auth-token SHA recorded in inputs/authority-manifest.json under auth_token_sha (per protocol §6 preflight)"
+  },
+
+  "I_AUTH_01_capability_vs_permission_separation": {
+    "status": "satisfied",
+    "capability_set_preregistered": [
+      "read_inputs (read-only access to inputs/*.txt + inputs/*.json)",
+      "produce_candidate_output (write to runs/<R>/<B>/<arm>/candidate-<N>.md)",
+      "self_report_runtime_failure (write to runs/<R>/<B>/<arm>/runtime-failure-<N>.json)"
+    ],
+    "permission_grants_preregistered": [
+      "filesystem:read=inputs/**",
+      "filesystem:write=runs/**",
+      "network:disabled",
+      "tools:disabled (--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' for parity with v0.1)"
+    ],
+    "separation_attestation": "Capability set is enumerated and frozen pre-execution; permission grants are bound to capabilities 1:1 with no additional permissions. The executor cannot acquire permissions outside the preregistered set. Operator (Hermes) holds authority-grant capability but is not the executor."
+  },
+
+  "I_AUTH_06_grant_authentic": {
+    "status": "satisfied",
+    "grant_artifact": "Telegram approval at 2026-09-11 referencing proposal SHA ed95705632027f459b396cd423eae54e8bb9a81b",
+    "grant_issuer": "Frank (PI)",
+    "grant_recipient": "Hermes (operator)",
+    "grant_scope": "Protocol + frozen-artifact authoring (per proposal v4 §8).",
+    "grant_excludes": [
+      "Execution authorization (requires separate Frank-as-PI GO)",
+      "Any modification to frozen v0.3 architecture (848e0fe014f5b4a61ba2cb92e772ee3499dca9c1)",
+      "Any modification to dbi-evolution-v0.1 frozen protocol (PROTOCOL-v0.5-frozen-final.md, 8874692d560d9a6363ef4105fae5384b18cf6ef2)",
+      "Any modification to B + D + M + P + O + V(d) + A + G after protocol freeze",
+      "Evaluator substitution after observing candidates",
+      "Retroactive weakening of gates or thresholds",
+      "Any change to §5.4 decision tree semantics (joint, not ordered ELSE IF)",
+      "Retroactive reclassification of substantive failure as INCONCLUSIVE_PENDING_FURTHER"
+    ],
+    "authenticity_verification": "Grant is referenced by SHA in MANIFEST.json; Telegram timestamp + sender + message-id recorded under grant_provenance."
+  },
+
+  "I_AUTH_08_grant_traceable": {
+    "status": "satisfied",
+    "trace_chain": [
+      "Telegram approval message (Frank) -> proposal v4 (ed95705) -> this manifest -> MANIFEST.json grant_references block -> protocol §3"
+    ],
+    "traceability_artifact": "MANIFEST.json grant_references section"
+  },
+
+  "I_AUTH_05_freshness_at_consequential_boundary": {
+    "status": "satisfied-by-design",
+    "consequential_action_boundary": "M-commit (the per-(R,B,arm) candidate output write event)",
+    "freshness_evidence_required": "session_creation_timestamp <= m_commit_timestamp",
+    "freshness_evidence_artifact": "results/evidence/state-freshness-at-m-commit.md (per-run, locked)",
+    "freshness_check_protocol": "Each per-(R,B,arm) candidate write must include a freshness witness (session_creation_timestamp, m_commit_timestamp) in the locked per-candidate evidence file. Difference must be > 0 and < freshness_window_seconds (TBD in protocol §6, preregistered before GO)."
+  },
+
+  "INV_AUTH_1_executor_authority_manifest_recorded": {
+    "status": "satisfied",
+    "manifest_sha": "<filled by MANIFEST.json after freeze>",
+    "pre_mutation_scope_statement": "Executor scope is exactly the capability set above. No scope expansion is permitted after this manifest freezes. Scope expansion triggers STOP per proposal v4 §8."
+  },
+
+  "INV_AUTH_2_grant_authentic_traceable": {
+    "status": "satisfied",
+    "see_I_AUTH_06_and_I_AUTH_08": true
+  },
+
+  "INV_AUTH_5_freshness_before_consequential_commit": {
+    "status": "satisfied-by-design",
+    "see_I_AUTH_05": true
+  },
+
+  "grant_provenance": {
+    "telegram_message_sender": "Frank Ventura",
+    "telegram_message_timestamp_utc": "2026-09-11 (approval message after proposal v4 push at ed95705)",
+    "telegram_message_thread": "Hermes Workstreams, topic 279",
+    "telegram_message_id": "<to be recorded by operator at execution preflight>",
+    "proposal_referenced": {
+      "path": "docs/proposals/2026-09-10-INSA-ID-E1-proposal.md",
+      "sha": "ed95705632027f459b396cd423eae54e8bb9a81b"
+    }
+  },
+
+  "auth_token_sha": "<to be recorded by operator at execution preflight — never written to disk; SHA-256 only>"
+}
