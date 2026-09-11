@@ -5,7 +5,7 @@
   "purpose": "INSA v0.3 §5 Applicability Declaration for INSA-ID-E1. Per proposal v5.1 §5.1 INV-APPL-1, this declaration must be ACTIVE for State, Identity, and Evidence before any pre-execution gate passes.",
   "experiment_id": "INSA-ID-E1",
   "declaration_author": "Hermes (operator)",
-  "declaration_frozen_at_utc": "2026-09-11T00:00:00Z",
+  "frozen_at_utc_date": "2026-09-11",
   "insa_frozen_architecture": {
     "blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
     "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
@@ -29,14 +29,14 @@
     }
   },
   "non_applicable_dimensions": [],
-  "O_is_empty_attestation": "O = ∅ (per proposal v5.1 §5.1); the BIB 4-dim vector + 8 C12 axes exhaust the scored dimensions tracked by the frozen evaluator rubric. Any candidate output dimension not in D = M ∪ P is unscored and therefore not a basis for any gate.",
+  "O_is_empty_attestation": "O = ∅ (per proposal v5.1 §5.1); the BIB 4-dim vector (subset-(a)) + 8 C12 axes (subset-(b)) exhaust the scored dimensions tracked by the frozen evaluator rubric. Any candidate output dimension not in D = M ∪ P is unscored and therefore not a basis for any gate.",
   "modification_to_architecture": false,
   "frozen_artifact_binding_required": true,
   "binding_complete": true,
   "binding_completeness_attestation": "All B + D + M + P + O + V(d) + A + G terms are content-addressed in MANIFEST.json. INV-D-1, INV-O-1, INV-P-1a, INV-P-1b, INV-V-1, INV-A-1, INV-G-1 all carry pre-mutation SHAs. INV-AUTH-1..5 captured in inputs/authority-manifest.json (static-only). INV-EVID-1 captured by content-addressing of all pre-execution artifacts. INV-APPL-1 satisfied by this declaration (State/Identity/Evidence ACTIVE). INV-STOP-1 references v0.1 C20 + BIB stop rules via protocol §15.",
   "pi_adjudication": {
     "adjudicator": "Frank (PI)",
-    "proposal_approval_artifact": "Telegram approval at 2026-09-11 referencing proposal SHA ed95705 (initial v5) and subsequently corrected to v5.1 SHA 1f84c3101d6add7d44ed821681946c10be8f5f5c (after the v5.1 cleanup commit)",
+    "proposal_approval_artifact": "Telegram approval at 2026-09-11 referencing proposal v5.1 SHA 1f84c3101d6add7d44ed821681946c10be8f5f5c",
     "approval_scope": "Protocol + frozen-artifact authoring per proposal v5.1. NOT execution authorization (separate Frank-as-PI GO required per proposal v5.1 §8)."
   }
 }

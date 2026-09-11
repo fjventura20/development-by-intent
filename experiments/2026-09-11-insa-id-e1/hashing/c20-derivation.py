@@ -1,272 +1,259 @@
 #!/usr/bin/env python3
 """
-INSA-ID-E1 C20 derivation (frozen pre-execution).
+INSA-ID-E1 C20 derivation (frozen pre-execution, v4).
 
-Computes C20 deterministically from the frozen 85-observation BIB envelope.
+Frozen deterministic C20 derivation. Recomputes every input SHA and fails
+fatally on any mismatch (so the derivation cannot be silently run against
+modified inputs). Uses the preregistered current expected Arm-C cell set
+{R1/B1, R2/B1, R3/B1} (3 cells; block B only). Records derivation time via
+datetime.utcnow().isoformat() at script execution (no post-write editing).
+
 Inputs:
-  --envelope PATH     Path to inputs/baseline-envelope-membership.json (85 SHA list)
-  --record-fixture PATH
-                       Path to inputs/baseline-statistics.json (the 85 per-(R, B, T,
-                       evaluator) records with per-dim scores; SHA-bound to the four
-                       frozen BIB scorebooks)
-  --arm-c-scorebooks PATH1 [PATH2 ...]
-                       Paths to evaluator-A-arm-C-scorebook.json + evaluator-B-arm-C-scorebook.json
-                       (the per-(R, B, arm=C, candidate) per-dim scores produced by Phase 2)
-  --out PATH          Output JSON path containing the C20 decision record (locked content-addressed)
+  --envelope PATH         inputs/baseline-envelope-membership.json (85 SHA list)
+  --baseline-stats PATH   inputs/baseline-statistics.json
+                           (must contain historical_envelope_bound per evaluator;
+                            current_expected_arm_c_cells = [R1/B1, R2/B1, R3/B1];
+                            85 envelope records)
+  --arm-c-A PATH          evaluation/evaluator-A-arm-C-scorebook.json
+  --arm-c-B PATH          evaluation/evaluator-B-arm-C-scorebook.json
+  --frozen-A-A PATH       experiments/.../evaluator-A-scores-LOCKED.jsonl (BIB-001 A)
+  --frozen-A-B PATH       experiments/.../evaluator-B-scores-LOCKED.jsonl (BIB-001 B)
+  --frozen-B-A PATH       experiments/.../evaluator-A-scores-LOCKED.jsonl (BIB-002 A)
+  --frozen-B-B PATH       experiments/.../evaluator-B-scores-LOCKED.jsonl (BIB-002 B)
+  --out PATH              Output JSON path containing the C20 decision record
+                           (frozen content-addressed; SHA-256 recorded externally)
 
-C20 rule (per proposal v5.1 §8; phase 2 of protocol v3):
-  For each evaluator independently:
-    For each (R, B) Arm-C cell:
-      Compute mean_M_dist_within_R = mean of per-candidate 4-dim Manhattan distance
-                                     from the frozen calibrated reference vector.
-      The reference vector is the per-evaluator 4-dim mean of the 85 envelope observations
-      (computed deterministically from inputs/baseline-statistics.json).
-      The per-candidate 4-dim Manhattan distance = sum over dims of |score - ref[dim]|.
-  C20 PASS for evaluator e IF AND ONLY IF for every (R, B) Arm-C cell
-    mean_M_dist_within_R <= C20_envelope_bound (the frozen historical envelope bound
-    for that evaluator; derived deterministically from the 85 envelope observations
-    via the envelope-bound computation below).
-
-C20 envelope bound derivation (per evaluator, deterministic):
-  The historical C20 envelope bound is the maximum per-(R, B) mean_4-dim-Manhattan-from-ref
-  observed across the 85 envelope observations, when grouped by the envelope's
-  reconstruction_id. This is the historical "envelope boundary" that an in-spec Arm-C
-  must satisfy on its own (without +1.5 tolerance per v0.1 §11.2 PI freeze correction 1).
-
-Output (JSON, locked):
-  {
-    "c20_method": "deterministic from inputs/baseline-statistics.json + inputs/baseline-envelope-membership.json",
-    "frozen_scorebook_shas": {BIB-001 A/B, BIB-002 A/B},
-    "calibrated_reference_vectors": {A: {dim: mean, ...}, B: {dim: mean, ...}},
-    "c20_envelope_bounds": {A: max_per_(R,B)_mean_dist, B: max_per_(R,B)_mean_dist},
-    "arm_c_per_evaluator": {A: {(R, B): mean_dist, ...}, B: ...},
-    "c20_per_evaluator_pass": {A: bool, B: bool},
-    "c20_joint_pass": bool,
-    "derivation_script_sha256": "<this script's SHA-256>",
-    "derivation_recorded_at_utc": "<UTC>",
-    "disposition_on_c20_fail": "INVALID_EXPERIMENT"
-  }
+Behavior:
+  - On any input SHA mismatch (the four scorebooks, the envelope membership
+    against the 85 records in baseline-statistics.json), the script exits
+    nonzero with a clear error message. NO silent fallback.
+  - On any missing expected current Arm-C cell, c20_per_evaluator_pass[e] = False.
+  - On any current cell's mean Manhattan distance exceeding the frozen
+    historical envelope bound for that evaluator, c20_per_evaluator_pass[e] = False.
+  - C20 joint PASS iff both evaluators PASS.
+  - derivation_recorded_at_utc is set at script run time (datetime.utcnow()).
+  - The output file does NOT contain its own SHA-256 (no self-reference);
+    the SHA is recorded externally.
 """
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import statistics
 import sys
+from datetime import datetime, timezone
 
 
 FROZEN_DIMS = ['contract_compliance', 'selection_behavior', 'narrative_behavior', 'functional_completeness']
+# Current expected Arm-C cells: {R1/B1, R2/B1, R3/B1} where "B1" denotes the single B exemplar
+# source (i.e., the BIB behavioral baseline that the experiment uses as the canonical exemplar).
+# In the historical envelope's nomenclature, this source is named "block B" (paired with block A in
+# the original 85-observation BIB envelope, where each reconstruction had two blocks: A and B).
+# For INSA-ID-E1's current generation, only one source (B) is used per reconstruction. The translator
+# below maps B1 -> B so the candidate records (which use block='B') are matched.
+CURRENT_EXPECTED_ARM_C_CELLS_NAMED = [('R1', 'B1'), ('R2', 'B1'), ('R3', 'B1')]
+# Translator: map the named (B1) form to the actual envelope block label (B)
+def _translate_cell(named_cell):
+    # Accept either ('R1','B1') tuple or 'R1/B1' string
+    if isinstance(named_cell, str):
+        parts = named_cell.split('/')
+        if len(parts) == 2:
+            R, b = parts
+            return (R, 'B' if b == 'B1' else b)
+        return named_cell  # leave as-is
+    R, b = named_cell
+    return (R, 'B' if b == 'B1' else b)
+CURRENT_EXPECTED_ARM_C_CELLS = [_translate_cell(c) for c in CURRENT_EXPECTED_ARM_C_CELLS_NAMED]
 
 
-def manhattan_distance(scores, ref):
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(65536), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def fail(msg):
+    print(f'FATAL: {msg}', file=sys.stderr)
+    sys.exit(2)
+
+
+def load_json(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+def manhattan(scores, ref):
     return sum(abs(scores[d] - ref[d]) for d in FROZEN_DIMS)
 
 
-def compute_reference_vectors(envelope_records):
-    """Compute per-evaluator 4-dim reference vector = mean of envelope observations per dim."""
-    refs = {}
-    for eval_id in ['A', 'B']:
-        key = f'scores_{eval_id}'
-        ref = {}
-        for d in FROZEN_DIMS:
-            vals = [r[key][d] for r in envelope_records if r[key].get(d) is not None]
-            ref[d] = round(statistics.mean(vals), 6)
-        refs[eval_id] = ref
-    return refs
-
-
-def compute_envelope_bounds(envelope_records, refs):
-    """
-    Compute C20 envelope bound per evaluator = max per-(R, B) mean 4-dim Manhattan distance
-    observed in the 85 envelope observations (historical C20 envelope boundary).
-    """
-    bounds = {}
-    for eval_id in ['A', 'B']:
-        key = f'scores_{eval_id}'
-        # Group by (R, B)
-        per_cell = {}
-        for r in envelope_records:
-            cell_key = (r['reconstruction_id'], r['block'])
-            if cell_key not in per_cell:
-                per_cell[cell_key] = []
-            per_cell[cell_key].append(manhattan_distance(r[key], refs[eval_id]))
-        # Max mean per cell across all (R, B) cells in the envelope
-        max_mean = max(statistics.mean(dists) for dists in per_cell.values())
-        bounds[eval_id] = round(max_mean, 6)
-    return bounds
-
-
-def compute_arm_c_per_evaluator(arm_c_scorebooks, refs):
-    """
-    For each evaluator, compute per-(R, B) mean 4-dim Manhattan distance for the Arm-C candidates.
-    arm_c_scorebooks is a dict {eval_id: list of per-candidate score dicts}.
-    """
-    out = {}
-    for eval_id, candidates in arm_c_scorebooks.items():
-        per_cell = {}
-        for c in candidates:
-            cell_key = (c['reconstruction_id'], c['block'])
-            if cell_key not in per_cell:
-                per_cell[cell_key] = []
-            per_cell[cell_key].append(manhattan_distance(c['scores'], refs[eval_id]))
-        per_cell_means = {k: round(statistics.mean(v), 6) for k, v in per_cell.items()}
-        out[eval_id] = {f'{k[0]}/{k[1]}': v for k, v in per_cell_means.items()}
-    return out
-
-
 def main():
-    ap = argparse.ArgumentParser(description="INSA-ID-E1 C20 derivation (frozen)")
-    ap.add_argument('--envelope', required=True, help='inputs/baseline-envelope-membership.json (85 SHA list)')
-    ap.add_argument('--record-fixture', required=True, help='inputs/baseline-statistics.json (per-(R,B,T,evaluator) per-dim scores)')
-    ap.add_argument('--arm-c-scorebook-a', required=True, help='evaluation/evaluator-A-arm-C-scorebook.json (per-candidate 4-dim scores)')
-    ap.add_argument('--arm-c-scorebook-b', required=True, help='evaluation/evaluator-B-arm-C-scorebook.json')
-    ap.add_argument('--frozen-scorebook-A-A', required=True, help='Path to frozen BIB-001 evaluator A scorebook (for SHA verification)')
-    ap.add_argument('--frozen-scorebook-A-B', required=True, help='Path to frozen BIB-001 evaluator B scorebook (for SHA verification)')
-    ap.add_argument('--frozen-scorebook-B-A', required=True, help='Path to frozen BIB-002 evaluator A scorebook (for SHA verification)')
-    ap.add_argument('--frozen-scorebook-B-B', required=True, help='Path to frozen BIB-002 evaluator B scorebook (for SHA verification)')
-    ap.add_argument('--out', required=True, help='Output JSON path (locked C20 decision record)')
+    ap = argparse.ArgumentParser(description="INSA-ID-E1 C20 derivation (frozen v4)")
+    ap.add_argument('--envelope', required=True, help='inputs/baseline-envelope-membership.json')
+    ap.add_argument('--baseline-stats', required=True, help='inputs/baseline-statistics.json')
+    ap.add_argument('--arm-c-A', required=True, help='evaluation/evaluator-A-arm-C-scorebook.json')
+    ap.add_argument('--arm-c-B', required=True, help='evaluation/evaluator-B-arm-C-scorebook.json')
+    ap.add_argument('--frozen-A-A', required=True, help='frozen BIB-001 evaluator A scorebook (LOCKED)')
+    ap.add_argument('--frozen-A-B', required=True, help='frozen BIB-001 evaluator B scorebook (LOCKED)')
+    ap.add_argument('--frozen-B-A', required=True, help='frozen BIB-002 evaluator A scorebook (LOCKED)')
+    ap.add_argument('--frozen-B-B', required=True, help='frozen BIB-002 evaluator B scorebook (LOCKED)')
+    ap.add_argument('--out', required=True, help='output C20 decision record JSON')
     args = ap.parse_args()
 
-    # Step 1: Verify the four frozen scorebook SHAs
-    frozen_book_paths = {
-        'BIB-001_evaluator_A': args.frozen_scorebook_A_A,
-        'BIB-001_evaluator_B': args.frozen_scorebook_A_B,
-        'BIB-002_evaluator_A': args.frozen_scorebook_B_A,
-        'BIB-002_evaluator_B': args.frozen_scorebook_B_B,
+    derivation_recorded_at_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    # Step 1: Recompute each of the four historical BIB scorebook SHA-256 values; compare against baseline-statistics.json expected values.
+    print('Step 1: verifying four frozen BIB scorebook SHAs...')
+    bs = load_json(args.baseline_stats)
+    expected_scorebook_shas = bs['frozen_bib_scorebook_shas']
+    actual_scorebook_shas = {
+        'BIB-001_evaluator_A': sha256_file(args.frozen_A_A),
+        'BIB-001_evaluator_B': sha256_file(args.frozen_A_B),
+        'BIB-002_evaluator_A': sha256_file(args.frozen_B_A),
+        'BIB-002_evaluator_B': sha256_file(args.frozen_B_B),
     }
-    frozen_book_shas = {}
-    for k, p in frozen_book_paths.items():
-        sha = hashlib.sha256(open(p, 'rb').read()).hexdigest()
-        frozen_book_shas[k] = sha
-    print(f'Frozen BIB scorebook SHAs (recomputed):')
-    for k, sha in frozen_book_shas.items():
-        print(f'  {k}: {sha}')
+    for k, expected in expected_scorebook_shas.items():
+        actual = actual_scorebook_shas[k]
+        if actual != expected:
+            fail(f'scorebook SHA mismatch for {k}: expected {expected}, got {actual}')
+    print(f'  all 4 scorebook SHAs verified (exit nonzero on mismatch)')
 
-    # Step 2: Load the 85-observation envelope record (per-dim scores)
-    with open(args.record_fixture) as f:
-        record_fixture = json.load(f)
-    envelope_records = record_fixture['envelope_records']
-    assert len(envelope_records) == 85, f"expected 85 envelope records, got {len(envelope_records)}"
+    # Step 2: Read and verify baseline-envelope-membership.json against the 85 records in baseline-statistics.json.
+    print('Step 2: verifying baseline-envelope-membership.json against baseline-statistics.json envelope records...')
+    envelope_membership = load_json(args.envelope)
+    membership_shas = sorted(obs['raw_sha256'] for obs in envelope_membership['included_observations'])
+    stats_records = bs['envelope_records_85_with_per_dim_scores']
+    records_shas = sorted(r['raw_sha256'] for r in stats_records)
+    if len(membership_shas) != 85 or len(records_shas) != 85:
+        fail(f'count mismatch: membership has {len(membership_shas)} SHAs, baseline-statistics has {len(records_shas)} records')
+    if membership_shas != records_shas:
+        # Diagnose
+        only_in_membership = set(membership_shas) - set(records_shas)
+        only_in_records = set(records_shas) - set(membership_shas)
+        fail(f'85-record SHA set mismatch. Only in membership: {len(only_in_membership)}; only in baseline-statistics: {len(only_in_records)}')
+    print(f'  all 85 envelope SHAs match between membership and baseline-statistics.json')
 
-    # Step 3: Compute reference vectors
-    refs = compute_reference_vectors(envelope_records)
-    print(f'\nCalibrated reference vectors:')
-    for e, ref in refs.items():
-        print(f'  {e}: {ref}')
+    # Step 3: Verify the baseline-statistics artifact expected by the frozen package.
+    print('Step 3: verifying baseline-statistics.json required fields...')
+    required_fields = [
+        'frozen_bib_scorebook_shas',
+        'calibrated_4d_reference_vectors_preregistered',
+        'C20_historical_envelope_bound_preregistered_v4',
+        'envelope_records_85_with_per_dim_scores',
+        'envelope_record_count',
+        'C20_method_for_arm_C_per_current_cell_manhattan',
+        'C20_boolean_pass_fail_formula',
+    ]
+    for f in required_fields:
+        if f not in bs:
+            fail(f'baseline-statistics.json missing required field: {f}')
+    if bs['envelope_record_count'] != 85:
+        fail(f"baseline-statistics envelope_record_count = {bs['envelope_record_count']}, expected 85")
 
-    # Step 4: Compute C20 envelope bounds
-    bounds = compute_envelope_bounds(envelope_records, refs)
-    print(f'\nC20 envelope bounds (per-(R,B) max mean Manhattan):')
-    for e, b in bounds.items():
-        print(f'  {e}: {b}')
+    env_bound = bs['C20_historical_envelope_bound_preregistered_v4']
+    if 'frozen_historical_envelope_bound' not in env_bound:
+        fail('baseline-statistics.json missing C20_historical_envelope_bound_preregistered_v4.frozen_historical_envelope_bound')
+    if 'evaluator_A' not in env_bound['frozen_historical_envelope_bound'] or 'evaluator_B' not in env_bound['frozen_historical_envelope_bound']:
+        fail('baseline-statistics.json C20 envelope bound missing evaluator_A or evaluator_B')
+    if 'current_expected_arm_c_cells' not in env_bound:
+        fail('baseline-statistics.json C20 envelope bound missing current_expected_arm_c_cells')
 
-    # Step 5: Load Arm-C scorebooks (Phase 2 outputs)
-    def load_arm_c_scorebook(path):
+    expected_named = [c for c in env_bound['current_expected_arm_c_cells']]
+    expected_translated = [_translate_cell(c) for c in expected_named]
+    if sorted(expected_translated) != sorted(CURRENT_EXPECTED_ARM_C_CELLS):
+        fail(f'current_expected_arm_c_cells mismatch: expected {sorted(CURRENT_EXPECTED_ARM_C_CELLS)} (translated from {sorted(CURRENT_EXPECTED_ARM_C_CELLS_NAMED)}), got {sorted(expected_translated)} (translated from {expected_named})')
+    print(f'  all required fields present, current_expected_arm_c_cells = {CURRENT_EXPECTED_ARM_C_CELLS}')
+
+    # Step 4: Load the per-evaluator reference vector and frozen historical envelope bound from baseline-statistics.
+    ref_vectors = bs['calibrated_4d_reference_vectors_preregistered']
+    envelope_bound = env_bound['frozen_historical_envelope_bound']
+    print(f'  per-evaluator reference vectors loaded (A: {ref_vectors["evaluator_A"]}; B: {ref_vectors["evaluator_B"]})')
+    print(f'  per-evaluator historical envelope bound loaded (A: {envelope_bound["evaluator_A"]}; B: {envelope_bound["evaluator_B"]})')
+
+    # Step 5: Load Arm-C scorebooks; per-candidate scores keyed by (R, B, blind_id).
+    print('Step 5: loading Phase 2 Arm-C scorebooks...')
+    def load_arm_c(path):
         with open(path) as f:
             sb = json.load(f)
-        # Expected format: list of {blind_id, scores: {dim: int, ...}, reconstruction_id, block}
-        candidates = []
+        out = []
         for rec in sb:
-            if 'scores' in rec and isinstance(rec['scores'], dict):
+            # Accept both {"scores": {...}} and flat per-dim fields
+            if isinstance(rec.get('scores'), dict):
                 scores = {d: rec['scores'].get(d) for d in FROZEN_DIMS}
             else:
                 scores = {d: rec.get(d) for d in FROZEN_DIMS if d in rec}
-            if all(d in scores for d in FROZEN_DIMS):
-                candidates.append({
+            if all(d in scores for d in FROZEN_DIMS) and None not in scores.values():
+                out.append({
                     'reconstruction_id': rec.get('reconstruction_id'),
                     'block': rec.get('block'),
+                    'blind_id': rec.get('blind_id') or rec.get('blindId'),
                     'scores': scores,
                 })
-        return candidates
+        return out
 
-    arm_c_candidates = {
-        'A': load_arm_c_scorebook(args.arm_c_scorebook_a),
-        'B': load_arm_c_scorebook(args.arm_c_scorebook_b),
-    }
-    print(f'\nArm-C candidate counts: A={len(arm_c_candidates["A"])}, B={len(arm_c_candidates["B"])}')
+    arm_c_A = load_arm_c(args.arm_c_A)
+    arm_c_B = load_arm_c(args.arm_c_B)
+    print(f'  loaded {len(arm_c_A)} evaluator A Arm-C candidates, {len(arm_c_B)} evaluator B Arm-C candidates')
 
-    # Step 5.5: Verify Arm-C covers every (R, B) cell from the envelope.
-    # Missing cells are themselves C20 failures (cannot validate against envelope
-    # for cells with no observations).
-    envelope_cells = set()
-    for r in envelope_records:
-        envelope_cells.add((r['reconstruction_id'], r['block']))
+    # Step 6: Compute per-(R, B) cell means for the CURRENT expected cells only.
+    print('Step 6: computing per-current-cell mean Manhattan...')
+    def per_cell_means_for(candidates, eval_id):
+        per_cell = {}
+        for c in candidates:
+            cell = (c['reconstruction_id'], c['block'])
+            per_cell.setdefault(cell, []).append(manhattan(c['scores'], ref_vectors[eval_id]))
+        return {f'{c[0]}/{c[1]}': round(statistics.mean(ds), 6) for c, ds in per_cell.items() if ds}
 
-    missing_cells = {}
-    for eval_id in ['A', 'B']:
-        arm_c_cells = set((c['reconstruction_id'], c['block']) for c in arm_c_candidates[eval_id])
-        missing = envelope_cells - arm_c_cells
-        missing_cells[eval_id] = sorted(missing)
+    per_cell_A = per_cell_means_for(arm_c_A, 'evaluator_A')
+    per_cell_B = per_cell_means_for(arm_c_B, 'evaluator_B')
+    print(f'  per-cell means A: {per_cell_A}')
+    print(f'  per-cell means B: {per_cell_B}')
+
+    # Step 7: Apply C20 decision.
+    print('Step 7: applying C20 decision...')
+    def c20_decision(per_cell, eval_id):
+        missing = [cell for cell in CURRENT_EXPECTED_ARM_C_CELLS if f'{cell[0]}/{cell[1]}' not in per_cell]
         if missing:
-            print(f'  WARN {eval_id}: missing (R, B) cells in Arm-C: {sorted(missing)}')
+            return False, f'missing current cells: {missing}', per_cell
+        worst = max(per_cell.items(), key=lambda kv: kv[1])
+        bound = envelope_bound[eval_id]
+        if worst[1] > bound:
+            return False, f'worst current cell {worst[0]} mean={worst[1]:.4f} > frozen historical envelope bound {bound}', per_cell
+        return True, None, per_cell
 
-    # Step 6: Compute per-(R, B) mean Manhattan for Arm-C
-    arm_c_per_evaluator = compute_arm_c_per_evaluator(arm_c_candidates, refs)
-    print(f'\nArm-C per-(R,B) mean Manhattan:')
-    for e, cells in arm_c_per_evaluator.items():
-        print(f'  {e}:')
-        for k, v in cells.items():
-            print(f'    {k}: {v}')
+    c20_pass_A, c20_fail_A, _ = c20_decision(per_cell_A, 'evaluator_A')
+    c20_pass_B, c20_fail_B, _ = c20_decision(per_cell_B, 'evaluator_B')
+    c20_joint_pass = c20_pass_A and c20_pass_B
+    print(f'  C20 per-evaluator pass: A={c20_pass_A}, B={c20_pass_B}, joint={c20_joint_pass}')
 
-    # Step 7: Apply C20 decision per evaluator
-    # C20 PASS for evaluator e IF AND ONLY IF:
-    #   (a) every (R, B) envelope cell has at least one Arm-C candidate (missing_cells empty), AND
-    #   (b) for every (R, B) Arm-C cell, mean 4-dim Manhattan distance <= c20_envelope_bound[e]
-    c20_per_evaluator_pass = {}
-    c20_fail_reasons = {}
-    for e in ['A', 'B']:
-        if missing_cells[e]:
-            c20_per_evaluator_pass[e] = False
-            c20_fail_reasons[e] = f"missing envelope cells: {missing_cells[e]}"
-            continue
-        cells = arm_c_per_evaluator[e]
-        max_mean = max(cells.values())
-        if max_mean <= bounds[e]:
-            c20_per_evaluator_pass[e] = True
-            c20_fail_reasons[e] = None
-        else:
-            c20_per_evaluator_pass[e] = False
-            worst_cell = max(cells.items(), key=lambda kv: kv[1])
-            c20_fail_reasons[e] = f"max cell mean {max_mean:.4f} > envelope bound {bounds[e]:.4f}; worst cell {worst_cell[0]} mean={worst_cell[1]:.4f}"
-
-    c20_joint_pass = c20_per_evaluator_pass['A'] and c20_per_evaluator_pass['B']
-
-    print(f'\nC20 per-evaluator pass: A={c20_per_evaluator_pass["A"]}, B={c20_per_evaluator_pass["B"]}')
-    print(f'C20 joint pass: {c20_joint_pass}')
-    for e in ['A', 'B']:
-        if c20_fail_reasons[e]:
-            print(f'  {e} fail reason: {c20_fail_reasons[e]}')
-    print(f'On C20 fail: disposition = INVALID_EXPERIMENT')
-
-    # Step 8: Compute this script's own SHA-256 (for the derivation record)
-    script_sha = hashlib.sha256(open(__file__, 'rb').read()).hexdigest()
-
-    # Step 9: Output
+    # Step 8: Build output record.
     out = {
-        'c20_method': 'deterministic from inputs/baseline-statistics.json + inputs/baseline-envelope-membership.json + Phase 2 Arm-C scorebooks',
-        'c20_rule': (
-            'For each evaluator independently: for each (R, B) Arm-C cell, '
-            'mean_4-dim_Manhattan_distance_from_ref <= c20_envelope_bound[e]. '
-            'C20 PASS for evaluator e iff every (R, B) cell satisfies the bound. '
-            'C20 joint PASS iff both evaluators PASS. '
-            'No tolerance added; +1.5 Manhattan tolerance applies only to G_pres_subset_a_a '
-            '(Arm M vs Arm C), NOT to C20 (per v0.1 §11.2 PI freeze correction 1, C-1).'
-        ),
-        'frozen_scorebook_shas': frozen_book_shas,
-        'envelope_record_count': len(envelope_records),
-        'envelope_source': 'dbi-evolution-v0.1 inputs/baseline-envelope-membership.json (inherited; 85 observations = 55 BIB-001-rerun non-deviated + 30 BIB-002)',
-        'calibrated_reference_vectors': refs,
-        'c20_envelope_bounds': bounds,
-        'c20_envelope_bound_method': 'max per-(R, B) mean 4-dim Manhattan distance from ref across the 85 envelope observations',
-        'arm_c_per_evaluator': arm_c_per_evaluator,
-        'arm_c_missing_envelope_cells_per_evaluator': missing_cells,
-        'c20_per_evaluator_pass': c20_per_evaluator_pass,
-        'c20_fail_reasons': c20_fail_reasons,
+        'schema_version': '1.0',
+        'record_kind': 'c20-decision-record',
+        'experiment_id': 'INSA-ID-E1',
+        'derivation_recorded_at_utc': derivation_recorded_at_utc,
+        'c20_method': 'deterministic from inputs/baseline-envelope-membership.json + inputs/baseline-statistics.json + Phase 2 Arm-C scorebooks',
+        'c20_rule': 'C20(e) = (missing_current_cells[e] is empty) AND (max over current (R, B) cells in {R1/B1, R2/B1, R3/B1} of mean_4dim_Manhattan_Arm_C(R, B) <= frozen_historical_envelope_bound[e]) for each evaluator e in {A, B}; C20_joint = C20(A) AND C20(B).',
+        'frozen_scorebook_shas': actual_scorebook_shas,
+        'envelope_record_count': len(membership_shas),
+        'envelope_record_set_match_baseline_statistics': (set(membership_shas) == set(records_shas)),
+        'calibrated_reference_vectors': ref_vectors,
+        'frozen_historical_envelope_bound': envelope_bound,
+        'current_expected_arm_c_cells': [f'{c[0]}/{c[1]}' for c in CURRENT_EXPECTED_ARM_C_CELLS],
+        'per_current_cell_mean_manhattan': {
+            'evaluator_A': per_cell_A,
+            'evaluator_B': per_cell_B,
+        },
+        'c20_per_evaluator_pass': {'evaluator_A': c20_pass_A, 'evaluator_B': c20_pass_B},
+        'c20_fail_reasons': {'evaluator_A': c20_fail_A, 'evaluator_B': c20_fail_B},
         'c20_joint_pass': c20_joint_pass,
         'c20_disposition_if_fail': 'INVALID_EXPERIMENT',
-        'derivation_script_sha256': script_sha,
-        'derivation_recorded_at_utc': None,  # filled by operator
+        'verification_command': 'python3 hashing/binding-verification.py --v4-experiment-dir .',
+        'sidecar_sha_record': 'preflight/c20-decision-record.sha256.txt (written by the operator after this script exits; not by this script itself)',
+        'self_referential_hash_prohibition': 'This file does NOT contain its own full-file SHA-256 inside its bytes.',
     }
 
     tmp = args.out + '.tmp'
@@ -276,8 +263,13 @@ def main():
         f.flush()
         os.fsync(f.fileno())
     os.replace(tmp, args.out)
-    print(f'\nWrote: {args.out}')
+
+    out_sha = sha256_file(args.out)
+    print()
+    print(f'WROTE: {args.out}')
     print(f'  c20_joint_pass: {c20_joint_pass}')
+    print(f'  output SHA-256: {out_sha}')
+    print(f'  derivation_recorded_at_utc: {derivation_recorded_at_utc}')
 
 
 if __name__ == '__main__':

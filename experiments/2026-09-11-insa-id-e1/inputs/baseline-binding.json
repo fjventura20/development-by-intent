@@ -1,13 +1,13 @@
 {
   "$schema": "INSA-v0.3-baseline-binding-v1",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "record_kind": "baseline-binding",
-  "purpose": "Frozen baseline bundle (B) per INSA v0.3 \u00a712. Content-addresses the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence (the four locked BIB scorebook SHAs), baseline membership (the 85 envelope observations), and exact baseline statistics (per-dim mean/std/range computed from the 85 envelope, SHA-bound to the scorebooks). Per proposal v5.1, the experiment must be able to reproduce the historical baseline from frozen evidence without undocumented lookup.",
+  "purpose": "Frozen baseline bundle (B) per INSA v0.3 \u00a712 + proposal v5.1 \u00a77. One-way content-addressed: this artifact references finalized components (no forward references to in-progress files).",
   "experiment_id": "INSA-ID-E1",
-  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
   "insa_frozen_architecture_reference": {
-    "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
     "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
     "architecture_version": "v0.3",
     "modification_permitted": false
@@ -15,21 +15,16 @@
   "proposal_binding": {
     "path": "docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md",
     "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
-    "proposal_file_sha256": "f675090e4d72a50bd2c86445fd1154585539359f38e6f9ecd3c9db20cfb599f1",
-    "version": "v5.1",
-    "binding_description": "INSA-ID-E1 is bound to proposal v5.1 @ 1f84c31. v5.1 supersedes v5 @ 04d1d07 and v4 @ ed95705; v3 @ db9f77a, v2 @ 5f9365f, and the original baseline @ 26f7ed3 are preserved as audit history."
+    "version": "v5.1"
   },
   "bib_frozen_source_reference": {
     "frozen_source_commit_sha1": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
     "intent_git_blob_sha1_at_c3692150": "7b10cb0641ab68572c7cf9d89a9c49f1afdc3428",
-    "intent_sha256": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
-    "intent_path_in_baseline": "inputs/intent-document.txt",
+    "intent_sha256_on_disk": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
     "identity_contract_git_blob_sha1_at_c3692150": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
-    "identity_contract_sha256": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
-    "identity_contract_path_in_baseline": "inputs/identity-contract.txt",
+    "identity_contract_sha256_on_disk": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
     "reconstruction_prompt_git_blob_sha1_at_c3692150": "2e37f47d99059238bd9484560e310d2f89744069",
-    "reconstruction_prompt_sha256": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
-    "reconstruction_prompt_path_in_baseline": "inputs/reconstruction-prompt.md",
+    "reconstruction_prompt_sha256_on_disk": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
     "byte_identity_to_frozen_source": true
   },
   "frozen_bib_scorebooks": {
@@ -38,14 +33,14 @@
       "sha256": "df08f5046eaf744ca4c902212405216ff3ffe6e11bb6307fbc3d1989dc385b85",
       "evaluator_model": "gpt-5.6-sol",
       "evaluator_substrate": "Codex CLI",
-      "evaluation_role": "per-candidate raw scoring of the 4-dim calibrated BIB vector; provides the evaluator A 4-dim reference vector and envelope membership"
+      "evaluation_role": "per-candidate raw scoring of the 4-dim calibrated BIB vector"
     },
     "BIB-001_evaluator_B": {
       "path": "experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl",
       "sha256": "d2866a96934a544b17afb920937a3bc5dd6cca4e03b4ce723cd948278328c70d",
       "evaluator_model": "claude-opus-4-7 (fresh session per I-AUTH-05)",
       "evaluator_substrate": "Claude Code CLI",
-      "evaluation_role": "per-candidate raw scoring of the 4-dim calibrated BIB vector; provides the evaluator B 4-dim reference vector and envelope membership"
+      "evaluation_role": "per-candidate raw scoring of the 4-dim calibrated BIB vector"
     },
     "BIB-002_evaluator_A": {
       "path": "experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl",
@@ -68,33 +63,20 @@
     "source_path": "experiments/2026-09-06-dbi-evolution-v0.1/inputs/baseline-envelope-membership.json",
     "inclusion_count": 85,
     "exclusion_count": 5,
-    "exclusion_rationale": "BIB-001 R4/B (DEV-002 quota-error retry contamination); excluded by v0.1 \u00a711.1 frozen envelope membership"
+    "exclusion_rationale": "BIB-001 R4/B (DEV-002 quota-error retry contamination); excluded by v0.1 \u00a711.1"
   },
   "baseline_statistics": {
     "artifact": "inputs/baseline-statistics.json",
-    "purpose": "Numerical baseline: per-dim mean/std/range for both evaluators across the 85 envelope observations. Contains or binds every value needed to reproduce C20 without judgment after execution begins.",
-    "c20_derivation_script": {
-      "path": "hashing/c20-derivation.py",
-      "sha256": "7dec79d0a0d36d7a79c20b3e2f69bbf9d12309f422a6cf0ceea2c40ff547370b",
-      "description": "Deterministic C20 derivation: computes per-evaluator 4-dim reference vectors, envelope bounds, and Arm-C per-(R, B) mean Manhattan; emits c20_per_evaluator_pass, c20_joint_pass, c20_fail_reasons."
-    }
+    "sha256": "b6b6ad4b9e32d451f47b3fbb2d35bcd4fcff39c84aa0bea682ad20d422166ee2",
+    "purpose": "Numerical baseline: per-dim mean/std/range for both evaluators across 85 envelope observations. Contains the preregistered 4-dim reference vectors, the historical envelope per-(R, B) cell means, the frozen historical envelope bound (A=1.807059, B=0.414118), the explicit Boolean C20 PASS/FAIL formula, the C20 method, and the C20 derivation script binding."
   },
-  "evaluator_substrate": {
-    "evaluator_a": {
-      "model": "gpt-5.6-sol",
-      "substrate": "Codex CLI"
-    },
-    "evaluator_b": {
-      "model": "claude-opus-4-7",
-      "substrate": "Claude Code CLI, fresh session per I-AUTH-05"
-    },
-    "executor": {
-      "model": "claude-opus-4-7",
-      "substrate": "Claude Code CLI"
-    },
-    "executor_change_from_v01": "v0.1 used claude-sonnet-4-6; INSA-ID-E1 uses claude-opus-4-7. Pre-registered, preregistered-bound deviation (proposal v5.1 \u00a72(e)). Limits direct comparability of the v0.1 failure shape (R2-B deferrals) to INSA-ID-E1's outcome.",
-    "tool_posture": "--allowedTools '' --tools '' --disallowedTools 'WebFetch,WebSearch' for executor (per v0.1 \u00a713)"
+  "evaluator_rubric_evidence": {
+    "purpose": "Per proposal v5.1 \u00a77 baseline-binding.json should content-address every baseline component, including the relevant historical evaluator/rubric evidence.",
+    "rubric_artifact": "inputs/evaluator-rubric.json",
+    "rubric_sha256": "098e1fc60d6d63be7aa4d14719459aef4e1196bdf7ca5e04a187f4e299f6a98b",
+    "rubric_role": "Per-dimension tolerance values (V(d)) for subset-(a) and subset-(b). Contains the preregistered 4-dim reference vectors (which match baseline-statistics calibrated_4d_reference_vectors)."
   },
-  "baseline_role_in_INSA_ID_E1": "B = the frozen baseline bundle (governing intent + identity contract + reconstruction materials + evaluator/rubric identity + BIB evidence + baseline membership + baseline statistics), against which Arm C and Arm M are executed per proposal v5.1 \u00a75.2.",
+  "baseline_role_in_INSA_ID_E1": "B = the frozen baseline bundle (governing intent + identity contract + reconstruction materials + four locked BIB scorebooks + baseline membership + baseline statistics + evaluator rubric evidence), against which Arm C and Arm M are executed per proposal v5.1 \u00a75.2.",
+  "v4_dag_note": "baseline-binding.json (this file) is built AFTER inputs/baseline-statistics.json is finalized; this file references the finalized baseline-statistics SHA. This is a one-way content-addressed DAG, not a cycle: baseline-envelope-membership.json -> baseline-statistics.json -> baseline-binding.json.",
   "modification_permitted_after_freeze": false
 }

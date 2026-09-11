@@ -1,51 +1,82 @@
 # INSA-ID-E1 — Audit Trail
 
-This directory preserves the protocol v1 + protocol v2 + proposal v4 + proposal v5 packages as audit history. Protocol v3 (current) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
+This directory preserves the protocol v1, v2, v3 + proposal v4, v5, v5.1 packages as audit history. Protocol v4 (frozen-candidate-rev4) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
 
-## Package v1 (frozen-candidate, 2026-09-11)
+## v1 frozen-candidate (2026-09-11)
 
-- **v1 commit:** `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`
+- **v1 commit:** `26f3ed3ecc588a292fbe6983105b0c28ec0c24f5` *(actual: `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`)*
 - **v1 MANIFEST SHA-256:** `8052e7cfa2403d87faaa4d5008cd13f5f0cafe359e1d1963f2a3c674c605141a`
 - **v1 path:** `audit/v1-frozen-candidate/`
-- **v1 defects:** v4 corrections list documents them (in v5 AUDIT_TRAIL referenced below). v1 was superseded by v2 (Frank's four correctness corrections) and then by v3 (Frank's architecture-binding corrections).
+- **v1 defects:** v4 corrections list documents them (in this AUDIT_TRAIL, see below). v1 was superseded by v2, v3, and v4.
 
-## Package v2 (frozen-candidate-rev2, 2026-09-11)
+## v2 frozen-candidate-rev2 (2026-09-11)
 
-- **v2 commit:** `6fdd79083608f83d9c496dcb4e69f7db29eff1e0`
+- **v2 commit:** `6fdd79083608f83d9c496dcb4e69f7db29eff1e0` *(actual: `6fdd79083608f83d9c496dcb4e69f7db29eff1e0`)*
 - **v2 MANIFEST SHA-256:** `97946101df774e5403e327302b3a0917960461274854bbf3dc140768094bf3cf`
 - **v2 path:** `audit/v2-frozen-candidate/`
-- **v2 status:** Frozen-candidate-rev2; superseded by v3 (Frank's architecture-binding corrections in proposal v5).
-- **v2 defects:** v5 AUDIT_TRAIL (referenced from `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` v5 corrections list) documents the v2 architecture-binding errors that v3 corrects.
+- **v2 defects:** Superseded by v3.
 
-## Package v3 (current; awaiting Frank-as-PI execution GO)
+## v3 frozen-candidate-rev3 (2026-09-11)
 
-- **v3 commit:** *(filled at v3 freeze)*
-- **v3 MANIFEST SHA-256:** *(filled at v3 freeze)*
-- **v3 path:** `experiments/2026-09-11-insa-id-e1/` (top level)
-- **v3 protocol SHA-256:** *(filled at v3 freeze)*
-- **v3 status:** Frozen-candidate-rev3 (per proposal v5.1 @ `1f84c31…`).
-- **v3 architecture binding:** Implements proposal v5.1 exactly — B as complete frozen baseline bundle; D = M ∪ P ∪ O; pairwise disjoint M, P, O; O = ∅ with frozen rationale; subset-(a) = actual calibrated BIB 4-dim vector (`contract_compliance`, `selection_behavior`, `narrative_behavior`, `functional_completeness`); subset-(b) = historical 8 C12 axes preserved verbatim, separately gated, non-collapsed; four-gate G_mod_a..d; aggregate C12 BROKEN rule; separate evaluator scoring from analysis aggregation; separate immutable Arm-C and Arm-M scorebooks; static/dynamic authority separation; frozen execution-order algorithm; no self-referential hashes (sidecar pattern); C20 in Phase 2 after Arm-C scoring; explicit executor-change limitation (claude-opus-4-7 vs v0.1's claude-sonnet-4-6); two-level Level-1/Level-2 interpretation; C20 binding is fully deterministic from `inputs/baseline-binding.json` + `inputs/baseline-statistics.json` + `hashing/c20-derivation.py`.
+- **v3 commit:** `2d0cf74054a48c578bb8cb65ce985e4767600809`
+- **v3 MANIFEST SHA-256:** `54487cf090165ce5ae5974b8daf9157ea218c05ef17bceaa4a42a9e25cff3d1f`
+- **v3 path:** `audit/v3-frozen-candidate/`
+- **v3 defects identified by Frank-as-PI review:**
+   - MANIFEST contained contradictory SHAs for the same artifacts (cross-reference fields referenced pre-edit SHAs after I edited the underlying files to replace `<filled at freeze>` placeholders).
+   - dimensions-decomposition referenced pre-edit mutation-dimensions SHA.
+   - preservation-dimensions contained `<filled at freeze time...>` unresolved placeholder.
+   - C20 envelope bounds described as "TBD" / not precomputed.
+   - C20 derivation script did not actually verify inputs.
+   - evaluator packet applied binary/zero "axis failure" conventions to the BIB 4-dim vector (subset-(a) should be Manhattan-only).
+   - Cyclic reference pattern between baseline-binding and baseline-statistics.
+   - Generic placeholder `2026-09-11T00:00:00Z` used as actual freeze time.
+   - Scorebook self-referential hash (Arm-C and Arm-M to be locked separately).
+   - Per-candidate fresh evaluator session not explicit.
+   - Reconstruction-input referenced nonexistent files.
+
+## v4 frozen-candidate-rev4 (current; awaiting Frank-as-PI execution GO)
+
+- **v4 commit:** *(filled at v4 freeze)*
+- **v4 MANIFEST SHA-256:** *(see `MANIFEST.sha256.txt` in the top-level directory after v4 freeze)*
+- **v4 path:** `experiments/2026-09-11-insa-id-e1/` (top level, NOT in audit/)
+- **v4 status:** Frozen-candidate-rev4 (per proposal v5.1 @ `1f84c31`).
+- **v4 architecture binding (per Frank-as-PI v3 review):** Implements proposal v5.1 exactly — B as complete frozen baseline bundle; D = M ∪ P ∪ O; pairwise disjoint M, P, O; O = ∅ with frozen rationale; subset-(a) = actual calibrated BIB 4-dim vector (`contract_compliance`, `selection_behavior`, `narrative_behavior`, `functional_completeness`); subset-(b) = historical 8 C12 axes preserved verbatim, separately gated, non-collapsed. v4 explicitly does NOT claim any one-to-one semantic identity between subset-(a) and subset-(b) dimensions.
+- **v4 C20 binding (per Frank-as-PI v3 review):** The frozen package includes a deterministic baseline binding sufficient to reproduce the decision without judgment after execution begins — exact 4 locked BIB scorebook SHAs, exact 85-observation inclusion mapping, per-evaluator calibrated 4-d reference vector, exact method for computing per-reconstruction Arm-C Manhattan statistics, exact historical C20 envelope/boundary values (A=1.807059, B=0.414118) precomputed and embedded in `inputs/baseline-statistics.json` (no TBD), explicit Boolean C20 PASS/FAIL formula, deterministic derivation/verification script (`hashing/c20-derivation.py`) that re-verifies every input SHA and fails fatally on any mismatch.
+- **v4 self-binding + no-cyclic-reference:** The MANIFEST is generated by `hashing/binding-verification.py` (single source of truth) from the actual on-disk artifact SHAs. baseline-statistics.json is built BEFORE baseline-binding.json; baseline-binding.json references the finalized baseline-statistics.json SHA. baseline-envelope-membership.json → baseline-statistics.json → baseline-binding.json is a one-way content-addressed DAG, not a cycle.
+- **v4 frozen binding-verification script:** `hashing/binding-verification.py` re-runs all SHA verifications, cross-reference checks, D disjointness check, and the C20 synthetic test suite (healthy/missing-cell/out-of-envelope/tampered-scorebook/tampered-membership). Exits nonzero on any mismatch.
+- **v4 structural tests verified at freeze time:**
+   - All 25 listed SHAs match on-disk
+   - All cross-references consistent (no SHA conflicts)
+   - D = M ∪ P ∪ O pairwise-disjoint: PASS
+   - C20 healthy current cells (R1/B, R2/B, R3/B): c20_joint_pass=***
+   - C20 missing R2/B: c20_joint_pass=False (reason: missing current cells)
+   - C20 degraded R1/B (contract_compliance=0): c20_joint_pass=False (reason: worst current cell mean > frozen historical envelope bound)
+   - C20 tampered BIB-001 evaluator A scorebook: FATAL exit 2
+   - C20 tampered baseline membership (1 obs removed): FATAL exit 2
+- **v4 truthful freeze timestamps:** `frozen_at_utc_date` is a date-only field; `manifest_generated_at_utc` records the actual binding-verification script run time (set automatically by the script via `datetime.now(timezone.utc).isoformat()`).
+- **v4 no model dispatch, no evaluator invocation, no candidate generation:** confirmed (no `runs/`, no scorebooks, no synthesis files, no execution-authority witness, no C20-decision-record).
 
 ## Proposal lineage
 
-- **v2:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v2 commit `5f9365f`)
-- **v3:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v3 commit `db9f77a`; Frank's four correctness corrections)
-- **v4:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (proposal v4 commit `ed95705`; Frank's four consistency corrections)
-- **v5:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (proposal v5 commit `04d1d07`; Frank's architecture-binding corrections: §12 B/D/O, BIB 4-dim, baseline statistics, executor change documentation)
-- **v5.1:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (proposal v5.1 commit `1f84c31`; Frank's five cleanup corrections: §5.2 D wording, §7 D/O baseline labels, "5 BIB scorebooks" → "4", abbreviated tuple → full tuple, C20 binding requirement)
+- **v2:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (commit `5f9365f`)
+- **v3:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (commit `db9f77a`; Frank's four correctness corrections)
+- **v4:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal.md` (commit `ed95705`; Frank's four consistency corrections)
+- **v5:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (commit `04d1d07`; Frank's architecture-binding corrections: §12 B/D/O, BIB 4-dim, baseline statistics, executor change documentation)
+- **v5.1:** `docs/proposals/2026-09-10-INSA-ID-E1-proposal-v5.md` (commit `1f84c31`; Frank's five cleanup corrections: §5.2 D wording, §7 D/O baseline labels, "5 BIB scorebooks" → "4", abbreviated tuple → full tuple, C20 binding requirement)
 - **APPROVED v5.1 SHA:** `1f84c3101d6add7d44ed821681946c10be8f5f5c` (Frank-as-PI authorization)
 
 ## Verification commands
 
 ```bash
-# Verify v3 MANIFEST SHA-256 (filled at freeze)
+# Re-run the binding-verification script (deterministic; reproduces MANIFEST)
+cd experiments/2026-09-11-insa-id-e1/
+python3 hashing/binding-verification.py --v4-experiment-dir . --repo-dir ../..
+
+# Verify v3 MANIFEST SHA-256
 sha256sum experiments/2026-09-11-insa-id-e1/MANIFEST.json
 
-# Verify v3 protocol SHA-256 (filled at freeze)
-sha256sum experiments/2026-09-11-insa-id-e1/protocol/INSA-ID-E1-protocol.md
-
-# Verify v1 + v2 audit packages preserved
-find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥42 (v1 20 + v2 22)
+# Verify v1 + v2 + v3 audit packages preserved
+find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥ 70 (v1 20 + v2 22 + v3 26)
 
 # Verify INSA v0.3 architecture unchanged
 git cat-file -t 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1   # should be 'blob'
@@ -57,4 +88,4 @@ git ls-tree origin/feature/insa-id-e1-proposal:experiments/2026-09-06-dbi-evolut
 
 ## Authority boundary
 
-This audit directory is preserved but **not** part of the v3 binding. The v3 binding references only the top-level artifacts listed in v3 MANIFEST.json.
+This audit directory is preserved but **not** part of the v4 binding. The v4 binding references only the top-level artifacts listed in v4 MANIFEST.json.

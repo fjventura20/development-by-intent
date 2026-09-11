@@ -1,40 +1,55 @@
 {
   "$schema": "INSA-v0.3-baseline-statistics-v1",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "record_kind": "baseline-statistics",
-  "purpose": "Numerical baseline for INSA-ID-E1. Contains or binds every value needed to reproduce C20 without judgment after execution begins (per proposal v5.1 \u00a77). Includes: (1) exact source locked scorebook SHAs (the four BIB scorebooks), (2) exact 85-observation inclusion mapping, (3) per-evaluator calibrated 4-d reference vector, (4) exact method for computing per-reconstruction Arm-C Manhattan statistics, (5) exact historical C20 envelope/boundary values, (6) explicit Boolean C20 PASS/FAIL formula, (7) deterministic derivation/verification script (hashing/c20-derivation.py).",
+  "purpose": "Numerical baseline for INSA-ID-E1 v4. Precomputed deterministic C20 reference + envelope bound + C20 method. NO TBD values remain. Contains or binds every value needed to reproduce C20 without judgment after execution begins (per proposal v5.1 \u00a77).",
   "experiment_id": "INSA-ID-E1",
-  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
   "binding": {
-    "proposal_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
-    "baseline_binding_sha256": "633cf95718ba8a907a021faf2243fa5cc833c6cc0d6bb217d07a0e65e18c3711",
-    "baseline_envelope_membership_sha256": "dad55959998a1851aa3106aab926e442690249327c5c343072fc4bd938520aa1"
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
+    "baseline_envelope_membership_artifact": "inputs/baseline-envelope-membership.json",
+    "baseline_envelope_membership_sha256": "dad55959998a1851aa3106aab926e442690249327c5c343072fc4bd938520aa1",
+    "scorebooks": {
+      "BIB-001_evaluator_A": {
+        "path": "experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl",
+        "sha256": "df08f5046eaf744ca4c902212405216ff3ffe6e11bb6307fbc3d1989dc385b85"
+      },
+      "BIB-001_evaluator_B": {
+        "path": "experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl",
+        "sha256": "d2866a96934a544b17afb920937a3bc5dd6cca4e03b4ce723cd948278328c70d"
+      },
+      "BIB-002_evaluator_A": {
+        "path": "experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl",
+        "sha256": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6"
+      },
+      "BIB-002_evaluator_B": {
+        "path": "experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl",
+        "sha256": "11ac84e8cf0606dac2a585c91bd7bfb7e20bc5ddadc80d0cc72c295bf2eec437"
+      }
+    }
   },
   "frozen_bib_scorebook_shas": {
     "BIB-001_evaluator_A": "df08f5046eaf744ca4c902212405216ff3ffe6e11bb6307fbc3d1989dc385b85",
     "BIB-001_evaluator_B": "d2866a96934a544b17afb920937a3bc5dd6cca4e03b4ce723cd948278328c70d",
     "BIB-002_evaluator_A": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6",
-    "BIB-002_evaluator_B": "11ac84e8cf0606dac2a585c91bd7bfb7e20bc5ddadc80d0cc72c295bf2eec437",
-    "verification_command": "sha256sum experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl"
+    "BIB-002_evaluator_B": "11ac84e8cf0606dac2a585c91bd7bfb7e20bc5ddadc80d0cc72c295bf2eec437"
   },
-  "calibrated_4d_reference_vectors": {
+  "calibrated_4d_reference_vectors_preregistered": {
     "evaluator_A": {
-      "dim_contract_compliance": 3.529412,
-      "dim_selection_behavior": 3.964706,
-      "dim_narrative_behavior": 3.847059,
-      "dim_functional_completeness": 3.494118,
-      "derivation_method": "mean of 85 envelope observations per dimension",
-      "n_observations": 85
+      "contract_compliance": 3.529412,
+      "selection_behavior": 3.964706,
+      "narrative_behavior": 3.847059,
+      "functional_completeness": 3.494118
     },
     "evaluator_B": {
-      "dim_contract_compliance": 3.988235,
-      "dim_selection_behavior": 3.988235,
-      "dim_narrative_behavior": 4,
-      "dim_functional_completeness": 4,
-      "derivation_method": "mean of 85 envelope observations per dimension",
-      "n_observations": 85
-    }
+      "contract_compliance": 3.988235,
+      "selection_behavior": 3.988235,
+      "narrative_behavior": 4,
+      "functional_completeness": 4
+    },
+    "derivation_method": "mean of 85 envelope observations per dimension per evaluator (deterministic from the 4 frozen BIB scorebooks)",
+    "n_observations_per_evaluator": 85
   },
   "per_evaluator_per_dim_envelope_stats": {
     "evaluator_A": {
@@ -106,19 +121,68 @@
       }
     }
   },
-  "C20_envelope_bounds": {
-    "evaluator_A": "TBD (computed deterministically by hashing/c20-derivation.py at preflight from the 85 envelope records)",
-    "evaluator_B": "TBD (computed deterministically by hashing/c20-derivation.py at preflight from the 85 envelope records)",
-    "computation_method": "For each evaluator, compute max per-(R, B) mean 4-dim Manhattan distance across the 85 envelope records; this is the historical envelope boundary that an in-spec Arm-C must satisfy on its own. Reproducible via hashing/c20-derivation.py with --verify-only (preflight) or full run (Phase 2)."
+  "C20_historical_envelope_bound_preregistered_v4": {
+    "method": "For each evaluator independently: max per-(R, B) mean 4-dim Manhattan distance from the per-evaluator reference vector across the 85 envelope observations (historical 17 cells: R1-R9 \u00d7 A or B block). This is the historical 'envelope boundary' that current Arm-C must satisfy on its own (without +1.5 tolerance per v0.1 \u00a711.2 PI freeze correction 1). The current expected Arm-C cells are {R1/B1, R2/B1, R3/B1} (3 cells, block B only); C20 PASSES for evaluator e IF AND ONLY IF: (a) all 3 expected current cells have at least one Arm-C candidate, AND (b) every current cell's mean Manhattan <= the frozen historical envelope bound[e].",
+    "historical_envelope_cell_means_preregistered": {
+      "evaluator_A": {
+        "R1/A": 1.167059,
+        "R1/B": 1.604706,
+        "R2/A": 1.317647,
+        "R2/B": 1.465883,
+        "R3/A": 1.152941,
+        "R3/B": 1.352941,
+        "R4/A": 1.505882,
+        "R5/A": 1.465883,
+        "R5/B": 1.807059,
+        "R6/A": 1.531765,
+        "R6/B": 1.374117,
+        "R7/A": 1.223529,
+        "R7/B": 1.211764,
+        "R8/A": 1.199999,
+        "R8/B": 1.164705,
+        "R9/A": 1.17647,
+        "R9/B": 1.374117
+      },
+      "evaluator_B": {
+        "R1/A": 0.414118,
+        "R1/B": 0.02353,
+        "R2/A": 0.02353,
+        "R2/B": 0.02353,
+        "R3/A": 0.02353,
+        "R3/B": 0.02353,
+        "R4/A": 0.02353,
+        "R5/A": 0.02353,
+        "R5/B": 0.02353,
+        "R6/A": 0.02353,
+        "R6/B": 0.02353,
+        "R7/A": 0.02353,
+        "R7/B": 0.02353,
+        "R8/A": 0.02353,
+        "R8/B": 0.02353,
+        "R9/A": 0.02353,
+        "R9/B": 0.02353
+      }
+    },
+    "frozen_historical_envelope_bound": {
+      "evaluator_A": 1.807059,
+      "evaluator_B": 0.414118
+    },
+    "current_expected_arm_c_cells": [
+      "R1/B1",
+      "R2/B1",
+      "R3/B1"
+    ],
+    "current_expected_arm_c_cells_count": 3,
+    "note": "Historical 85-record cells are used ONLY to derive the historical bound. Current expected Arm-C cells are {R1/B1, R2/B1, R3/B1} (3 cells; block B only). C20 does NOT require current Arm C to contain every historical R1-R9/A-B cell."
   },
-  "C20_method_for_arm_C_per_reconstruction_manhattan": {
-    "step_1": "For each evaluator independently, compute the per-evaluator 4-dim reference vector = mean of the 85 envelope observations per dimension (above).",
-    "step_2": "For each Arm-C candidate, compute per-candidate 4-dim Manhattan distance = sum over the 4 dimensions of |candidate_score - reference_vector[dim]|.",
-    "step_3": "For each (R, B) cell in the envelope (envelope_cells set), compute the mean Manhattan distance across all Arm-C candidates in that cell.",
-    "step_4": "C20 PASS for evaluator e IF AND ONLY IF: (a) every envelope (R, B) cell has at least one Arm-C candidate (missing_cells empty), AND (b) for every (R, B) Arm-C cell, mean Manhattan distance <= C20_envelope_bound[e].",
+  "C20_method_for_arm_C_per_current_cell_manhattan": {
+    "step_1": "For each evaluator independently, the per-evaluator 4-dim reference vector = mean of the 85 envelope observations per dimension (above; calibrated_4d_reference_vectors_preregistered).",
+    "step_2": "For each current Arm-C candidate in a (R, B) cell in {R1/B1, R2/B1, R3/B1}, compute per-candidate 4-dim Manhattan distance = sum over the 4 dimensions of |candidate_score - reference_vector[dim]|.",
+    "step_3": "For each current (R, B) cell, compute the mean Manhattan distance across all Arm-C candidates in that cell.",
+    "step_4": "C20 PASS for evaluator e IF AND ONLY IF: (a) all 3 expected current cells {R1/B1, R2/B1, R3/B1} have at least one Arm-C candidate (no missing cells), AND (b) for every current (R, B) cell, mean Manhattan distance <= frozen_historical_envelope_bound[e].",
     "step_5": "C20 joint PASS iff both evaluators PASS. C20 fail -> disposition = INVALID_EXPERIMENT."
   },
-  "C20_boolean_pass_fail_formula": "C20(e) = (missing_cells[e] is empty) AND (max over (R, B) of mean_4dim_Manhattan_Arm_C(R, B) <= envelope_bound[e])  // for each evaluator e in {A, B}; C20_joint = C20(A) AND C20(B).",
+  "C20_boolean_pass_fail_formula": "C20(e) = (missing_current_cells[e] is empty) AND (max over current (R, B) cells in {R1/B1, R2/B1, R3/B1} of mean_4dim_Manhattan_Arm_C(R, B) <= frozen_historical_envelope_bound[e])  // for each evaluator e in {A, B}; C20_joint = C20(A) AND C20(B).",
   "envelope_records_85_with_per_dim_scores": [
     {
       "source_experiment": "DBI-BIB-001-RERUN-001",
@@ -1739,7 +1803,9 @@
   "envelope_record_count": 85,
   "c20_derivation_script": {
     "path": "hashing/c20-derivation.py",
-    "sha256": "7dec79d0a0d36d7a79c20b3e2f69bbf9d12309f422a6cf0ceea2c40ff547370b",
-    "verification_command": "python3 hashing/c20-derivation.py --envelope inputs/baseline-envelope-membership.json --record-fixture inputs/baseline-statistics.json --arm-c-scorebook-a evaluation/evaluator-A-arm-C-scorebook.json --arm-c-scorebook-b evaluation/evaluator-B-arm-C-scorebook.json --frozen-scorebook-A-A experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl --frozen-scorebook-A-B experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl --frozen-scorebook-B-A experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl --frozen-scorebook-B-B experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl --out preflight/c20-decision-record.json"
-  }
+    "sha256_to_be_filled_at_freeze": "<filled at freeze by binding-verification.py>",
+    "role": "Frozen deterministic C20 derivation. Re-verifies the four locked BIB scorebook SHAs (fatal on mismatch); verifies the baseline-envelope-membership.json 85-SHA set matches the 85 records in this file; uses the preregistered historical envelope bound (frozen_historical_envelope_bound above); computes per-(R, B) Arm-C means from the Phase 2 Arm-C scorebooks; emits c20_per_evaluator_pass, c20_joint_pass, c20_fail_reasons. No manual post-write editing.",
+    "verification_command_template": "python3 hashing/c20-derivation.py --envelope inputs/baseline-envelope-membership.json --baseline-statistics inputs/baseline-statistics.json --arm-c-A evaluation/evaluator-A-arm-C-scorebook.json --arm-c-B evaluation/evaluator-B-arm-C-scorebook.json --frozen-A-A experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-A-scores-LOCKED.jsonl --frozen-A-B experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-B-scores-LOCKED.jsonl --frozen-B-A experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-A-scores-LOCKED.jsonl --frozen-B-B experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-B-scores-LOCKED.jsonl --out preflight/c20-decision-record.json"
+  },
+  "frozen_bib_scorebook_shas_verification_command": "sha256sum experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl experiments/2026-09-06-dbi-bib-002-r4-b-confirmation/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl"
 }
