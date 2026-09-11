@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-INSA-ID-E1 frozen binding-verification script (frozen pre-execution, v6).
+INSA-ID-E1 frozen binding-verification script (frozen pre-execution, v6.2).
 
-Single authoritative source of truth for the v6 MANIFEST.json. Run this
+Single authoritative source of truth for the v6.2 MANIFEST.json. Run this
 script at protocol freeze to (re)produce the final MANIFEST.json. The script:
 
   1. Hashes every listed frozen/supporting artifact.
@@ -16,10 +16,10 @@ script at protocol freeze to (re)produce the final MANIFEST.json. The script:
      data and verifies (a) the operator-side scorebook is correctly built,
      (b) the deliberate metadata-mismatch test fails fatally, and (c) all 8 C12
      axes survive into the locked scorebook.
-  6. v6 NEW: Clean-environment verification — the script must run from a clean
+  6. v6.2 NEW: Clean-environment verification — the script must run from a clean
      checkout using only frozen repository artifacts + temporary files it
      creates itself. No pre-existing /tmp file is required.
-  7. v6 NEW: Statically verifies that the evaluator packet contains the exact
+  7. v6.2 NEW: Statically verifies that the evaluator packet contains the exact
      frozen BIB rubric content + the ≥2-of-4 worldwide-significance rule.
   8. Emits the final MANIFEST.json (content-addressed, no self-reference).
   9. Exits nonzero on any mismatch.
@@ -43,7 +43,7 @@ import tempfile
 from datetime import datetime, timezone
 
 
-# 20 frozen pre-execution artifacts (per proposal v5.1 §7 + v6 additions)
+# Frozen pre-execution artifacts (per proposal v5.1 §7 + v6.2 additions)
 FROZEN_ARTIFACTS = [
     'inputs/baseline-binding.json',
     'inputs/baseline-statistics.json',
@@ -111,7 +111,7 @@ def fail(msg):
 
 
 def main():
-    ap = argparse.ArgumentParser(description='INSA-ID-E1 v6 binding-verification + MANIFEST generator')
+    ap = argparse.ArgumentParser(description='INSA-ID-E1 v6.2 binding-verification + MANIFEST generator')
     ap.add_argument('--v6-experiment-dir', required=True, help='Path to experiments/2026-09-11-insa-id-e1/')
     ap.add_argument('--repo-dir', default=None, help='Path to the git repo root (default: parent of --v6-experiment-dir)')
     ap.add_argument('--skip-c20-synthetic', action='store_true', help='Skip the C20 synthetic test runs')
@@ -203,7 +203,7 @@ def main():
 
     # Step 3: v6 NEW — verify the frozen BIB rubric content + hash
     print()
-    print('Step 3: v6 evaluator-rubric + test-invocations + worldwide-significance validation...')
+    print('Step 3: v6.2 evaluator-rubric + test-invocations + worldwide-significance validation...')
     er = json.load(open(os.path.join(exp_dir, 'inputs/evaluator-rubric.json')))
 
     # 3a. Verify evaluator-rubric.json content-addresses the frozen BIB rubric
@@ -727,11 +727,11 @@ def main():
         '$schema': 'INSA-v0.3-MANIFEST-v1',
         'schema_version': '2.0',
         'record_kind': 'experiment-manifest',
-        'purpose': 'Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v6 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[].',
+        'purpose': 'Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v6.2 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[].',
         'experiment_id': 'INSA-ID-E1',
         'experiment_short_name': 'insa-id-e1',
-        'experiment_status': 'frozen-candidate-rev6 (awaiting Frank-as-PI execution GO)',
-        'experiment_revision': 'v6 (per proposal v5.1)',
+        'experiment_status': 'frozen-candidate-rev6.2 (awaiting Frank-as-PI execution GO)',
+        'experiment_revision': 'v6.2 (per proposal v5.1)',
         'binding_verification_script': {
             'artifact': 'hashing/binding-verification.py',
             'sha256': file_info['hashing/binding-verification.py']['sha256'],
@@ -758,7 +758,7 @@ def main():
         'frozen_at_utc_date': record_frozen_at_utc_date,
         'frozen_by': 'Hermes (operator)',
         'manifest_generated_at_utc': record_run_at_utc,
-        'manifest_generation_method': 'hashing/binding-verification.py v6 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)',
+        'manifest_generation_method': 'hashing/binding-verification.py v6.2 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)',
         'insa_frozen_architecture_reference': {
             'git_blob_sha1': '848e0fe014f5b4a61ba2cb92e772ee3499dca9c1',
             'commit_sha': 'd2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b',
@@ -1036,13 +1036,13 @@ def main():
     os.replace(tmp, manifest_path)
     new_manifest_sha = sha256_file(manifest_path)
     print()
-    print(f'MANIFEST.json v6 written: {len(manifest_text)} bytes, SHA-256: {new_manifest_sha}')
+    print(f'MANIFEST.json v6.2 written: {len(manifest_text)} bytes, SHA-256: {new_manifest_sha}')
 
     with open(os.path.join(exp_dir, 'MANIFEST.sha256.txt'), 'w') as f:
         f.write(f'{new_manifest_sha}  MANIFEST.json\n')
 
     print()
-    print('=== v6 binding-verification + MANIFEST generation complete ===')
+    print('=== v6.2 binding-verification + MANIFEST generation complete ===')
     print(f'  proposal v5.1 SHA: 1f84c3101d6add7d44ed821681946c10be8f5f5c')
     print(f'  binding-verification script SHA: {file_info["hashing/binding-verification.py"]["sha256"]}')
     print(f'  c20-derivation.py SHA: {file_info["hashing/c20-derivation.py"]["sha256"]}')
@@ -1056,7 +1056,7 @@ def main():
     print(f'  evaluator-input-packet.md SHA: {file_info["evaluation/evaluator-input-packet.md"]["sha256"]}')
     print(f'  evaluator-rubric.json SHA: {file_info["inputs/evaluator-rubric.json"]["sha256"]}')
     print(f'  test-invocations.json SHA: {file_info["inputs/test-invocations.json"]["sha256"]}')
-    print(f'  MANIFEST.json v6 SHA: {new_manifest_sha}')
+    print(f'  MANIFEST.json v6.2 SHA: {new_manifest_sha}')
 
 
 if __name__ == '__main__':

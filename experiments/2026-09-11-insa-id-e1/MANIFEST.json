@@ -2,14 +2,14 @@
   "$schema": "INSA-v0.3-MANIFEST-v1",
   "schema_version": "2.0",
   "record_kind": "experiment-manifest",
-  "purpose": "Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v6 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[].",
+  "purpose": "Content-addressed binding of all frozen pre-execution artifacts for INSA-ID-E1 v6.2 revision (per proposal v5.1 @ 1f84c31). SHA-256 locks every file; git blob SHA-1 provides cross-reference into frozen git history. Built deterministically by hashing/binding-verification.py from the actual finalized artifact SHAs. Every occurrence of an artifact SHA anywhere in MANIFEST equals the SHA in frozen_artifacts[].",
   "experiment_id": "INSA-ID-E1",
   "experiment_short_name": "insa-id-e1",
-  "experiment_status": "frozen-candidate-rev6 (awaiting Frank-as-PI execution GO)",
-  "experiment_revision": "v6 (per proposal v5.1)",
+  "experiment_status": "frozen-candidate-rev6.2 (awaiting Frank-as-PI execution GO)",
+  "experiment_revision": "v6.2 (per proposal v5.1)",
   "binding_verification_script": {
     "artifact": "hashing/binding-verification.py",
-    "sha256": "8879f53dcfe256b98327bd49feddccb7644ff23106f0e8d3d29fc46769948008",
+    "sha256": "015fdd7540189caf7e1e4de9ab105679a53c103d7451cf5117f8bb4488de2e4e",
     "role": "Single authoritative source of truth for this MANIFEST. Re-runs all SHA verifications, cross-reference checks, D disjointness check, evaluator-rubric content+hash verification, \u22652-of-4 worldwide-significance verification, normalize-and-join tests, C20 synthetic test suite (9 cases including deliberately-mismatched-blind-map), and clean-environment verification. Exits nonzero on any mismatch."
   },
   "audit_trail": {
@@ -32,8 +32,8 @@
   },
   "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
-  "manifest_generated_at_utc": "2026-09-11T19:56:01Z",
-  "manifest_generation_method": "hashing/binding-verification.py v6 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)",
+  "manifest_generated_at_utc": "2026-09-11T20:24:16Z",
+  "manifest_generation_method": "hashing/binding-verification.py v6.2 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)",
   "insa_frozen_architecture_reference": {
     "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
     "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
@@ -182,15 +182,15 @@
     },
     {
       "path": "protocol/INSA-ID-E1-protocol.md",
-      "sha256": "b268a799cb82ad774407233b94d1d7ffd4bdf14fdda3b285dac0c1338c2ec47c",
-      "size_bytes": 27350,
-      "git_blob_sha1": "183f12ca47123c3462ac98fdf707ec5d8eb87a74"
+      "sha256": "318422474caa8401ac68767d3a4c94fff564efaa516fd9b7e9b9d2a93158d967",
+      "size_bytes": 27360,
+      "git_blob_sha1": "9dc3eb0ae338734525ccfb5abcf08f5a9da2d2d2"
     },
     {
       "path": "protocol/EXECUTION-ORDER.md",
-      "sha256": "8e3be5c3294d51c7ac743313f9decd4cad9f8b18ff99a28215bc3d2d2282ad3c",
-      "size_bytes": 17015,
-      "git_blob_sha1": "6ed9f41b5355f9a249388a1d637a28040b8088f8"
+      "sha256": "ddb20d943e25b9b667b30bd7c1a6511c3772e8be1d6cd954e9d81bdcd75497b2",
+      "size_bytes": 17025,
+      "git_blob_sha1": "6fa43500b2cefd309a6bc3f7d40b661b5328f913"
     }
   ],
   "supporting_artifacts": [
@@ -220,15 +220,15 @@
     },
     {
       "path": "hashing/blind-map-builder.py",
-      "sha256": "c1f4722bf5b65bc36213df2cd4e57422d48e390f2e5d706e5892836176883e56",
-      "size_bytes": 10689,
-      "git_blob_sha1": "dbdc8aaade9b8477bfd8977c13cba3e5ab8ee63d"
+      "sha256": "bafe59391a3d8614d510e43f5a2bb1106e3d816f98a453f35c59005a5fbf0151",
+      "size_bytes": 12783,
+      "git_blob_sha1": "29676ffa2b17ba3038c5133b8de832c40a59e0b9"
     },
     {
       "path": "hashing/binding-verification.py",
-      "sha256": "8879f53dcfe256b98327bd49feddccb7644ff23106f0e8d3d29fc46769948008",
-      "size_bytes": 78936,
-      "git_blob_sha1": "3c0b3dac29937853d95125f9d692486f9ed2fb58"
+      "sha256": "015fdd7540189caf7e1e4de9ab105679a53c103d7451cf5117f8bb4488de2e4e",
+      "size_bytes": 78961,
+      "git_blob_sha1": "8c2ea25f65a17c130997d2c5ba24abd04aeee2e5"
     },
     {
       "path": "preflight/build-reconstruction-input.py",
@@ -413,7 +413,7 @@
   },
   "execution_order_binding": {
     "artifact": "protocol/EXECUTION-ORDER.md",
-    "sha256": "8e3be5c3294d51c7ac743313f9decd4cad9f8b18ff99a28215bc3d2d2282ad3c",
+    "sha256": "ddb20d943e25b9b667b30bd7c1a6511c3772e8be1d6cd954e9d81bdcd75497b2",
     "frozen_scoring_algorithm": {
       "artifact": "hashing/score-derivation.py",
       "sha256": "9e6fa0e5d2ec1703b6451d71e7e988ed36448482659e419b79ef891d116f32e6",

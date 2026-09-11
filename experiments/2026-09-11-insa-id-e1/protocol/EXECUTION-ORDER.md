@@ -1,6 +1,6 @@
-# INSA-ID-E1 — Execution Order (frozen pre-execution, v6)
+# INSA-ID-E1 — Execution Order (frozen pre-execution, v6.2)
 
-**Status:** v6 (frozen-candidate-rev6), pending Frank-as-PI execution GO.
+**Status:** v6.2 (frozen-candidate-rev6.2), pending Frank-as-PI execution GO.
 **Author:** Hermes (operator).
 **Date:** 2026-09-11.
 **Binding:**
@@ -268,4 +268,4 @@ This artifact's authorization boundary is protocol + frozen-artifact preparation
 
 ---
 
-**End of EXECUTION-ORDER.md v6 (frozen-candidate-rev6).**
+**End of EXECUTION-ORDER.md v6.2 (frozen-candidate-rev6.2).**
