@@ -4,14 +4,14 @@ This directory preserves the protocol v1, v2, v3 + proposal v4, v5, v5.1 package
 
 ## v1 frozen-candidate (2026-09-11)
 
-- **v1 commit:** `26f3ed3ecc588a292fbe6983105b0c28ec0c24f5` *(actual: `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`)*
+- **v1 commit:** `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`
 - **v1 MANIFEST SHA-256:** `8052e7cfa2403d87faaa4d5008cd13f5f0cafe359e1d1963f2a3c674c605141a`
 - **v1 path:** `audit/v1-frozen-candidate/`
 - **v1 defects:** v4 corrections list documents them (in this AUDIT_TRAIL, see below). v1 was superseded by v2, v3, and v4.
 
 ## v2 frozen-candidate-rev2 (2026-09-11)
 
-- **v2 commit:** `6fdd79083608f83d9c496dcb4e69f7db29eff1e0` *(actual: `6fdd79083608f83d9c496dcb4e69f7db29eff1e0`)*
+- **v2 commit:** `6fdd79083608f83d9c496dcb4e69f7db29eff1e0`
 - **v2 MANIFEST SHA-256:** `97946101df774e5403e327302b3a0917960461274854bbf3dc140768094bf3cf`
 - **v2 path:** `audit/v2-frozen-candidate/`
 - **v2 defects:** Superseded by v3.
@@ -36,8 +36,10 @@ This directory preserves the protocol v1, v2, v3 + proposal v4, v5, v5.1 package
 
 ## v4 frozen-candidate-rev4 (current; awaiting Frank-as-PI execution GO)
 
-- **v4 commit:** *(filled at v4 freeze)*
-- **v4 MANIFEST SHA-256:** *(see `MANIFEST.sha256.txt` in the top-level directory after v4 freeze)*
+- **v4 commit:** `1b70d65301854e04ee22f7e3407b40cf47de480e`
+- **v4 MANIFEST SHA-256:** `2e08e6e1b52b821be8cece45ca4006ebd24c1d74bbfca8e58a87696fce6f35d7`
+- **v4 protocol SHA-256:** `036537fb5a3402f0a2832d3de01c18aa7a178ab92ca46444755feecabb608440`
+- **v4 EXECUTION-ORDER SHA-256:** `a53a633bb196281f46d3d17e45a95aa865f963c96ee072e6953ff43a73cc0a83`
 - **v4 path:** `experiments/2026-09-11-insa-id-e1/` (top level, NOT in audit/)
 - **v4 status:** Frozen-candidate-rev4 (per proposal v5.1 @ `1f84c31`).
 - **v4 architecture binding (per Frank-as-PI v3 review):** Implements proposal v5.1 exactly — B as complete frozen baseline bundle; D = M ∪ P ∪ O; pairwise disjoint M, P, O; O = ∅ with frozen rationale; subset-(a) = actual calibrated BIB 4-dim vector (`contract_compliance`, `selection_behavior`, `narrative_behavior`, `functional_completeness`); subset-(b) = historical 8 C12 axes preserved verbatim, separately gated, non-collapsed. v4 explicitly does NOT claim any one-to-one semantic identity between subset-(a) and subset-(b) dimensions.
@@ -72,11 +74,11 @@ This directory preserves the protocol v1, v2, v3 + proposal v4, v5, v5.1 package
 cd experiments/2026-09-11-insa-id-e1/
 python3 hashing/binding-verification.py --v4-experiment-dir . --repo-dir ../..
 
-# Verify v3 MANIFEST SHA-256
+# Verify v4 MANIFEST SHA-256
 sha256sum experiments/2026-09-11-insa-id-e1/MANIFEST.json
 
 # Verify v1 + v2 + v3 audit packages preserved
-find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥ 70 (v1 20 + v2 22 + v3 26)
+find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥ 68 (v1 20 + v2 22 + v3 26)
 
 # Verify INSA v0.3 architecture unchanged
 git cat-file -t 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1   # should be 'blob'
