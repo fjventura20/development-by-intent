@@ -1,10 +1,17 @@
 # INSA-ID-E1 — Targeted Evolution With Preservation (proposal v5)
 
-**Status:** v5 — corrects proposal v4 §7 binding errors per Frank-as-PI review at 2026-09-11. Committed on `feature/insa-id-e1-proposal` ahead of v4 @ `ed95705`. Awaiting Frank-as-PI final review of the proposal text before protocol v3 authoring begins.
+**Status:** v5.1 — Frank's five cleanup items applied on top of v5 @ `04d1d07`. Awaiting Frank-as-PI final review of the proposal text before protocol v3 authoring begins.
 
 **Author:** Hermes (operator).
 
-**Date:** 2026-09-10 (v2), 2026-09-10 (v3), 2026-09-10 (v4), 2026-09-11 (v5 architecture-binding corrections)
+**Date:** 2026-09-10 (v2), 2026-09-10 (v3), 2026-09-10 (v4), 2026-09-11 (v5 architecture-binding corrections), 2026-09-11 (v5.1 cleanup)
+
+**v5.1 cleanup vs v5 (per Frank-as-PI review at 2026-09-11):**
+1. **§5.2 stale D wording removed.** Replaced "frozen intent (`D` includes the intent; `O = ∅`)" with "same frozen baseline `B`". Both arms operate against the same frozen baseline `B`; the control vs modification distinction is the no-op directive vs the modification specification.
+2. **§7 stale D/O baseline labels removed.** `inputs/intent-document.txt` and `inputs/identity-contract.txt` are now correctly labeled as "part of `B`" (baseline), not "D baseline material" / "O baseline material".
+3. **"5 BIB scorebooks" corrected to 4.** The repository exposes four authoritative locked scorebooks (BIB-001 evaluator A, BIB-001 evaluator B, BIB-002 evaluator A, BIB-002 evaluator B). The previous reference to "five" was an audit-trail error; the count is now four, named explicitly.
+4. **Abbreviated tuple `(B, M, P, V(d), A, G)` restored to full `(B, D, M, P, O, V(d), A, G)`** in §1.3.
+5. **C20 binding requirement added to §7 baseline-statistics.json description** (per Frank-as-PI v5 cleanup): the artifact must contain or bind every value needed to reproduce C20 without judgment after execution begins, including exact source locked scorebook SHAs, exact 85-observation inclusion mapping, per-evaluator calibrated 4-d reference vector, the exact method for computing per-reconstruction Arm-C Manhattan statistics, the exact historical C20 envelope/boundary values, the explicit Boolean C20 pass/fail formula, and a deterministic derivation/verification script or equivalent reproducible procedure.
 
 **Supersedes:** v4 @ `ed95705632027f459b396cd423eae54e8bb9a81b` (preserved as audit history in git).
 
@@ -83,7 +90,7 @@ This proposal does **not** claim:
 - That any specific intelligent executor is sufficient without further constraints.
 - That this single experiment generalizes across executors, applications, or modification types.
 - That arbitrary or unbounded evolution is supported by v0.3.
-- That the v0.3 corrections are sufficient for evolutions beyond the bound `(B, M, P, V(d), A, G)` declared at protocol freeze.
+- That the v0.3 corrections are sufficient for evolutions beyond the bound `(B, D, M, P, O, V(d), A, G)` declared at protocol freeze.
 - That a PASS result validates any application other than the specific one exercised.
 - That the v0.3 frozen baseline itself is "correct" — only that the Safe Evolution Contract's bounded execution against it is testable.
 - That `PRESERVATION_FAILURE` or `MUTATION_FAILURE` alone is architectural falsification. Only `MODIFICATION_AND_PRESERVATION_FAILURE` (after ruling out runtime/evaluator/pre-check causes) strengthens the §4.1 Level 2 concern toward §12's general structure, and even then does not equate to §12 invalidity.
@@ -174,7 +181,7 @@ This is the structure v3 added. v5 preserves it unchanged and clarifies that Lev
 
 | ID | Invariant | Verification |
 |---|---|---|
-| INV-B-1 | Frozen baseline `B` content-addressed; baseline-binding artifact `inputs/baseline-binding.json` binds the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence, baseline membership, and exact baseline statistics. The numerical baseline statistics are themselves content-addressed to the original BIB scorebooks by SHA. | `preflight/INV-B-1.md` (records `inputs/baseline-binding.json` SHA + the 5 included frozen BIB scorebook SHAs) |
+| INV-B-1 | Frozen baseline `B` content-addressed; baseline-binding artifact `inputs/baseline-binding.json` binds the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence, baseline membership, and exact baseline statistics. The numerical baseline statistics are themselves content-addressed to the original BIB scorebooks by SHA. | `preflight/INV-B-1.md` (records `inputs/baseline-binding.json` SHA + the **four** locked BIB scorebook SHAs: BIB-001 evaluator A, BIB-001 evaluator B, BIB-002 evaluator A, BIB-002 evaluator B) |
 | INV-D-1 | `D` enumerated as `M ∪ P ∪ O`; pairwise-disjointness verified (set intersection = ∅); `D` SHA-bound | `preflight/INV-D-1.md` |
 | INV-M-1 | `M` enumerated with frozen per-dimension specification; additive; bounded scope | modification-spec file SHA + size + line count |
 | INV-P-1 | `P` enumerated as `subset-(a) ∪ subset-(b)`, disjoint; non-collapse attestation | per-subset SHAs + non-collapse attestation |
@@ -193,8 +200,8 @@ This is the structure v3 added. v5 preserves it unchanged and clarifies that Lev
 
 ### §5.2 Two-arm matched-pair design
 
-- **Arm C** (control): frozen intent (`D` includes the intent; `O = ∅`) + no-op directive.
-- **Arm M** (modification): same frozen intent + frozen modification specification.
+- **Arm C** (control): same frozen baseline `B` + no-op directive.
+- **Arm M** (modification): same frozen baseline `B` + frozen modification specification.
 
 `B` is the frozen baseline (per INV-B-1): content-addressed bundle of the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence, baseline membership, and exact baseline statistics. The 85-observation BIB envelope (BIB-001 non-deviated + BIB-002) provides the empirical calibration for the calibrated 4-dim reference vector and C20 envelope.
 
@@ -356,10 +363,10 @@ This table mirrors §4.1 exactly.
 Before execution (frozen pre-execution):
 
 **Baseline (B) artifacts:**
-- `inputs/baseline-binding.json` — the frozen baseline bundle. Content-addresses the governing intent (`D` baseline material), identity contract (`O` baseline material), reconstruction/test materials, evaluator/rubric identity, BIB evidence (the5 frozen BIB scorebook SHAs), baseline membership (the85 envelope observations), and exact baseline statistics (per-dim mean/std/range computed from the85 envelope, SHA-bound to the scorebooks).
-- `inputs/baseline-statistics.json` — numerical baseline: per-dim mean/std/range for both evaluators across the85 envelope observations. Traceable by SHA to the5 frozen BIB scorebooks.
-- `inputs/intent-document.txt` — frozen governing intent (part of B; the "D baseline material" referenced in §1.1). Content-addressed to BIB source commit `c3692150`.
-- `inputs/identity-contract.txt` — frozen identity contract (part of B; the "O baseline material" referenced in §1.1). Content-addressed to BIB source commit `c3692150`.
+- `inputs/baseline-binding.json` — the frozen baseline bundle. Content-addresses the governing intent, identity contract, reconstruction/test materials, evaluator/rubric identity, BIB evidence (the **four** locked BIB scorebook SHAs: BIB-001 evaluator A, BIB-001 evaluator B, BIB-002 evaluator A, BIB-002 evaluator B), baseline membership (the 85 envelope observations), and exact baseline statistics (per-dim mean/std/range computed from the 85 envelope, SHA-bound to the scorebooks).
+- `inputs/baseline-statistics.json` — numerical baseline: per-dim mean/std/range for both evaluators across the 85 envelope observations. Traceable by SHA to the **four** locked BIB scorebooks. Must contain or bind every value needed to reproduce C20 without judgment after execution begins (per Frank-as-PI v5 cleanup: exact source locked scorebook SHAs, exact 85-observation inclusion mapping, per-evaluator calibrated 4-d reference vector, the exact method for computing per-reconstruction Arm-C Manhattan statistics, the exact historical C20 envelope/boundary values, the explicit Boolean C20 pass/fail formula, and a deterministic derivation/verification script or equivalent reproducible procedure).
+- `inputs/intent-document.txt` — frozen governing intent (part of `B`). Content-addressed to BIB source commit `c3692150`.
+- `inputs/identity-contract.txt` — frozen identity contract (part of `B`). Content-addressed to BIB source commit `c3692150`.
 - `inputs/reconstruction-prompt.md` — frozen BIB reconstruction prompt (part of B's reconstruction/test materials). Content-addressed to BIB source commit `c3692150`.
 - `inputs/baseline-envelope-membership.json` — frozen 85-observation BIB envelope (part of B's baseline membership). Inherited from v0.1.
 
