@@ -1,0 +1,48 @@
+{
+  "$schema": "INSA-v0.3-preservation-gates-v1",
+  "schema_version": "1.0",
+  "record_kind": "preservation-gates-G",
+  "purpose": "Frozen G per proposal v4 §5.1 INV-G-1: per-dimension preservation gates bound only to P, covering both subset-(a) (calibrated BIB 4-dim) and subset-(b) (8 C12 axes).",
+  "experiment_id": "INSA-ID-E1",
+  "binding": {
+    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "P_subset_a": "inputs/preservation-dimensions-subset-a.json",
+    "P_subset_b": "inputs/preservation-dimensions-subset-b.json"
+  },
+  "gates": [
+    {
+      "id": "G-pres-subset-a-A",
+      "subset": "subset-(a) calibrated BIB 4-dim",
+      "evaluator": "A (Codex CLI gpt-5.6-sol, blinded)",
+      "criterion": "G_pres_a + G_pres_b per v0.1 §11.2 — Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5 (G_pres_a), AND Arm M within-Recon Manhattan mean <= 2.5 absolute (G_pres_b).",
+      "pass_rule": "Both G_pres_a and G_pres_b must PASS for this gate to PASS.",
+      "scope_note": "The +1.5 Manhattan tolerance applies ONLY to G_pres_a. Arm C validity envelope is not enlarged by the +1.5 (per v0.1 §11.2 PI freeze correction 1, C-1)."
+    },
+    {
+      "id": "G-pres-subset-a-B",
+      "subset": "subset-(a) calibrated BIB 4-dim",
+      "evaluator": "B (Claude Code CLI claude-opus-4-7, fresh session, blinded)",
+      "criterion": "Same as G-pres-subset-a-A, evaluated independently.",
+      "pass_rule": "Both G_pres_a and G_pres_b must PASS for this gate to PASS."
+    },
+    {
+      "id": "G-pres-subset-b-A",
+      "subset": "subset-(b) 8 C12 axes",
+      "evaluator": "A (Codex CLI gpt-5.6-sol, blinded)",
+      "criterion": "Each of the 8 axes (C12-1..8) independently evaluated per-axis. A per-axis C12-axis-BROKEN call is a hard fail on that axis.",
+      "pass_rule": "All 8 axes must PASS (no C12-axis-BROKEN) for this gate to PASS."
+    },
+    {
+      "id": "G-pres-subset-b-B",
+      "subset": "subset-(b) 8 C12 axes",
+      "evaluator": "B (Claude Code CLI claude-opus-4-7, fresh session, blinded)",
+      "criterion": "Same as G-pres-subset-b-A, evaluated independently.",
+      "pass_rule": "All 8 axes must PASS (no C12-axis-BROKEN) for this gate to PASS."
+    }
+  ],
+  "aggregation_rule_for_Non_target_Identity_Preservation": "Non-target_Identity_Preservation = G-pres-subset-a-A AND G-pres-subset-a-B AND G-pres-subset-b-A AND G-pres-subset-b-B AND no per-axis C12-axis-BROKEN (per proposal v4 §5.4 STEP 1).",
+  "control_validity_pre_check_C20": "Before any G evaluation, Arm C must satisfy the frozen BIB non-deviated envelope on its own (no +1.5 tolerance added to Arm C). Arm C failure on C20 -> INVALID_EXPERIMENT (proposal v4 §5.4 pre-check).",
+  "evaluator_blinding_manifest": "See inputs/acceptance-tests.json evaluator_blinding_manifest; same blinding discipline applies to G evaluators.",
+  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "modification_permitted_after_freeze": false
+}

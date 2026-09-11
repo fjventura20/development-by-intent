@@ -1,0 +1,14 @@
+# INSA-ID-E1 — Arm C directive (control, no-op, frozen pre-execution)
+#
+# Source: dbi-evolution-v0.1 inputs/arm-c-directive.txt, frozen at the v0.1
+# protocol freeze (PROTOCOL-v0.5-frozen-final.md, 2026-09-06).
+# Inherited verbatim for INSA-ID-E1 to maintain continuity with the v0.1
+# empirical record. The Arm C directive is a no-op relative to the frozen BIB
+# behavioral contract; it carries no modification layer (no "Additionally"
+# clause), so it is the contemporaneous baseline against which Arm M's targeted
+# modification is measured (per proposal v4 §5.2 two-arm matched-pair design and
+# INV-M-1).
+#
+# Binding: see MANIFEST.json.
+
+Follow the Amazing Birthday behavioral contract as specified in the durable package above. No additional directives apply to this reconstruction. Preserve all existing behaviors exactly as specified.

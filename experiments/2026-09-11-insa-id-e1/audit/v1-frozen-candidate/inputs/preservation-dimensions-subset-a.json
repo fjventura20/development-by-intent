@@ -1,0 +1,57 @@
+{
+  "$schema": "INSA-v0.3-preservation-dimensions-subset-a-v1",
+  "schema_version": "1.0",
+  "record_kind": "preservation-dimensions-subset-a",
+  "purpose": "Subset-(a) of P per proposal v4 §5.1 INV-P-1a: the calibrated BIB 4-dimensional behavior vector as the primary identity metric. Inherited verbatim from dbi-evolution-v0.1 frozen protocol §11.2 (PROTOCOL-v0.5-frozen-final.md).",
+  "experiment_id": "INSA-ID-E1",
+  "subset_role_in_P": "primary calibrated identity metric (subset-(a)); disjoint from subset-(b) per proposal v4 §5.1 INV-P-1 non-collapse attestation",
+  "binding": {
+    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "v0_1_protocol_sha": "8874692d560d9a6363ef4105fae5384b18cf6ef2",
+    "v0_1_protocol_section": "§11.2 BIB 4-dim preservation criterion (C16 ruling)"
+  },
+  "dimensions": [
+    {
+      "id": "BIB-4D-1",
+      "name": "selection_significance",
+      "type": "subjective 0-4",
+      "v01_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.2 dim 1",
+      "v_dd_value": "per-criterion within the historical BIB calibrated 0-4 range; per-(R,B) cell mean computed across candidates",
+      "frozen_tolerance_per_axis": "no per-axis tolerance (4-dim Manhattan aggregate only; see criterion below)"
+    },
+    {
+      "id": "BIB-4D-2",
+      "name": "end_of_report_synthesis",
+      "type": "binary",
+      "v01_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.2 dim 2",
+      "v_dd_value": "present/absent",
+      "frozen_tolerance_per_axis": "no per-axis tolerance"
+    },
+    {
+      "id": "BIB-4D-3",
+      "name": "lifetime_framing",
+      "type": "subjective 0-4",
+      "v01_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.2 dim 3",
+      "v_dd_value": "per-criterion within the historical BIB calibrated 0-4 range",
+      "frozen_tolerance_per_axis": "no per-axis tolerance"
+    },
+    {
+      "id": "BIB-4D-4",
+      "name": "factual_discipline",
+      "type": "binary",
+      "v01_rubric_reference": "v0.1 PROTOCOL-v0.5-frozen-final.md §11.2 dim 4",
+      "v_dd_value": "no nearby events misrepresented as exact-date",
+      "frozen_tolerance_per_axis": "no per-axis tolerance; factual discipline appears ONLY here in subset-(a), and ALSO as a subset-(b) C12 axis (axis 7) — the two are NOT the same datum and are scored independently per §11.2 (subset-(a)) and §11.3 (subset-(b))"
+    }
+  ],
+  "aggregate_criterion_inherited_from_v01": {
+    "criterion_name": "BIB 4-dim preservation criterion (C16 ruling)",
+    "g_pres_a": "Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5 (relative criterion)",
+    "g_pres_b": "Arm M within-Recon Manhattan mean <= 2.5 absolute",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 Manhattan tolerance applies ONLY to G_pres_a (the Arm M vs contemporaneous Arm C comparison). It must NOT enlarge the Arm C validity envelope. The C20 pre-check (protocol §15 / v0.1 §12, §14) requires Arm C to satisfy the frozen BIB non-deviated envelope on its own, without any +1.5 (or other) tolerance addition.",
+    "per_evaluator_independence_required": true
+  },
+  "non_collapse_attestation": "The 4 dimensions in subset-(a) are evaluated via the aggregate Manhattan criterion and are NOT individually scored as subset-(b) axes. Factual discipline appears in subset-(a) as the 4th dim of the 4-dim vector AND in subset-(b) as C12 axis 7; these are independently scored per their respective criteria and are not aggregated into a 12-dim Manhattan (per v0.1 §11.3 explicit prohibition).",
+  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "modification_permitted_after_freeze": false
+}

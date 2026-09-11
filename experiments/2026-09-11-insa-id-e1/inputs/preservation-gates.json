@@ -1,48 +1,82 @@
 {
   "$schema": "INSA-v0.3-preservation-gates-v1",
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "record_kind": "preservation-gates-G",
-  "purpose": "Frozen G per proposal v4 §5.1 INV-G-1: per-dimension preservation gates bound only to P, covering both subset-(a) (calibrated BIB 4-dim) and subset-(b) (8 C12 axes).",
+  "purpose": "Frozen G per proposal v4 §5.1 INV-G-1: per-P preservation gates covering both subset-(a) (calibrated BIB 4-dim) and subset-(b) (8 C12 axes). v2 restores the v0.1-style joint C12 BROKEN rule per Frank-as-PI at 2026-09-11: an axis is BROKEN only when Arm-M failure rate >=30% AND Arm-M failure rate is >=30pp worse than Arm-C; preservation fails for an evaluator if ANY of the eight axes is BROKEN. Evaluators return per-candidate raw scores only; the analysis layer (post-lock) computes G_pres_a, G_pres_b, C12 per-axis failure rates, C12-axis-BROKEN.",
   "experiment_id": "INSA-ID-E1",
+  "v2_revision_note": "v1 required every individual candidate to pass all eight axes; v2 restores the joint aggregate rule with explicit failure-rate thresholds and per-evaluator independence.",
   "binding": {
     "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
     "P_subset_a": "inputs/preservation-dimensions-subset-a.json",
     "P_subset_b": "inputs/preservation-dimensions-subset-b.json"
   },
-  "gates": [
-    {
-      "id": "G-pres-subset-a-A",
-      "subset": "subset-(a) calibrated BIB 4-dim",
-      "evaluator": "A (Codex CLI gpt-5.6-sol, blinded)",
-      "criterion": "G_pres_a + G_pres_b per v0.1 §11.2 — Arm M within-Recon Manhattan mean <= Arm C within-Recon Manhattan mean + 1.5 (G_pres_a), AND Arm M within-Recon Manhattan mean <= 2.5 absolute (G_pres_b).",
-      "pass_rule": "Both G_pres_a and G_pres_b must PASS for this gate to PASS.",
-      "scope_note": "The +1.5 Manhattan tolerance applies ONLY to G_pres_a. Arm C validity envelope is not enlarged by the +1.5 (per v0.1 §11.2 PI freeze correction 1, C-1)."
+
+  "subset_a_gates_BIB_4dim": {
+    "G_pres_subset_a_a_relative": {
+      "definition": "For each evaluator independently: across all (R, B, arm=M) candidates, the within-Recon Manhattan mean (from BIB 4-dim vector) <= the contemporaneous Arm-C within-Recon Manhattan mean + 1.5.",
+      "formula": "G_pres_subset_a_a = (mean(M_manhattan_within_R for arm-M candidates) <= (mean(C_manhattan_within_R for arm-C candidates) + 1.5))",
+      "evaluator_independence_required": true,
+      "binding": "P subset-(a)"
     },
-    {
-      "id": "G-pres-subset-a-B",
-      "subset": "subset-(a) calibrated BIB 4-dim",
-      "evaluator": "B (Claude Code CLI claude-opus-4-7, fresh session, blinded)",
-      "criterion": "Same as G-pres-subset-a-A, evaluated independently.",
-      "pass_rule": "Both G_pres_a and G_pres_b must PASS for this gate to PASS."
+    "G_pres_subset_a_b_absolute": {
+      "definition": "For each evaluator independently: across all (R, B, arm=M) candidates, the within-Recon Manhattan mean <= 2.5 absolute.",
+      "formula": "G_pres_subset_a_b = (mean(M_manhattan_within_R for arm-M candidates) <= 2.5)",
+      "evaluator_independence_required": true,
+      "binding": "P subset-(a)"
     },
-    {
-      "id": "G-pres-subset-b-A",
-      "subset": "subset-(b) 8 C12 axes",
-      "evaluator": "A (Codex CLI gpt-5.6-sol, blinded)",
-      "criterion": "Each of the 8 axes (C12-1..8) independently evaluated per-axis. A per-axis C12-axis-BROKEN call is a hard fail on that axis.",
-      "pass_rule": "All 8 axes must PASS (no C12-axis-BROKEN) for this gate to PASS."
+    "subset_a_pass_rule": "Both G_pres_subset_a_a and G_pres_subset_a_b must PASS for the subset-(a) gate to PASS for this evaluator.",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 Manhattan tolerance applies ONLY to G_pres_subset_a_a. Arm-C validity envelope (C20) is not enlarged by this tolerance."
+  },
+
+  "subset_b_gates_C12_axes": {
+    "per_axis_broken_rule": {
+      "definition_for_evaluator_e_and_axis_a": "axis_a is BROKEN for evaluator_e IF AND ONLY IF BOTH: (i) arm_M_failure_rate_on_axis_a >= 0.30 AND (ii) (arm_M_failure_rate_on_axis_a - arm_C_failure_rate_on_axis_a) >= 0.30.",
+      "formulas": {
+        "arm_M_failure_rate_axis_a": "count(candidates with axis_a_failure==True for arm-M candidates) / count(total arm-M candidates)",
+        "arm_C_failure_rate_axis_a": "count(candidates with axis_a_failure==True for arm-C candidates) / count(total arm-C candidates)"
+      },
+      "axis_a_failure_per_candidate": "Per-candidate axis_a failure is determined by the per-candidate raw axis score returned by the evaluator. For binary axes: failure = axis_a_score == False (or 0). For 0-4 axes: failure = axis_a_score == 0. The exact per-axis 'failure' definition is recorded per-axis in inputs/preservation-dimensions-subset-b.json.",
+      "evaluator_independence_required": true
     },
-    {
-      "id": "G-pres-subset-b-B",
-      "subset": "subset-(b) 8 C12 axes",
-      "evaluator": "B (Claude Code CLI claude-opus-4-7, fresh session, blinded)",
-      "criterion": "Same as G-pres-subset-b-A, evaluated independently.",
-      "pass_rule": "All 8 axes must PASS (no C12-axis-BROKEN) for this gate to PASS."
-    }
-  ],
-  "aggregation_rule_for_Non_target_Identity_Preservation": "Non-target_Identity_Preservation = G-pres-subset-a-A AND G-pres-subset-a-B AND G-pres-subset-b-A AND G-pres-subset-b-B AND no per-axis C12-axis-BROKEN (per proposal v4 §5.4 STEP 1).",
-  "control_validity_pre_check_C20": "Before any G evaluation, Arm C must satisfy the frozen BIB non-deviated envelope on its own (no +1.5 tolerance added to Arm C). Arm C failure on C20 -> INVALID_EXPERIMENT (proposal v4 §5.4 pre-check).",
-  "evaluator_blinding_manifest": "See inputs/acceptance-tests.json evaluator_blinding_manifest; same blinding discipline applies to G evaluators.",
+    "subset_b_pass_rule_for_evaluator_e": "subset-(b) gate PASSES for evaluator_e IF AND ONLY IF no axis in {{C12-1, C12-2, C12-3, C12-4, C12-5, C12-6, C12-7, C12-8}} is BROKEN for evaluator_e (per the joint rule above).",
+    "binding": "P subset-(b)"
+  },
+
+  "non_target_identity_preservation_aggregation_rule": {
+    "per_evaluator": "Non-target_Identity_Preservation (for evaluator e) = G_pres_subset_a_a AND G_pres_subset_a_b AND (no C12 axis BROKEN for evaluator e).",
+    "experiment_level": "Non-target_Identity_Preservation (the experiment-level claim) = (Non-target_Identity_Preservation for A) AND (Non-target_Identity_Preservation for B)."
+  },
+
+  "evaluator_scoring_vs_aggregate_separation": {
+    "evaluator_returns_per_candidate": [
+      "subset_a_4dim_vector: [selection_significance (0-4), end_of_report_synthesis (binary), lifetime_framing (0-4), factual_discipline (binary)]",
+      "subset_b_axis_scores: {C12-1..C12-8 raw scores per inputs/preservation-dimensions-subset-b.json}",
+      "evaluator_self_report.runtime_failure_observed (boolean)"
+    ],
+    "evaluator_does_NOT_return": [
+      "No reconstruction-level aggregates.",
+      "No Arm-C vs Arm-M comparison.",
+      "No G_pres_subset_a_a or G_pres_subset_a_b computation.",
+      "No per-axis BROKEN determination.",
+      "No C12 failure-rate computation."
+    ],
+    "analysis_layer_computes_post_lock": [
+      "Per-reconstruction and pooled M_manhattan_within_R and C_manhattan_within_R means.",
+      "G_pres_subset_a_a and G_pres_subset_a_b for each evaluator.",
+      "Per-axis arm_M_failure_rate and arm_C_failure_rate for each evaluator.",
+      "Per-axis BROKEN determination for each evaluator.",
+      "Subset-(b) gate pass/fail for each evaluator.",
+      "Non-target_Identity_Preservation at per-evaluator and experiment levels."
+    ]
+  },
+
+  "control_validity_pre_check_C20": {
+    "definition": "Before any M-arm analysis, Arm-C candidates must satisfy the frozen BIB non-deviated envelope on its own (no +1.5 tolerance added to Arm C; per v0.1 §11.2 PI freeze correction 1, C-1). C20 is computed from the per-candidate BIB 4-dim vector returned by each evaluator, then aggregated to per-evaluator mean Manhattan distance from the BIB mean; if for either evaluator the Arm-C mean exceeds the historical BIB envelope (recorded in inputs/baseline-envelope-membership.json), C20 FAILS.",
+    "phase": "Generation -> Arm-C scoring -> C20 gate -> (if C20 PASSES) M-arm scoring -> substantive analysis. C20 is NOT a pre-dispatch preflight gate (Arm-C candidates must exist for C20 to be computed).",
+    "C20_fail_classification": "INVALID_EXPERIMENT (per proposal v4 §5.4 pre-check)."
+  },
+
+  "evaluator_blinding_manifest": "Same blinding discipline as per inputs/acceptance-tests.json evaluator_blinding_manifest. Evaluators receive only per-candidate output text + evaluator input packet; no arm identity, no reconstruction number, no experiment identity, no candidate number.",
   "frozen_at_utc": "2026-09-11T00:00:00Z",
   "modification_permitted_after_freeze": false
 }

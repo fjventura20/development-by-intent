@@ -1,66 +1,75 @@
 {
   "$schema": "INSA-v0.3-acceptance-tests-v1",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "record_kind": "acceptance-tests-A",
-  "purpose": "Frozen A per proposal v4 §5.1 INV-A-1: per-dimension acceptance tests bound only to M, with evaluator-blinding manifest.",
+  "purpose": "Frozen A per proposal v4 §5.1 INV-A-1: per-M acceptance tests. v2 restores the exact four-gate Modification_Success pattern from proposal v4 §5.4 STEP 1 (G_mod_a..d) with the specific thresholds specified by Frank-as-PI at 2026-09-11. Evaluators return per-candidate raw M scores; the analysis layer (post-lock) computes the four gates.",
   "experiment_id": "INSA-ID-E1",
+  "v2_revision_note": "v1 incorrectly defined A-mod-c/A-mod-d as intra-evaluator rescoring checks; v2 removes those add-ons and restores the exact four-gate pattern.",
   "binding": {
     "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
     "M_source": "inputs/mutation-dimensions.json"
   },
-  "tests": [
-    {
-      "id": "A-mod-a",
-      "evaluator": "A (Codex CLI invoking gpt-5.6-sol, blinded)",
-      "M_target_id": "M-1",
-      "test_kind": "structural + content",
-      "rubric": [
-        "T1: exactly one near-date event present in the output (count == 1)",
-        "T2: the event date is within +/-30 calendar days of the birth date",
-        "T3: the event is historically significant (operator-judged pre-piloted rubric; matches v0.1 evaluator packet template §B)",
-        "T4: the event is clearly distinguished from exact-date connections in the output text (explicit label or framing distinction)"
-      ],
-      "pass_rule": "All four T1..T4 must PASS for the test to PASS",
-      "per_evaluator_independence_required": true
+  "per_candidate_evaluator_scoring": {
+    "evaluator_returns": [
+      "M1_pass (binary: near-date event present? count==1)",
+      "M2_pass (binary: event within +/-30 calendar days of birth date?)",
+      "M3_pass (binary: event is historically significant?)",
+      "M4_pass (binary: event clearly distinguished from exact-date connections in output text?)",
+      "modification_conformance (numeric 0-4: overall M-satisfaction; used for G_mod_a)",
+      "candidate_all_pass (derived: M1 AND M2 AND M3 AND M4; used for G_mod_b/G_mod_c/G_mod_d)"
+    ],
+    "evaluator_does_NOT_compute": [
+      "G_mod_a (requires reconstruction-level mean across all candidates in R; analysis-side only)",
+      "G_mod_b (requires Arm-M aggregate candidate count; analysis-side only)",
+      "G_mod_c (requires per-reconstruction all-pass rate; analysis-side only)",
+      "G_mod_d (requires contemporaneous Arm-C vs Arm-M aggregate; analysis-side only)"
+    ]
+  },
+  "four_gates_G_mod_a_to_d": {
+    "G_mod_a": {
+      "definition": "For each evaluator independently: across all Arm-M candidates in the experiment (all reconstructions pooled), the mean of modification_conformance >= 3.5/4.",
+      "formula": "G_mod_a = (mean(per_candidate.modification_conformance for all Arm-M candidates) >= 3.5)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
+      "evaluator_independence_required": true
     },
-    {
-      "id": "A-mod-b",
-      "evaluator": "B (Claude Code CLI invoking claude-opus-4-7, fresh session per I-AUTH-05, blinded)",
-      "M_target_id": "M-1",
-      "test_kind": "structural + content",
-      "rubric": [
-        "T1: exactly one near-date event present in the output (count == 1)",
-        "T2: the event date is within +/-30 calendar days of the birth date",
-        "T3: the event is historically significant (operator-judged pre-piloted rubric; matches v0.1 evaluator packet template §B)",
-        "T4: the event is clearly distinguished from exact-date connections in the output text (explicit label or framing distinction)"
-      ],
-      "pass_rule": "All four T1..T4 must PASS for the test to PASS",
-      "per_evaluator_independence_required": true
+    "G_mod_b": {
+      "definition": "For each evaluator independently: >=80% of Arm-M candidates have candidate_all_pass == true (i.e., pass all four M1..M4 checks).",
+      "formula": "G_mod_b = (count(candidate_all_pass==True for all Arm-M candidates) / count(total Arm-M candidates) >= 0.80)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
+      "evaluator_independence_required": true
     },
-    {
-      "id": "A-mod-c",
-      "evaluator": "A re-scored by A (intra-evaluator stability check; report only, not gating)",
-      "M_target_id": "M-1",
-      "test_kind": "intra-evaluator reliability",
-      "rubric": ["same as A-mod-a"],
-      "pass_rule": "Report-only; not part of Modification_Success aggregation. Captured for evidence profile.",
-      "per_evaluator_independence_required": false
+    "G_mod_c": {
+      "definition": "For each evaluator independently: every Arm-M reconstruction has >=70% of its candidates with candidate_all_pass == true (i.e., pass all four M1..M4 checks).",
+      "formula": "G_mod_c = AND over R in {R1, R2, R3}: (count(candidate_all_pass==True for Arm-M candidates in R) / count(total Arm-M candidates in R) >= 0.70)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
+      "evaluator_independence_required": true
     },
-    {
-      "id": "A-mod-d",
-      "evaluator": "B re-scored by B (intra-evaluator stability check; report only, not gating)",
-      "M_target_id": "M-1",
-      "test_kind": "intra-evaluator reliability",
-      "rubric": ["same as A-mod-b"],
-      "pass_rule": "Report-only; not part of Modification_Success aggregation. Captured for evidence profile.",
-      "per_evaluator_independence_required": false
+    "G_mod_d": {
+      "definition": "For each evaluator independently: the Arm-M all-pass rate (across all candidates pooled) exceeds the Arm-C all-pass rate by >=50 percentage points.",
+      "formula": "G_mod_d = ((arm_M_all_pass_rate - arm_C_all_pass_rate) >= 0.50)",
+      "binding": "M (per proposal v4 §5.1 INV-A-1)",
+      "evaluator_independence_required": true,
+      "note": "This is the contemporaneous Arm-C vs Arm-M comparison per proposal v4 §5.2 matched-pair design. Arm-C all-pass rate is computed from Arm-C candidates; Arm-M all-pass rate from Arm-M candidates. The analysis layer computes both from the locked scorebooks."
     }
-  ],
-  "aggregation_rule_for_Modification_Success": "Modification_Success = A-mod-a AND A-mod-b (per proposal v4 §5.4 STEP 1). A-mod-c and A-mod-d are report-only.",
+  },
+  "modification_success_aggregation_rule": {
+    "formula": "Modification_SSuccess = G_mod_a AND G_mod_b AND G_mod_c AND G_mod_d (per proposal v4 §5.4 STEP 1)",
+    "per_evaluator_independence_required": true,
+    "modification_success_per_evaluator": "Computed independently for evaluator A and evaluator B from their respective locked scorebooks.",
+    "both_evaluators_required": "Modification_Success (the experiment-level claim) = (Modification_Success for A) AND (Modification_SSuccess for B)."
+  },
   "evaluator_blinding_manifest": {
     "blinded_artifacts": [
-      "Evaluator A and B receive only the candidate output + evaluator input packet (no arm identity, no reconstruction number, no experiment identity).",
-      "Evaluator blinding packet: evaluation/evaluator-input-packet.md (frozen at protocol freeze)."
+      "Evaluator A and B receive only the candidate output + evaluator input packet (no arm identity, no reconstruction number, no experiment identity, no candidate number)."
+    ],
+    "evaluator_returns": [
+      "Per-candidate raw M scores only: M1_pass, M2_pass, M3_pass, M4_pass, modification_conformance, candidate_all_pass.",
+      "evaluator_self_report.runtime_failure_observed (boolean)."
+    ],
+    "evaluator_does_NOT_return": [
+      "No aggregate computation (no G_mod_a, no G_mod_b, no G_mod_c, no G_mod_d).",
+      "No Arm-C vs Arm-M comparison.",
+      "No reconstruction-level aggregates."
     ],
     "de_blinding_table": "results/de-blinding-table.json (auditable; constructed post-scoring from runs/<R>/<B>/<arm>/<candidate> mapping)"
   },

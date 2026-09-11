@@ -1,0 +1,22 @@
+{
+  "$schema": "INSA-v0.3-preservation-dimensions-P-v1",
+  "schema_version": "1.0",
+  "record_kind": "preservation-dimensions-P",
+  "purpose": "Frozen P per proposal v4 §5.1 INV-P-1: the union of subset-(a) (calibrated BIB 4-dim behavior vector) and subset-(b) (8 C12 non-target axes), with explicit non-collapse attestation.",
+  "experiment_id": "INSA-ID-E1",
+  "P_definition": "P := subset-(a) ∪ subset-(b), disjoint",
+  "binding": {
+    "proposal_sha": "ed95705632027f459b396cd423eae54e8bb9a81b",
+    "subset_a_artifact": "inputs/preservation-dimensions-subset-a.json (calibrated BIB 4-dim vector, primary identity metric)",
+    "subset_b_artifact": "inputs/preservation-dimensions-subset-b.json (8 C12 non-target axes, additional preservation gates)"
+  },
+  "non_collapse_attestation": {
+    "attestation_required_by": "proposal v4 §5.1 INV-P-1",
+    "attestation_text": "P is the DISJOINT UNION of subset-(a) and subset-(b). Subset-(a) is evaluated under the BIB 4-dim Manhattan aggregate criterion (G_pres_a + G_pres_b per v0.1 §11.2); subset-(b) is evaluated as 8 independently-gated binary/subjective axes. The two subsets are not concatenated into a 12-dim Manhattan. Axes sharing names across subsets (selection_significance, end_of_report_synthesis, lifetime_framing, factual_discipline) are scored under their respective subset's criteria and reported as distinct gates. Factual discipline appears as the 4th subset-(a) dim AND as C12-7 axis; these are independently scored under different criteria and reported separately.",
+    "non_collapse_self_check_command": "diff <(jq '.dimensions | map(.id)' inputs/preservation-dimensions-subset-a.json) <(jq '.axes | map(.id)' inputs/preservation-dimensions-subset-b.json) (expect: no shared IDs between subsets)",
+    "non_collapse_self_check_expected": "subset-(a) IDs: BIB-4D-1..4; subset-(b) IDs: C12-1..8 — fully disjoint ID namespaces",
+    "non_collapse_self_check_actual": "<filled at freeze time; if non-empty diff output, STOP and escalate>"
+  },
+  "frozen_at_utc": "2026-09-11T00:00:00Z",
+  "modification_permitted_after_freeze": false
+}

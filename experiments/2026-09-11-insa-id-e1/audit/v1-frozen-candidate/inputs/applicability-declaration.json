@@ -1,0 +1,42 @@
+{
+  "$schema": "INSA-v0.3-applicability-declaration-v1",
+  "schema_version": "1.0",
+  "record_kind": "applicability-declaration",
+  "purpose": "INSA v0.3 \u00a75 Applicability Declaration for INSA-ID-E1. Per proposal v4 INV-APPL-1, this declaration must be ACTIVE for State, Identity, and Evidence before any pre-execution gate passes.",
+  "experiment_id": "INSA-ID-E1",
+  "experiment_short_name": "insa-id-e1",
+  "declaration_author": "Hermes (operator)",
+  "declaration_frozen_at_utc": "2026-09-11T00:00:00Z",
+  "insa_frozen_architecture": {
+    "blob_sha": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
+    "architecture_version": "v0.3"
+  },
+  "applicable_dimensions": {
+    "state": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1 exercises the Safe Evolution Contract (\u00a712) which requires state-aware evolution: the executor must commit a consequential change against a frozen pre-mutation state, with freshness evidence captured at the M-commit boundary (INV-AUTH-5). State applies because the experiment is a controlled, state-mutating evolution of a governed intelligent executor against a frozen baseline.",
+      "evidence_artifact": "results/evidence/state-freshness-at-m-commit.md (produced during execution)"
+    },
+    "identity": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1's preservation model is built on identity-preservation gates (proposal v4 \u00a75.1 INV-P-1, \u00a75.2 subset-(a) and subset-(b)). The frozen identity contract (inputs/identity-contract.txt, blob 7ef4356f657884d65dbd4462d85c1c81b3f6fa2a) is the binding identity basis. Identity applies because the experiment tests whether declared identity dimensions are preserved under a targeted behavioral modification.",
+      "evidence_artifact": "results/evidence/identity-basis-binding.md (produced during execution)"
+    },
+    "evidence": {
+      "status": "ACTIVE",
+      "rationale": "INSA-ID-E1 produces a per-step evidence profile (proposal v4 \u00a75.1 INV-EVID-1, \u00a714 evidence-chain cross-cut) including locked evaluator scorebooks, raw candidate outputs, and causal-trace per \u00a75.3. Evidence applies because architectural claim verification requires auditable, content-addressed evidence at every consequential step.",
+      "evidence_artifact": "results/evidence/chain-integrity-report.md (produced during execution)"
+    }
+  },
+  "non_applicable_dimensions": [],
+  "modification_to_architecture": false,
+  "frozen_artifact_binding_required": true,
+  "binding_complete": true,
+  "binding_completeness_attestation": "All B + D + M + P + O + V(d) + A + G terms are content-addressed in MANIFEST.json. INV-D-1, INV-O-1, INV-P-1a, INV-P-1b, INV-V-1, INV-A-1, INV-G-1 all carry pre-mutation SHAs. INV-AUTH-1..8 captured in inputs/authority-manifest.json. INV-EVID-1 captured by content-addressing of all pre-execution artifacts. INV-APPL-1 satisfied by this declaration (State/Identity/Evidence ACTIVE). INV-STOP-1 references v0.1 C20 + BIB stop rules via protocol \u00a715.",
+  "pi_adjudication": {
+    "adjudicator": "Frank (PI)",
+    "approval_artifact": "Telegram approval at 2026-09-11 referencing proposal SHA ed95705632027f459b396cd423eae54e8bb9a81b",
+    "approval_scope": "Protocol + frozen-artifact authoring. NOT execution authorization (separate Frank-as-PI GO required per proposal v4 \u00a78)."
+  }
+}
