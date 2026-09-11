@@ -1,0 +1,64 @@
+{
+  "$schema": "INSA-v0.3-preservation-dimensions-subset-a-v1",
+  "schema_version": "1.1",
+  "record_kind": "preservation-dimensions-subset-a",
+  "purpose": "Subset-(a) of P per proposal v5.1 §5.1 INV-P-1a: the calibrated BIB 4-dim behavior vector as the primary identity metric for INSA-ID-E1. Uses the ACTUAL BIB rubric dim names verified from experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl.",
+  "experiment_id": "INSA-ID-E1",
+  "subset_role_in_P": "primary calibrated identity metric (subset-(a)); disjoint from subset-(b) per proposal v5.1 §5.1 INV-P-1 non-collapse attestation; ID namespace BIB-4D-* (no overlap with subset-(b) C12-*)",
+  "binding": {
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
+    "BIB_frozen_source_commit_sha1": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "BIB-001_evaluator_A_scorebook_sha256": "df08f5046eaf744ca4c902212405216ff3ffe6e11bb6307fbc3d1989dc385b85",
+    "BIB-001_evaluator_B_scorebook_sha256": "d2866a96934a544b17afb920937a3bc5dd6cca4e03b4ce723cd948278328c70d",
+    "BIB-002_evaluator_A_scorebook_sha256": "3ab8ffedafdb461df923a7b2177bf6fe50980702cbc0b98028407f5c75ada2f6",
+    "BIB-002_evaluator_B_scorebook_sha256": "11ac84e8cf0606dac2a585c91bd7bfb7e20bc5ddadc80d0cc72c295bf2eec437"
+  },
+  "dimensions": [
+    {
+      "id": "BIB-4D-1",
+      "label": "contract_compliance",
+      "type": "0-4 (integer, 0..4 inclusive)",
+      "original_BIB_rubric_origin": "BIB evaluator 4-dim scoring; verified from experiments/2026-09-05-dbi-bib-001-rerun-001/evaluation/evaluator-{A,B}-scores-LOCKED.jsonl (total_score field in that file sums 4 dims; here presented as the 4-dim vector per individual-dim field)",
+      "v_dd_value": "0..4 (integer); mean of 85 envelope observations = 3.5294 (evaluator A), 3.9882 (evaluator B)",
+      "failure_convention": "none at the per-axis level for the 4-dim vector; subset-(a) is adjudicated ONLY through the 4-dim Manhattan aggregate (G_pres_subset_a_a + G_pres_subset_a_b). Per-axis 'failure = score == 0' or any binary conversion is NOT applied to the 4-dim vector; that convention belongs ONLY to subset-(b) C12 axes per v0.1 §11.3 PI pass 3 and proposal v5.1 §5.1 INV-P-1b.",
+      "frozen_tolerance_per_axis": "no per-axis tolerance (4-dim Manhattan aggregate only; see criterion below)"
+    },
+    {
+      "id": "BIB-4D-2",
+      "label": "selection_behavior",
+      "type": "0-4 (integer, 0..4 inclusive)",
+      "original_BIB_rubric_origin": "BIB evaluator 4-dim scoring (same as BIB-4D-1)",
+      "v_dd_value": "0..4 (integer); mean of 85 envelope observations = 3.9647 (evaluator A), 3.9882 (evaluator B)",
+      "failure_convention": "none at the per-axis level; adjudicated only through 4-dim Manhattan aggregate",
+      "frozen_tolerance_per_axis": "no per-axis tolerance"
+    },
+    {
+      "id": "BIB-4D-3",
+      "label": "narrative_behavior",
+      "type": "0-4 (integer, 0..4 inclusive)",
+      "original_BIB_rubric_origin": "BIB evaluator 4-dim scoring (same as BIB-4D-1)",
+      "v_dd_value": "0..4 (integer); mean of 85 envelope observations = 3.8471 (evaluator A), 4.0000 (evaluator B)",
+      "failure_convention": "none at the per-axis level; adjudicated only through 4-dim Manhattan aggregate",
+      "frozen_tolerance_per_axis": "no per-axis tolerance"
+    },
+    {
+      "id": "BIB-4D-4",
+      "label": "functional_completeness",
+      "type": "0-4 (integer, 0..4 inclusive)",
+      "original_BIB_rubric_origin": "BIB evaluator 4-dim scoring (same as BIB-4D-1)",
+      "v_dd_value": "0..4 (integer); mean of 85 envelope observations = 3.4941 (evaluator A), 4.0000 (evaluator B)",
+      "failure_convention": "none at the per-axis level; adjudicated only through 4-dim Manhattan aggregate",
+      "frozen_tolerance_per_axis": "no per-axis tolerance"
+    }
+  ],
+  "aggregate_criterion_inherited_from_v01": {
+    "criterion_name": "BIB 4-dim preservation criterion (v0.1 §11.2 C16 ruling)",
+    "G_pres_subset_a_a_relative": "Arm M within-Recon mean 4-dim Manhattan distance from the per-evaluator reference vector <= Arm C within-Recon mean 4-dim Manhattan distance from the same reference vector + 1.5",
+    "G_pres_subset_a_b_absolute": "Arm M within-Recon mean 4-dim Manhattan distance from the per-evaluator reference vector <= 2.5 absolute (per proposal v5.1 §6 + v0.1 §11.2; v0.1 described the 2.5 as a backstop)",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 Manhattan tolerance applies ONLY to G_pres_subset_a_a. Arm-C validity envelope (C20) is not enlarged by this tolerance.",
+    "per_evaluator_independence_required": true
+  },
+  "non_collapse_attestation_v4": "The 4 dimensions in subset-(a) are evaluated via the aggregate 4-dim Manhattan criterion. Subset-(a) is a SEPARATE PRESERVATION FAMILY from subset-(b) (the 8 C12 axes). The two subsets are kept disjoint by ID namespace (BIB-4D-* vs C12-*) and by criterion (Manhattan aggregate vs per-axis binary-failure). The v4 protocol EXPLICITLY does NOT invent any one-to-one semantic identity between the subset-(a) BIB 4-dim dimensions and any subset-(b) C12 axis, even where the display names happen to coincide in unrelated v0.1 §11.3 prose (e.g., 'selection significance' as C12-3, 'factual discipline' as C12-7). The calibrated 4-dim vector IS the BIB rubric's 4-dim; the C12 axes ARE the v0.1 §11.3 8 axes; they are measured by different scorebooks (or the same scorebook producing both score vectors), reported as separate gates, and adjudicated under separate criteria.",
+  "frozen_at_utc_date": "2026-09-11",
+  "modification_permitted_after_freeze": false
+}

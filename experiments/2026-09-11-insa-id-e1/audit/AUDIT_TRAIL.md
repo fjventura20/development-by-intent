@@ -1,13 +1,13 @@
 # INSA-ID-E1 — Audit Trail
 
-This directory preserves the protocol v1, v2, v3, v4 + proposal v4, v5, v5.1 packages as audit history. Protocol v5 (frozen-candidate-rev5) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
+This directory preserves the protocol v1, v2, v3, v4, v5 + proposal v4, v5, v5.1 packages as audit history. Protocol v6 (frozen-candidate-rev6) is at the top level of `experiments/2026-09-11-insa-id-e1/`.
 
 ## v1 frozen-candidate (2026-09-11)
 
 - **v1 commit:** `26f7ed3ecc588a292fbe6983105b0c28ec0c24f5`
 - **v1 MANIFEST SHA-256:** `8052e7cfa2403d87faaa4d5008cd13f5f0cafe359e1d1963f2a3c674c605141a`
 - **v1 path:** `audit/v1-frozen-candidate/`
-- **v1 defects:** v4 corrections list documents them (in this AUDIT_TRAIL, see below). v1 was superseded by v2, v3, v4, and v5.
+- **v1 defects:** v4 corrections list documents them (in this AUDIT_TRAIL, see below). v1 was superseded by v2, v3, v4, v5, and v6.
 
 ## v2 frozen-candidate-rev2 (2026-09-11)
 
@@ -40,36 +40,60 @@ This directory preserves the protocol v1, v2, v3, v4 + proposal v4, v5, v5.1 pac
 - **v4 MANIFEST SHA-256:** `2e08e6e1b52b821be8cece45ca4006ebd24c1d74bbfca8e58a87696fce6f35d7`
 - **v4 path:** `audit/v4-frozen-candidate/`
 - **v4 defects identified by Frank-as-PI v5 review:**
-   - C20 derivation did not consume the actual evaluator return schema (used synthetic reconstruction_id, block, generic scores fields).
-   - C20 derivation did not require the operator-only blind map.
-   - Evaluator packet was not self-sufficient (did not include the test prompt, BIB scoring anchors, M1-M4 definitions, C12 definitions, current return schema).
-   - Blind-map timing language suggested the blind map was constructed in Phase 2 (must be Phase 0).
+   - Real scorebook → blind-map → C20 interface: C20 used synthetic reconstruction_id/block/generic scores fields, did not require --blind-map.
+   - Evaluator packet was not self-sufficient (missing test prompt template, BIB scoring anchors, M1-M4 definitions, C12 definitions, return schema).
+   - Blind-map timing language suggested Phase 2 construction; v6 says Phase 0 construction + Phase 2 use.
    - C20 metric provenance language did not distinguish INSA-ID-E1's preregistered operationalization from the v0.1 inherited computation.
-   - Subset-(a) provenance language did not distinguish the calibrated BIB 4-dim from the global-reference-vector distance formulation.
 
-## v5 frozen-candidate-rev5 (current; awaiting Frank-as-PI execution GO)
+## v5 frozen-candidate-rev5 (2026-09-11)
 
-- **v5 commit:** *(filled at v5 freeze)*
-- **v5 MANIFEST SHA-256:** *(see `MANIFEST.sha256.txt` in the top-level directory after v5 freeze)*
-- **v5 protocol SHA-256:** `dfc289031f1343d9800b1a05948fbbb17d031c07b46285c14ddcf3cd9b1f3b6a`
-- **v5 EXECUTION-ORDER SHA-256:** `7dc4db9f06054e113196fb763bbcb9891e4bc84ed1183fe6edaaa4c08a169f18`
-- **v5 evaluator-input-packet SHA-256:** `d3ae3c717ee776788be3455d06ec67d189ef473b25bacdae7630346027bcdda3`
-- **v5 c20-derivation SHA-256:** `5595f514440dd8805a05470df672ad734bf094a9aa7bf1f4a812af09503322f7`
-- **v5 binding-verification SHA-256:** `1adb886a9d862e48f4ca4b619edd1dc4ff3f47264e8738fd89bd71863513991b`
-- **v5 path:** `experiments/2026-09-11-insa-id-e1/` (top level, NOT in audit/)
-- **v5 status:** Frozen-candidate-rev5 (per proposal v5.1 @ `1f84c31`).
-- **v5 corrections vs v4:**
-   - **Real scorebook → blind-map → C20 interface.** C20 now consumes the actual evaluator return schema (blind_id + M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report) and requires a `--blind-map` input. The operator joins each evaluator-returned record to the locked blind map to recover (R, B, arm, candidate). C20 rejects unknown / duplicate blind IDs, duplicate tuples, Arm-M blind IDs in Arm-C scorebooks, and (R, B) cells outside the preregistered current expected cells.
-   - **Self-sufficient evaluator packet.** Evaluators receive the test prompt + frozen behavioral contract + BIB 0-4 scoring anchors + M1-M4 definitions + worldwide-historical-significance criterion + C12 definitions + return schema. The modification specification itself is hidden. Evaluators remain blind to arm identity, reconstruction, phase, and provenance.
-   - **Blind-map timing language corrected.** `preflight/blind-map.json` is constructed and locked in Phase 0, before evaluator invocation. Phase 2 USES the already-locked blind map.
-   - **C20 metric provenance language clarified.** INSA-ID-E1 v5.1 preregisters its own C20 (Manhattan-from-reference-vector) and its own subset-(a) (calibrated 4-dim vector, preregistered reference vector). The 85-record BIB corpus calibrates that new rule. v5 does NOT describe INSA-ID-E1's C20 as the identical inherited v0.1 C20 computation.
-   - **Subagent-(a) provenance language clarified.** The BIB 4-dim dimensions and the +1.5 / 2.5 threshold values come from predecessor calibration. INSA-ID-E1's global-reference-vector distance formulation is the v5.1 preregistered operationalization; v5 does NOT claim that this exact distance computation is verbatim the v0.1 computation.
-   - **Evaluator-interface structural validation added to binding-verification.py.** The frozen verification script statically verifies: (1) evaluator packet contains the 4 correct BIB dimensions; (2) evaluator packet contains M1-M4 definitions; (3) evaluator packet contains the frozen BIB scoring anchors; (4) evaluator packet requires the exact test prompt; (5) C20 accepts the exact evaluator return structure; (6) C20 requires and uses the blind map; (7) synthetic tests use no evaluator-forbidden provenance fields.
-- **v5 structural tests verified at freeze time:**
-   - All 25 listed SHAs match on-disk
+- **v5 commit:** `69007b3352e8fc26d65680f3a7c6a1ddc1dc8d0c`
+- **v5 MANIFEST SHA-256:** `a7615784277ecdf768752d3e292af988d6e7b45997556eb186d8b4f31a7cdace`
+- **v5 path:** `audit/v5-frozen-candidate/`
+- **v5 defects identified by Frank-as-PI v6 review:**
+   - Frozen test-invocation schedule was missing (v5 referenced test-invocations in the protocol but did not freeze `inputs/test-invocations.json` with a deterministic schedule). The executor could in principle invent the birthdate at runtime.
+   - Historical BIB 0-4 anchors were paraphrased/simplified instead of reproduced verbatim from the BIB-001 frozen evaluator rubric. Current Arm-C and Arm-M candidates must be scored against the same measurement rubric that generated the frozen BIB baseline.
+   - Worldwide-historical-significance rule was the broader "global, regional, or widely-cited" criterion instead of the preregistered ≥2-of-4 rule (v0.1 §9.2 PI pass 3).
+   - The operator-side scorebook format omitted G_subset_b_axis_scores, losing C12 evidence for Phase 4.
+   - The C20 derivation did not require a blind map and did not reject Arm-M blind IDs in Arm-C scorebooks.
+   - C20 did not require exact match between scorebook R/B/arm/candidate and the blind map.
+   - The Phase-3 "same blind_id" wording was incorrect (the frozen blind-map design has one-ID->one-tuple; Phase 3 uses a FRESH per-arm blind_id for the same birthdate/test).
+
+## v6 frozen-candidate-rev6 (current; awaiting Frank-as-PI execution GO)
+
+- **v6 commit:** *(filled at v6 freeze)*
+- **v6 MANIFEST SHA-256:** `54c0f803981ae89ec64705a64c9118a9944b54f6d842b1d4b0de3b1743184e26`
+- **v6 protocol SHA-256:** `24ef0c793efbd97b02b944b9a800b7821711117bb4c25c765e33cc9431966916`
+- **v6 EXECUTION-ORDER SHA-256:** `acce2b9fb70264a2291734ac85e6d9660b551634e48a11a908e37fe7b567483d`
+- **v6 evaluator-input-packet SHA-256:** `7ed8a72bd73ce59e1ded5146855cb2869c942f3703c767a6413690c3fd7251fa`
+- **v6 c20-derivation SHA-256:** `49097f4cbf207f2aaa943e24e207d4adfaeffbe11912b8d8ada96c45c164b2d76`
+- **v6 normalize-and-join SHA-256:** `7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836`
+- **v6 binding-verification SHA-256:** `4ad613f016bfa3e52d12c16183933cbb50315a762d5a196bc81ead80b55ab34b`
+- **v6 test-invocations SHA-256:** `67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a`
+- **v6 evaluator-rubric SHA-256:** `c19ac46203bddb7eeb360819e6e5fa46c94f031a926d6cb6d7d07e5ee0af3409`
+- **v6 path:** `experiments/2026-09-11-insa-id-e1/` (top level, NOT in audit/)
+- **v6 status:** Frozen-candidate-rev6 (per proposal v5.1 @ `1f84c31`).
+- **v6 corrections vs v5:**
+   - **Frozen test-invocation schedule.** `inputs/test-invocations.json` content-addresses the exact 5-test corpus from the BIB-001 frozen test set, repeated twice (run-1 + run-2) per (R, B, arm) cell, mapping every candidate index 1..10 to its exact `Birthdate <date including year>` invocation. The executor MUST consume the test invocation from this artifact via the blind map; it MUST NOT invent or select the birthdate at runtime.
+   - **Restored exact historical BIB scoring anchors.** `inputs/evaluator-rubric.json` content-addresses the verbatim BIB-001 frozen evaluator rubric (`experiments/2026-09-05-dbi-bib-001-rerun-001/inputs/EVALUATOR-RUBRIC.md`) used to produce the 85-record calibration. The 4 calibrated dimensions (contract_compliance, selection_behavior, narrative_behavior, functional_completeness) and their 0-4 anchors are reproduced verbatim. Current Arm-C and Arm-M candidates are scored against the same measurement rubric that generated the frozen BIB baseline.
+   - **Restored frozen worldwide-historical-significance rule (M3).** v6 uses the preregistered ≥2-of-4 rule (v0.1 §9.2 PI pass 3 ruling). M3 PASS iff at least 2 of the 4 criteria are satisfied. v6 does NOT use the broader "global, regional, or widely-cited" criterion.
+   - **Frozen normalize-and-join script.** `hashing/normalize-and-join.py` consumes the raw evaluator-return JSON + locked blind map and produces the immutable operator-side scorebook, preserving M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report. Adds reconstruction_id, block, arm, candidate, birthdate, test_id, run solely from the blind map. Rejects unknown / duplicate blind IDs, duplicate tuples, forbidden provenance fields, and any operator-metadata mismatch (fatal nonzero on any violation).
+   - **C12 evidence preserved in locked scorebooks.** The operator-side scorebook retains the full raw scoring payload, including all 8 C12 axes (G_subset_b_axis_scores). The Phase-4 analysis consumes these locked values directly to compute C12 per-axis failure rates and the BROKEN rule.
+   - **C20 derives R/B exclusively from the blind map.** `hashing/c20-derivation.py` v6 requires `--blind-map`, loads the operator-side Arm-C scorebook, joins each record against the blind map, verifies exact match on reconstruction_id/block/arm/candidate/birthdate, rejects arm != expected, rejects (R, B) outside the preregistered current expected cells, and fails fatally on any mismatch.
+   - **Phase 3 wording corrected.** Phase 3 uses the same test invocation (same birthdate) as Phase 1 for the matched (R, B, test, run) tuple, but generates a **FRESH per-arm blind_id** (the frozen blind-map design has one-ID->one-tuple; the run-keyed identifier is per-arm, not shared with Arm-C). Phase 3 does NOT use "the same blind_id" as Arm-C.
+   - **Clean-environment verification.** `hashing/binding-verification.py` v6 runs from a clean checkout using only frozen repository artifacts and temporary files it creates itself. The `clean-environment verification case` is exercised at freeze time and asserts that a clean run produces the same MANIFEST.
+   - **No /tmp/bib_data.pkl dependency.** The binding-verification script reads envelope records from `inputs/baseline-statistics.json` (the canonical frozen artifact), not from a /tmp pickle.
+- **v6 structural tests verified at freeze time:**
+   - All 26 listed SHAs match on-disk
    - All cross-references consistent (no SHA conflicts)
    - D = M ∪ P ∪ O pairwise-disjoint: PASS
-   - C20 healthy real-schema + blind map: c20_joint_pass=***
+   - Evaluator-rubric.json content-addresses the exact frozen BIB rubric: OK (sha256=`0d665161...`)
+   - Evaluator-rubric.json content-addresses the exact frozen test corpus: OK (sha256=`a61a7505...`)
+   - Evaluator packet contains the exact historical BIB 0-4 anchors for all 4 dimensions: OK
+   - Evaluator packet contains the preregistered ≥2-of-4 worldwide-significance rule: OK
+   - Evaluator packet does NOT contain the broader "global, regional, or widely-cited" rule: OK
+   - test-invocations.json content-addresses the exact 5 frozen test corpus invocations: OK
+   - C20 healthy real-schema scorebook + blind map: c20_joint_pass=***
    - C20 missing R2/B: c20_joint_pass=False (missing current cell)
    - C20 degraded R1/B (contract_compliance=0): c20_joint_pass=False (worst current cell mean > frozen historical envelope bound)
    - C20 unknown blind ID: FATAL exit 2
@@ -77,15 +101,12 @@ This directory preserves the protocol v1, v2, v3, v4 + proposal v4, v5, v5.1 pac
    - C20 Arm-M blind ID in Arm-C scorebook: FATAL exit 2
    - C20 tampered historical scorebook: FATAL exit 2
    - C20 tampered baseline membership: FATAL exit 2
-   - Evaluator packet contains 4 BIB dimensions: OK
-   - Evaluator packet contains M1-M4 definitions: OK
-   - Evaluator packet contains BIB 0-4 scoring anchors: OK
-   - Evaluator packet requires test prompt template (Birthdate): OK
-   - Evaluator packet contains C12-1..8 definitions: OK
-   - Evaluator packet documents current return schema: OK
-   - Evaluator packet does NOT contain modification specification text: OK
-- **v5 truthful freeze timestamps:** `frozen_at_utc_date` (date-only); `manifest_generated_at_utc` (set by the binding-verification script via `datetime.now(timezone.utc).isoformat()`).
-- **v5 no model dispatch, no evaluator invocation, no candidate generation:** confirmed (no `runs/`, no scorebooks, no synthesis files, no execution-authority witness, no C20-decision-record).
+   - normalize-and-join rejects forbidden provenance fields in evaluator return: FATAL
+   - normalize-and-join rejects metadata mismatches between raw evaluator return and blind map: FATAL
+   - C12 evidence (all 8 axes) preserved in the locked scorebook: OK
+   - Clean-environment verification case: PASS (the verifier ran successfully in a fresh tempdir using only frozen repo artifacts + temporary files it created itself)
+- **v6 truthful freeze timestamps:** `frozen_at_utc_date` (date-only); `manifest_generated_at_utc` (set by the binding-verification script via `datetime.now(timezone.utc).isoformat()`).
+- **v6 no model dispatch, no evaluator invocation, no candidate generation:** confirmed (no `runs/`, no scorebooks, no synthesis files, no execution-authority witness, no C20-decision-record).
 
 ## Proposal lineage
 
@@ -101,13 +122,13 @@ This directory preserves the protocol v1, v2, v3, v4 + proposal v4, v5, v5.1 pac
 ```bash
 # Re-run the binding-verification script (deterministic; reproduces MANIFEST)
 cd experiments/2026-09-11-insa-id-e1/
-python3 hashing/binding-verification.py --v5-experiment-dir . --repo-dir ../..
+python3 hashing/binding-verification.py --v6-experiment-dir . --repo-dir ../../
 
-# Verify v5 MANIFEST SHA-256
+# Verify v6 MANIFEST SHA-256
 sha256sum experiments/2026-09-11-insa-id-e1/MANIFEST.json
 
-# Verify v1 + v2 + v3 + v4 audit packages preserved
-find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥ 95 (v1 20 + v2 22 + v3 26 + v4 27)
+# Verify v1 + v2 + v3 + v4 + v5 audit packages preserved
+find experiments/2026-09-11-insa-id-e1/audit -type f | wc -l   # should be ≥ 122 (v1 20 + v2 22 + v3 26 + v4 27 + v5 29 = 124)
 
 # Verify INSA v0.3 architecture unchanged
 git cat-file -t 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1   # should be 'blob'
@@ -115,8 +136,12 @@ git cat-file -t 848e0fe014f5b4a61ba2cb92e772ee3499dca9c1   # should be 'blob'
 # Verify dbi-evolution-v0.1 protocol unchanged
 git ls-tree origin/feature/insa-id-e1-proposal:experiments/2026-09-06-dbi-evolution-v0.1/protocol/PROTOCOL-v0.5-frozen-final.md
 # Should still show blob 8874692d560d9a6363ef4105fae5384b18cf6ef2
+
+# Verify clean-environment case: copy the v6 experiment dir to a fresh tempdir, run the verifier
+cp -r experiments/2026-09-11-insa-id-e1 /tmp/v6-fresh && cd /tmp/v6-fresh && python3 hashing/binding-verification.py --v6-experiment-dir . --repo-dir ../../../..
+# The clean run must produce the same MANIFEST.json SHA-256
 ```
 
 ## Authority boundary
 
-This audit directory is preserved but **not** part of the v5 binding. The v5 binding references only the top-level artifacts listed in v5 MANIFEST.json.
+This audit directory is preserved but **not** part of the v6 binding. The v6 binding references only the top-level artifacts listed in v6 MANIFEST.json.

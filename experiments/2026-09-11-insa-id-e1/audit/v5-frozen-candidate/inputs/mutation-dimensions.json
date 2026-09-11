@@ -1,0 +1,36 @@
+{
+  "$schema": "INSA-v0.3-mutation-dimensions-v1",
+  "schema_version": "1.1",
+  "record_kind": "mutation-dimensions-M",
+  "purpose": "Frozen M per proposal v5.1 §5.1 INV-M-1: enumerated, additive, bounded, auditable post-hoc against this frozen spec. The M specification is single-target (one additional behavior) for INSA-ID-E1.",
+  "experiment_id": "INSA-ID-E1",
+  "M_specification_source": "inputs/modification-specification.txt (frozen)",
+  "binding": {
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c"
+  },
+  "M_enumeration": [
+    {
+      "id": "M-1",
+      "label": "near_date_historical_event_addition",
+      "description": "Include exactly one historically significant worldwide event occurring within +/-30 calendar days of the birth date.",
+      "type": "additive",
+      "additive_verification": "Verified additive: does not remove, replace, or alter any existing behavior in the frozen BIB behavioral contract. Adds a single new event-connection to the output.",
+      "bounded_verification": "Single-target: exactly one such event per output (not zero, not two-or-more). The 'exactly one' constraint is the bounded-ness check.",
+      "distinction_requirement": "The near-date event must be clearly distinguished from exact-date connections (i.e., the report must label the distinction; it must not be presented as an exact-date connection).",
+      "scope_bound": "Within +/-30 calendar days of the birth date; not globally historical."
+    }
+  ],
+  "additive_attestation": "M-1 is additive — it adds one event-connection but does not modify any existing behavior. Verified against frozen BIB behavioral contract (B baseline).",
+  "bounded_attestation": "M-1 is bounded — single-target, single-class (near-date historical), single constraint (exactly one per output).",
+  "auditable_post_hoc": true,
+  "audit_mechanism": "Each per-(R, B, M) output is scored by both evaluators on the M-1 acceptance test (inputs/acceptance-tests.json). The acceptance test verifies: (i) exactly one near-date event present, (ii) the event is within +/-30 calendar days of the birth date, (iii) the event is historically significant, (iv) the event is clearly distinguished from exact-date connections in the output text.",
+  "modification_classes_NOT_in_M": [
+    "Removal of any existing behavior (forbidden — would violate additive constraint)",
+    "Replacement of any existing behavior (forbidden — would violate additive constraint)",
+    "Modification of subset-(a) BIB 4-dim dimensions (forbidden — preservation territory, governed by G_pres_subset_a_*)",
+    "Modification of subset-(b) C12 axes (forbidden — preservation territory, governed by subset-(b) BROKEN rule)",
+    "Multiple near-date events (forbidden — would violate bounded constraint)"
+  ],
+  "frozen_at_utc_date": "2026-09-11",
+  "modification_permitted_after_freeze": false
+}

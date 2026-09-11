@@ -7,7 +7,7 @@
   "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
   "insa_frozen_architecture_reference": {
-    "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
+    "blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
     "commit_sha": "d2c2ad93d95d048e6e2e0c3d42d993a1ecd40f1b",
     "architecture_version": "v0.3",
     "modification_permitted": false
@@ -20,10 +20,10 @@
   "bib_frozen_source_reference": {
     "frozen_source_commit_sha1": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
     "intent_git_blob_sha1_at_c3692150": "7b10cb0641ab68572c7cf9d89a9c49f1afdc3428",
-    "identity_contract_git_blob_sha1_at_c3692150": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
-    "reconstruction_prompt_git_blob_sha1_at_c3692150": "2e37f47d99059238bd9484560e310d2f89744069",
     "intent_sha256_on_disk": "7f22a0fa7ede3c6e6938b2affc1298a52fd566b9c5707579461ba661d0d6fb33",
+    "identity_contract_git_blob_sha1_at_c3692150": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a",
     "identity_contract_sha256_on_disk": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159",
+    "reconstruction_prompt_git_blob_sha1_at_c3692150": "2e37f47d99059238bd9484560e310d2f89744069",
     "reconstruction_prompt_sha256_on_disk": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce",
     "byte_identity_to_frozen_source": true
   },
@@ -70,28 +70,34 @@
     "sha256": "b6b6ad4b9e32d451f47b3fbb2d35bcd4fcff39c84aa0bea682ad20d422166ee2",
     "purpose": "Numerical baseline: per-dim mean/std/range for both evaluators across 85 envelope observations. Contains the preregistered 4-dim reference vectors, the historical envelope per-(R, B) cell means, the frozen historical envelope bound (A=1.807059, B=0.414118), the explicit Boolean C20 PASS/FAIL formula, the C20 method, and the C20 derivation script binding."
   },
-  "evaluator_rubric": {
-    "artifact": "inputs/evaluator-rubric.json",
-    "sha256": "c19ac46203bddb7eeb360819e6e5fa46c94f031a926d6cb6d7d07e5ee0af3409",
-    "role": "Frozen BIB evaluator rubric content. Reproduces the exact historical 0-4 rubrics used to produce the 85-record calibration, plus the preregistered worldwide-historical-significance rule. Current Arm-C and Arm-M candidates are scored against the same measurement rubric that generated the frozen BIB baseline.",
-    "bib_frozen_evaluator_rubric_path": "experiments/2026-09-05-dbi-bib-001-rerun-001/inputs/EVALUATOR-RUBRIC.md",
-    "bib_frozen_evaluator_rubric_sha256": "0d665161a34d98d9ee69ccdad46d0e2b438f46b6cffb51ef9722b501c88428fb",
-    "worldwide_historical_significance_rule": "M3 PASS iff AT LEAST 2 of the 4 criteria are satisfied (per v0.1 \u00a79.2 PI pass 3)"
+  "evaluator_rubric_evidence": {
+    "purpose": "Per proposal v5.1 \u00a77 baseline-binding.json should content-address every baseline component, including the relevant historical evaluator/rubric evidence.",
+    "rubric_artifact": "inputs/evaluator-rubric.json",
+    "rubric_sha256": "098e1fc60d6d63be7aa4d14719459aef4e1196bdf7ca5e04a187f4e299f6a98b",
+    "rubric_role": "Per-dimension tolerance values (V(d)) for subset-(a) and subset-(b). Contains the preregistered 4-dim reference vectors (which match baseline-statistics calibrated_4d_reference_vectors)."
   },
+  "baseline_role_in_INSA_ID_E1": "B = the frozen baseline bundle (governing intent + identity contract + reconstruction materials + four locked BIB scorebooks + baseline membership + baseline statistics + evaluator rubric evidence), against which Arm C and Arm M are executed per proposal v5.1 \u00a75.2.",
+  "v4_dag_note": "baseline-binding.json (this file) is built AFTER inputs/baseline-statistics.json is finalized; this file references the finalized baseline-statistics SHA. This is a one-way content-addressed DAG, not a cycle: baseline-envelope-membership.json -> baseline-statistics.json -> baseline-binding.json.",
+  "modification_permitted_after_freeze": false,
   "test_invocations": {
     "artifact": "inputs/test-invocations.json",
-    "sha256": "67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a",
+    "sha256": "665b1d318fed14b7b80ceb254576a17f9e723006deae64de678320e4b53ecc5e",
     "role": "Frozen content-addressed test invocation schedule. Maps every candidate index 1..10 (per (R, B, arm) cell) to its exact frozen Birthdate <date including year> invocation. The 5 distinct test prompts T1..T5 are repeated twice (run-1 and run-2) within each (R, B) cell. The executor MUST consume the test invocation from this artifact via the blind map; it MUST NOT invent or select the birthdate at runtime.",
     "frozen_test_corpus_source": "experiments/2026-09-05-dbi-bib-001-rerun-001/inputs/test-corpus.txt",
     "frozen_test_corpus_sha256": "a61a75053a4921e23922075be2164932b1eb543fff7c3c29b7baaea97d60f9a1"
   },
+  "evaluator_rubric": {
+    "artifact": "inputs/evaluator-rubric.json",
+    "sha256": "9f6dcc97a8f6d6a5272c102ec650baf71f4f772c981d1dbb1fb97aa29791e10e",
+    "role": "Frozen BIB evaluator rubric content. Reproduces the exact historical 0-4 rubrics used to produce the 85-record calibration, plus the preregistered worldwide-historical-significance rule. Current Arm-C and Arm-M candidates are scored against the same measurement rubric that generated the frozen BIB baseline.",
+    "bib_frozen_evaluator_rubric_path": "experiments/2026-09-05-dbi-bib-001-rerun-001/inputs/EVALUATOR-RUBRIC.md",
+    "bib_frozen_evaluator_rubric_sha256": "0d665161a34d98d9ee69ccdad46d0e2b438f46b6cffb51ef9722b501c88428fb",
+    "worldwide_historical_significance_rule": "M3 PASS iff AT LEAST 2 of the 4 criteria are satisfied (per v0.1 \u00a79.2 PI pass 3 ruling)"
+  },
   "normalize_and_join_script": {
     "artifact": "hashing/normalize-and-join.py",
-    "sha256": "7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836",
+    "sha256": "3eb4f9e170778b6fbedeeeaf8a7a41dc2473f784ad8774e11ec8548f94569aa4",
     "role": "Frozen deterministic evaluator-return \u2192 operator-side scorebook normalization/join script. Consumes raw evaluator-return JSON + locked blind map. Preserves M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report. Adds R/B/arm/candidate/birthdate/test_id/run solely from blind map. Rejects unknown / duplicate blind IDs, duplicate tuples, and any operator-metadata mismatch (fatal nonzero on any violation)."
   },
-  "v6_dag_order": "baseline-envelope-membership.json (leaf) -> baseline-statistics.json (per-evaluator stats from 85 envelope records) -> dimensions-decomposition.json (M / subset-(a) / subset-(b) / O SHAs) -> preservation-dimensions.json (subset-(a) \u222a subset-(b)) -> preservation-dimensions-subset-{a,b}.json (subset SHAs) -> evaluator-rubric.json (frozen BIB rubric + test corpus + worldwide-significance rule) -> test-invocations.json (frozen test schedule) -> mutation-dimensions.json (M enumeration) + modification-specification.txt (M text) -> acceptance-tests.json (A, 4 G_mod gates) + preservation-gates.json (G, with C12 BROKEN rule) -> authority-manifest.json (static-only) + applicability-declaration.json (ACT ACT ACT) -> baseline-binding.json (this file; B; references finalized baseline-statistics SHA + frozen test-invocations + frozen evaluator-rubric + frozen normalize-and-join) -> protocol/INSA-ID-E1-protocol.md (v6) + protocol/EXECUTION-ORDER.md (v6) + evaluation/evaluator-input-packet.md (v6) -> hashing/score-derivation.py + hashing/c20-derivation.py + hashing/normalize-and-join.py + hashing/binding-verification.py -> MANIFEST.json",
-  "baseline_role_in_INSA_ID_E1": "B = the frozen baseline bundle (governing intent + identity contract + reconstruction materials + four locked BIB scorebooks + baseline membership + baseline statistics + evaluator rubric + test invocations + normalize-and-join script), against which Arm C and Arm M are executed per proposal v5.1 \u00a75.2.",
-  "v6_dag_note": "baseline-binding.json (this file) is built AFTER inputs/baseline-statistics.json is finalized; this file references the finalized baseline-statistics SHA. This is a one-way content-addressed DAG, not a cycle: baseline-envelope-membership.json -> baseline-statistics.json -> baseline-binding.json. The normalize-and-join.py SHA is finalized at v6-freeze time by the binding-verification script.",
-  "modification_permitted_after_freeze": false
+  "v6_dag_order": "baseline-envelope-membership.json (leaf) -> baseline-statistics.json (per-evaluator stats from 85 envelope records) -> dimensions-decomposition.json (M / subset-(a) / subset-(b) / O SHAs) -> preservation-dimensions.json (subset-(a) \u222a subset-(b)) -> preservation-dimensions-subset-{a,b}.json (subset SHAs) -> evaluator-rubric.json (frozen BIB rubric + test corpus + worldwide-significance rule) -> test-invocations.json (frozen test schedule) -> mutation-dimensions.json (M enumeration) + modification-specification.txt (M text) -> acceptance-tests.json (A, 4 G_mod gates) + preservation-gates.json (G, with C12 BROKEN rule) -> authority-manifest.json (static-only) + applicability-declaration.json (ACT ACT ACT) -> baseline-binding.json (this file; B; references finalized baseline-statistics SHA + frozen test-invocations + frozen evaluator-rubric + frozen normalize-and-join) -> protocol/INSA-ID-E1-protocol.md (v6) + protocol/EXECUTION-ORDER.md (v6) + evaluation/evaluator-input-packet.md (v6) -> hashing/score-derivation.py + hashing/c20-derivation.py + hashing/normalize-and-join.py + hashing/binding-verification.py -> MANIFEST.json"
 }

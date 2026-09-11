@@ -1,0 +1,88 @@
+{
+  "$schema": "INSA-v0.3-preservation-gates-v1",
+  "schema_version": "1.2",
+  "record_kind": "preservation-gates-G",
+  "purpose": "Frozen G per proposal v5.1 §5.1 INV-G-1: per-P preservation gates covering both subset-(a) (calibrated BIB 4-dim, actual BIB rubric dim names) and subset-(b) (8 C12 non-target axes, verbatim from v0.1 §11.3). Evaluators return per-candidate raw scores only; the analysis layer (post-lock) computes G_pres_subset_a_a, G_pres_subset_a_b, C12 per-axis failure rates, C12-axis-BROKEN.",
+  "experiment_id": "INSA-ID-E1",
+  "frozen_at_utc_date": "2026-09-11",
+  "frozen_by": "Hermes (operator)",
+  "binding": {
+    "proposal_commit_sha": "1f84c3101d6add7d44ed821681946c10be8f5f5c",
+    "P_subset_a_artifact": "inputs/preservation-dimensions-subset-a.json",
+    "P_subset_a_sha256": "74308b4efa836e8d826aec8de33505e1fcd45458f8a7194eb8970207b7043912",
+    "P_subset_b_artifact": "inputs/preservation-dimensions-subset-b.json",
+    "P_subset_b_sha256": "d1683d60d714d0613338c905089f0b6be412bda0d2af43eac3232b8c2e680b5c",
+    "baseline_statistics_artifact": "inputs/baseline-statistics.json"
+  },
+
+  "subset_a_gates_BIB_4dim": {
+    "G_pres_subset_a_a_relative": {
+      "definition": "For each evaluator independently: across all (R, B, arm=M) candidates, the within-Recon 4-dim Manhattan mean from the per-evaluator reference vector <= the contemporaneous Arm-C within-Recon 4-dim Manhattan mean from the same reference vector + 1.5.",
+      "formula": "G_pres_subset_a_a = (mean(M_manhattan_within_R for arm-M) <= (mean(C_manhattan_within_R for arm-C) + 1.5))",
+      "evaluator_independence_required": true,
+      "binding": "P subset-(a)",
+      "per_evaluator_reference_vector_source": "inputs/baseline-statistics.json calibrated_4d_reference_vectors"
+    },
+    "G_pres_subset_a_b_absolute": {
+      "definition": "For each evaluator independently: across all (R, B, arm=M) candidates, the within-Recon 4-dim Manhattan mean from the per-evaluator reference vector <= 2.5 absolute.",
+      "formula": "G_pres_subset_a_b = (mean(M_manhattan_within_R for arm-M) <= 2.5)",
+      "evaluator_independence_required": true,
+      "binding": "P subset-(a)"
+    },
+    "subset_a_pass_rule": "Both G_pres_subset_a_a and G_pres_subset_a_b must PASS for the subset-(a) gate to PASS for this evaluator.",
+    "scope_note_pi_freeze_correction_1_C_minus_1": "The +1.5 Manhattan tolerance applies ONLY to G_pres_subset_a_a. Arm-C validity envelope (C20) is not enlarged by this tolerance."
+  },
+
+  "subset_b_gates_C12_axes": {
+    "per_axis_broken_rule": {
+      "definition_for_evaluator_e_and_axis_a": "axis_a is BROKEN for evaluator_e IF AND ONLY IF BOTH: (i) arm_M_failure_rate_on_axis_a >= 0.30 AND (ii) (arm_M_failure_rate_on_axis_a - arm_C_failure_rate_on_axis_a) >= 0.30.",
+      "formulas": {
+        "arm_M_failure_rate_axis_a": "count(candidates with axis_a_failure==True for arm-M candidates) / count(total arm-M candidates)",
+        "arm_C_failure_rate_axis_a": "count(candidates with axis_a_failure==True for arm-C candidates) / count(total arm-C candidates)"
+      },
+      "axis_a_failure_per_candidate": "Per-candidate axis_a failure is determined by the per-candidate raw axis score returned by the evaluator. For binary axes: failure = axis_a_score == false. For 0-4 axes (C12-3, C12-5, C12-6): failure = axis_a_score == 0. For C12-2 (count): failure = count < 5 OR count > 10. The exact per-axis 'failure' definitions are recorded per-axis in inputs/preservation-dimensions-subset-b.json under failure_convention_pr_INSA_ID_E1.",
+      "evaluator_independence_required": true
+    },
+    "subset_b_pass_rule_for_evaluator_e": "subset-(b) gate PASSES for evaluator_e IF AND ONLY IF no axis in {C12-1, C12-2, C12-3, C12-4, C12-5, C12-6, C12-7, C12-8} is BROKEN for evaluator_e (per the joint rule above).",
+    "binding": "P subset-(b)"
+  },
+
+  "non_target_identity_preservation_aggregation_rule": {
+    "per_evaluator": "Non-target_Identity_Preservation_per_evaluator = G_pres_subset_a_a AND G_pres_subset_a_b AND (no C12 axis BROKEN for that evaluator).",
+    "experiment_level": "Non-target_Identity_Preservation = (Non-target_Identity_Preservation for A) AND (Non-target_Identity_Preservation for B)."
+  },
+
+  "evaluator_scoring_vs_aggregate_separation": {
+    "evaluator_returns_per_candidate": [
+      "subset_a_4dim_vector: {contract_compliance: 0-4, selection_behavior: 0-4, narrative_behavior: 0-4, functional_completeness: 0-4}",
+      "subset_b_axis_scores: {C12-1..C12-8 raw scores per inputs/preservation-dimensions-subset-b.json}",
+      "evaluator_self_report.runtime_failure_observed (boolean)"
+    ],
+    "evaluator_does_NOT_return": [
+      "No reconstruction-level aggregates.",
+      "No Arm-C vs Arm-M comparison.",
+      "No G_pres_subset_a_a or G_pres_subset_a_b computation.",
+      "No per-axis BROKEN determination.",
+      "No C12 failure-rate computation."
+    ],
+    "analysis_layer_computes_post_lock": [
+      "Per-reconstruction and pooled M_manhattan_within_R and C_manhattan_within_R means.",
+      "G_pres_subset_a_a and G_pres_subset_a_b for each evaluator.",
+      "Per-axis arm_M_failure_rate and arm_C_failure_rate for each evaluator.",
+      "Per-axis BROKEN determination for each evaluator.",
+      "Subset-(b) gate pass/fail for each evaluator.",
+      "Non-target_Identity_Preservation at per-evaluator and experiment levels."
+    ]
+  },
+
+  "control_validity_pre_check_C20": {
+    "definition": "Computed in Phase 2 (after Arm-C scoring, before M-arm scoring). For each evaluator: compute Arm-C per-(R, B) 4-dim mean Manhattan distance from the per-evaluator reference vector; for every (R, B) Arm-C cell, mean Manhattan distance must be within the historical C20 envelope bound for that evaluator (computed deterministically by hashing/c20-derivation.py from inputs/baseline-statistics.json). C20 PASSES for evaluator e IF AND ONLY IF: (a) every envelope (R, B) cell has at least one Arm-C candidate, AND (b) for every (R, B) Arm-C cell, mean Manhattan distance <= C20 envelope bound for evaluator e.",
+    "phase": "Phase 2 (after Arm-C scoring). C20 NOT in Phase 0 pre-dispatch preflight; C20 requires Arm-C candidates to exist.",
+    "c20_fail_classification": "INVALID_EXPERIMENT (per proposal v5.1 §5.4). Do NOT proceed to Phase 3.",
+    "c20_deterministic_computation": "hashing/c20-derivation.py computes the per-evaluator reference vectors, the envelope bounds, the per-(R, B) Arm-C means, and the C20 PASS/FAIL decision from the four frozen BIB scorebook SHAs, the 85-envelope record (inputs/baseline-statistics.json), and the Phase 2 Arm-C scorebooks."
+  },
+
+  "evaluator_blinding_manifest": "Same blinding discipline as per inputs/acceptance-tests.json. Evaluators receive only per-candidate output text + evaluator input packet; no arm identity, no reconstruction number, no experiment identity, no candidate number, no phase indication. Per-candidate fresh evaluator sessions per v3 item 8.",
+  "frozen_at_utc_date": "2026-09-11",
+  "modification_permitted_after_freeze": false
+}

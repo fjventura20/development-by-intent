@@ -32,7 +32,7 @@
   },
   "frozen_at_utc_date": "2026-09-11",
   "frozen_by": "Hermes (operator)",
-  "manifest_generated_at_utc": "2026-09-11T19:34:09Z",
+  "manifest_generated_at_utc": "2026-09-11T19:31:17Z",
   "manifest_generation_method": "hashing/binding-verification.py v6 (deterministic; produces content-addressed MANIFEST.json from actual on-disk artifact SHAs; re-runnable; clean-environment-compatible)",
   "insa_frozen_architecture_reference": {
     "git_blob_sha1": "848e0fe014f5b4a61ba2cb92e772ee3499dca9c1",
@@ -68,9 +68,9 @@
   "frozen_artifacts": [
     {
       "path": "inputs/baseline-binding.json",
-      "sha256": "7a211c3e6a7c76fab2f62795f60193c97c47872b11c47ac9088f9c2cf9631317",
-      "size_bytes": 8497,
-      "git_blob_sha1": "f8e4c1e0307bcbf1661fdeb211bedb05a7dd9fa9"
+      "sha256": "490c9022d994853691318f4e6c0b64eea5810a741ba750d4e7fdfe8b54b51b29",
+      "size_bytes": 8931,
+      "git_blob_sha1": "3427cd0d172f88a7da81754dcacc55553b84d2b4"
     },
     {
       "path": "inputs/baseline-statistics.json",
@@ -146,9 +146,9 @@
     },
     {
       "path": "inputs/evaluator-rubric.json",
-      "sha256": "c19ac46203bddb7eeb360819e6e5fa46c94f031a926d6cb6d7d07e5ee0af3409",
-      "size_bytes": 12428,
-      "git_blob_sha1": "84b4d5347a397c47e31e3fcaf51939325e64f9fc"
+      "sha256": "9f6dcc97a8f6d6a5272c102ec650baf71f4f772c981d1dbb1fb97aa29791e10e",
+      "size_bytes": 12517,
+      "git_blob_sha1": "3dec7d3072afb1b97ba075050770b9a428d0ccce"
     },
     {
       "path": "inputs/acceptance-tests.json",
@@ -176,9 +176,9 @@
     },
     {
       "path": "inputs/test-invocations.json",
-      "sha256": "67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a",
+      "sha256": "882312b6812738aa8ef55722a0646fad7a72797d1ae69712dce53eafea9cdaab",
       "size_bytes": 3696,
-      "git_blob_sha1": "64f39712f97d8d44dea553a1347dcb8bd8037cba"
+      "git_blob_sha1": "6e09d39d0e8d0394a87736bbc605acb45d2bcb72"
     },
     {
       "path": "protocol/INSA-ID-E1-protocol.md",
@@ -214,9 +214,9 @@
     },
     {
       "path": "hashing/normalize-and-join.py",
-      "sha256": "7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836",
-      "size_bytes": 10703,
-      "git_blob_sha1": "34566af9a61e8bb7891cc891ee9dbd2319b3f106"
+      "sha256": "3eb4f9e170778b6fbedeeeaf8a7a41dc2473f784ad8774e11ec8548f94569aa4",
+      "size_bytes": 11372,
+      "git_blob_sha1": "4424fd7928384361d620fc47f326ba283b9441d9"
     },
     {
       "path": "hashing/binding-verification.py",
@@ -238,7 +238,7 @@
   },
   "B_binding": {
     "artifact": "inputs/baseline-binding.json",
-    "sha256": "7a211c3e6a7c76fab2f62795f60193c97c47872b11c47ac9088f9c2cf9631317",
+    "sha256": "490c9022d994853691318f4e6c0b64eea5810a741ba750d4e7fdfe8b54b51b29",
     "content_addresses": [
       "governing intent (inputs/intent-document.txt; BIB c3692150 blob 7b10cb0641ab68572c7cf9d89a9c49f1afdc3428)",
       "identity contract (inputs/identity-contract.txt; BIB c3692150 blob 7ef4356f657884d65dbd4462d85c1c81b3f6fa2a)",
@@ -319,7 +319,7 @@
   },
   "V_d_binding": {
     "artifact": "inputs/evaluator-rubric.json",
-    "sha256": "c19ac46203bddb7eeb360819e6e5fa46c94f031a926d6cb6d7d07e5ee0af3409",
+    "sha256": "9f6dcc97a8f6d6a5272c102ec650baf71f4f772c981d1dbb1fb97aa29791e10e",
     "exact_historical_bib_rubric_content": true,
     "exact_historical_test_corpus_content": true,
     "preregistered_worldwide_significance_rule": "M3 PASS iff AT LEAST 2 of the 4 criteria are satisfied (per v0.1 \u00a79.2 PI pass 3)",
@@ -347,7 +347,7 @@
   },
   "test_invocations_binding": {
     "artifact": "inputs/test-invocations.json",
-    "sha256": "67a7ab98493f3113c96d3f78cecd827ed83b3136a11b3d28f92d9de7b5fe3a0a",
+    "sha256": "882312b6812738aa8ef55722a0646fad7a72797d1ae69712dce53eafea9cdaab",
     "role": "Frozen content-addressed test invocation schedule. Maps every candidate index 1..10 (per (R, B, arm) cell) to its exact frozen Birthdate <date including year> invocation. The 5 distinct test prompts T1..T5 are repeated twice (run-1 and run-2) within each (R, B) cell. The executor MUST consume the test invocation from this artifact via the blind map; it MUST NOT invent or select the birthdate at runtime.",
     "repetition_design": "five frozen test prompts repeated twice per (R, B) cell"
   },
@@ -437,7 +437,7 @@
     },
     "frozen_normalize_and_join_script": {
       "artifact": "hashing/normalize-and-join.py",
-      "sha256": "7daca294b0f088a5bb2802df04d321247bed4873b6a40041ef9457ce1f120836",
+      "sha256": "3eb4f9e170778b6fbedeeeaf8a7a41dc2473f784ad8774e11ec8548f94569aa4",
       "role": "Frozen deterministic evaluator-return \u2192 operator-side scorebook normalization/join script. Consumes the raw evaluator-return JSON + locked blind map and produces the immutable operator-side scorebook. Preserves M_scores + G_subset_a_4dim_vector + G_subset_b_axis_scores + evaluator_self_report. Adds reconstruction_id, block, arm, candidate, birthdate, test_id, run solely from the blind map. Verifies every added metadata field against the blind map (fatal on mismatch). Rejects unknown blind IDs, duplicate blind IDs, duplicate tuples, any forbidden provenance field in the evaluator return."
     },
     "blind_map_timing_v6": "preflight/blind-map.json is constructed and locked in Phase 0 (pre-dispatch preflight), before any evaluator invocation. Phase 2 USES the already-locked blind map; it does NOT construct or mutate the blind map in Phase 2. Phase 3 uses FRESH per-arm blind_ids (the frozen blind-map design has one-ID->one-tuple); Phase 3 does NOT use \"the same blind_id\" as Arm-C.",
