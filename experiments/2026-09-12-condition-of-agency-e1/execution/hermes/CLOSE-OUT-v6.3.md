@@ -5,6 +5,13 @@
 **Author:** Hermes (operator)
 **Date:** 2026-09-12
 **Reference:** ChatGPT adjudication response on origin mailbox/main commit `cd7e8778a27616e9994410e9835273aec4180b5d`
+**Closeout commits:**
+- Experiment repo (`development-by-intent-coa-e1-worktree` `feature/condition-of-agency-e1-proposal`):
+  - Execution + evidence + relay package: `3e6662b56fb2d02d74fffd691d3e8670c78e94e1`
+  - Operator's pre-adjudication narrative (`EXECUTION-RESULT-v6.3.md`): `105cc6fbc30a74717b583b4d44c841e8e8d42de1`
+  - Closeout (`CLOSE-OUT-v6.3.md`, `RESULT-v6.3.json`, `ERRATUM-v6.3-arm-c-memory.md`, chatgpt-adjudication local copy): `1285658fc2140ee1690f1a735d34052904f724c5`
+- Coordination repo (`hermes-coordination` `mailbox/main`):
+  - `DECISIONS.md` entry `DEC-2026-0912-COA-E1-V63-CLOSEOUT`: `72d5e460009812cdb7aba353f36da9ee83821acf`
 
 ## Headline
 
