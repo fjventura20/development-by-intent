@@ -2,23 +2,7 @@
 
 Status: EXECUTION INSTRUCTIONS — frozen design unchanged
 Participant: Hermes
-Required runtime/model: **Hermes Agent v0.21.2 / MiniMax provider / MiniMax-M3** (per `FREEZE-v0.3.md` participant/runtime binding; v6.3 narrow amendment, commit `bb7eb22`).
-
-> **v6.3 execution-artifact correction log (2026-09-12, per ChatGPT ruling):**
->
-> The v6.2 runbook described the Hermes participant as running on the Claude Code CLI substrate with `--model claude-opus-4-7`, `--allowedTools ''`, `--disallowedTools 'WebFetch,WebSearch'`, and a `--print` JSON envelope format. The v6.3 narrow amendment (`FREEZE-v0.3.md`, commit `bb7eb22`) supersedes that substrate description and binds the Hermes participant to **Hermes Agent v0.21.2 / MiniMax provider / MiniMax-M3**. The frozen design (COA content, task corpus, task order, arm semantics, attestation requirements, scoring, rubric, C20 gate, acceptance criteria) is unchanged. The corrections below are execution-artifact edits permitted by `FREEZE-v0.3.md` §"Post-freeze discipline."
->
-> Specific corrections:
->
-> | v6.2 instruction | v6.3 correction |
-> |---|---|
-> | Substrate: `claude -p --model claude-opus-4-7 --print` | Substrate: `hermes chat -q <prompt> --oneshot` (Hermes Agent v0.21.2, default config: `model.default=MiniMax-M3`, `model.provider=minimax`) |
-> | `--allowedTools '' --disallowedTools 'WebFetch,WebSearch'` (Claude CLI flags) | No CLI flags — equivalent achieved by running in an isolated `/tmp` workdir with no repo write access and using Hermes's default toolset posture (web toolsets are not in `_HERMES_CORE_TOOLS` for the hermes-cli toolset). Per-tool posture recorded in each session's evidence file. |
-> | `--print` JSON envelope format (CLI emits `{session_id, is_error, cost, raw_response}` per call) | Hermes Agent CLI emits a textual response with `Session:` / `Duration:` / `Messages:` footer lines and the session id in the form `YYYYMMDD_HHMMSS_<hex>`. Envelope shape adapted accordingly; per-task envelope retains `{session_id, raw_input, raw_output, raw_output_sha256, cost, duration, send_utc, recv_utc}` fields. |
-> | Model pinned via `--model claude-opus-4-7` | Model is the runtime default `MiniMax-M3` (set by `~/.hermes/config.yaml`). Provider plugin `minimax` is registered in `plugins/model-providers/`. Live runtime identity captured before each arm via `hermes --version` and a substrate self-assertion probe (`hermes chat -q "Reply with one line: AGENT: Hermes; RUNTIME: <hermes --version>; MODEL: MiniMax-M3; PROVIDER: MiniMax. Nothing else." --oneshot`). |
-> | Session-freshness discipline: "fresh Claude Code CLI session per arm" | Session-freshness discipline (v6.3): each arm uses a fresh `hermes chat --oneshot` invocation in a fresh isolated `/tmp` workdir; no `--resume` is used; the per-task envelopes are stitched back together under a per-arm `transfer_id` after the run completes. This preserves the v6.2 intent (no carryover of contextual memory between arms). |
->
-> The pre-v6.3 runbook is preserved unchanged at `OPERATOR-RUNBOOK.md.v6.2.bak` (SHA-256 `9dada812ddb50e062648447f4aed6cab2c3a2dc7b6fdc653a4c43817cc4c42bf`). All other v6.2 substantive content (CoA digest, nonces, task order, evidence capture schema, arm-specific duties) is preserved unchanged.
+Required runtime/model: exact active Hermes model/runtime on Claude Code CLI substrate, recorded by operator before first task of each session and held fixed across Arms A/B/C.
 
 ## Hermes runtime binding (record before first task of each session)
 
