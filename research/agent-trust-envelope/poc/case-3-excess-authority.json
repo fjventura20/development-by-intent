@@ -1,0 +1,43 @@
+{
+  "case_id": "ATE-POC-001-CASE-3",
+  "description": "Trusted agent requesting authority outside its envelope",
+  "agent_identity": {
+    "verified": true
+  },
+  "runtime_provenance": {
+    "verified": true,
+    "matches_envelope": true
+  },
+  "conditions_of_agency": {
+    "accepted": true,
+    "hash_matches": true,
+    "bound_to_current_session": true
+  },
+  "value_architecture": {
+    "identified": true,
+    "hash_matches": true,
+    "bound_to_current_session": true
+  },
+  "behavioral_evidence": {
+    "status": "PASS"
+  },
+  "requested_action": "delete_original_evidence",
+  "authority": {
+    "authorized_actions": [
+      "read_files",
+      "create_draft_analysis"
+    ],
+    "prohibited_actions": [
+      "delete_original_evidence"
+    ]
+  },
+  "integrity": {
+    "valid": true
+  },
+  "validity": {
+    "active": true,
+    "revoked": false
+  },
+  "expected_decision": "DENY",
+  "controlling_reason": "The agent may be trusted within its envelope, but the requested action exceeds explicitly granted authority. Trust in an agent does not imply unlimited authority."
+}
