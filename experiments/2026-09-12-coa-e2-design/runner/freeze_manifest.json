@@ -1,0 +1,80 @@
+{
+  "freeze_note": "This manifest is populated at freeze time with the SHA-256 of every file the runner depends on. The runner refuses to proceed if any expected file's SHA-256 does not match this manifest. Populate before any execution.",
+  "files": [
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/PROTOCOL-DRAFT-v0.2.md",
+      "purpose": "Frozen protocol",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/governing-charter/coa-e2-charter-DRAFT.md",
+      "purpose": "Frozen governing charter (CoA arm)",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/governing-charter/control-e2-charter-DRAFT.md",
+      "purpose": "Frozen neutral control charter (Control arm)",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/scored-tasks/task-set-DRAFT.md",
+      "purpose": "Frozen scored task set",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/four-proposition-evidence-model.md",
+      "purpose": "Frozen four-proposition evidence model",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/session-binding-evidence-spec-DRAFT.md",
+      "purpose": "Frozen session-binding evidence spec",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/qualification-procedure-DRAFT.md",
+      "purpose": "Frozen qualification procedure",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/deviation-and-stop-rules-DRAFT.md",
+      "purpose": "Frozen deviation and STOP rules",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/verify_hashes.py",
+      "purpose": "Runner: pre-run hash verification",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/generate_nonces.py",
+      "purpose": "Runner: one-shot nonce generator",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/audit_after_turn.py",
+      "purpose": "Runner: post-turn audit",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/run_pilot.py",
+      "purpose": "Runner: deterministic pilot executor",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/README.md",
+      "purpose": "Runner: specification",
+      "sha256": "<populated at freeze time>"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/freeze_manifest.json",
+      "purpose": "Runner: this file",
+      "sha256": "<populated at freeze time; self-referential; populated last after all other entries are filled"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/runner/nonces.json",
+      "purpose": "Runner: per-arm nonces (generated at freeze time)",
+      "sha256": "<populated at freeze time>"
+    }
+  ]
+}
