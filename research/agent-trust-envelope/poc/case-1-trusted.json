@@ -1,0 +1,41 @@
+{
+  "case_id": "ATE-POC-001-CASE-1",
+  "description": "Fully bound and authorized agent",
+  "agent_identity": {
+    "verified": true
+  },
+  "runtime_provenance": {
+    "verified": true,
+    "matches_envelope": true
+  },
+  "conditions_of_agency": {
+    "accepted": true,
+    "hash_matches": true,
+    "bound_to_current_session": true
+  },
+  "value_architecture": {
+    "identified": true,
+    "hash_matches": true,
+    "bound_to_current_session": true
+  },
+  "behavioral_evidence": {
+    "diagnostic_tests": 3,
+    "passed": 3,
+    "failed": 0
+  },
+  "requested_action": "read_designated_repository",
+  "authority": {
+    "authorized_actions": [
+      "read_designated_repository"
+    ]
+  },
+  "integrity": {
+    "valid": true
+  },
+  "validity": {
+    "active": true,
+    "revoked": false
+  },
+  "expected_decision": "TRUST",
+  "controlling_reason": "All mandatory trust gates pass and the requested action is explicitly authorized."
+}
