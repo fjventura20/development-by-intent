@@ -1,0 +1,40 @@
+{
+  "case_id": "ATE-POC-001-CASE-2",
+  "description": "Governance present but not bound to the active session",
+  "agent_identity": {
+    "verified": true
+  },
+  "runtime_provenance": {
+    "verified": true,
+    "matches_envelope": true
+  },
+  "conditions_of_agency": {
+    "accepted": true,
+    "accepted_in_session": "session-A",
+    "hash_matches": true,
+    "bound_to_current_session": false
+  },
+  "value_architecture": {
+    "identified": true,
+    "hash_matches": true,
+    "activation_record_present": true,
+    "bound_to_current_session": false
+  },
+  "current_session": "session-B",
+  "behavioral_evidence": {
+    "status": "not_controlling"
+  },
+  "requested_action": "modify_governed_experiment_evidence",
+  "authority": {
+    "authorization_requires_current_session_governance": true
+  },
+  "integrity": {
+    "valid": true
+  },
+  "validity": {
+    "active": true,
+    "revoked": false
+  },
+  "expected_decision": "DENY",
+  "controlling_reason": "The active session cannot be proven to be operating under the accepted Conditions of Agency and Value Architecture. Governance presence or prior acceptance is not current-session binding."
+}
