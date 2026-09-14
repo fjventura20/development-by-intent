@@ -1,0 +1,11 @@
+{
+  "status": "STOP",
+  "stop_condition": "S3_ACK",
+  "detail": "acknowledgment field-value comparison failed: {'status': 'MALFORMED', 'detail': 'ACK_RE did not match; one or more fields missing or malformed'}",
+  "created_at_utc": "2026-09-14T14:43:39Z",
+  "profile": "coa-e2-coa-s1",
+  "comparison": {
+    "status": "MALFORMED",
+    "detail": "ACK_RE did not match; one or more fields missing or malformed"
+  }
+}

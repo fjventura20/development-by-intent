@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "status": "SEALED",
+  "package_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.4",
+  "nonces": {
+    "coa-init": "8a34cf2b6b66f0f02f904101a9b1d346",
+    "coa-digest": "8aefaa834ea63170cf76c4b80113042d",
+    "coa-nonce": "9feecea9c8da16c7489db5324cbf4acf",
+    "control-init": "01ddf74a5f245295e4bfdb566cd86d68",
+    "control-digest": "8d99d075f113e0ef9a399e275b5f10ae",
+    "control-nonce": "ea7df2302b794686efb09f3a41adb64f"
+  },
+  "expected_runtime_identity": {
+    "hermes_version": "Hermes Agent v0.21.2 (2026.9.11) \u00b7 upstream e440bf35\nInstall directory: /home/fjventura20/.hermes/hermes-agent\nInstall method: git\nPython: 3.11.15\nOpenAI SDK: 2.24.0\nUpdate available: 555 commits behind \u2014 run 'hermes update'",
+    "model": "MiniMax-M3",
+    "provider": "minimax",
+    "endpoint": "",
+    "enabled_tools": "[\"hermes-cli\"]",
+    "permissions": "--pass-session-id,-Q",
+    "normalized_config_hash": "40c1ca4ee72e6eaa96fd49e833c0a6684aa72d8b97c62141a49c4163b6236825",
+    "expected_blank_memory_md_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected_blank_user_md_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "profiles": [
+    "coa-e2-coa-s1",
+    "coa-e2-control-s1"
+  ],
+  "order": [
+    "coa",
+    "control"
+  ],
+  "files": [
+    {
+      "path": "CONSISTENCY-AUDIT-DRAFT-v0.4.4.md",
+      "sha256": "b4de40c6d60280873d02ac5af077161ba50efe65bc117ac15528734656855079"
+    },
+    {
+      "path": "DEVIATION-AND-STOP-RULES-DRAFT-v0.4.4.md",
+      "sha256": "2d2baaf58c6aae022046c092fd443255440fb3d557ee9022c572ba4119cfe194"
+    },
+    {
+      "path": "OPERATOR-RUNBOOK-DRAFT-v0.4.4.md",
+      "sha256": "ac78226165bd48a2a729e9419d7630ae553d849e18c40b331c3d3fa49b789288"
+    },
+    {
+      "path": "PROTOCOL-DRAFT-v0.4.4.md",
+      "sha256": "f298aeed6a31a9952d31bc94a40313bfb63aa52b597fe04aa448e260ac9686b8"
+    },
+    {
+      "path": "README.md",
+      "sha256": "69059729b82fa1bc08aa15dcdac60338888415d17b90670f8e937a68837e9c3e"
+    },
+    {
+      "path": "RUNTIME-CAPABILITY-ASSESSMENT-DRAFT-v0.4.4.md",
+      "sha256": "4b21b29e5c2f2a224a33f90ad6b2a8034b6fef96470161778f5f4fd83dbc7a17"
+    },
+    {
+      "path": "UNRESOLVED-DECISIONS-DRAFT-v0.4.4.md",
+      "sha256": "d7f2ef8c5922a777419dd8e57abbdbe1f2df061479347f7cf210eb0d46e38341"
+    },
+    {
+      "path": "audit-specification-DRAFT-v0.4.4.md",
+      "sha256": "5b4d99831a511cfe58880bbf7ab9a29b4b5ae1b0ccc99cf0b4c8caf2389114d1"
+    },
+    {
+      "path": "charters/coa-governed-DRAFT.md",
+      "sha256": "f62de3c7aee8745313e42fb858fa7a6ab0e3cd64d7f1c2eb0a2414a62e9e5e7c"
+    },
+    {
+      "path": "charters/control-DRAFT.md",
+      "sha256": "ea77a6dd9b05ff641d307f7ea504b62f52d6ec6ae68fd22f4e1d4b3761d2b24b"
+    },
+    {
+      "path": "four-proposition-evidence-model-DRAFT-v0.4.4.md",
+      "sha256": "56c95d62fdd254c337c04a8fc553c991b7b690f03763a1cf4fcb046604ae8118"
+    },
+    {
+      "path": "packets/CANONICAL-INITIALIZATION-TEMPLATE-DRAFT.md",
+      "sha256": "16b69d5af1a1ee1be4cb3c88724e8225bc63c0ec13cdc62672c927267f3be377"
+    },
+    {
+      "path": "qualification-procedure-DRAFT-v0.4.4.md",
+      "sha256": "5dfd496f94c29366c8531f3f3a84baeda985f562390b5a337fcf7ff23192522e"
+    },
+    {
+      "path": "runner/README.md",
+      "sha256": "c090b787c22f3a3a55c07ee0ba809b24354fa479e719185dee4f594db9149cf8"
+    },
+    {
+      "path": "runner/RUNNER-CONTRACT-DRAFT.md",
+      "sha256": "1765f6d9c7a93e2c2e39643c6d1b4b33e2ac6cb5345f0cb3ff7ed9966db7501b"
+    },
+    {
+      "path": "runner/aggregate_pilot.py",
+      "sha256": "dab21af073f5cc75f6bd6a0e5f70626236bace59815051bc0787d7c2025060b7"
+    },
+    {
+      "path": "runner/audit_after_turn.py",
+      "sha256": "3532685e668b048430db87157cbb69b94e6e0d7dad2a5d08b29ab1226e2c7a73"
+    },
+    {
+      "path": "runner/bootstrap_state.py",
+      "sha256": "b5eb56c6bf29dd7dc7b10075e130a11618c026afa03d9bd0170e1ecaece63f36"
+    },
+    {
+      "path": "runner/classify_response.py",
+      "sha256": "9f183f5ef33f0f672a3abbee11cf95942381548a3b15e1fa4bee348230651667"
+    },
+    {
+      "path": "runner/freeze-manifest-DRAFT.md",
+      "sha256": "5f6b3f39dc5c04b10c96c18b5eb6ee0629a5b270f08df76f9f37dd7dcbcf62f8"
+    },
+    {
+      "path": "runner/generate_nonces.py",
+      "sha256": "8ced2013bf69fdeef23aaa24589dce4192f2b95e7cbf0edb629d87ffd3476666"
+    },
+    {
+      "path": "runner/run_pilot.py",
+      "sha256": "cb7b5dc7100d68cf7d485efe6c166e7745ce11c8b728cc634caac0cafb725e72"
+    },
+    {
+      "path": "runner/runtime-manifest-DRAFT.json",
+      "sha256": "c7a10ec571b06d16a0c69b1d30b98d32a3dd6df0a19c3ff191a902aea680b6b6"
+    },
+    {
+      "path": "runner/verify_manifest.py",
+      "sha256": "3b3a3e3900f52796fa6bb1c94823f0f1ed815d5c833410516f4a570f318f9125"
+    },
+    {
+      "path": "session-binding-evidence-spec-DRAFT-v0.4.4.md",
+      "sha256": "2dd1d79c4217a9f4eef0735fe744440bf2548eb19b905a0133777af497fb1d88"
+    },
+    {
+      "path": "tasks/RUBRIC-DRAFT-v0.4.4.md",
+      "sha256": "f17b06b2cc3ca607d32a265f3c64c2906a29aa2cd012d47463440b61d4bf5c94"
+    },
+    {
+      "path": "tasks/U1.md",
+      "sha256": "d064d89eea40cc6e621d0a24d558455689d61b9713ad51adde2b48ebdc461f25"
+    },
+    {
+      "path": "tasks/U2.md",
+      "sha256": "10c1c8b68552805c7ef6b4c1087a27b6acb2ec03ccee3dcf1f958b4693de70bd"
+    },
+    {
+      "path": "tasks/U3.md",
+      "sha256": "093ff597d55c49bce58414f4c8b4ef6d9081858ff34c43d0427d6309d9d11317"
+    },
+    {
+      "path": "tasks/U4.md",
+      "sha256": "9c8d5153c84aa8e1eae1f8c2ba4db08264adae41bc5324d7a2d0b2d8a47ba81b"
+    },
+    {
+      "path": "tasks/U5.md",
+      "sha256": "3f15966d26702fbc118242ca0571d6588e84163467b3a90cd649869232698d62"
+    },
+    {
+      "path": "tasks/participant/U2.md",
+      "sha256": "db956098a03cf2190d8391dde3ae8c89ae25a3f003045fbc2bf64fdd4bcea9b3"
+    },
+    {
+      "path": "tasks/participant/U3.md",
+      "sha256": "7732bd11f9b33720945e9f7ca8a725cf2ab3cd5f81452868daf41303ad3f0d02"
+    },
+    {
+      "path": "tasks/participant/U5.md",
+      "sha256": "b9c1aa67cb0fdc3f23e426faae60c254bf557166d0a005af95df081f0f75ab24"
+    },
+    {
+      "path": "execution/nonces.json",
+      "sha256": "f1393ba219f21655383c9a752a56cd3246215351bae2859a94b946452d3997c9"
+    }
+  ],
+  "fixed_predeclared_order": true,
+  "expected_nonce_count": 6,
+  "sealing_metadata": {
+    "package_version": "v0.4.4",
+    "candidate_commit_sha": "75f09c68045fd5294337e4bf5954fd4ad8fcdbd5",
+    "freeze_record_id": "20260914T143853Z-coa-e2-v0.4.4-freeze-001",
+    "freeze_commit_sha": "aba9c835559fbe012ef46043df850b5288a67d30",
+    "sealing_timestamp_utc": "2026-09-14T14:39:55Z",
+    "schema_fingerprint": "c5b775ee753c26a357b98592fe4349f70272383db5f0a7dd18abedb8c44be7f6",
+    "persistence_usability_verified": true,
+    "consumed_nonce_sets_excluded_count": 12,
+    "normalized_config_hash_canonical_formula": "digest_text(hermes -p <profile> config show . stdout+stderr . replace(profile,\"<profile>\"))"
+  }
+}
