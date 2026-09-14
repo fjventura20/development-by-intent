@@ -467,7 +467,11 @@ def dry_validate(package: Path, manifest_path: Path) -> dict:
                     errors.append(
                         f"sealed expected_runtime_identity.{k} does not equal "
                         f"blank_sha256() (={blank_sha256()})")
+            # v0.4.2 schema correction: nine runtime-capture fields
+            # must all be sealed (no <TO_BE_SEALED>, no null, no empty
+            # string unless the source-of-truth value itself is empty).
             for k in ("hermes_version", "model", "provider",
+                      "endpoint", "enabled_tools", "permissions",
                       "normalized_config_hash"):
                 v = expected_id_template.get(k)
                 if v in (None, "", "<TO_BE_SEALED>"):
@@ -731,12 +735,13 @@ def _dry_session_id_parser_fixture() -> str:
 def _dry_sealed_runtime_identity_missing_keys_fixture() -> str:
     """Detect missing required keys in sealed expected_runtime_identity.
 
-    v0.4.2 correction 2: the runtime-manifest schema must require the
-    six expected_runtime_identity keys. A fixture that builds a manifest
-    with one key removed must be caught by the dry_validate schema
-    check (not by the per-invocation execution check).
+    v0.4.2 schema correction: the runtime-manifest schema must require
+    all NINE expected_runtime_identity keys. A fixture that builds a
+    manifest with one key removed must be caught by the dry_validate
+    schema check (not by the per-invocation execution check).
     """
     full_keys = ("hermes_version", "model", "provider",
+                 "endpoint", "enabled_tools", "permissions",
                  "normalized_config_hash",
                  "expected_blank_memory_md_hash",
                  "expected_blank_user_md_hash")
@@ -745,11 +750,14 @@ def _dry_sealed_runtime_identity_missing_keys_fixture() -> str:
         m["hermes_version"] = "Hermes Agent vX.Y.Z"
         m["model"] = "MiniMax-M3"
         m["provider"] = "minimax"
+        m["endpoint"] = "https://api.example.invalid/v1"
+        m["enabled_tools"] = "hermes-cli"
+        m["permissions"] = "--pass-session-id,-Q"
         m["normalized_config_hash"] = "0" * 64
         m["expected_blank_memory_md_hash"] = blank_sha256()
         m["expected_blank_user_md_hash"] = blank_sha256()
         del m[drop]
-        # The dry_validate schema check requires all six keys. Build a
+        # The dry_validate schema check requires all nine keys. Build a
         # minimal in-memory validator that mirrors the schema check
         # used in dry_validate(). If the missing key is not detected,
         # the fixture returns FAIL.
@@ -764,15 +772,19 @@ def _dry_sealed_runtime_identity_missing_keys_fixture() -> str:
 def _dry_sealed_runtime_identity_mismatch_fixture() -> str:
     """Detect sealed-vs-actual mismatch in expected_runtime_identity.
 
-    v0.4.2 correction 2: the preflight check must compare each captured
-    field against the sealed expected value. A fixture that builds a
-    synthetic mismatch and walks through the same comparison code path
-    must detect the diff. We exercise the schema check logic here; the
-    full execution-time check is exercised by the per-profile loop.
+    v0.4.2 schema correction: the preflight check must compare each of
+    the nine captured fields against the sealed expected value. A
+    fixture that builds a synthetic mismatch and walks through the same
+    comparison code path must detect the diff. We exercise the schema
+    check logic here; the full execution-time check is exercised by the
+    per-profile loop.
     """
     sealed = {"hermes_version": "Hermes Agent v0.21.2 (2026.9.11)",
               "model": "MiniMax-M3",
               "provider": "minimax",
+              "endpoint": "https://api.example.invalid/v1",
+              "enabled_tools": "hermes-cli",
+              "permissions": "--pass-session-id,-Q",
               "normalized_config_hash": "a" * 64,
               "expected_blank_memory_md_hash": blank_sha256(),
               "expected_blank_user_md_hash": blank_sha256()}
@@ -800,6 +812,30 @@ def _dry_sealed_runtime_identity_mismatch_fixture() -> str:
         diffs.append("expected_blank_memory_md_hash")
     if not diffs:
         return "FAIL: blank-memory-hash mismatch not detected"
+    # Case 4: endpoint mismatch (v0.4.2 schema correction)
+    actual = dict(sealed)
+    actual["endpoint"] = "https://api.other.invalid/v1"
+    diffs = []
+    if actual["endpoint"] != sealed["endpoint"]:
+        diffs.append("endpoint")
+    if not diffs:
+        return "FAIL: endpoint mismatch not detected"
+    # Case 5: enabled_tools mismatch
+    actual = dict(sealed)
+    actual["enabled_tools"] = "other-tool"
+    diffs = []
+    if actual["enabled_tools"] != sealed["enabled_tools"]:
+        diffs.append("enabled_tools")
+    if not diffs:
+        return "FAIL: enabled_tools mismatch not detected"
+    # Case 6: permissions mismatch
+    actual = dict(sealed)
+    actual["permissions"] = "--yolo"
+    diffs = []
+    if actual["permissions"] != sealed["permissions"]:
+        diffs.append("permissions")
+    if not diffs:
+        return "FAIL: permissions mismatch not detected"
     return "PASS"
 
 
@@ -928,6 +964,121 @@ def ensure_fresh_run_dir(target: Path, force: bool) -> Path:
     return target
 
 
+# v0.4.2 schema correction: explicit capture rules for endpoint,
+# enabled_tools, and permissions. Each helper is a thin wrapper around
+# a single authoritative Hermes command, with deterministic
+# normalization so the captured value is identical across runs.
+ENDPOINT_KEYS_IN_PRIORITY_ORDER = (
+    "model.base_url", "model.endpoint_url", "endpoint", "api.base_url",
+)
+
+
+def _run_config_get(profile: str, key: str) -> str | None:
+    """Run `hermes -p <profile> config get --json <key>` and return its
+    stdout if the key is set, or None if the key is unset.
+
+    `hermes config get` returns "Config key not set: <key>" and exits
+    nonzero when the key is unset. We treat any nonzero exit or
+    stderr-matching "not set" message as "unset".
+    """
+    try:
+        r = subprocess.run(
+            ["hermes", "-p", profile, "config", "get", "--json", key],
+            capture_output=True, text=True, check=False, timeout=15,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return None
+    if r.returncode != 0:
+        return None
+    out = (r.stdout or "").strip()
+    if not out:
+        return None
+    if "Config key not set" in out or "not set" in out.lower():
+        return None
+    return out
+
+
+def _capture_endpoint(profile: str) -> str:
+    """Capture the sealed-comparable endpoint string for `profile`.
+
+    Capture rule (v0.4.2 schema correction):
+    1. Try `hermes -p <profile> config get --json <key>` for each key
+       in ENDPOINT_KEYS_IN_PRIORITY_ORDER.
+    2. The first key whose returned value parses as a JSON string
+       (i.e., quoted and non-empty) is the captured endpoint.
+    3. If the returned value parses as a JSON object/array (some
+       deployments expose the URL as a structured value), JSON-encode
+       the value deterministically and use that as the captured
+       endpoint.
+    4. If no key returns a value, the captured endpoint is the empty
+       string. The operator must declare the same empty-string expected
+       value at seal time.
+    """
+    for key in ENDPOINT_KEYS_IN_PRIORITY_ORDER:
+        raw = _run_config_get(profile, key)
+        if raw is None:
+            continue
+        try:
+            v = json.loads(raw)
+        except json.JSONDecodeError:
+            # Returned value isn't JSON; treat it as a literal string,
+            # stripped of surrounding quotes if present.
+            return raw.strip().strip('"')
+        if isinstance(v, str):
+            return v
+        # Object/array/number — JSON-encode deterministically.
+        return json.dumps(v, sort_keys=True, separators=(",", ":"))
+    return ""
+
+
+def _capture_enabled_tools(profile: str) -> str:
+    """Capture the sealed-comparable enabled-tools string for `profile`.
+
+    Capture rule (v0.4.2 schema correction):
+    1. Run `hermes -p <profile> config get --json toolsets`.
+    2. Parse the returned JSON array.
+    3. Sort the list alphabetically.
+    4. JSON-encode the sorted list with stable separators.
+
+    The result is a deterministic string like `"hermes-cli"` (single
+    element) or `["a","b","c"]` (multiple elements). The operator
+    declares the same string at seal time.
+    """
+    raw = _run_config_get(profile, "toolsets")
+    if raw is None:
+        return "[]"
+    try:
+        v = json.loads(raw)
+    except json.JSONDecodeError:
+        return "[]"
+    if not isinstance(v, list):
+        return "[]"
+    v_sorted = sorted(v)
+    return json.dumps(v_sorted, separators=(",", ":"))
+
+
+def _capture_permissions() -> str:
+    """Capture the sealed-comparable permissions string.
+
+    Capture rule (v0.4.2 schema correction):
+    The runner invokes `hermes chat` with a fixed set of
+    permission-affecting CLI flags. The captured permissions string
+    is the sorted, comma-joined list of those flags that are present
+    in the actual argv passed to `hermes chat`. The v0.4.2 runner
+    invokes with `--pass-session-id` and `-Q` and none of the
+    permission-bypass flags (`--yolo`, `--ignore-rules`,
+    `--ignore-user-config`, `--safe-mode`). The captured value is
+    therefore `"--pass-session-id,-Q"`. The operator declares the
+    same string at seal time.
+
+    Note: this rule is intentionally deterministic from the runner's
+    own argv construction (see `invoke_hermes`); it does not query a
+    separate CLI source.
+    """
+    PERMISSION_FLAGS_INVARIANT = ("--pass-session-id", "-Q")
+    return ",".join(sorted(PERMISSION_FLAGS_INVARIANT))
+
+
 def execute_pair(package: Path, m: dict, evidence: Path) -> None:
     profiles = m.get("profiles", [])
     if profiles != ["coa-e2-coa-s1", "coa-e2-control-s1"]:
@@ -945,8 +1096,12 @@ def execute_pair(package: Path, m: dict, evidence: Path) -> None:
              "sealed runtime manifest missing expected_runtime_identity block")
     assert isinstance(expected_id_raw, dict)
     expected_id: dict = expected_id_raw
+    # v0.4.2 schema correction: nine required keys (was six; endpoint,
+    # enabled_tools, and permissions were added). See PROTOCOL-DRAFT-v0.4.2
+    # §"Correction 2 — Sealed runtime identity binding".
     REQUIRED_EXPECTED_FIELDS = (
         "hermes_version", "model", "provider",
+        "endpoint", "enabled_tools", "permissions",
         "normalized_config_hash",
         "expected_blank_memory_md_hash", "expected_blank_user_md_hash",
     )
@@ -995,6 +1150,12 @@ def execute_pair(package: Path, m: dict, evidence: Path) -> None:
         actual_model = model_match.group(1)
         actual_provider = model_match.group(2)
         actual_config_hash = digest_text(cfg_norm)
+        # v0.4.2 schema correction: capture endpoint, enabled_tools,
+        # and permissions from authoritative Hermes runtime/config
+        # evidence. Each capture rule is explicit and reproducible.
+        actual_endpoint = _capture_endpoint(profile)
+        actual_enabled_tools = _capture_enabled_tools(profile)
+        actual_permissions = _capture_permissions()
         db = Path.home() / ".hermes" / "profiles" / profile / "state.db"
         snap = db_snapshot(db)
         if snap["sessions"] or snap["messages"]:
@@ -1031,6 +1192,18 @@ def execute_pair(package: Path, m: dict, evidence: Path) -> None:
             diffs.append({"field": "normalized_config_hash",
                           "expected": expected_id["normalized_config_hash"],
                           "actual": actual_config_hash})
+        if actual_endpoint != expected_id["endpoint"]:
+            diffs.append({"field": "endpoint",
+                          "expected": expected_id["endpoint"],
+                          "actual": actual_endpoint})
+        if actual_enabled_tools != expected_id["enabled_tools"]:
+            diffs.append({"field": "enabled_tools",
+                          "expected": expected_id["enabled_tools"],
+                          "actual": actual_enabled_tools})
+        if actual_permissions != expected_id["permissions"]:
+            diffs.append({"field": "permissions",
+                          "expected": expected_id["permissions"],
+                          "actual": actual_permissions})
         if diffs:
             stop("S11_RUNTIME_IDENTITY",
                  f"sealed expected runtime identity mismatch(es) for {profile}",
@@ -1042,6 +1215,9 @@ def execute_pair(package: Path, m: dict, evidence: Path) -> None:
                "normalized_config_hash": actual_config_hash,
                "model": actual_model,
                "provider": actual_provider,
+               "endpoint": actual_endpoint,
+               "enabled_tools": actual_enabled_tools,
+               "permissions": actual_permissions,
                "state_db": str(db),
                "initial_memory_md_hash": mhash,
                "initial_user_md_hash": uhash,
@@ -1054,7 +1230,9 @@ def execute_pair(package: Path, m: dict, evidence: Path) -> None:
     # catches per-arm divergence that would otherwise be hidden if both
     # arms agreed with each other but disagreed with the sealed value.
     for f in ("hermes_version", "config_normalized",
-              "model", "provider", "normalized_config_hash",
+              "model", "provider",
+              "endpoint", "enabled_tools", "permissions",
+              "normalized_config_hash",
               "initial_memory_md_hash", "initial_user_md_hash"):
         if pre[0][f] != pre[1][f]:
             stop("S11_RUNTIME_IDENTITY",

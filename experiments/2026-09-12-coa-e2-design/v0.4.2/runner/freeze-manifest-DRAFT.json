@@ -85,11 +85,11 @@
     },
     {
       "path": "runner/run_pilot.py",
-      "sha256": "29916fc59222f9907b767bca91e7e30d34e9b81ff5c104f67cb4c3e255c4b6e3"
+      "sha256": "0ec36c1ad8c4ca8bcc3dc182e02a7546b8a21a92a4dd2d1a3471fe81a227e07e"
     },
     {
       "path": "runner/runtime-manifest-DRAFT.json",
-      "sha256": "034be2a592c76a9c8aa1cdfcd979c95a6c4f4baca96f12dc5121818e4790585c"
+      "sha256": "c7a10ec571b06d16a0c69b1d30b98d32a3dd6df0a19c3ff191a902aea680b6b6"
     },
     {
       "path": "runner/verify_manifest.py",

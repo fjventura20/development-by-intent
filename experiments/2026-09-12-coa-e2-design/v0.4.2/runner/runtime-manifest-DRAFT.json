@@ -13,6 +13,9 @@
     "hermes_version": "<TO_BE_SEALED: hermes --version>",
     "model": "<TO_BE_SEALED: parsed from 'Model:' line of `hermes -p <profile> config show`>",
     "provider": "<TO_BE_SEALED: parsed from 'Model:' line of `hermes -p <profile> config show`>",
+    "endpoint": "<TO_BE_SEALED: resolved at seal time from `hermes -p <profile> config get --json <key>` for the first non-empty of [model.base_url, model.endpoint_url, endpoint, api.base_url]; the sealed expected value is the exact string returned (possibly empty). If none of those keys is set, the operator declares an empty string.>",
+    "enabled_tools": "<TO_BE_SEALED: sorted, comma-joined JSON list returned by `hermes -p <profile> config get --json toolsets`. For example, if toolsets=['hermes-cli'] the sealed value is 'hermes-cli' (a single-element sorted list).>",
+    "permissions": "<TO_BE_SEALED: sorted, comma-joined set of CLI permission-affecting flags the runner passes to `hermes chat` for the experimental invocation. The v0.4.2 runner invokes with --pass-session-id and -Q and no permission-bypass flags (--yolo, --ignore-rules, --ignore-user-config, --safe-mode are all absent). The sealed expected value is therefore '--pass-session-id,-Q'.>",
     "normalized_config_hash": "<TO_BE_SEALED: SHA-256 of profile-normalized `hermes -p <profile> config show` output, after replacing the per-arm profile name with '<profile>'>",
     "expected_blank_memory_md_hash": "<TO_BE_SEALED: equals blank_sha256() = SHA-256 of b''>",
     "expected_blank_user_md_hash": "<TO_BE_SEALED: equals blank_sha256() = SHA-256 of b''>"
@@ -30,9 +33,9 @@
   "fixed_predeclared_order": true,
   "expected_nonce_count": 6,
   "notes": [
-    "v0.4.2: expected_runtime_identity block is required even at DRAFT_TEMPLATE status; the schema check enforces the six keys above.",
+    "v0.4.2: expected_runtime_identity block is required even at DRAFT_TEMPLATE status; the schema check enforces the nine keys above.",
     "v0.4.2: at SEALED status the expected_blank_memory_md_hash and expected_blank_user_md_hash values must equal the runner's blank_sha256() helper (= SHA-256 of b'').",
-    "v0.4.2: hermes_version, model, provider, and normalized_config_hash must be sealed (no <TO_BE_SEALED>, no null, no empty string) before the runtime manifest can transition to SEALED.",
+    "v0.4.2: hermes_version, model, provider, endpoint, enabled_tools, permissions, and normalized_config_hash must be sealed (no <TO_BE_SEALED>, no null, no empty string unless the source-of-truth value itself is empty) before the runtime manifest can transition to SEALED.",
     "v0.4.2: the six-nonce semantics now bind all three per-arm nonces to distinct operational points (init / digest recall / nonce recall)."
   ]
 }
