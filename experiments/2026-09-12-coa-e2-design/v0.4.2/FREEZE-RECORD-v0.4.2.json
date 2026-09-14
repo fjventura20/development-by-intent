@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Protocol-compliant freeze record for the COA-E2 v0.4.2 design package. Records the frozen-candidate identity at the moment of freeze. Records inherited mechanism-check evidence and applicability rationale. Records one non-blocking technical-debt note. Does not modify any of the 33 frozen candidate artifacts.",
+  "package": {
+    "name": "COA-E2 v0.4.2",
+    "design_directory": "experiments/2026-09-12-coa-e2-design/v0.4.2",
+    "package_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2",
+    "branch": "feature/coa-e2-persistent-session-binding",
+    "candidate_commit_sha": "42620dccedb8a1bee9e9dd7a3191d6e56eea11f6",
+    "status": "FROZEN_NOT_EXECUTABLE"
+  },
+  "freeze": {
+    "freeze_decision": "FREEZE GO",
+    "freeze_decision_authority": "Frank-as-PI",
+    "freeze_timestamp": "2026-09-14T11:13:32Z",
+    "freeze_record_id": "20260914T071332Z-coa-e2-v0.4.2-freeze-001"
+  },
+  "frozen_artifacts": {
+    "freeze_manifest": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4.2/runner/freeze-manifest-DRAFT.json",
+      "sha256": "7282e44195eb6350d55804f4a16ab8b476d178c9b1c25874b91531e33781aecf",
+      "entry_count": 33,
+      "self_reference_excluded": true,
+      "internal_status_field": "DRAFT_NOT_FROZEN",
+      "note": "Internal 'status' field retained as DRAFT_NOT_FROZEN per design convention; the manifest itself is frozen at this SHA-256. Filename retains -DRAFT.json for verifier compatibility."
+    },
+    "protocol": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4.2/PROTOCOL-DRAFT-v0.4.2.md",
+      "sha256": "c6de08e3bfc03e1ca09badf2f395e07cebf36dfa93bfb5de7aeeaa3deefac833"
+    },
+    "runtime_manifest_template": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4.2/runner/runtime-manifest-DRAFT.json",
+      "sha256": "c7a10ec571b06d16a0c69b1d30b98d32a3dd6df0a19c3ff191a902aea680b6b6",
+      "nonce_state": "six null values; final nonce generation is not authorized by the freeze step and is gated on the separate execution-preparation / execution GO-NO-GO decision",
+      "expected_runtime_identity_state": "nine required keys present at DRAFT_TEMPLATE status (hermes_version, model, provider, endpoint, enabled_tools, permissions, normalized_config_hash, expected_blank_memory_md_hash, expected_blank_user_md_hash); all nine values are <TO_BE_SEALED> placeholders"
+    },
+    "run_pilot_py": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4.2/runner/run_pilot.py",
+      "sha256": "0ec36c1ad8c4ca8bcc3dc182e02a7546b8a21a92a4dd2d1a3471fe81a227e07e"
+    }
+  },
+  "pre_freeze_verification": {
+    "verifier_command": "cd /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2/runner && python3 verify_manifest.py --manifest freeze-manifest-DRAFT.json --package-root /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2 --output /tmp/coa-e2-v042-final-verify.json",
+    "verifier_exit_code": 0,
+    "verifier_stdout": "{\"overall\": \"PASS\", \"checked\": 33}",
+    "overall": "PASS",
+    "checked": 33,
+    "failed_paths": [],
+    "report_file": "/tmp/coa-e2-v042-final-verify.json",
+    "dry_run_status": "DRY_RUN_PASS",
+    "dry_run_errors": [],
+    "targeted_fixtures": {
+      "scoring_pipeline": "PASS",
+      "ack_comparator": "PASS",
+      "blank_state_check": "PASS",
+      "session_id_parser": "PASS",
+      "sealed_runtime_identity_missing_keys": "PASS",
+      "sealed_runtime_identity_mismatch": "PASS",
+      "six_nonce_material_participation": "PASS",
+      "nonce_duplicate_reuse": "PASS"
+    },
+    "compilation": "all runner/*.py compile clean under python3 -m py_compile"
+  },
+  "inherited_mechanism_check": {
+    "evidence_path": "experiments/2026-09-12-coa-e2-design/v0.4/MECHANISM-CHECK-v0.4.1-001.json",
+    "evidence_commit_sha": "ff6dda02c5ce40d814ccf1bc8470c890d4c325de",
+    "hermes_version": "Hermes Agent v0.21.2 (2026.9.11) · upstream e440bf35",
+    "applicability_to_v0_4_2": "ACCEPTED. The persistent-session mechanism, the verified CLI footer channel, and the session-ID parser semantics are unchanged from the v0.4.1 mechanism check. Specifically: SESSION_RE regex (runner/run_pilot.py line 54) is byte-identical between v0.4.1 and v0.4.2 (`r\"^session_id:\\s*(\\S+)\\s*$\"`, re.M); the session_id() parser function and invoke_hermes() argv construction (--pass-session-id) are unchanged; the v0.4.2 candidate does not modify any session-mechanism surface. The previously-passed mechanism check therefore remains the authoritative evidence for the v0.4.2 freeze. Do not rerun the mechanism check unless the session parser or Hermes CLI/session behavior changes.",
+    "v0_4_1_mechanism_result": "MECHANISM_CHECK_PASS",
+    "initialization_session_id": "20260914_061915_b69d5b",
+    "resume_session_id": "20260914_061915_b69d5b",
+    "session_db_continuity": "1 session row across init+resume, parent_session_id=NULL, message_count 2 -> 4, init messages preserved, 0 children/forked sessions",
+    "frozen_parser_acceptance": "frozen SESSION_RE accepted the observed real CLI footer channel exactly without modification"
+  },
+  "non_blocking_technical_debt": {
+    "note": "The DRAFT_TEMPLATE REQUIRED_EXPECTED_KEYS tuple in dry_validate() (runner/run_pilot.py line 450) still enumerates the original six runtime-identity fields, while the actual runtime-manifest template contains all nine and the SEALED validation explicitly requires endpoint, enabled_tools, and permissions. This does NOT permit execution with missing/unsealed values: dry_validate() runs against DRAFT_TEMPLATE status only (which currently has placeholders), and execute_pair() (which uses the correct nine-key tuple REQUIRED_EXPECTED_FIELDS at line 1102) gates SEALED execution. The DRAFT_TEMPLATE dry-run check is therefore non-load-bearing for execution safety; the SEALED gate in execute_pair() is the load-bearing check. This is recorded for operator awareness; the candidate is not modified for this note.",
+    "load_bearing_check": "REQUIRED_EXPECTED_FIELDS in execute_pair() (9 keys, line 1102)",
+    "non_load_bearing_check": "REQUIRED_EXPECTED_KEYS in dry_validate() (6 keys, line 450)"
+  },
+  "freeze_procedure": {
+    "type": "external freeze-record (non-disruptive)",
+    "rationale": "The freeze is recorded in a NEW file at the package root (FREEZE-RECORD-v0.4.2.json) that is NOT listed in freeze-manifest-DRAFT.json. The 33 listed files remain byte-identical to candidate commit 42620dccedb8a1bee9e9dd7a3191d6e56eea11f6, preserving their frozen hashes.",
+    "hash_impact": {
+      "manifest_sha256_unchanged": true,
+      "protocol_sha256_unchanged": true,
+      "runtime_manifest_sha256_unchanged": true,
+      "run_pilot_py_sha256_unchanged": true,
+      "files_added": ["FREEZE-RECORD-v0.4.2.json (new)"],
+      "files_modified": [],
+      "files_deleted": []
+    }
+  },
+  "post_freeze_verification": {
+    "expected_overall": "PASS",
+    "expected_checked": 33,
+    "expected_failed_paths": 0,
+    "required_rerun": true
+  },
+  "boundaries_unchanged": [
+    "no_experimental_nonce_generation",
+    "no_runtime_manifest_sealing",
+    "no_experimental_profile_creation",
+    "no_experimental_arm_execution",
+    "no_U2_U3_U5_execution",
+    "no_response_scoring",
+    "no_evaluator_engagement"
+  ],
+  "next_gate": "Execution preparation: populate and seal runtime identity (nine fields) and six nonces, verify the sealed manifest, then proceed to the two-session proof-of-concept if that seal passes."
+}
