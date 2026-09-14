@@ -1,0 +1,1 @@
+Mechanism check resume. Reply with one short sentence confirming you can see the prior message from the initialization, then stop. Do not use any tools.
