@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "purpose": "EXECUTION_PRECHECK_STOP evidence. Records the exact blocker that prevented the v0.4.2 proof-of-concept from proceeding past Phase B (mechanical pre-execution gate). The 33 frozen candidate artifacts are preserved unchanged. This file is an execution artifact outside the frozen manifest set.",
+  "phase": "Phase B - mechanical pre-execution gate",
+  "decision": "EXECUTION_PRECHECK_STOP",
+  "stopped_by": "dry-run schema check in runner/run_pilot.py (line ~471 in the SEALED-status validation block) rejects the captured endpoint='' value as 'not sealed'.",
+  "evidence_root": "/tmp/coa-e2-v042-sealed-dryrun",
+  "sealed_runtime_manifest": {
+    "path": "experiments/2026-09-12-coa-e2-design/v0.4.2/execution/runtime-manifest-SEALED.json",
+    "sha256": "555634cdd7071edd7e87f27ced205135d7333a1e05dd5b178cca81d69269e596"
+  },
+  "frozen_artifact_unchanged": {
+    "runner_run_pilot_py_sha256": "0ec36c1ad8c4ca8bcc3dc182e02a7546b8a21a92a4dd2d1a3471fe81a227e07e",
+    "freeze_manifest_sha256": "7282e44195eb6350d55804f4a16ab8b476d178c9b1c25874b91531e33781aecf",
+    "protocol_sha256": "c6de08e3bfc03e1ca09badf2f395e07cebf36dfa93bfb5de7aeeaa3deefac833"
+  },
+  "phase_a_completed": {
+    "profiles_created": ["coa-e2-coa-s1", "coa-e2-control-s1"],
+    "blank_state_files": {
+      "coa-e2-coa-s1": {
+        "MEMORY.md": "0 bytes, sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (= blank_sha256())",
+        "USER.md":   "0 bytes, sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (= blank_sha256())"
+      },
+      "coa-e2-control-s1": {
+        "MEMORY.md": "0 bytes, sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (= blank_sha256())",
+        "USER.md":   "0 bytes, sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (= blank_sha256())"
+      }
+    },
+    "state_db": "absent for both profiles (zero sessions, zero messages, zero child sessions by construction)",
+    "captured_runtime_identity": {
+      "hermes_version": "Hermes Agent v0.21.2 (2026.9.11) · upstream e440bf35\\nInstall directory: /home/fjventura20/.hermes/hermes-agent\\nInstall method: git\\nPython: 3.11.15\\nOpenAI SDK: 2.24.0\\nUpdate available: 555 commits behind — run 'hermes update'",
+      "model": "MiniMax-M3",
+      "provider": "minimax",
+      "endpoint": "",
+      "enabled_tools": "[\"hermes-cli\"]",
+      "permissions": "--pass-session-id,-Q",
+      "normalized_config_hash": "40c1ca4ee72e6eaa96fd49e833c0a6684aa72d8b97c62141a49c4163b6236825",
+      "expected_blank_memory_md_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_blank_user_md_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cross_arm_equivalence": "PASS (all nine runtime-identity fields identical across both profiles)",
+    "nonces_generated": {
+      "coa-init":     "737518c6e05637a469a87022bfe1710b",
+      "coa-digest":   "9e111b2f7b566a63f0b9147d8f544d46",
+      "coa-nonce":    "9eae00306f2275346d2b8e7504ec6baa",
+      "control-init":   "e1bdd820024f05d3fd0384e6e533b481",
+      "control-digest": "2b4e579a76805ac2c04ebbf050317338",
+      "control-nonce":  "bd9d225af8f66ebd9a9fdfb98fe62cb6"
+    },
+    "nonces_pairwise_unique": true,
+    "nonces_unseen": true,
+    "nonces_format_valid": "all six are 32-hex lowercase"
+  },
+  "phase_b_results": {
+    "frozen_package_verification": {
+      "command": "cd /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2/runner && python3 verify_manifest.py --manifest freeze-manifest-DRAFT.json --package-root /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2 --output /tmp/coa-e2-v042-preflight-verify.json",
+      "exit_code": 0,
+      "stdout": "{\"overall\": \"PASS\", \"checked\": 33}",
+      "overall": "PASS",
+      "checked": 33,
+      "failed_paths": 0
+    },
+    "dry_run": {
+      "command": "cd /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4.2 && python3 runner/run_pilot.py --dry-run --package-root . --runtime-manifest execution/runtime-manifest-SEALED.json --evidence-root /tmp/coa-e2-v042-sealed-dryrun",
+      "exit_code": 0,
+      "status": "DRY_RUN_FAIL",
+      "manifest_structure": false,
+      "synthetic_fixtures": {
+        "scoring_pipeline": "PASS",
+        "ack_comparator": "PASS",
+        "blank_state_check": "PASS",
+        "session_id_parser": "PASS",
+        "sealed_runtime_identity_missing_keys": "PASS",
+        "sealed_runtime_identity_mismatch": "PASS",
+        "six_nonce_material_participation": "PASS",
+        "nonce_duplicate_reuse": "PASS"
+      },
+      "errors": [
+        "sealed expected_runtime_identity.endpoint is not sealed (value='')"
+      ]
+    }
+  },
+  "blocker_detail": {
+    "what_failed": "The dry_validate() schema check at SEALED status (in runner/run_pilot.py, around line 471) treats an empty-string endpoint value as 'not sealed' and adds an error to the dry-run result. The check uses `if v in (None, '', '<TO_BE_SEALED>')` which lumps a legitimately empty captured value together with 'unset' placeholders.",
+    "why_endpoint_is_legitimately_empty": "The endpoint capture rule (defined in runner/run_pilot.py, _capture_endpoint) tries `hermes -p <profile> config get --json <key>` for each key in ENDPOINT_KEYS_IN_PRIORITY_ORDER = ('model.base_url', 'model.endpoint_url', 'endpoint', 'api.base_url'). For both coa-e2-coa-s1 and coa-e2-control-s1, all four keys return 'Config key not set: <key>' (verified by direct CLI invocation). Per the documented capture rule, the captured endpoint value is therefore '' (empty string), which is a legitimate, deterministic, reproducible capture.",
+    "why_modifying_the_frozen_runner_would_be_wrong": "The PI authorization explicitly forbids modifying any of the 33 frozen candidate artifacts. runner/run_pilot.py is one of the 33. The schema check is part of the frozen contract.",
+    "relationship_to_the_v0.4.2_technical_debt_note": "The FREEZE-RECORD-v0.4.2.json recorded a non-blocking technical-debt note about REQUIRED_EXPECTED_KEYS in dry_validate() being non-load-bearing for execution safety. That note described the missing-fields check (six keys vs nine keys). It did not describe the empty-string rejection. The empty-string rejection is a separate issue that emerged when the SEALED manifest was first exercised with a legitimately empty endpoint.",
+    "what_would_be_required_to_unblock": "A narrowly scoped patch to the dry_validate() schema check in runner/run_pilot.py to treat a legitimately captured empty endpoint (or any other legitimately captured empty value) as sealed. This would require either: (a) a new v0.4.3 candidate with the schema check loosened to `if v is None or v == '<TO_BE_SEALED>'`; or (b) a PI ruling that the empty-string rejection is itself a freeze-blocking defect and the schema check should be relaxed without a new candidate. Either path requires explicit PI authorization because it modifies the frozen runner contract."
+  },
+  "phase_b_condition_check": {
+    "frozen_package_verification_PASS_33_33": true,
+    "sealed_runtime_manifest_validation_PASS": false,
+    "dry_run_DRY_RUN_PASS": false,
+    "all_targeted_fixtures_PASS": true,
+    "six_nonces_unique_valid_unseen": true,
+    "all_nine_runtime_identity_fields_sealed": false,
+    "both_experimental_profiles_fresh_and_blank": true,
+    "runtime_identity_matches_sealed_expected_values": true,
+    "cross_arm_runtime_equivalence_holds": true,
+    "working_tree_package_artifacts_unchanged": true,
+    "overall_phase_b": "FAIL (dry-run is not DRY_RUN_PASS, sealed runtime-manifest validation reports one error)",
+    "phase_c_authorized": false
+  },
+  "boundary_observed": "Phase C (execute) NOT entered. No participant invocation, no scored turns, no profile state mutation beyond blank-file creation in Phase A."
+}
