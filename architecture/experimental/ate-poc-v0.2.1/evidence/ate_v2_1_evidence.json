@@ -1,0 +1,587 @@
+{
+  "schema_id": "TGE-ATE-POC-V2.1-EVIDENCE/0.1",
+  "started_utc": "2026-09-14T20:33:37Z",
+  "spec_version": "ATE-POC-DESIGN-v0.2.1",
+  "passed": 16,
+  "total": 16,
+  "tamper_passed": 10,
+  "tamper_total": 10,
+  "replay_match": true,
+  "exact_once_per_nonce": true,
+  "max_executions_per_nonce": 1,
+  "elapsed_seconds": 0.03876304626464844,
+  "final_acceptance": "PASS",
+  "implementation_hashes": {
+    "crypto_utils_v2.py": "1b1787b3612626912c2441ea6345d2c0bac9ce90ec50d7d8e373e835f108ad27",
+    "identity_v2.py": "d832b0c80ff754eb29c457389c3c88bd989d39b15a6da46a0e866b03579edc45",
+    "session_context.py": "17e38eb2685030b8eb1cf7be3250b437b9a77f0f31f6f25d27cb3db41bac2667",
+    "receipt_v2.py": "3a8402f2988f446f2d38d631e5cb3f8f420f162178f4cde7c22bdb98eca9b76f",
+    "capability_v2.py": "5778aa8c50f9c275e11a5fbb167cba0d73036615bd88a5f6e86538fffe0fe100",
+    "signed_candidate_action.py": "0ead42b13486598f44906c21b668a96619fffb8cbf0fc20607998ee13b4d977e",
+    "signed_executed_action.py": "3b3d7e16fd6b484f30da6eac57b32326b3f97668ce57bdc8a2e5564751ed5f12",
+    "nonce_registry.py": "2a703e43943d52d25f2e02db604b7fffb9e1dbe0bf7602f46fd73485ba414560",
+    "decision_record.py": "7a4467b73b8c795d4c7df3a6eeff1b92f087f1ae98991af9f67a40b13cee917a",
+    "pipeline_v2_1.py": "0b4f377f2f97091c04c07a5f38fce61a6476edfe2a567e09eb32ced07ed4d22b",
+    "ate_v2_1_test.py": "3b98dc714e1657ca59effc44ea4f24acf0291d132f93b679181ad9fd1147949b"
+  },
+  "gel_v022_sha256": "dfcf251447e8c2296c396861ef55eae63f7cd1859663755abf3ba0e31e88a21f",
+  "design_sha256": "f3261448923c9cfad32671470aaa800632532f586a71eba618160392e2509230",
+  "key_role_fingerprints": {
+    "K_IDENTITY": {
+      "public_key_b64": "45k4FgEqgHMIlZ8v6OE2R0PujUIPcxLG/Wk6MV/vl9E=",
+      "public_key_fingerprint": "45f8546d6e5f04c3a865651a2fe4f780e7aea9a361083a36d2532f46083410ee"
+    },
+    "K_TGE": {
+      "public_key_b64": "Jgge4CD5s+YEP2p1JflG6meRrrYzAdyNp8pOLH5wpxs=",
+      "public_key_fingerprint": "3ec33a07f2b8d8149d4fbda202d5dd35cffcdc1fac8c4d61bf0eeab1133c0ea7"
+    },
+    "K_AUTHORITY": {
+      "public_key_b64": "1mxyzuMGK5zWmsuavLppefFkzzHSHB4enzuJZKNJ6p4=",
+      "public_key_fingerprint": "45cdd3eab857edbc22e59bfa6bd129f2b60b6f6544c6d4780eb4c1c3eee6dc27"
+    },
+    "K_GEL": {
+      "public_key_b64": "NyVI58XSJx0dWZ6YHFpPiPQpGCmDPEUQ4DumEb40X9E=",
+      "public_key_fingerprint": "69e85f5a269243de2a6b0c2819dd1525c20b929f036747c8ea95f35f899a5e49"
+    },
+    "K_PIPELINE": {
+      "public_key_b64": "xGu7WUXD+e0Ffj+8gNndqCFQII829gYNBdTotDjdaTs=",
+      "public_key_fingerprint": "155c487232a5778bf916c8a3dd39563084d39fdda06811735423bf78fdfec8fc"
+    }
+  },
+  "fixture_trust_root": {
+    "session_id": "session_ate_v2_1_001",
+    "agent_id": "agent_ate_v2_1_001",
+    "runtime_fingerprint": "bdff0df0a3c2571ffaf2f70031096db72e2cd20ecca8d2d7215c6af0135d8f52",
+    "envelope_nonce": "nonce_ate_v2_1_001",
+    "charter_sha256": "charter_sha256_ate_poc_v0_1",
+    "key_roles": {
+      "K_IDENTITY": "runtime (K_IDENTITY)",
+      "K_TGE": "TGE-fixture (K_TGE)",
+      "K_AUTHORITY": "authority (K_AUTHORITY)",
+      "K_GEL": "GEL-fixture (K_GEL)",
+      "K_PIPELINE": "pipeline (K_PIPELINE)"
+    }
+  },
+  "execution_boundary_events": [
+    {
+      "case_id": "ATE-V2.1-A",
+      "nonce": "nonce_ate_v2_1_001",
+      "execution_boundary_reached": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553"
+    },
+    {
+      "case_id": "ATE-V2.1-1",
+      "nonce": "nonce_v1_fresh",
+      "execution_boundary_reached": true,
+      "decision_id": "a9b9f35e7aad06d4d81431b941c3afd0"
+    }
+  ],
+  "case_results": [
+    {
+      "case_id": "ATE-V2.1-A",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "first valid execution with unseen nonce",
+      "expected": {
+        "verdict": "ALLOW",
+        "reason_code": "PASS",
+        "replay_check_result": "PASS_FIRST_EXECUTION",
+        "execution_boundary_reached": true,
+        "nonce_state_observed": "UNSEEN"
+      },
+      "actual": {
+        "verdict": "ALLOW",
+        "reason_code": "PASS",
+        "replay_check_result": "PASS_FIRST_EXECUTION",
+        "execution_boundary_reached": true,
+        "nonce_state_observed": "UNSEEN"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "REPLAY_CHECK:PASS",
+        "EVAL_GATE:ALLOW",
+        "BIND_EXECUTED_ACTION:PASS",
+        "BIND_DECISION:PASS"
+      ],
+      "failing_stage": null
+    },
+    {
+      "case_id": "ATE-V2.1-1",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "valid fully bound envelope (fresh nonce)",
+      "expected": {
+        "verdict": "ALLOW",
+        "reason_code": "PASS",
+        "replay_check_result": "PASS_FIRST_EXECUTION",
+        "execution_boundary_reached": true,
+        "nonce_state_observed": "UNSEEN"
+      },
+      "actual": {
+        "verdict": "ALLOW",
+        "reason_code": "PASS",
+        "replay_check_result": "PASS_FIRST_EXECUTION",
+        "execution_boundary_reached": true,
+        "nonce_state_observed": "UNSEEN"
+      },
+      "pass": true,
+      "decision_id": "a9b9f35e7aad06d4d81431b941c3afd0",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "REPLAY_CHECK:PASS",
+        "EVAL_GATE:ALLOW",
+        "BIND_EXECUTED_ACTION:PASS",
+        "BIND_DECISION:PASS"
+      ],
+      "failing_stage": null
+    },
+    {
+      "case_id": "ATE-V2.1-10-VERIFY",
+      "operation_mode": "VERIFY_ENVELOPE",
+      "description": "exact original envelope under VERIFY_ENVELOPE",
+      "expected": {
+        "verdict": "VERIFICATION_PASS",
+        "reason_code": "VERIFICATION_PASS",
+        "replay_check_result": "N/A_FOR_VERIFICATION",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "actual": {
+        "verdict": "VERIFICATION_PASS",
+        "reason_code": "VERIFICATION_PASS",
+        "replay_check_result": "N/A_FOR_VERIFICATION",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "pass": true,
+      "decision_id": "478f382a57d900a62be207f050e9a729",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "BIND_DECISION:PASS"
+      ],
+      "failing_stage": null
+    },
+    {
+      "case_id": "ATE-V2.1-B",
+      "operation_mode": "VERIFY_ENVELOPE",
+      "description": "exact historical envelope reverification",
+      "expected": {
+        "verdict": "VERIFICATION_PASS",
+        "reason_code": "VERIFICATION_PASS",
+        "replay_check_result": "N/A_FOR_VERIFICATION",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "actual": {
+        "verdict": "VERIFICATION_PASS",
+        "reason_code": "VERIFICATION_PASS",
+        "replay_check_result": "N/A_FOR_VERIFICATION",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "pass": true,
+      "decision_id": "e09c70655887f2c17c5359a037653516",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "BIND_DECISION:PASS"
+      ],
+      "failing_stage": null
+    },
+    {
+      "case_id": "ATE-V2.1-10-EXEC",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "exact original envelope under AUTHORIZE_EXECUTION (replay)",
+      "expected": {
+        "verdict": "DENY_REPLAY",
+        "reason_code": "GX_REPLAY_NONCE_PREVIOUSLY_CONSUMED",
+        "replay_check_result": "DENY_NONCE_PREVIOUSLY_CONSUMED",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "actual": {
+        "verdict": "DENY_REPLAY",
+        "reason_code": "GX_REPLAY_NONCE_PREVIOUSLY_CONSUMED",
+        "replay_check_result": "DENY_NONCE_PREVIOUSLY_CONSUMED",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "pass": true,
+      "decision_id": "a9b9f35e7aad06d4d81431b941c3afd0",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "REPLAY_CHECK:FAIL"
+      ],
+      "failing_stage": "REPLAY_CHECK",
+      "first_decision_id": null
+    },
+    {
+      "case_id": "ATE-V2.1-C",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "second execution using consumed nonce",
+      "expected": {
+        "verdict": "DENY_REPLAY",
+        "reason_code": "GX_REPLAY_NONCE_PREVIOUSLY_CONSUMED",
+        "replay_check_result": "DENY_NONCE_PREVIOUSLY_CONSUMED",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "actual": {
+        "verdict": "DENY_REPLAY",
+        "reason_code": "GX_REPLAY_NONCE_PREVIOUSLY_CONSUMED",
+        "replay_check_result": "DENY_NONCE_PREVIOUSLY_CONSUMED",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "CONSUMED"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:PASS",
+        "BIND_GEL_INPUT_HASH:PASS",
+        "REPLAY_CHECK:FAIL"
+      ],
+      "failing_stage": "REPLAY_CHECK",
+      "first_decision_id": null
+    },
+    {
+      "case_id": "ATE-V2.1-2",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "substitute different capability-authorized action",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-3",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "replace action after signing/binding but pre-GEL",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-4",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "replace executed action after GEL (decision_signature mismatch)",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_DECISION_FAILED",
+        "execution_boundary_reached": false
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_DECISION_FAILED",
+        "execution_boundary_reached": false
+      },
+      "pass": true,
+      "audit_trail_summary": "tamper-detected",
+      "failing_stage": "BIND_DECISION"
+    },
+    {
+      "case_id": "ATE-V2.1-5",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "replay under different session (action-level)",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-6",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "replay under different agent identity (action-level)",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-7",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "replay using different capability token (action-level)",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CAPABILITY_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CAPABILITY_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:FAIL"
+      ],
+      "failing_stage": "BIND_CAPABILITY"
+    },
+    {
+      "case_id": "ATE-V2.1-8",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "transplant receipt from another envelope",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": null,
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_IDENTITY_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "0e08540905243c7c1a8771fda74bb733",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:FAIL"
+      ],
+      "failing_stage": "BIND_IDENTITY"
+    },
+    {
+      "case_id": "ATE-V2.1-9",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "alter gate/audit evidence without decision change",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_DECISION_FAILED",
+        "execution_boundary_reached": false
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_DECISION_FAILED",
+        "execution_boundary_reached": false
+      },
+      "pass": true,
+      "audit_trail_summary": "tamper-detected",
+      "failing_stage": "BIND_DECISION"
+    },
+    {
+      "case_id": "ATE-V2.1-D",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "same signed action transplanted to new envelope with different nonce",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "b8a8bacc5ebd9edde5fb49627cfc4553",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-E",
+      "operation_mode": "AUTHORIZE_EXECUTION",
+      "description": "altered nonce after candidate signing",
+      "expected": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": null,
+        "execution_boundary_reached": false,
+        "nonce_state_observed": null
+      },
+      "actual": {
+        "verdict": "DENY_BINDING_MISMATCH",
+        "reason_code": "GX_BIND_CANDIDATE_ACTION_FAILED",
+        "replay_check_result": "N/A_FAILED_BEFORE_REPLAY_CHECK",
+        "execution_boundary_reached": false,
+        "nonce_state_observed": "N/A"
+      },
+      "pass": true,
+      "decision_id": "46b9ba3d68f44bdcfd3ffeb08d3ffca1",
+      "audit_trail_summary": [
+        "BIND_IDENTITY:PASS",
+        "BIND_SESSION_CONTEXT:PASS",
+        "BIND_RECEIPT:PASS",
+        "BIND_CAPABILITY:PASS",
+        "BIND_CANDIDATE_ACTION:FAIL"
+      ],
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    }
+  ],
+  "tamper_results": [
+    {
+      "case_id": "ATE-V2.1-2",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-3",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-4",
+      "failing_stage": "BIND_DECISION"
+    },
+    {
+      "case_id": "ATE-V2.1-5",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-6",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-7",
+      "failing_stage": "BIND_CAPABILITY"
+    },
+    {
+      "case_id": "ATE-V2.1-8",
+      "failing_stage": "BIND_IDENTITY"
+    },
+    {
+      "case_id": "ATE-V2.1-9",
+      "failing_stage": "BIND_DECISION"
+    },
+    {
+      "case_id": "ATE-V2.1-D",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    },
+    {
+      "case_id": "ATE-V2.1-E",
+      "failing_stage": "BIND_CANDIDATE_ACTION"
+    }
+  ],
+  "replay_deterministic": {
+    "dr_replay_1_verdict": "ALLOW",
+    "dr_replay_2_verdict": "ALLOW",
+    "dr_replay_1_decision_signature": "usvzi+4FpmUkMlcOolFdXi4njCTuHOtUaEPdkwDMgkGMIh6v1wgVyJT4XucFYmtAdj3/qTYXd9gpvbCTby8YBw==",
+    "dr_replay_2_decision_signature": "usvzi+4FpmUkMlcOolFdXi4njCTuHOtUaEPdkwDMgkGMIh6v1wgVyJT4XucFYmtAdj3/qTYXd9gpvbCTby8YBw==",
+    "match": true
+  }
+}
