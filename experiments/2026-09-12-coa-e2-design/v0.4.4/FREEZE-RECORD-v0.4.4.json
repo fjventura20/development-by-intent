@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "freeze_record_id": "20260914T143853Z-coa-e2-v0.4.4-freeze-001",
+  "freeze_record_kind": "design-candidate freeze for execution preparation",
+  "package_version": "v0.4.4",
+  "package_directory": "v0.4.4/",
+  "branch": "feature/coa-e2-persistent-session-binding",
+  "freeze_timestamp_utc": "2026-09-14T14:38:53Z",
+  "candidate_commit_sha": "75f09c68045fd5294337e4bf5954fd4ad8fcdbd5",
+  "candidate_branch_head": "75f09c68045fd5294337e4bf5954fd4ad8fcdbd5",
+  "manifest_sha256": "e2bdf0a834d1ea2732fe78b526f89e7be4700626943235c61121abaac5d9e284",
+  "manifest_entries": 34,
+  "protocol_sha256": "f298aeed6a31a9952d31bc94a40313bfb63aa52b597fe04aa448e260ac9686b8",
+  "runtime_manifest_template_sha256": "c7a10ec571b06d16a0c69b1d30b98d32a3dd6df0a19c3ff191a902aea680b6b6",
+  "run_pilot_sha256": "cb7b5dc7100d68cf7d485efe6c166e7745ce11c8b728cc634caac0cafb725e72",
+  "bootstrap_state_py_sha256": "b5eb56c6bf29dd7dc7b10075e130a11618c026afa03d9bd0170e1ecaece63f36",
+  "inherited_mechanism_check_evidence": {
+    "applicable": true,
+    "rationale": "Hermes v0.21.2 (2026.9.11) behavior is unchanged for v0.4.4. The v0.4.4 bootstrap-and-scrub mechanism uses the same CLI invocation pattern as the inherited mechanism check (single one-shot chat, --oneshot, --pass-session-id). The session-ID/footer parser line at run_pilot.py ~line 54 is byte-identical to v0.4.1. No parser/session-mechanism change in v0.4.4.",
+    "evidence_path": "experiments/2026-09-12-coa-e2-design/v0.4/MECHANISM-CHECK-v0.4.1-001.json",
+    "evidence_commit_sha": "ff6dda02c5ce40d814ccf1bc8470c890d4c325de"
+  },
+  "preserved_prior_versions": [
+    {
+      "package_version": "v0.4.1",
+      "candidate_sha": "64f9a80771558c50edf6dd0d5c3dd21da625d51a",
+      "manifest_sha256": "053dc3d33dd7d5b410dc4bf227c7b82e25627bb046a497a0e8abc1f4054ab372",
+      "status": "byte-identical at freeze time"
+    },
+    {
+      "package_version": "v0.4.2",
+      "candidate_sha": "42620dccedb8a1bee9e9dd7a3191d6e56eea11f6",
+      "manifest_sha256": "7282e44195eb6350d55804f4a16ab8b476d178c9b1c25874b91531e33781aecf",
+      "phase_b_stop_evidence_sha": "5447a7847859e7e507d3552ba4eb85ab89ffdcda",
+      "status": "byte-identical at freeze time, kept as historical failed-precheck evidence"
+    },
+    {
+      "package_version": "v0.4.3",
+      "candidate_sha": "bd72015e3bf834128c3f2df6f58ae235704552f8",
+      "freeze_sha": "2bf9cc8",
+      "evidence_sha": "2abf5e9",
+      "manifest_sha256": "b0f63d69c27d49902d0141d977bc340286f0d68dd50f50731f5714f2185ae4a4",
+      "status": "byte-identical at freeze time"
+    }
+  ],
+  "consumed_nonce_sets": {
+    "v0.4.2": [
+      "737518c6e05637a469a87022bfe1710b",
+      "9e111b2f7b566a63f0b9147d8f544d46",
+      "9eae00306f2275346d2b8e7504ec6baa",
+      "e1bdd820024f05d3fd0384e6e533b481",
+      "2b4e579a76805ac2c04ebbf050317338",
+      "bd9d225af8f66ebd9a9fdfb98fe62cb6"
+    ],
+    "v0.4.3": [
+      "e64270853f633647fe2649bbe0632807",
+      "b71f591f50a7f9849b551298b060c133",
+      "e2ea474585d358cb17e9af97d6408854",
+      "28ea3c727b4fb1403b17bd18dd7e0967",
+      "8b9e946a040c38c97ea1256409220972",
+      "96481a9bcc81bd953063bad002e99170"
+    ]
+  },
+  "verification_at_freeze": {
+    "compilation": "OK, all runner/*.py files compile clean",
+    "manifest_verifier": {
+      "overall": "PASS",
+      "checked": 34,
+      "exit_code": 0
+    },
+    "dry_run": {
+      "status": "DRY_RUN_PASS",
+      "errors": [],
+      "synthetic_fixtures_total": 17,
+      "synthetic_fixtures_passing": 17
+    },
+    "regression_suite": "17/17 PASS (8 v0.4.1+2 baseline + 6 v0.4.3 endpoint field-aware + 3 v0.4.4 bootstrap-and-scrub)"
+  },
+  "scope_of_authority": {
+    "authorized": [
+      "freeze v0.4.4 from candidate commit 75f09c68045fd5294337e4bf5954fd4ad8fcdbd5",
+      "create fresh execution profiles",
+      "run bootstrap-and-scrub via frozen helper",
+      "generate six fresh disjoint nonces",
+      "seal runtime manifest",
+      "execute CoA-S1 + Control-S1 in frozen order",
+      "report aggregate classification"
+    ],
+    "do_not_modify_during_run": [
+      "any of the 34 frozen candidate artifacts",
+      "the freeze manifest hash content",
+      "the frozen task prompts",
+      "the frozen scoring rules",
+      "the frozen sealed expected-runtime-identity values once sealed"
+    ]
+  },
+  "next_step": "execute Phase A: profile setup + bootstrap + scrub; Phase B: nonce gen + manifest seal + gates; Phase C: execute; Phase D: report aggregate classification"
+}
