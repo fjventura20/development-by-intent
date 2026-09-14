@@ -1,0 +1,888 @@
+{
+  "schema_id": "TGE-ATE-POC-EVIDENCE/0.1",
+  "started_utc": "2026-09-14T20:21:40Z",
+  "spec_version": "ATE-POC-DESIGN-v0.1",
+  "passed": 11,
+  "total": 11,
+  "tamper_passed": 4,
+  "tamper_total": 4,
+  "replay_match": true,
+  "elapsed_seconds": 0.020699262619018555,
+  "final_acceptance": "PASS",
+  "implementation_hashes": {
+    "crypto_utils.py": "e62bab65ecf9c3f5ea2ad1519a89a8cb71596d906c320725395727280b97570f",
+    "identity.py": "c8202d2813f96ca09e2e27f17284acb1c47731ca04a8c145cd873200d69cf8e3",
+    "capability.py": "d4ddb2502415d246495316305017115ef6d8eded36ea60422b22a6771040f814",
+    "receipt.py": "222891a92187fc4b6e6b434996b9e4087af2eb8e5f143760327ed714db145167",
+    "pipeline.py": "2309fae76b6f0e1f05756a6d3fb50e7a28e0c258e4a0b1bb9a2d2f1f915d2009",
+    "ate_test.py": "6bc5e9ce3ac13e837189d5e4bdb626ee4a603c61c1454268ff4743e50edba395"
+  },
+  "gel_v022_sha256": "dfcf251447e8c2296c396861ef55eae63f7cd1859663755abf3ba0e31e88a21f",
+  "design_sha256": "02fd4b04f5b3a05450c9f3c16aed1e12b70d082e9a15e87fc8f192fe8038015c",
+  "fixture_trust_root": {
+    "authority_pubkey_b64": "tdSaam9ufxlVzFMdWnnOZDwn6pqUhh/NPQs+YSBLIfY=",
+    "session_id": "session_ate_001",
+    "agent_id": "agent_ate_001",
+    "runtime_fingerprint": "19f599dd792b8f4c1c525313b36d688cc70b6f1377f0a1241e0dcff5b6deaa42",
+    "charter_sha256": "charter_sha256_ate_poc_v0_1"
+  },
+  "case_results": [
+    {
+      "case_id": "ATE-1",
+      "description": "valid identity + valid receipt + authorized capability + permitted action",
+      "expected_verdict": "ALLOW",
+      "actual_verdict": "ALLOW",
+      "expected_reason_code": "PASS",
+      "actual_reason_code": "PASS",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "failing_gate": null,
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": true,
+        "session_passed": true,
+        "capability_passed": true,
+        "gel_passed": true,
+        "first_failing_gate": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "058bae1d43fb2e1c11f7ec2bf281e8bc957ac56a2974e1ca75a9b30ce78222f4",
+        "evidence_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "receipt_valid",
+          "details": {
+            "age_seconds": 60,
+            "freshness_window_seconds": 3600
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_SESSION",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "session_id consistent across all sources",
+          "details": {
+            "session_id": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_CAPABILITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "capability_valid",
+          "details": {},
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_GEL",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "gel_verdict=allow, rule_id=None",
+          "details": {
+            "gel_verdict": "allow",
+            "gel_rule_id": null
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-2",
+      "description": "valid identity/receipt but action exceeds granted capability",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_CAPABILITY_EXCEEDED",
+      "actual_reason_code": "GX_CAPABILITY_EXCEEDED",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY"
+      ],
+      "failing_gate": "GATE_CAPABILITY",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": true,
+        "session_passed": true,
+        "capability_passed": false,
+        "first_failing_gate": "GATE_CAPABILITY",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "ad800dee90e3b8b674715be645c3e3cc7d699f142d19682f429db30930a9c953",
+        "envelope_hash": "5be2c447d5412abbedadaecc1cf0698ae88a6724df21630088daf62ca892fb5f",
+        "evidence_chain_hash": "4ee1ac6733cf107e032ee09e3b7358068e50df12029dfc339e283c9183c6860c"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "receipt_valid",
+          "details": {
+            "age_seconds": 60,
+            "freshness_window_seconds": 3600
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_SESSION",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "session_id consistent across all sources",
+          "details": {
+            "session_id": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_CAPABILITY",
+          "verdict": "FAIL",
+          "reason_code": "GX_CAPABILITY_EXCEEDED",
+          "reason_description": "action_op=B1 target_kind=C1 target='/etc/passwd' not in scope=['B11:C5:*', 'B1:C1:/tmp/*', 'B7:C3:*', 'B10:C4:*', 'B1:C3:*']",
+          "details": {
+            "operation": "B1",
+            "target_kind": "C1",
+            "target_identifier": "/etc/passwd",
+            "scope": [
+              "B11:C5:*",
+              "B1:C1:/tmp/*",
+              "B7:C3:*",
+              "B10:C4:*",
+              "B1:C3:*"
+            ]
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-3a",
+      "description": "missing receipt",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_RECEIPT_MISSING",
+      "actual_reason_code": "GX_RECEIPT_MISSING",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "failing_gate": "GATE_RECEIPT",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": false,
+        "first_failing_gate": "GATE_RECEIPT",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": null,
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "97fc567f748dbde54ee12fc8a2e70ebe8f9752b42987f66822620974c1ee0cad",
+        "evidence_chain_hash": "a40aa7abbaa8b0d32fd1e252d3dec4476c9970fa9fc995ddb48c793ba565ee95"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "FAIL",
+          "reason_code": "GX_RECEIPT_MISSING",
+          "reason_description": "receipt_is_none",
+          "details": {},
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-3b",
+      "description": "invalid receipt (schema_id mismatch)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_RECEIPT_INVALID",
+      "actual_reason_code": "GX_RECEIPT_INVALID",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "failing_gate": "GATE_RECEIPT",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": false,
+        "first_failing_gate": "GATE_RECEIPT",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "4939724af9102840f3d468728a970c65cab1b3a8af11b0ca8380644728d30334",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "40950c43b18078bfbd105a62a1c522f70ed8775251a1d0dfd3f4c4e8173a7d0f",
+        "evidence_chain_hash": "c181a7f5ad40c571ec044954988a6ff80a273e748c7dd24e003df568e0b6d6df"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "FAIL",
+          "reason_code": "GX_RECEIPT_INVALID",
+          "reason_description": "bad_schema_id:'INVALID'",
+          "details": {},
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-3c",
+      "description": "expired receipt (issued 2 hours ago, freshness window 1h)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_RECEIPT_EXPIRED",
+      "actual_reason_code": "GX_RECEIPT_EXPIRED",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "failing_gate": "GATE_RECEIPT",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": false,
+        "first_failing_gate": "GATE_RECEIPT",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "0778bead9e2d9e1d9a978868ad7bc10689e96ea82226863e4b240158e5f75461",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "850f9705e00d611113e14107736dcc86ad41c82159ca5fd7ea5d1d6505cdf92b",
+        "evidence_chain_hash": "343ae884067633fafafa5f378821fa340550a624bec1ee129c38d0efe00a30ff"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "FAIL",
+          "reason_code": "GX_RECEIPT_EXPIRED",
+          "reason_description": "receipt_age=7260s > freshness_window=3600s",
+          "details": {
+            "age_seconds": 7260,
+            "freshness_window_seconds": 3600,
+            "issued_at_utc": 1699992800,
+            "now": 1700000060
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-3d",
+      "description": "session mismatch (receipt.session_id != identity.session_id)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_SESSION_MISMATCH",
+      "actual_reason_code": "GX_SESSION_MISMATCH",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "failing_gate": "GATE_RECEIPT",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": false,
+        "first_failing_gate": "GATE_RECEIPT",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "dd2832145b3bcb3ada825a7ee5530d2f3aabae66ec391e2b62eb37aea34358e1",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "3e5b72580642c69b3351e5afe0ecfda83caf6422c75b4f3fca4ee996acb845a9",
+        "evidence_chain_hash": "bbc98c7eff795c335c53eabf44b1f6a2ac5d976706d798e49a3c7cc08c6b7bd1"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "FAIL",
+          "reason_code": "GX_SESSION_MISMATCH",
+          "reason_description": "receipt_session_id='different_session_id' != expected='session_ate_001'",
+          "details": {
+            "receipt_session_id": "different_session_id",
+            "expected": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-4",
+      "description": "authorized request containing GEL-violating action",
+      "expected_verdict": "BLOCK",
+      "actual_verdict": "BLOCK",
+      "expected_reason_code": "R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION",
+      "actual_reason_code": "R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "failing_gate": "GATE_GEL",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": true,
+        "session_passed": true,
+        "capability_passed": true,
+        "gel_passed": false,
+        "first_failing_gate": "GATE_GEL"
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "57cd9784a5c41517600083a1ff3c33aa9555ad2e2c649e4e4180d5646b05a7b2",
+        "envelope_hash": "150a5052d28c0daa32b4bc877296b6005fc6848ecdc3c07cf869d1966b387f63",
+        "evidence_chain_hash": "b410519091453f1277ef782c23ff4217165840e8e8cc38fad4bd78e43a326557"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "receipt_valid",
+          "details": {
+            "age_seconds": 60,
+            "freshness_window_seconds": 3600
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_SESSION",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "session_id consistent across all sources",
+          "details": {
+            "session_id": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_CAPABILITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "capability_valid",
+          "details": {},
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_GEL",
+          "verdict": "FAIL",
+          "reason_code": "R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION",
+          "reason_description": "gel_verdict=block, rule_id=R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION",
+          "details": {
+            "gel_verdict": "block",
+            "gel_rule_id": "R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION"
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true
+    },
+    {
+      "case_id": "ATE-5a",
+      "description": "tampered identity (corrupted signature)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_IDENTITY_INVALID",
+      "actual_reason_code": "GX_IDENTITY_INVALID",
+      "expected_reached_gates": [
+        "GATE_IDENTITY"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY"
+      ],
+      "failing_gate": "GATE_IDENTITY",
+      "trust_summary": {
+        "identity_passed": false,
+        "first_failing_gate": "GATE_IDENTITY",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "b9512f0f35feabccc1c890f6034cfd24f55b2d61c978b02ae276ce627da56c15",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "c29502fff87c73d75f08c3d10c36b3e7a93e25aee22037f343978694c3e8626e",
+        "evidence_chain_hash": "a9751a10529750a8f83e8c03fac3b23e7c89988b0871f84094a74c1b70ba42d8"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "FAIL",
+          "reason_code": "GX_IDENTITY_INVALID",
+          "reason_description": "signature_verification_failed",
+          "details": {
+            "identity_hash": "b9512f0f35feabccc1c890f6034cfd24f55b2d61c978b02ae276ce627da56c15"
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true,
+      "tamper_info": {
+        "tampered_field": "identity.signature_b64",
+        "original_identity_hash": "7b8870e967c28ffb0fa77ca0716e472782ab3d2528fa550282cea9e8ccaf2558",
+        "tampered_identity_hash": "c1e175bd19c6ec2e36a2d162fee2233d37db639c145633ddc8a1b43cb11e20ec",
+        "detection_gate": "GATE_IDENTITY"
+      }
+    },
+    {
+      "case_id": "ATE-5b",
+      "description": "tampered receipt (charter_sha256 replaced)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_RECEIPT_TAMPERED",
+      "actual_reason_code": "GX_RECEIPT_TAMPERED",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT"
+      ],
+      "failing_gate": "GATE_RECEIPT",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": false,
+        "first_failing_gate": "GATE_RECEIPT",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "40a0a474a51315bec5a56542d1d5b5e503a75e2ee4b8c1fe9caa7c19fabbce12",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "dbc5a4ddaa0c8edd49493f9f8b989fe8819561ae8989f501c774fc82f33cad5c",
+        "evidence_chain_hash": "dc82564d3280132e84a0c43498671a29f6c71c29b39419ed0d7436e109dbac6e"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "FAIL",
+          "reason_code": "GX_RECEIPT_TAMPERED",
+          "reason_description": "receipt_charter_sha256='tampered_charter_sha256_xxxxxxxx' != expected='charter_sha256_ate_poc_v0_1'",
+          "details": {
+            "receipt_charter_sha256": "tampered_charter_sha256_xxxxxxxx",
+            "expected": "charter_sha256_ate_poc_v0_1"
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true,
+      "tamper_info": {
+        "tampered_field": "acceptance_receipt.charter_sha256",
+        "original_receipt_hash": "76c0a1806a9bbc0752a4e30b86e6d21ae6fd09497d5446c2b079caa9d6304c26",
+        "tampered_receipt_hash": "944f319486c35271bb512722464126b1c55d6956abcef7005bb96b616e1ab7a5",
+        "detection_gate": "GATE_RECEIPT"
+      }
+    },
+    {
+      "case_id": "ATE-5c",
+      "description": "tampered candidate action (operation changed; detected at capability scope check)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_CAPABILITY_EXCEEDED",
+      "actual_reason_code": "GX_CAPABILITY_EXCEEDED",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY"
+      ],
+      "failing_gate": "GATE_CAPABILITY",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": true,
+        "session_passed": true,
+        "capability_passed": false,
+        "first_failing_gate": "GATE_CAPABILITY",
+        "gel_passed": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "2756abd83f12bb1536f92cfccf18ae411ec73c31f1e7f660abcdd691dce22580",
+        "envelope_hash": "64f332feecbd59896a47f5d82504fdf6d75e5e7fafe560fc8ff3cd6e23246c51",
+        "evidence_chain_hash": "7d7af9bc5f31457ba3042dcb786737617f25dc8cc54af4b42343525fb088bbb3"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "receipt_valid",
+          "details": {
+            "age_seconds": 60,
+            "freshness_window_seconds": 3600
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_SESSION",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "session_id consistent across all sources",
+          "details": {
+            "session_id": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_CAPABILITY",
+          "verdict": "FAIL",
+          "reason_code": "GX_CAPABILITY_EXCEEDED",
+          "reason_description": "action_op=B2 target_kind=C1 target='/tmp/new' not in scope=['B11:C5:*', 'B1:C1:/tmp/*', 'B7:C3:*', 'B10:C4:*', 'B1:C3:*']",
+          "details": {
+            "operation": "B2",
+            "target_kind": "C1",
+            "target_identifier": "/tmp/new",
+            "scope": [
+              "B11:C5:*",
+              "B1:C1:/tmp/*",
+              "B7:C3:*",
+              "B10:C4:*",
+              "B1:C3:*"
+            ]
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true,
+      "tamper_info": {
+        "tampered_field": "candidate_action.operation",
+        "original_action_hash": "a751dee720d8438eaa3af73fab750068bcbec2c0b8ab34607f690fd9820957cf",
+        "tampered_action_hash": "4a550e43cb4dee0e437aafb11f86a929d3564ea492a3ea12b3281e44a4accfb7",
+        "detection_gate": "GATE_CAPABILITY",
+        "note": "v0.2.2 has no per-action signature; tampering detected via capability scope mismatch"
+      }
+    },
+    {
+      "case_id": "ATE-5d",
+      "description": "tampered evidence chain (audit_trail entry modified post-hoc; verify_decision detects mismatch)",
+      "expected_verdict": "DENY_BEFORE_GEL",
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "expected_reason_code": "GX_EVIDENCE_CHAIN_TAMPERED",
+      "actual_reason_code": "GX_EVIDENCE_CHAIN_TAMPERED",
+      "expected_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "actual_reached_gates": [
+        "GATE_IDENTITY",
+        "GATE_RECEIPT",
+        "GATE_SESSION",
+        "GATE_CAPABILITY",
+        "GATE_GEL"
+      ],
+      "failing_gate": "EVIDENCE_CHAIN_VERIFY",
+      "trust_summary": {
+        "identity_passed": true,
+        "receipt_passed": true,
+        "session_passed": true,
+        "capability_passed": true,
+        "gel_passed": true,
+        "first_failing_gate": null
+      },
+      "hashes": {
+        "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536",
+        "receipt_hash": "2cb5c392cb735567d588d8b9a3fb5dda99e9d9eada20937315f99980f64c90e0",
+        "capability_hash": "4623dd8c883da51f132ba1f1944bec89af3974a086e7d07d90159b82ac57081e",
+        "candidate_action_hash": "5f9a5694216d67cd8be986365bd51120012d77c5abb3a0f855e1e80cdbeacf88",
+        "envelope_hash": "058bae1d43fb2e1c11f7ec2bf281e8bc957ac56a2974e1ca75a9b30ce78222f4",
+        "evidence_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1"
+      },
+      "audit_trail": [
+        {
+          "gate_id": "GATE_IDENTITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "identity_verified",
+          "details": {
+            "identity_hash": "808e899ea20b931a4d83d63290f97f871327d2b696dd31d2237ad957856e6536"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_RECEIPT",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "receipt_valid",
+          "details": {
+            "age_seconds": 60,
+            "freshness_window_seconds": 3600
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_SESSION",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "session_id consistent across all sources",
+          "details": {
+            "session_id": "session_ate_001"
+          },
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_CAPABILITY",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "capability_valid",
+          "details": {},
+          "evaluated_at_utc": 1700000060
+        },
+        {
+          "gate_id": "GATE_GEL",
+          "verdict": "PASS",
+          "reason_code": "PASS",
+          "reason_description": "gel_verdict=allow, rule_id=None",
+          "details": {
+            "gel_verdict": "allow",
+            "gel_rule_id": null
+          },
+          "evaluated_at_utc": 1700000060
+        }
+      ],
+      "pass": true,
+      "tamper_info": {
+        "tampered_field": "audit_trail[0].details",
+        "original_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1",
+        "tampered_chain_hash": "5470ead16e1f00662e36703ffdb2e5ba4688bd3652a9e90779cfafd0cb24059f",
+        "verification_result": "MISMATCH",
+        "detection_method": "verify_decision",
+        "detection_gate": "EVIDENCE_CHAIN_VERIFY"
+      }
+    }
+  ],
+  "tamper_results": [
+    {
+      "case_id": "ATE-5a",
+      "tamper_info": {
+        "tampered_field": "identity.signature_b64",
+        "original_identity_hash": "7b8870e967c28ffb0fa77ca0716e472782ab3d2528fa550282cea9e8ccaf2558",
+        "tampered_identity_hash": "c1e175bd19c6ec2e36a2d162fee2233d37db639c145633ddc8a1b43cb11e20ec",
+        "detection_gate": "GATE_IDENTITY"
+      },
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "actual_reason_code": "GX_IDENTITY_INVALID",
+      "failing_gate": "GATE_IDENTITY",
+      "expected_detection_gate": "GATE_IDENTITY"
+    },
+    {
+      "case_id": "ATE-5b",
+      "tamper_info": {
+        "tampered_field": "acceptance_receipt.charter_sha256",
+        "original_receipt_hash": "76c0a1806a9bbc0752a4e30b86e6d21ae6fd09497d5446c2b079caa9d6304c26",
+        "tampered_receipt_hash": "944f319486c35271bb512722464126b1c55d6956abcef7005bb96b616e1ab7a5",
+        "detection_gate": "GATE_RECEIPT"
+      },
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "actual_reason_code": "GX_RECEIPT_TAMPERED",
+      "failing_gate": "GATE_RECEIPT",
+      "expected_detection_gate": "GATE_RECEIPT"
+    },
+    {
+      "case_id": "ATE-5c",
+      "tamper_info": {
+        "tampered_field": "candidate_action.operation",
+        "original_action_hash": "a751dee720d8438eaa3af73fab750068bcbec2c0b8ab34607f690fd9820957cf",
+        "tampered_action_hash": "4a550e43cb4dee0e437aafb11f86a929d3564ea492a3ea12b3281e44a4accfb7",
+        "detection_gate": "GATE_CAPABILITY",
+        "note": "v0.2.2 has no per-action signature; tampering detected via capability scope mismatch"
+      },
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "actual_reason_code": "GX_CAPABILITY_EXCEEDED",
+      "failing_gate": "GATE_CAPABILITY",
+      "expected_detection_gate": "GATE_CAPABILITY"
+    },
+    {
+      "case_id": "ATE-5d",
+      "tamper_info": {
+        "tampered_field": "audit_trail[0].details",
+        "original_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1",
+        "tampered_chain_hash": "5470ead16e1f00662e36703ffdb2e5ba4688bd3652a9e90779cfafd0cb24059f",
+        "verification_result": "MISMATCH",
+        "detection_method": "verify_decision",
+        "detection_gate": "EVIDENCE_CHAIN_VERIFY"
+      },
+      "actual_verdict": "DENY_BEFORE_GEL",
+      "actual_reason_code": "GX_EVIDENCE_CHAIN_TAMPERED",
+      "failing_gate": "EVIDENCE_CHAIN_VERIFY",
+      "expected_detection_gate": "EVIDENCE_CHAIN_VERIFY"
+    }
+  ],
+  "replay_result": {
+    "original_evidence_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1",
+    "replay_evidence_chain_hash": "6bfd8a1ceaf8ba9403363865772650a0eddbb92fff59f79a3a82523819170de1",
+    "match": true
+  }
+}
