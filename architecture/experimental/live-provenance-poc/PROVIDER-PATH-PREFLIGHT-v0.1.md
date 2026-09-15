@@ -69,7 +69,7 @@ two-turn experiment failure.
     live_provenance_runtime: true    # enabled by previous closeout run
 
 ~/.hermes/.env
-  MINIMAX_API_KEY=sk-cp-...XjQA       # present, valid (verified below)
+  MINIMAX_API_KEY=${REDACTED-API-KEY-FRAGMENT}  # sanitized per sanitation amendment; literal env-var name kept, value redacted
 ```
 
 Configuration file SHA-256 (BEFORE): `68203e48410690a000e720dd95a201bcaf09ef88ad586ee29affb5f2ffc1feca`

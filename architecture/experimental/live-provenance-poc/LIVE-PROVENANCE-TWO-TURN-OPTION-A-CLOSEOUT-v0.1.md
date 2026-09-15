@@ -47,7 +47,7 @@ reply.
     provider: custom
     api_mode: chat_completions
     base_url: https://api.minimax.io/v1
-    api_key: ${MINIMAX_API_KEY}      # expanded at load time to sk-cp-79DIy8...XjQA
+    api_key: ${MINIMAX_API_KEY}      # expanded at load time to ${REDACTED-API-KEY-FRAGMENT} (sanitized per sanitation amendment)
   ```
 
 ### Effective runtime resolution (verified before any model call)
@@ -57,7 +57,7 @@ reply.
 | api_mode | `chat_completions` | YES |
 | base_url | `https://api.minimax.io/v1` | YES |
 | model | `MiniMax-M3` | YES |
-| api_key source | `${MINIMAX_API_KEY}` in config.yaml → expanded to existing env var `sk-cp-79DIy8...XjQA` | YES (existing `${MINIMAX_API_KEY}` per directive) |
+| api_key source | `${MINIMAX_API_KEY}` in config.yaml → expanded to existing env var `${REDACTED-API-KEY-FRAGMENT}` (sanitized per sanitation amendment) | YES (existing `${MINIMAX_API_KEY}` per directive) |
 
 The runtime resolution was confirmed by `cli.load_cli_config()` returning the expected dict and `assert` checks of all four required fields passing before any HTTP call was issued.
 
