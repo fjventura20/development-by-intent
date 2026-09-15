@@ -1,0 +1,137 @@
+{
+  "controlling_design_commit": "6ca3a5624f501f9b184f1b06fd7f42a73c31e5d4",
+  "results": {
+    "T0": {
+      "details": {
+        "anchor_final_seq": 1,
+        "audit_chain_len": 1,
+        "audit_chain_verify": true,
+        "mutation_count_after": 1,
+        "nonce_state": "CONSUMED",
+        "reason_code": "PX_OK",
+        "verdict": "EXECUTED"
+      },
+      "pass": true
+    },
+    "T1": {
+      "details": {
+        "audit_chain_len": 0,
+        "mutation_count": 0,
+        "nonce_state": null,
+        "reason_code": "PX_REQUEST_SIGNATURE_INVALID",
+        "verdict": "DENIED"
+      },
+      "pass": true
+    },
+    "T10": {
+      "details": {
+        "anchor_final_seq": 0,
+        "audit_chain_len": 0,
+        "crash_occurred": true,
+        "mutation_count": 0,
+        "nonce_state": null
+      },
+      "pass": true
+    },
+    "T2": {
+      "details": {
+        "requester_exposed": {
+          "has_audit_hmac_key_handle": false,
+          "has_db_write_handle": false,
+          "has_resource_credential_handle": false,
+          "module_exposes_executor_secrets": false,
+          "module_source_sha256": "852f7dc3eb6ab290fbf93be038b49dfee00c054d7d6aba1f60ba3560dff9bd93",
+          "signing_key_role": "request_signing_only_not_privileged"
+        },
+        "requester_module_audit_key_absence": true,
+        "subprocess_boundary_verified": true
+      },
+      "pass": true
+    },
+    "T3": {
+      "details": {
+        "audit_chain_len": 1,
+        "first_verdict": "EXECUTED",
+        "mutation_count": 1,
+        "nonce_state": "CONSUMED",
+        "replay_reason": "PX_NONCE_REPLAY_OR_BUSY",
+        "replay_verdict": "DENIED"
+      },
+      "pass": true
+    },
+    "T4": {
+      "details": {
+        "audit_chain_len": 0,
+        "mutation_count": 0,
+        "reason_code": "PX_AUTHORITY_REVOKED",
+        "verdict": "DENIED"
+      },
+      "pass": true
+    },
+    "T5": {
+      "details": {
+        "audit_chain_len": 2,
+        "denials": 15,
+        "first_success_request_id": "req-T5-000",
+        "mutation_count": 2,
+        "nonce_state": "CONSUMED",
+        "successes": 1,
+        "worker_count": 16
+      },
+      "pass": true
+    },
+    "T6": {
+      "details": {
+        "anchor_final_seq": 0,
+        "audit_chain_len": 0,
+        "mutation_count": 0,
+        "nonce_state": null,
+        "reason_code": "PX_REVERIFICATION_FAILED",
+        "verdict": "DENIED"
+      },
+      "pass": true
+    },
+    "T7": {
+      "details": {
+        "tamper_results": {
+          "anchor_mac_tamper": true,
+          "field_mutation": true,
+          "insertion": true,
+          "middle_deletion": true,
+          "reorder": true,
+          "tail_truncation": true
+        },
+        "untouched_control_reason": "verified",
+        "untouched_control_verifies": true
+      },
+      "pass": true
+    },
+    "T8": {
+      "details": {
+        "audit_chain_len": 0,
+        "other_resource_mut": 0,
+        "real_resource_mut": 0,
+        "reason_code": "PX_TARGET_BINDING_MISMATCH",
+        "verdict": "DENIED"
+      },
+      "pass": true
+    },
+    "T9": {
+      "details": {
+        "audit_chain_len_after_tamper": 1,
+        "first_verdict": "EXECUTED",
+        "mutation_count": 1,
+        "nonce_state": "CONSUMED",
+        "post_tamper_reason": "PX_AUDIT_INTEGRITY_FAILURE",
+        "post_tamper_verdict": "DENIED"
+      },
+      "pass": true
+    }
+  },
+  "summary": {
+    "fails": 0,
+    "passes": 11,
+    "total": 11
+  },
+  "upstream_frozen_ate_baseline": "f903478154e2b484f8a49295ba0692d0a5a4f260"
+}
