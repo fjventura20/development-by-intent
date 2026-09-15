@@ -1,0 +1,104 @@
+{
+  "experiment": "live-provenance-poc-v0.2.1-two-turn-option-A",
+  "started_at_utc": 1789474717.8911505,
+  "config_resolved": {
+    "provider": "custom",
+    "api_mode": "chat_completions",
+    "base_url": "https://api.minimax.io/v1",
+    "model": "MiniMax-M3"
+  },
+  "runtime_identity": {
+    "session_id": "20260915_081830_d81c9b",
+    "pid": "4076347",
+    "code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91",
+    "code_version": "unknown",
+    "started_at_utc": "1789474710.397118",
+    "proc_start_time": "1789474709.050000",
+    "public_key_sha256": "5ee7de4e6006876512ed824e79d8ba9a4a51dfed58b37079c47bcabd388b34fa",
+    "public_key_b64": "VYhcr+1ZybxmfiJrz2OdqnhjHDhcUeui22t/aGQPuII="
+  },
+  "operator_freshness_challenge": "liveprov_a1f057cc864d72c9",
+  "turn_a": {
+    "model_response_text": "ACCEPT:liveprov_a1f057cc864d72c9",
+    "state_before": "SESSION_STARTED",
+    "state_after": "ACCEPTANCE_PENDING",
+    "coa_receipt_fingerprint": "sha256:97b70ad9189484c2793b5100be9bb38657c653863a2c5f71a4762a4469dc3f6e"
+  },
+  "turn_a_artifact_session_acceptance": {
+    "schema_id": "HERMES-LP-SESSION-ACCEPTANCE/0.1",
+    "session_id": "20260915_081830_d81c9b",
+    "public_key_sha256": "5ee7de4e6006876512ed824e79d8ba9a4a51dfed58b37079c47bcabd388b34fa",
+    "freshness_challenge": "liveprov_a1f057cc864d72c9",
+    "coa_receipt_fingerprint": "sha256:97b70ad9189484c2793b5100be9bb38657c653863a2c5f71a4762a4469dc3f6e",
+    "acceptance_response_hash": "5689cedf9825cf28ec3ebb4eab299a04d2a0d5839e63ad3b505a00a4c08d1ddf",
+    "monotonic_seq": 1,
+    "turn_id": 1,
+    "channel_proof": "23aa8ea49dbe70a2af4df2aeedb3f175f9237b1f01eed7c6bbe726f51aa6fd05",
+    "prior_fingerprint": "sha256:97b70ad9189484c2793b5100be9bb38657c653863a2c5f71a4762a4469dc3f6e",
+    "provenance_type": "RUNTIME_ACCEPTANCE_TURN",
+    "domain": "SESSION_ACCEPTANCE",
+    "event_source": "HERMES_MODEL_RESPONSE",
+    "session_acceptance_fingerprint": "e94393e79ed7a14e866e1f396596741d489bc197667d5e6a3aa34cf896e14dd3",
+    "signed_preimage_sha256": "e94393e79ed7a14e866e1f396596741d489bc197667d5e6a3aa34cf896e14dd3",
+    "payload_canonical_b64": "eyJhY2NlcHRhbmNlX3Jlc3BvbnNlX2hhc2giOiI1Njg5Y2VkZjk4MjVjZjI4ZWMzZWJiNGVhYjI5OWEwNGQyYTBkNTgzOWU2M2FkM2I1MDVhMDBhNGMwOGQxZGRmIiwiY2hhbm5lbF9wcm9vZiI6IjIzYWE4ZWE0OWRiZTcwYTJhZjRkZjJhZWVkYjNmMTc1ZjkyMzdiMWYwMWVlZDdjNmJiZTcyNmY1MWFhNmZkMDUiLCJjb2FfcmVjZWlwdF9maW5nZXJwcmludCI6InNoYTI1Njo5N2I3MGFkOTE4OTQ4NGMyNzkzYjUxMDBiZTliYjM4NjU3YzY1Mzg2M2EyYzVmNzFhNDc2MmE0NDY5ZGMzZjZlIiwiZG9tYWluIjoiU0VTU0lPTl9BQ0NFUFRBTkNFIiwiZXZlbnRfc291cmNlIjoiSEVSTUVTX01PREVMX1JFU1BPTlNFIiwiZnJlc2huZXNzX2NoYWxsZW5nZSI6ImxpdmVwcm92X2ExZjA1N2NjODY0ZDcyYzkiLCJtb25vdG9uaWNfc2VxIjoxLCJwcmlvcl9maW5nZXJwcmludCI6InNoYTI1Njo5N2I3MGFkOTE4OTQ4NGMyNzkzYjUxMDBiZTliYjM4NjU3YzY1Mzg2M2EyYzVmNzFhNDc2MmE0NDY5ZGMzZjZlIiwicHJvdmVuYW5jZV90eXBlIjoiUlVOVElNRV9BQ0NFUFRBTkNFX1RVUk4iLCJwdWJsaWNfa2V5X3NoYTI1NiI6IjVlZTdkZTRlNjAwNjg3NjUxMmVkODI0ZTc5ZDhiYTlhNGE1MWRmZWQ1OGIzNzA3OWM0N2JjYWJkMzg4YjM0ZmEiLCJzZXNzaW9uX2lkIjoiMjAyNjA5MTVfMDgxODMwX2Q4MWM5YiIsInR1cm5faWQiOjF9",
+    "signature_b64": "SWdFAwGgWs/8qA4vQTe4VL4lwS9t3HAMotKW56OWk7uHjRSvkqLulkjtDMmrNiOesGbGk1iq1nOA1fnj3ousAg==",
+    "public_key_b64": "VYhcr+1ZybxmfiJrz2OdqnhjHDhcUeui22t/aGQPuII="
+  },
+  "turn_b": {
+    "model_response_text": "{\"operation\":\"NONE\",\"target\":\"governance_accepted\"}",
+    "state_before": "ACCEPTANCE_ISSUED",
+    "state_after": "ACTION_PENDING",
+    "action_struct": {
+      "operation": "NONE",
+      "target": "governance_accepted"
+    },
+    "capability_id": "cap_live_3fbabc6e",
+    "envelope_nonce": "nonce_8e4a2ea39076998e"
+  },
+  "turn_b_artifact_signed_candidate_action": {
+    "schema_id": "HERMES-LP-SIGNED-CANDIDATE-ACTION/0.1",
+    "session_id": "20260915_081830_d81c9b",
+    "public_key_sha256": "5ee7de4e6006876512ed824e79d8ba9a4a51dfed58b37079c47bcabd388b34fa",
+    "freshness_challenge": "liveprov_a1f057cc864d72c9",
+    "session_acceptance_fingerprint": "e94393e79ed7a14e866e1f396596741d489bc197667d5e6a3aa34cf896e14dd3",
+    "capability_id": "cap_live_3fbabc6e",
+    "receipt_id": "e94393e79ed7a14e866e1f396596741d489bc197667d5e6a3aa34cf896e14dd3",
+    "identity_fingerprint": "5ee7de4e6006876512ed824e79d8ba9a4a51dfed58b37079c47bcabd388b34fa",
+    "action_preimage_hash": "ce007390a6bae285c9c68c2ce22bf1800ef455c1f9430c696692287d777c3e0e",
+    "prior_fingerprint": "e94393e79ed7a14e866e1f396596741d489bc197667d5e6a3aa34cf896e14dd3",
+    "envelope_nonce": "nonce_8e4a2ea39076998e",
+    "monotonic_seq": 2,
+    "turn_id": 2,
+    "channel_proof": "3768e2d3e5324e6e9c315da978f4874161329c4de4245b7393f2d04b46628180",
+    "provenance_type": "RUNTIME_ACTION_TURN",
+    "domain": "SESSION_ACTION",
+    "event_source": "HERMES_MODEL_RESPONSE",
+    "signed_preimage_sha256": "55b155be425e1a6e3593820c13cb19dc860571cd8ef37f24e7ab2dbdfab7c0d0",
+    "payload_canonical_b64": "eyJhY3Rpb25fcHJlaW1hZ2VfaGFzaCI6ImNlMDA3MzkwYTZiYWUyODVjOWM2OGMyY2UyMmJmMTgwMGVmNDU1YzFmOTQzMGM2OTY2OTIyODdkNzc3YzNlMGUiLCJjYXBhYmlsaXR5X2lkIjoiY2FwX2xpdmVfM2ZiYWJjNmUiLCJjaGFubmVsX3Byb29mIjoiMzc2OGUyZDNlNTMyNGU2ZTljMzE1ZGE5NzhmNDg3NDE2MTMyOWM0ZGU0MjQ1YjczOTNmMmQwNGI0NjYyODE4MCIsImRvbWFpbiI6IlNFU1NJT05fQUNUSU9OIiwiZW52ZWxvcGVfbm9uY2UiOiJub25jZV84ZTRhMmVhMzkwNzY5OThlIiwiZXZlbnRfc291cmNlIjoiSEVSTUVTX01PREVMX1JFU1BPTlNFIiwiZnJlc2huZXNzX2NoYWxsZW5nZSI6ImxpdmVwcm92X2ExZjA1N2NjODY0ZDcyYzkiLCJpZGVudGl0eV9maW5nZXJwcmludCI6IjVlZTdkZTRlNjAwNjg3NjUxMmVkODI0ZTc5ZDhiYTlhNGE1MWRmZWQ1OGIzNzA3OWM0N2JjYWJkMzg4YjM0ZmEiLCJtb25vdG9uaWNfc2VxIjoyLCJwcmlvcl9maW5nZXJwcmludCI6ImU5NDM5M2U3OWVkN2ExNGU4NjZlMWYzOTY1OTY3NDFkNDg5YmMxOTc2NjdkNWU2YTNhYTM0Y2Y4OTZlMTRkZDMiLCJwcm92ZW5hbmNlX3R5cGUiOiJSVU5USU1FX0FDVElPTl9UVVJOIiwicHVibGljX2tleV9zaGEyNTYiOiI1ZWU3ZGU0ZTYwMDY4NzY1MTJlZDgyNGU3OWQ4YmE5YTRhNTFkZmVkNThiMzcwNzljNDdiY2FiZDM4OGIzNGZhIiwicmVjZWlwdF9pZCI6ImU5NDM5M2U3OWVkN2ExNGU4NjZlMWYzOTY1OTY3NDFkNDg5YmMxOTc2NjdkNWU2YTNhYTM0Y2Y4OTZlMTRkZDMiLCJzZXNzaW9uX2FjY2VwdGFuY2VfZmluZ2VycHJpbnQiOiJlOTQzOTNlNzllZDdhMTRlODY2ZTFmMzk2NTk2NzQxZDQ4OWJjMTk3NjY3ZDVlNmEzYWEzNGNmODk2ZTE0ZGQzIiwic2Vzc2lvbl9pZCI6IjIwMjYwOTE1XzA4MTgzMF9kODFjOWIiLCJ0dXJuX2lkIjoyfQ==",
+    "signature_b64": "+Zo1330qqM+3ZEzYmlgLjQz8YMIMOFOjEkQWNKdHgWCEamRh3ULFg1CPw+/sQsQG7yJauDhzW+l6vfgqfQrDBw==",
+    "public_key_b64": "VYhcr+1ZybxmfiJrz2OdqnhjHDhcUeui22t/aGQPuII="
+  },
+  "verification": {
+    "session_acceptance_live_provenance": true,
+    "signed_candidate_action_live_provenance": true,
+    "sa_event_source": "HERMES_MODEL_RESPONSE",
+    "sca_event_source": "HERMES_MODEL_RESPONSE",
+    "sa_monotonic_seq": 1,
+    "sca_monotonic_seq": 2,
+    "sa_turn_id": 1,
+    "sca_turn_id": 2,
+    "monotonic_increasing": true,
+    "turn_ids_differ": true,
+    "channel_proofs_differ": true,
+    "pubkey_sha256_match": true,
+    "freshness_challenge_match": true,
+    "sa_does_not_verify_as_action": true,
+    "sca_does_not_verify_as_acceptance": true,
+    "sca_session_acceptance_fingerprint_matches_sa_fingerprint": true
+  },
+  "negative_control": {
+    "session_id": "nc_3e2361e25650",
+    "issue_error": "acceptance_requires_lifecycle_event_source:HERMES_MODEL_RESPONSE; got:'SIMULATED_TEST_RESPONSE'",
+    "live_provenance_rejected": true
+  }
+}
