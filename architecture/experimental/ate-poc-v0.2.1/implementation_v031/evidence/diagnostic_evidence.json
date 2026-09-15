@@ -1,0 +1,69 @@
+{
+  "case_a": {
+    "case": "A",
+    "decision_reason_code": "GX_OK",
+    "decision_verdict": "TRUST_GRANTED",
+    "execution": {
+      "envelope_nonce": "ate-v031-nonce-caseA-001",
+      "executed": true,
+      "executed_at_state": "NONSE_AUTHORIZED",
+      "operation": "WRITE_SCOPED",
+      "resulting_nonce_state": "NONCE_CONSUMED",
+      "target": "filesystem:/home/agent/proj/file.txt"
+    },
+    "gate_results": [
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "nonce_post_trust_decide_state": "NONCE_UNSEEN",
+    "nonce_pre_state": "NONCE_UNSEEN",
+    "nonce_state_after": null,
+    "replay_denied": true,
+    "replay_reason_code": "GX_NONCE_PREVIOUSLY_CONSUMED",
+    "replay_verdict": "TRUST_DENIED"
+  },
+  "case_b": {
+    "case": "B",
+    "decision_reason_code": "GX_VA_POLICY_INCOMPATIBLE",
+    "decision_verdict": "TRUST_DENIED",
+    "execution": null,
+    "gate_results": [
+      "PASS",
+      "PASS"
+    ],
+    "nonce_post_trust_decide_state": null,
+    "nonce_pre_state": null,
+    "nonce_state_after": "NONCE_CONSUMED",
+    "replay_denied": null,
+    "replay_reason_code": null,
+    "replay_verdict": null
+  },
+  "case_c": {
+    "case": "C",
+    "decision_reason_code": "GX_COA_SESSION_MISMATCH",
+    "decision_verdict": "TRUST_DENIED",
+    "execution": null,
+    "gate_results": [
+      "PASS"
+    ],
+    "nonce_post_trust_decide_state": null,
+    "nonce_pre_state": null,
+    "nonce_state_after": "NONCE_UNSEEN",
+    "replay_denied": null,
+    "replay_reason_code": null,
+    "replay_verdict": null
+  },
+  "executed_at_utc": 1789480138.2423344,
+  "execution_id": "ate-v031-diagnostic-001",
+  "nonce_state_snapshot_final": {
+    "ate-v031-nonce-caseA-001": "NONCE_CONSUMED",
+    "ate-v031-nonce-caseC-001": "NONCE_UNSEEN"
+  },
+  "trust_decide_purity_proof": true
+}
