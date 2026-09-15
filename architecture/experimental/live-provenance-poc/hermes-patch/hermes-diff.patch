@@ -48,10 +48,10 @@ index 1af5ef9720..7d8f260cff 100644
          from cli import _cprint
          from hermes_state import format_session_db_unavailable
 diff --git a/hermes_cli/cli_session_mixin.py b/hermes_cli/cli_session_mixin.py
-index b9ae6400e5..fee65ebe6b 100644
+index b9ae6400e5..73d5f88c5b 100644
 --- a/hermes_cli/cli_session_mixin.py
 +++ b/hermes_cli/cli_session_mixin.py
-@@ -509,6 +509,12 @@ class CLISessionMixin:
+@@ -509,6 +509,20 @@ class CLISessionMixin:
              CLI_CONFIG, _parse_reasoning_config, _parse_service_tier_config,
              _sync_process_session_id, datetime)
          old_session_id = self.session_id
@@ -61,10 +61,18 @@ index b9ae6400e5..fee65ebe6b 100644
 +            _terminate_eph_session(old_session_id)
 +        except Exception:
 +            pass
++        # EXPERIMENTAL v0.2.1: also clear the dedicated issuance state machine.
++        try:
++            from hermes_cli.ephemeral_runtime_issuance_poc import (
++                terminate_session_state as _terminate_lp_state,
++            )
++            _terminate_lp_state(old_session_id)
++        except Exception:
++            pass
          _boundary_snapshot = None
          if self.agent:
              if self.conversation_history:
-@@ -539,6 +545,16 @@ class CLISessionMixin:
+@@ -539,6 +553,25 @@ class CLISessionMixin:
          self.session_id = f"{self.session_start.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
          # getattr: tests drive new_session unbound against a SimpleNamespace stand-in.
          getattr(self, "_write_terminal_breadcrumb", lambda: None)()
@@ -78,14 +86,23 @@ index b9ae6400e5..fee65ebe6b 100644
 +            _setup_eph_session(self.session_id)
 +        except Exception:
 +            pass
++        # EXPERIMENTAL v0.2.1: register the dedicated issuance state machine
++        # for this session. See hermes_cli/ephemeral_runtime_issuance_poc.py.
++        try:
++            from hermes_cli.ephemeral_runtime_issuance_poc import (
++                register_session as _register_lp_session,
++            )
++            _register_lp_session(self.session_id)
++        except Exception:
++            pass
          self.conversation_history = []
          self._pending_title = None
          self._resumed = False
 diff --git a/hermes_cli/config_defaults.py b/hermes_cli/config_defaults.py
-index 7f850a5423..039295b917 100644
+index 7f850a5423..35615b6bb5 100644
 --- a/hermes_cli/config_defaults.py
 +++ b/hermes_cli/config_defaults.py
-@@ -2384,6 +2384,20 @@ DEFAULT_CONFIG = {
+@@ -2384,6 +2384,29 @@ DEFAULT_CONFIG = {
          # Extra ports detection probes for an external llama-server (besides 8080).
          "detect_ports": [],
      },
@@ -102,6 +119,15 @@ index 7f850a5423..039295b917 100644
 +        # when the session terminates. See hermes_cli/AGENTS.md and
 +        # architecture/experimental/live-provenance-poc/.
 +        "ephemeral_session_identity": False,
++        # Dedicated runtime issuance mechanism for live-provenance-poc v0.2.1.
++        # When true, the runtime exposes dedicated issuance functions
++        # (issue_session_acceptance, issue_signed_candidate_action) with
++        # cryptographic domain separation and a per-session state machine.
++        # Generic signing interfaces do NOT satisfy the
++        # LIVE_SESSION_PROVENANCE_BOUND predicate. See
++        # hermes_cli/ephemeral_runtime_issuance_poc.py and
++        # architecture/experimental/live-provenance-poc/.
++        "live_provenance_runtime": False,
 +    },
      "_config_version": 44,  # Config schema version - bump this when adding new required fields
  }

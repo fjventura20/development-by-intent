@@ -1,0 +1,11 @@
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4054785", "proc_start_time": "1789465996.730000", "public_key_b64": "nffbqd1CCLOrqM5rizoqIGtm4EITxSSYLMim+rPRP6Q=", "public_key_sha256": "22066a79b2dc310aba658bdd539e27084e0af28a707cf5d885687b10914b1556", "session_id": "selftest_df59d11e", "started_at_utc": "1789465997.094209"}
+[PASS] G5 attack rejected: harness-crafted SessionAcceptance via generic signer fails verification
+[PASS] second acceptance issuance blocked by state machine
+[PASS] monotonic ordering: acceptance=1 < action=2
+[PASS] G6 attack rejected: harness-crafted SignedCandidateAction via generic signer fails verification
+[PASS] cross-domain: acceptance artifact does NOT verify as action
+[PASS] cross-domain: action artifact does NOT verify as acceptance
+[PASS] post-termination acceptance issuance blocked: session_terminated:'selftest_df59d11e'
+[PASS] post-termination model response recording blocked: session_terminated:'selftest_df59d11e'
+
+[ALL TESTS PASS]
