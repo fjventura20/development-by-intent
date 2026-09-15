@@ -1,0 +1,17 @@
+{
+  "classification": "ATE_P1_FIRST_TARGETS_PASS",
+  "model_calls": 0,
+  "returncode": 0,
+  "source_sha256": {
+    "ate_p1/__init__.py": "778f11261c07ddf10340db5400d4bde60c01569d8c214e8ddc18f6836ff9b550",
+    "ate_p1/audit.py": "2205f97e853c799d579fe5b67df133c4ebe9850198f1cc16c87c4d360a225ae6",
+    "ate_p1/enforcer.py": "d845daa58b363fac57b9aede81cfafc4f008ddc8623e10e67e9eb78e95428039",
+    "ate_p1/resource.py": "a91c1aeccb391baeef85912d70eb3a7bf3352dc6073ebc63e8a8625af5f6bb02",
+    "ate_p1/state.py": "c56be3d76dfdc9fa757e6074cbe6c329120223e689eadf4cb6f8cba9b1749e33",
+    "run_p1.py": "9f3211ad816824592a67412db70ae395f50f5d03911e6f1308eda90bbf19723a",
+    "tests/test_p1.py": "f6dea625f0ad7c24f972836039529293e9e1ca1a77285fb88fc08d34b749f978"
+  },
+  "stderr": "",
+  "stdout": ".........                                                                [100%]\n9 passed in 0.08s",
+  "test_command": "python -m pytest -q tests/test_p1.py"
+}
