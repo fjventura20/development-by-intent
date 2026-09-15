@@ -421,8 +421,27 @@ def run_case_a(keys, nonce_registry, now_utc, lifetime):
 
 
 def run_case_b(keys, case_a_envelope, nonce_registry, now_utc):
-    """Case B: reuse Case A artifacts but tamper the requested_action.operation."""
-    print("\n=== Case B: action outside authorization scope ===")
+    """Case B (ORIGINAL at commit c7726c5): action outside authorization scope.
+
+    ORIGINAL CONFESSION (per PI HOLD on commit c7726c5):
+    The original Case B requested operation=DELETE_FILE. DELETE_FILE is
+    rejected by VA policy rule R1 (allowlist = [READ, WRITE_SCOPED,
+    EXECUTE_SCOPED]) BEFORE reaching the capability-scope gate. The G3
+    (VA_POLICY_INCOMPATIBLE) failure masked the intended G5
+    (authorization-scope) test. The frozen Case B proposition
+    (capability-scope violation with all other gates valid) was NOT
+    exercised at c7726c5.
+
+    ALSO: this original Case B reuses Case A's envelope, including the
+    consumed nonce. The PI HOLD flags this as a confound too: the
+    nonce was already CONSUMED, so the G8 check would not have been
+    exercised independently.
+
+    The CORRECTED Case B lives in run_case_b_v2() (see below). The
+    original Case B is preserved unchanged at c7726c5 for audit
+    traceability; the closeout explicitly acknowledges the confound.
+    """
+    print("\n=== Case B (ORIGINAL at c7726c5, confounded by VA failure) ===")
     envelope_b = json.loads(canonicalize_json(case_a_envelope))
     envelope_b["contents"]["requested_action"]["operation"] = "DELETE_FILE"
     envelope_b["envelope_binding_hash"] = fingerprint_obj(envelope_b["contents"])
@@ -571,6 +590,131 @@ def run_case_c(keys, case_a_envelope, nonce_registry, now_utc):
 
 def _ensure_case_c_nonce_registered(nonce_registry):
     nonce_registry.register("ate-v031-nonce-caseC-001")
+
+
+def run_case_b_v2(keys, case_a_envelope, nonce_registry, now_utc):
+    """CORRECTED Case B per PI HOLD on commit c7726c5.
+
+    The frozen Case B proposition: "valid identity + governance + VA +
+    behavioral evidence, but requested action outside CapabilityToken
+    authorization scope."
+
+    Provision-by-provision to ensure all gates PRIOR to G5 pass:
+
+      G1 Live Provenance:   unchanged sa/sca/session_ctx (valid)
+      G2 COA:               unchanged receipt (valid signature)
+      G3 VA compatibility:  requested action stays INSIDE the VA
+                            allowlist. Specifically we use
+                            operation=EXECUTE_SCOPED (in VA R1 allowlist
+                            and in CapabilityToken.operation_scope),
+                            data_class=NONE (R2), harm_potential=1 (R3).
+                            VA passes.
+      G4 behavioral:        unchanged receipt (valid)
+      G5 authorization:     the requested TARGET is set to
+                            'filesystem:/home/agent/secrets/file.txt'
+                            which is in capability.constraints.excluded_targets
+                            AND not in capability.target_scope. Trigger:
+                            GX_TARGET_OUT_OF_SCOPE / GX_TARGET_EXCLUDED.
+
+    We use an INDEPENDENT envelope_nonce (not Case A's consumed nonce),
+    registered as NONCE_UNSEEN so G8 is exercised correctly (no CONSUMED
+    confound). The fresh envelope_nonce is reflected in a re-signed
+    CapabilityToken so the K_AUTHORITY signature remains valid.
+
+    The trusted-action-vs-authorized-action independence: the executor
+    is never called because the decision is DENIED. Nonce stays UNSEEN.
+    """
+    print("\n=== Case B (CORRECTED per PI HOLD): action outside authorization scope ===")
+    # Build a fresh envelope from Case A artifacts.
+    envelope_b = json.loads(canonicalize_json(case_a_envelope))
+    fresh_nonce = "ate-v031-nonce-caseB-fresh-001"
+    envelope_b["envelope_nonce"] = fresh_nonce
+
+    # Update the CapabilityToken to bind to the fresh nonce (re-sign with K_AUTHORITY).
+    envelope_b["contents"]["capability_token"]["envelope_nonce"] = fresh_nonce
+    envelope_b["contents"]["capability_token"]["capability_id"] = fingerprint_obj(
+        {k: v for k, v in envelope_b["contents"]["capability_token"].items()
+         if k not in ("capability_id", "authority_signature_b64")}
+    )
+    envelope_b["contents"]["capability_token"]["authority_signature_b64"] = sign(
+        keys["AUTHORITY"]["priv"], envelope_b["contents"]["capability_token"]
+    )
+
+    # Change ONLY the requested_action.target to a value OUTSIDE the
+    # capability target_scope (and inside constraints.excluded_targets).
+    # operation remains EXECUTE_SCOPED (in VA R1 allowlist AND in
+    # capability.operation_scope), so G3 and G5 operation check both pass.
+    envelope_b["contents"]["requested_action"]["operation"] = "EXECUTE_SCOPED"
+    envelope_b["contents"]["requested_action"]["target"] = (
+        "filesystem:/home/agent/secrets/file.txt"
+    )
+    envelope_b["contents"]["requested_action"]["action_struct"] = (
+        '{"operation":"EXECUTE_SCOPED","target":"filesystem:/home/agent/secrets/file.txt"}'
+    )
+    # data_class=NONE (not in R2 denylist), harm_potential=1 (<=3 in R3) — VA passes.
+
+    envelope_b["envelope_binding_hash"] = fingerprint_obj(envelope_b["contents"])
+    envelope_b["envelope_id"] = fingerprint_obj(
+        {k: v for k, v in envelope_b.items() if k != "envelope_id"}
+    )
+
+    # Register the fresh nonce as UNSEEN.
+    nonce_registry.register(fresh_nonce)
+    pre_state = nonce_registry.lookup(fresh_nonce).value
+
+    lp = envelope_b["contents"]
+    identity_att = lp["identity_attestation"]
+    session_ctx = lp["session_context"]
+    sa = lp["live_provenance_acceptance"]
+    sca = lp["live_provenance_action"]
+    receipt = lp["coa_acceptance_receipt"]
+    va_policy = lp["va_policy"]
+    behavioral = lp["behavioral_evidence_receipt"]
+    capability = lp["capability_token"]
+    challenge = envelope_b["contents"]["operator_freshness_challenge"]
+
+    decision, gates = trust_decide(
+        envelope_b,
+        identity_att=identity_att,
+        session_ctx=session_ctx,
+        sa=sa,
+        sca=sca,
+        receipt=receipt,
+        va_policy=va_policy,
+        behavioral_receipt=behavioral,
+        capability=capability,
+        operator_freshness_challenge=challenge,
+        now_utc=now_utc,
+        nonce_registry=nonce_registry,
+        pub_key_identity=keys["IDENTITY"]["pub"],
+        pub_key_tge=keys["TGE"]["pub"],
+        pub_key_va=keys["VA"]["pub"],
+        pub_key_behavioral=keys["BEHAVIORAL"]["pub"],
+        pub_key_authority=keys["AUTHORITY"]["pub"],
+        trust_decision_priv_key=keys["TRUST_DECISION"]["priv"],
+        trust_decision_pub_key=keys["TRUST_DECISION"]["pub"],
+    )
+    print(f"  decision verdict: {decision['verdict']}")
+    print(f"  decision reason: {decision['reason_code']}")
+    print(f"  gate results: {[g['result'] for g in gates]}")
+    print(f"  nonce pre-state (CORRECTED fresh): {pre_state}")
+    nonce_state_post = nonce_registry.lookup(fresh_nonce).value
+    print(f"  nonce state after case B (must remain UNSEEN, no action executed): {nonce_state_post}")
+
+    return {
+        "case": "B_corrected",
+        "decision_verdict": decision["verdict"],
+        "decision_reason_code": decision["reason_code"],
+        "gate_results": [g["result"] for g in gates],
+        "nonce_pre_state": pre_state,
+        "nonce_state_after": nonce_state_post,
+        "fresh_nonce": fresh_nonce,
+        "envelope_binding_hash": envelope_b["envelope_binding_hash"],
+        "decision_signature_ok": verify_trust_decision(decision, keys["TRUST_DECISION"]["pub"]),
+        "decision_fingerprint": fingerprint_obj(decision),
+        "envelope": envelope_b,
+        "decision": decision,
+    }
 
 
 def main():

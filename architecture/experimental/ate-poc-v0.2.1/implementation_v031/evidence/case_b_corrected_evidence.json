@@ -1,0 +1,48 @@
+{
+  "case_id": "B_corrected_target_out_of_scope",
+  "decision_fingerprint": "459ec467d135640c486365058a42215515dfadb81a8fc09a350821ce843d3fb0",
+  "decision_reason_code": "GX_TARGET_OUT_OF_SCOPE",
+  "decision_signature_ok": true,
+  "decision_verdict": "TRUST_DENIED",
+  "envelope_binding_hash": "8e8353b645bced7d374542f03afe3523282bcce7a6c2ffe2582ab0d1f140005a",
+  "fresh_nonce": "ate-v031-nonce-caseB-v2-001",
+  "gate_details": [
+    {
+      "detail": "",
+      "gate": "G1_RUNTIME_BINDING",
+      "result": "PASS"
+    },
+    {
+      "detail": "",
+      "gate": "G2_COA_BINDING",
+      "result": "PASS"
+    },
+    {
+      "detail": "",
+      "gate": "G3_VA_COMPATIBILITY",
+      "result": "PASS"
+    },
+    {
+      "detail": "",
+      "gate": "G4_BEHAVIORAL_EVIDENCE",
+      "result": "PASS"
+    }
+  ],
+  "gate_results": [
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS"
+  ],
+  "nonce_pre_state": "NONCE_UNSEEN",
+  "nonce_state_after": "NONCE_UNSEEN",
+  "note": "G5 fires GX_TARGET_OUT_OF_SCOPE because requested target filesystem:/home/agent/other/file.txt is NOT in capability.target_scope and NOT in capability.constraints.excluded_targets.",
+  "now_utc": 1789480486.303998,
+  "requested_action": {
+    "action_struct": "{\"operation\":\"WRITE_SCOPED\",\"target\":\"filesystem:/home/agent/other/file.txt\"}",
+    "data_class": "NONE",
+    "harm_potential": 1,
+    "operation": "WRITE_SCOPED",
+    "target": "filesystem:/home/agent/other/file.txt"
+  }
+}
