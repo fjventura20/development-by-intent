@@ -1,0 +1,10 @@
+{
+  "classification": "ATE_P0_LOCAL_CONFORMANCE_PASS",
+  "executed_at": 1789485049,
+  "exit_code": 0,
+  "model_calls": 0,
+  "output_sha256": "b9ac1ba3918de5cadb7033b0890bc2547f4f5d15dd940b7bb2deb9341c5fbac8",
+  "profile": "P0",
+  "run_id": "local-p0-v0.1",
+  "test_output": "test_P0_01_valid_trust_grant (test_p0.P0Tests.test_P0_01_valid_trust_grant) ... ok\ntest_P0_02_out_of_scope_operation (test_p0.P0Tests.test_P0_02_out_of_scope_operation) ... ok\ntest_P0_03_out_of_scope_target (test_p0.P0Tests.test_P0_03_out_of_scope_target) ... ok\ntest_P0_04_session_substitution (test_p0.P0Tests.test_P0_04_session_substitution) ... ok\ntest_P0_05_coa_substitution (test_p0.P0Tests.test_P0_05_coa_substitution) ... ok\ntest_P0_06_va_policy_substitution (test_p0.P0Tests.test_P0_06_va_policy_substitution) ... ok\ntest_P0_07_behavioral_expired (test_p0.P0Tests.test_P0_07_behavioral_expired) ... ok\ntest_P0_08_signature_failure (test_p0.P0Tests.test_P0_08_signature_failure) ... ok\ntest_P0_09_unauthorized_issuer (test_p0.P0Tests.test_P0_09_unauthorized_issuer) ... ok\ntest_P0_10_decision_purity (test_p0.P0Tests.test_P0_10_decision_purity) ... ok\ntest_P0_11_one_time_execution (test_p0.P0Tests.test_P0_11_one_time_execution) ... ok\ntest_P0_12_replay_rejection (test_p0.P0Tests.test_P0_12_replay_rejection) ... ok\ntest_P0_13_parameter_digest_substitution (test_p0.P0Tests.test_P0_13_parameter_digest_substitution) ... ok\ntest_P0_14_unknown_artifact_version (test_p0.P0Tests.test_P0_14_unknown_artifact_version) ... ok\ntest_P0_15_missing_required_evidence (test_p0.P0Tests.test_P0_15_missing_required_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 15 tests in 0.050s\n\nOK\n"
+}
