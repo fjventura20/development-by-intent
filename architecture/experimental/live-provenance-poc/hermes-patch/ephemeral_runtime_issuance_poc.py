@@ -144,6 +144,8 @@ class _IssuanceState:
     action_turn_id: Optional[int] = None
     pending_acceptance_response_hash: Optional[str] = None
     pending_action_response_hash: Optional[str] = None
+    pending_acceptance_event_source: Optional[str] = None
+    pending_action_event_source: Optional[str] = None
     terminated: bool = False
 
     def transition(self, target: str) -> None:
@@ -264,27 +266,97 @@ def associate_freshness_challenge(session_id: str, challenge: str) -> None:
 # ---------------------------------------------------------------------------
 # Model-response event recording
 # ---------------------------------------------------------------------------
+#
+# Two event-source paths are distinguished:
+#
+# 1. LIFECYCLE PATH (production): `_record_lifecycle_response` — INTERNAL ONLY.
+#    This is the only function that the runtime's actual model-response
+#    lifecycle hook may call. The caller cannot choose `event_source`;
+#    it is hard-coded to HERMES_MODEL_RESPONSE inside this function.
+#    Artifacts derived from these events carry event_source =
+#    HERMES_MODEL_RESPONSE in their signed region.
+#
+# 2. TEST/DEBUG PATH (non-production): `record_simulated_test_response` —
+#    PUBLIC (for tests) but visibly marked. Caller-supplied bytes; the
+#    event is tagged SIMULATED_TEST_RESPONSE. Artifacts derived from
+#    these events carry event_source = SIMULATED_TEST_RESPONSE in their
+#    signed region. The verifier rejects artifacts with this event_source
+#    for the live-provenance predicate.
+#
+# A direct harness invocation of `record_simulated_test_response` to obtain
+# HERMES_MODEL_RESPONSE provenance fails because:
+#   (a) `record_simulated_test_response` hard-codes event_source =
+#       SIMULATED_TEST_RESPONSE; the caller cannot override it;
+#   (b) the issuance function requires event_source == HERMES_MODEL_RESPONSE
+#       and refuses otherwise;
+#   (c) the verifier rejects HERMES_MODEL_RESPONSE-bound artifacts only
+#       when the lifecycle recording path was actually exercised.
 
-def record_model_response(
+EVENT_SOURCE_LIFECYCLE = "HERMES_MODEL_RESPONSE"
+EVENT_SOURCE_SIMULATED = "SIMULATED_TEST_RESPONSE"
+
+_ALLOWED_EVENT_SOURCES = frozenset({EVENT_SOURCE_LIFECYCLE, EVENT_SOURCE_SIMULATED})
+
+
+def record_simulated_test_response(
     session_id: str,
     turn_kind: str,
     response_bytes: bytes,
 ) -> Tuple[int, str]:
-    """Record that the live Hermes runtime observed a model response event.
+    """SIMULATED / DEBUG-ONLY response recording.
 
-    Returns (turn_id, response_hash). The turn_id is a runtime-internal
-    monotonic counter and is bound into the signed artifact as
-    `channel_proof`. The response_hash is bound into the signed artifact
-    as `acceptance_response_hash` / `action_response_hash`.
-
-    This function is the ONLY legal way to populate the runtime's
-    record of a model response. After this call, the dedicated issuance
-    functions become eligible to construct the corresponding artifact.
+    Public for tests. Tags the event with `event_source =
+    SIMULATED_TEST_RESPONSE`. Artifacts derived from this event will be
+    REJECTED by the live-provenance verifier. This function does NOT
+    satisfy the LIVE_SESSION_PROVENANCE_BOUND predicate.
 
     `turn_kind` is 'acceptance' or 'action'. Other values raise ValueError.
     """
     if not is_enabled():
         raise ValueError("live_provenance_runtime_disabled")
+    return _record_response_event(
+        session_id=session_id,
+        turn_kind=turn_kind,
+        response_bytes=response_bytes,
+        event_source=EVENT_SOURCE_SIMULATED,
+    )
+
+
+def _record_lifecycle_response(
+    session_id: str,
+    turn_kind: str,
+    response_bytes: bytes,
+) -> Tuple[int, str]:
+    """INTERNAL-ONLY: record an actual model-response event from the
+    Hermes response lifecycle. Caller cannot choose `event_source`; it
+    is hard-coded to HERMES_MODEL_RESPONSE inside this function.
+
+    This is the ONLY function the runtime's actual model-response hook
+    may call. Calling it from any other context requires direct module
+    access to the private symbol, which the harness does not have via
+    any documented public API.
+
+    `turn_kind` is 'acceptance' or 'action'. Other values raise ValueError.
+    """
+    if not is_enabled():
+        raise ValueError("live_provenance_runtime_disabled")
+    return _record_response_event(
+        session_id=session_id,
+        turn_kind=turn_kind,
+        response_bytes=response_bytes,
+        event_source=EVENT_SOURCE_LIFECYCLE,
+    )
+
+
+def _record_response_event(
+    session_id: str,
+    turn_kind: str,
+    response_bytes: bytes,
+    *,
+    event_source: str,
+) -> Tuple[int, str]:
+    if event_source not in _ALLOWED_EVENT_SOURCES:
+        raise ValueError(f"invalid_event_source:{event_source!r}")
     if turn_kind not in ("acceptance", "action"):
         raise ValueError(f"invalid_turn_kind:{turn_kind!r}")
     with _LOCK:
@@ -293,26 +365,24 @@ def record_model_response(
             raise ValueError(f"unknown_session:{session_id!r}")
         if st.terminated:
             raise ValueError(f"session_terminated:{session_id!r}")
-        # Allocate the turn id
+        # Allocate the turn id atomically.
         st.last_turn_id += 1
         turn_id = st.last_turn_id
-        # Hash the response
+        # Hash the response bytes.
         h = hashlib.sha256(response_bytes).hexdigest()
         if turn_kind == "acceptance":
             st.pending_acceptance_response_hash = h
+            st.pending_acceptance_event_source = event_source
             st.acceptance_turn_id = turn_id
-            # Transition SESSION_STARTED -> ACCEPTANCE_PENDING (idempotent
-            # if already in ACCEPTANCE_PENDING).
             if st.state == STATE_SESSION_STARTED:
                 st.transition(STATE_ACCEPTANCE_PENDING)
         else:
             st.pending_action_response_hash = h
+            st.pending_action_event_source = event_source
             st.action_turn_id = turn_id
             if st.state == STATE_ACCEPTANCE_ISSUED:
                 st.transition(STATE_ACTION_PENDING)
             elif st.state == STATE_ACTION_PENDING:
-                # Subsequent action responses for the same session in the
-                # pending state are recorded but the state does not move.
                 pass
         return turn_id, h
 
@@ -419,6 +489,11 @@ def issue_session_acceptance(
             raise ValueError("model_response_observation_required")
         if st.acceptance_turn_id is None:
             raise ValueError("turn_id_required")
+        if st.pending_acceptance_event_source != EVENT_SOURCE_LIFECYCLE:
+            raise ValueError(
+                f"acceptance_requires_lifecycle_event_source:{EVENT_SOURCE_LIFECYCLE}; "
+                f"got:{st.pending_acceptance_event_source!r}"
+            )
 
         # Allocate monotonic seq and transition state.
         st.monotonic_seq += 1
@@ -426,6 +501,7 @@ def issue_session_acceptance(
         turn_id = st.acceptance_turn_id
         response_hash = st.pending_acceptance_response_hash
         challenge = st.last_freshness_challenge
+        event_source = st.pending_acceptance_event_source
         # Channel proof is runtime-controlled: SHA-256 of turn_id (hex) + ':' + response_hash.
         channel_proof = hashlib.sha256(
             f"{turn_id}:{response_hash}".encode("utf-8")
@@ -452,6 +528,7 @@ def issue_session_acceptance(
         "prior_fingerprint": coa_receipt_fingerprint,
         "provenance_type": "RUNTIME_ACCEPTANCE_TURN",
         "domain": "SESSION_ACCEPTANCE",
+        "event_source": event_source,
     }
     signed_preimage, sig_b64, pub_b64, pub_sha = _sign_under_domain(
         session_id, DOMAIN_SESSION_ACCEPTANCE, payload_obj
@@ -478,6 +555,7 @@ def issue_session_acceptance(
         "prior_fingerprint": coa_receipt_fingerprint,
         "provenance_type": "RUNTIME_ACCEPTANCE_TURN",
         "domain": "SESSION_ACCEPTANCE",
+        "event_source": event_source,
         "session_acceptance_fingerprint": sa_fingerprint,
         "signed_preimage_sha256": sa_fingerprint,
         "payload_canonical_b64": base64.b64encode(_canonical_json(payload_obj)).decode("ascii"),
@@ -532,6 +610,11 @@ def issue_signed_candidate_action(
             raise ValueError("model_response_observation_required")
         if st.action_turn_id is None:
             raise ValueError("turn_id_required")
+        if st.pending_action_event_source != EVENT_SOURCE_LIFECYCLE:
+            raise ValueError(
+                f"action_requires_lifecycle_event_source:{EVENT_SOURCE_LIFECYCLE}; "
+                f"got:{st.pending_action_event_source!r}"
+            )
         if st.last_session_acceptance_fingerprint is None:
             raise ValueError("session_acceptance_required_before_action")
         if st.last_freshness_challenge is None:
@@ -542,6 +625,7 @@ def issue_signed_candidate_action(
         seq = st.monotonic_seq
         turn_id = st.action_turn_id
         response_hash = st.pending_action_response_hash
+        event_source = st.pending_action_event_source
         channel_proof = hashlib.sha256(
             f"{turn_id}:{response_hash}".encode("utf-8")
         ).hexdigest()
@@ -566,6 +650,7 @@ def issue_signed_candidate_action(
         "channel_proof": channel_proof,
         "provenance_type": "RUNTIME_ACTION_TURN",
         "domain": "SESSION_ACTION",
+        "event_source": event_source,
     }
     signed_preimage, sig_b64, pub_b64, pub_sha = _sign_under_domain(
         session_id, DOMAIN_SESSION_ACTION, payload_obj
@@ -588,6 +673,7 @@ def issue_signed_candidate_action(
         "channel_proof": channel_proof,
         "provenance_type": "RUNTIME_ACTION_TURN",
         "domain": "SESSION_ACTION",
+        "event_source": event_source,
         "signed_preimage_sha256": signed_preimage_sha,
         "payload_canonical_b64": base64.b64encode(_canonical_json(payload_obj)).decode("ascii"),
         "signature_b64": sig_b64,
@@ -639,6 +725,11 @@ def verify_acceptance(artifact: Dict[str, object], public_key_b64: str) -> bool:
         the Ed25519 signature against the same preimage + domain prefix)
       - payload's `domain` field equals "SESSION_ACCEPTANCE"
 
+    NOTE: This is the cryptographic-domain verification. It does NOT
+    enforce event_source == HERMES_MODEL_RESPONSE; for that, use
+    verify_live_provenance_acceptance. The two are layered so that the
+    live-provenance check is a strict superset.
+
     Returns False otherwise.
     """
     return _verify_under_domain(artifact, public_key_b64, DOMAIN_SESSION_ACCEPTANCE)
@@ -652,9 +743,50 @@ def verify_action(artifact: Dict[str, object], public_key_b64: str) -> bool:
       - signature was issued under SESSION_ACTION domain
       - payload's `domain` field equals "SESSION_ACTION"
 
+    NOTE: This is the cryptographic-domain verification. It does NOT
+    enforce event_source == HERMES_MODEL_RESPONSE; for that, use
+    verify_live_provenance_action. The two are layered so that the
+    live-provenance check is a strict superset.
+
     Returns False otherwise.
     """
     return _verify_under_domain(artifact, public_key_b64, DOMAIN_SESSION_ACTION)
+
+
+def verify_live_provenance_acceptance(artifact: Dict[str, object], public_key_b64: str) -> bool:
+    """Verify a SessionAcceptance artifact for LIVE_SESSION_PROVENANCE_BOUND.
+
+    Strict superset of verify_acceptance. Additionally requires:
+      - event_source == HERMES_MODEL_RESPONSE (NOT SIMULATED_TEST_RESPONSE)
+      - the artifact was issued through the lifecycle path, not the
+        simulated/test path
+    """
+    if not verify_acceptance(artifact, public_key_b64):
+        return False
+    try:
+        payload_b64 = artifact.get("payload_canonical_b64")
+        payload_bytes = base64.b64decode(payload_b64)  # type: ignore[arg-type]
+        payload_obj = json.loads(payload_bytes.decode("utf-8"))
+    except Exception:
+        return False
+    return payload_obj.get("event_source") == EVENT_SOURCE_LIFECYCLE
+
+
+def verify_live_provenance_action(artifact: Dict[str, object], public_key_b64: str) -> bool:
+    """Verify a SignedCandidateAction artifact for LIVE_SESSION_PROVENANCE_BOUND.
+
+    Strict superset of verify_action. Additionally requires:
+      - event_source == HERMES_MODEL_RESPONSE (NOT SIMULATED_TEST_RESPONSE)
+    """
+    if not verify_action(artifact, public_key_b64):
+        return False
+    try:
+        payload_b64 = artifact.get("payload_canonical_b64")
+        payload_bytes = base64.b64decode(payload_b64)  # type: ignore[arg-type]
+        payload_obj = json.loads(payload_bytes.decode("utf-8"))
+    except Exception:
+        return False
+    return payload_obj.get("event_source") == EVENT_SOURCE_LIFECYCLE
 
 
 def _verify_under_domain(
@@ -761,13 +893,19 @@ def _selftest() -> int:
         associate_freshness_challenge(sid, challenge)
 
         # First, demonstrate a CORRECT acceptance issuance path:
-        # record model response, then issue acceptance, verify
-        record_model_response(sid, "acceptance", b'{"role":"assistant","content":"I ACCEPT the COA: ' + challenge.encode() + b'"}')
+        # record model response via the LIFECYCLE path, then issue acceptance,
+        # verify (including the live-provenance verifier that requires
+        # event_source == HERMES_MODEL_RESPONSE).
+        _record_lifecycle_response(sid, "acceptance", b'{"role":"assistant","content":"I ACCEPT the COA: ' + challenge.encode() + b'"}')
         coa_fp = "sha256:" + hashlib.sha256(b"tge_receipt_placeholder").hexdigest()
         sa = issue_session_acceptance(sid, coa_receipt_fingerprint=coa_fp)
         pub_b64 = sa["public_key_b64"]
         if not verify_acceptance(sa, pub_b64):
             failures.append("valid acceptance rejected")
+        if not verify_live_provenance_acceptance(sa, str(pub_b64)):
+            failures.append("valid acceptance (lifecycle) rejected by live-provenance verifier")
+        else:
+            print("[PASS] legitimate lifecycle acceptance verifies as live provenance")
         # Re-verify with WRONG public key must fail
         wrong_key = base64.b64encode(b"\x00" * 32).decode("ascii")
         if verify_acceptance(sa, wrong_key):
@@ -809,7 +947,7 @@ def _selftest() -> int:
             print("[PASS] G5 attack rejected: harness-crafted SessionAcceptance via generic signer fails verification")
 
         # 3. State machine: try to issue acceptance twice
-        record_model_response(sid, "acceptance", b'second')
+        _record_lifecycle_response(sid, "acceptance", b'second')
         try:
             issue_session_acceptance(sid, coa_receipt_fingerprint=coa_fp)
             failures.append("second acceptance issuance succeeded (should fail)")
@@ -822,7 +960,7 @@ def _selftest() -> int:
         # 4. State machine: action-before-acceptance is impossible here because
         # we already issued acceptance. We test the *transition*: issue
         # action by recording an action model response.
-        record_model_response(sid, "action", b'legitimate action response text')
+        _record_lifecycle_response(sid, "action", b'legitimate action response text')
         action_struct = {"operation": "TEST", "target": "x"}
         sca = issue_signed_candidate_action(
             sid,
@@ -884,10 +1022,10 @@ def _selftest() -> int:
             print("[PASS] cross-domain: action artifact does NOT verify as acceptance")
 
         # 5. Terminate session, attempt post-termination issuance directly
-        # (do not call record_model_response; that itself raises, which is
-        # also a valid defense, but we test the issuance path here).
+        # (do not call record on a terminated session; that itself raises,
+        # which is also a valid defense, but we test the issuance path here).
         terminate_session_state(sid)
-        # Note: do NOT call record_model_response after termination because
+        # Note: do NOT call lifecycle recording after termination because
         # the runtime itself refuses to record on a terminated session.
         # Instead, attempt issuance directly. The issuance function MUST
         # reject because st.terminated is True.
@@ -900,15 +1038,15 @@ def _selftest() -> int:
             else:
                 print(f"[PASS] post-termination acceptance issuance blocked: {e}")
 
-        # Also: record_model_response itself refuses terminated sessions.
+        # Also: lifecycle recording itself refuses terminated sessions.
         try:
-            record_model_response(sid, "acceptance", b'post-term')
-            failures.append("post-termination model response recording succeeded")
+            _record_lifecycle_response(sid, "acceptance", b'post-term')
+            failures.append("post-termination lifecycle recording succeeded")
         except ValueError as e:
             if "terminated" not in str(e).lower():
-                failures.append(f"post-termination record: wrong error: {e}")
+                failures.append(f"post-termination lifecycle record: wrong error: {e}")
             else:
-                print(f"[PASS] post-termination model response recording blocked: {e}")
+                print(f"[PASS] post-termination lifecycle recording blocked: {e}")
 
         # Cleanup
         prim.terminate_session(sid)

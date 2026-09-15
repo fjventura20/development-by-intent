@@ -1,0 +1,56 @@
+============================================================
+E. DIRECT-INJECTION REJECTION (event_source separation)
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "q+NO9L7V+/cUQe54KaYG7J27clUK7laMFrXHyTtwp54=", "public_key_sha256": "cf267cdded62788cc2ac3a595b662912bf95e6280f7d2cd37ff7a14a6ad03361", "session_id": "lifecycle_1fcdfba36cda", "started_at_utc": "1789473557.073032"}
+[PASS] E.1 direct harness invocation of record_simulated_test_response rejected at issuance
+[PASS] E.2 lifecycle acceptance produces verifier-valid SessionAcceptance
+[PASS] E.3 lifecycle acceptance satisfies live-provenance verifier (event_source == HERMES_MODEL_RESPONSE)
+[PASS] E.4 sa_e carries event_source == HERMES_MODEL_RESPONSE in signed region
+[PASS] E.5 caller-supplied fake event_source does NOT help (domain-separation rejects)
+[PASS] E.6 caller-supplied fake event_source for action does NOT help
+============================================================
+F. CAUSALITY
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "xARXP+HobqsvEIqFfZX/GuDHRVunQoa5+QLGbbx6NHI=", "public_key_sha256": "aea00fa87685a56d6847bc00ff470d11f9502efd69c19028163a0a437210a47d", "session_id": "lifecycle_c9f34fa6d44a", "started_at_utc": "1789473557.075381"}
+[PASS] F.1 acceptance issuance without any response event fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "sdNgbpNYcm7PJQcH+4BE/wgnPa7+7jLlF8uOQC+vBCw=", "public_key_sha256": "229725203e4f3fda81fc5e8395d4ef8a274d6a93370ff5166b1014b508e036e0", "session_id": "lifecycle_7cac35a2ceba", "started_at_utc": "1789473557.077646"}
+[PASS] F.2 action issuance without action response event fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "i3K3vGTIU6dirZAV+kY6gHbCSapdqf6JX0nGixeGshQ=", "public_key_sha256": "9ad20b1718a6d787c2e5ee84b3d6b1d9d8b41af46096b71a959e8fb6a63615d9", "session_id": "lifecycle_054276edebf0", "started_at_utc": "1789473557.079822"}
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "pJgak0kDCdewAIbKfMO140vbYHmGC9/rTMmBde0HAWM=", "public_key_sha256": "a231d1815551a40141fada33a458cef62c26ebbd5240637f6167f9055e79a8ae", "session_id": "lifecycle_bd5455463e7b", "started_at_utc": "1789473557.081093"}
+[PASS] F.3 cross-session: response event on session B does not enable acceptance on session A
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "IzT56rwPeJnhgEJGH23Rrdb17wvfEWPdqOSjrbfbaBw=", "public_key_sha256": "d848aaf486547ed02270bf00db4bb7ed5b55feb959616e19aea4b026bc424e8c", "session_id": "lifecycle_398b5eb3f4a4", "started_at_utc": "1789473557.083352"}
+[PASS] F.4 reusing acceptance response event fails (state machine blocks)
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "khGqBcqkAyccMarDF5Lqevi/sABZw7aoca2Sy6Fthw4=", "public_key_sha256": "712988113f1f895c27f1070a2e2d1869b4dfcb9718fdf39f57347bc02ece77a1", "session_id": "lifecycle_dbf5b56fbd25", "started_at_utc": "1789473557.085869"}
+[PASS] F.5 post-termination lifecycle recording fails
+============================================================
+G. CONTINUITY (lifecycle events produce verifiable chain)
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "5Q7j1Z63Y/P3rM7Z7WHFheC12r/MAs89/r11dS3pqUo=", "public_key_sha256": "1bdf9e8ccc8a4b5f6d0ab35e48777f82c7d25be3e7df9c004b98d5e29598a206", "session_id": "lifecycle_5d379497c4eb", "started_at_utc": "1789473557.088233"}
+[PASS] G.1 acceptance artifact verifies under SESSION_ACCEPTANCE domain
+[PASS] G.2 acceptance artifact verifies as LIVE_PROVENANCE (event_source check)
+[PASS] G.3 action artifact verifies under SESSION_ACTION domain
+[PASS] G.4 action artifact verifies as LIVE_PROVENANCE (event_source check)
+[PASS] G.5 acceptance and action share same public_key_sha256
+[PASS] G.6 acceptance and action share same freshness_challenge
+[PASS] G.7 monotonic_seq: acceptance < action
+[PASS] G.8 turn IDs differ
+[PASS] G.9 channel proofs differ
+[PASS] G.10 event_source == HERMES_MODEL_RESPONSE on both
+[PASS] G.11 action's session_acceptance_fingerprint == acceptance fingerprint
+[PASS] G.12 acceptance prior_fingerprint == coa_receipt_fingerprint
+[PASS] G.13 action prior_fingerprint == acceptance fingerprint
+============================================================
+H. CROSS-SESSION LIFECYCLE INDEPENDENCE
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "CwHw3fsg/7sfiBachpR9O1mIWzX4xglUJdA64w//DC4=", "public_key_sha256": "db23c6a46b0ce22042d8fe04ecf05919d46bb4918148701555f0517c4adba037", "session_id": "lifecycle_75e738d22593", "started_at_utc": "1789473557.090708"}
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "mk0ClwYQOnjRtHJxqzLCcedVInMA8YD96BvnxxbjI9E=", "public_key_sha256": "069344431184cc2d9cca3ee74fc43f78e9b076cd573cb132f16683ece81844f4", "session_id": "lifecycle_5fd3ac9e5ef4", "started_at_utc": "1789473557.092942"}
+[PASS] H.1 session H1 acceptance verifies as live provenance under H1's pubkey
+[PASS] H.2 session H2 cannot issue acceptance without recorded lifecycle event
+============================================================
+I. REPLAY PROTECTION
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069736", "proc_start_time": "1789473556.740000", "public_key_b64": "hjIqeM9mz1oxc4mTsdUlpzONpkKViyEjKkj7rNcsORg=", "public_key_sha256": "5361788e45929c670d2a22854d4bf51e69ac8c9af8a08342a7f31350da79fc26", "session_id": "lifecycle_6300cbb898c5", "started_at_utc": "1789473557.095466"}
+[PASS] I.1 stale acceptance response (re-recorded after issuance) does not enable second acceptance
+
+============================================================
+ALL TESTS PASS

@@ -1,3 +1,49 @@
+diff --git a/agent/turn_response_check.py b/agent/turn_response_check.py
+index a0847ae1cb..efb53b810c 100644
+--- a/agent/turn_response_check.py
++++ b/agent/turn_response_check.py
+@@ -142,6 +142,41 @@ def check_api_response(
+     agent._turn_received_provider_response = True
+     finish_reason = _derive_finish_reason(agent, response, messages)
+ 
++    # EXPERIMENTAL v0.2.1: record the model-response event into the
++    # dedicated live-provenance runtime issuance state machine.
++    # This is the canonical lifecycle hook for "the live participant
++    # actually emitted this response through the normal Hermes
++    # response path". See hermes_cli/ephemeral_runtime_issuance_poc.py
++    # and architecture/experimental/live-provenance-poc/.
++    try:
++        import hermes_cli.ephemeral_runtime_issuance_poc as _lp_poc  # type: ignore
++        if _lp_poc.is_enabled():
++            # Extract response text via the transport's normalizer.
++            _transport = agent._get_transport()
++            _normalized = _transport.normalize_response(response)
++            _content = (_normalized.content or "") if _normalized else ""
++            if _content:
++                # Determine turn kind by current issuance state.
++                _sid = getattr(agent, "session_id", None)
++                if _sid and _lp_poc.has_session(_sid):
++                    _state = _lp_poc.get_state(_sid)
++                    if _state == _lp_poc.STATE_SESSION_STARTED:
++                        _turn_kind = "acceptance"
++                    elif _state == _lp_poc.STATE_ACCEPTANCE_ISSUED:
++                        _turn_kind = "action"
++                    else:
++                        _turn_kind = None
++                    if _turn_kind is not None:
++                        # INTERNAL lifecycle path; event_source hard-coded
++                        # to HERMES_MODEL_RESPONSE inside this function.
++                        _lp_poc._record_lifecycle_response(
++                            _sid, _turn_kind, _content.encode("utf-8")
++                        )
++    except Exception:
++        # Best-effort: do not break the turn loop if the experimental
++        # module fails.
++        pass
++
+     # HTTP-200 refusals are deterministic: one fallback try, else return the refusal.
+     if finish_reason == "content_filter":
+         _rv = handle_content_policy_refusal(
 diff --git a/cli.py b/cli.py
 index f3c865b1dc..3cad4949ef 100644
 --- a/cli.py

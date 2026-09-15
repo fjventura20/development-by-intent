@@ -1,0 +1,13 @@
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069748", "proc_start_time": "1789473556.810000", "public_key_b64": "/9tnhBxUA/1ZgDRi0oTGdi5bD0hxM0Tcej3UMApP64o=", "public_key_sha256": "6cdfbe18aeaebff91c1f4f573f72aa4718a713c0f8b7605672163b1513f69502", "session_id": "lifecycle_integration_949385bc276d", "started_at_utc": "1789473557.199355"}
+State after first response: ACCEPTANCE_PENDING
+[PASS] L.1 lifecycle hook fires _record_lifecycle_response on first response
+[PASS] L.2 lifecycle acceptance verifies as live provenance (event_source=HERMES_MODEL_RESPONSE)
+State after second response: ACTION_PENDING
+[PASS] L.3 lifecycle hook fires _record_lifecycle_response on second response (action)
+[PASS] L.4 lifecycle action verifies as live provenance
+[PASS] L.5 acceptance and action share same public_key_sha256
+[PASS] L.6 acceptance and action share same freshness_challenge
+[PASS] L.7 monotonic_seq: acceptance < action
+
+============================================================
+ALL TESTS PASS

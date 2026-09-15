@@ -138,13 +138,13 @@ check(
 # Drive the legitimate path.
 challenge_a = "ch_" + secrets.token_hex(8)
 lp.associate_freshness_challenge(sid_a, challenge_a)
-lp.record_model_response(sid_a, "acceptance", b"legitimate acceptance response " + challenge_a.encode())
+lp._record_lifecycle_response(sid_a, "acceptance", b"legitimate acceptance response " + challenge_a.encode())
 coa_fp = "sha256:" + hashlib.sha256(b"tge_receipt_placeholder").hexdigest()
 sa = lp.issue_session_acceptance(sid_a, coa_receipt_fingerprint=coa_fp)
 check("A.3a legitimate acceptance verifies under SESSION_ACCEPTANCE",
       lp.verify_acceptance(sa, pub_b64))
 
-lp.record_model_response(sid_a, "action", b"legitimate action response " + challenge_a.encode())
+lp._record_lifecycle_response(sid_a, "action", b"legitimate action response " + challenge_a.encode())
 sca = lp.issue_signed_candidate_action(
     sid_a,
     capability_id="cap_test",
@@ -217,7 +217,7 @@ check("B.1 acceptance-before-pending fails", result_b1 is None,
 sid_b2 = start_session()
 result_b2 = None
 try:
-    lp.record_model_response(sid_b2, "action", b"premature action response")
+    lp._record_lifecycle_response(sid_b2, "action", b"premature action response")
     lp.issue_signed_candidate_action(
         sid_b2,
         capability_id="cap",
@@ -235,11 +235,11 @@ check("B.2 action-before-acceptance fails", result_b2 == "rejected",
 sid_b3 = start_session()
 challenge_b3 = "ch_" + secrets.token_hex(4)
 lp.associate_freshness_challenge(sid_b3, challenge_b3)
-lp.record_model_response(sid_b3, "acceptance", b"first acceptance")
+lp._record_lifecycle_response(sid_b3, "acceptance", b"first acceptance")
 sa_b3 = lp.issue_session_acceptance(sid_b3, coa_receipt_fingerprint="coa_b3")
 check("B.3a first acceptance succeeds", sa_b3 is not None and "signature_b64" in sa_b3)
 # Record another acceptance model response (allowed) but the second issuance is blocked.
-lp.record_model_response(sid_b3, "acceptance", b"second acceptance response (same challenge)")
+lp._record_lifecycle_response(sid_b3, "acceptance", b"second acceptance response (same challenge)")
 result_b3 = _try_issue_acceptance(sid_b3, "coa_b3")
 check("B.3 second acceptance under same challenge fails", result_b3 is None,
       detail=f"got: {result_b3}")
@@ -250,12 +250,12 @@ sid_b4b = start_session()
 # Set up A correctly and partially.
 challenge_b4 = "ch_" + secrets.token_hex(4)
 lp.associate_freshness_challenge(sid_b4a, challenge_b4)
-lp.record_model_response(sid_b4a, "acceptance", b"acceptance on b4a")
+lp._record_lifecycle_response(sid_b4a, "acceptance", b"acceptance on b4a")
 sa_b4a = lp.issue_session_acceptance(sid_b4a, coa_receipt_fingerprint="coa_b4a")
 # Now record an action response on sid_b4b (wrong session)
 result_b4 = None
 try:
-    lp.record_model_response(sid_b4b, "action", b"action on b4b")
+    lp._record_lifecycle_response(sid_b4b, "action", b"action on b4b")
     # Try to issue action on sid_b4a but with sid_b4b's recorded response
     # Actually: the action is on b4a which doesn't have an action response.
     lp.issue_signed_candidate_action(
@@ -291,10 +291,10 @@ lp.associate_freshness_challenge(sid_b5b, challenge_b5b)
 # simply won't match.
 # Test: issue acceptance on b5a; attempt to issue action on b5b (which has
 # no acceptance) — must fail.
-lp.record_model_response(sid_b5a, "acceptance", b"acceptance on b5a")
+lp._record_lifecycle_response(sid_b5a, "acceptance", b"acceptance on b5a")
 sa_b5a = lp.issue_session_acceptance(sid_b5a, coa_receipt_fingerprint="coa_b5a")
 # Now try to issue action on b5b (wrong session).
-lp.record_model_response(sid_b5b, "action", b"action on b5b")
+lp._record_lifecycle_response(sid_b5b, "action", b"action on b5b")
 result_b5 = None
 try:
     lp.issue_signed_candidate_action(
@@ -315,7 +315,7 @@ check("B.5 stale-chain (action on session without prior acceptance) fails",
 sid_b6 = start_session()
 challenge_b6 = "ch_" + secrets.token_hex(4)
 lp.associate_freshness_challenge(sid_b6, challenge_b6)
-lp.record_model_response(sid_b6, "acceptance", b"acceptance b6")
+lp._record_lifecycle_response(sid_b6, "acceptance", b"acceptance b6")
 lp.terminate_session_state(sid_b6)
 result_b6 = _try_issue_acceptance(sid_b6, "coa_b6")
 check("B.6 post-termination acceptance issuance fails", result_b6 is None,
@@ -415,7 +415,7 @@ challenge_d = "ch_" + secrets.token_hex(8)
 lp.associate_freshness_challenge(sid_d, challenge_d)
 
 # Simulate legitimate acceptance model-response event
-lp.record_model_response(sid_d, "acceptance", b"legitimate acceptance response containing " + challenge_d.encode())
+lp._record_lifecycle_response(sid_d, "acceptance", b"legitimate acceptance response containing " + challenge_d.encode())
 sa_d = lp.issue_session_acceptance(sid_d, coa_receipt_fingerprint="sha256:d_coa")
 prim_ev_d = prim.get_public_evidence(sid_d)
 pub_b64_d = prim_ev_d["public_key_b64"]
@@ -425,7 +425,7 @@ check(
 )
 
 # Simulate legitimate governed-action model-response event
-lp.record_model_response(sid_d, "action", b"legitimate action response " + challenge_d.encode())
+lp._record_lifecycle_response(sid_d, "action", b"legitimate action response " + challenge_d.encode())
 sca_d = lp.issue_signed_candidate_action(
     sid_d,
     capability_id="cap_d",
