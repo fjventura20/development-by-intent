@@ -25,7 +25,7 @@ from typing import Callable, Dict, Optional, Tuple
 from qa_poc.admission import AdmissionAuthority, AdmissionCredential, QualificationCredential
 from qa_poc.authorization import AuthorizationAuthority, CapabilityToken, TrustDecision
 from qa_poc.clock import Clock
-from qa_poc.crypto import Ed25519PrivateKey, Ed25519PublicKey, generate_keypair
+from qa_poc.crypto import Ed25519PrivateKey, Ed25519PublicKey, generate_keypair, key_id_from_public_pem
 from qa_poc.models import (
     DOMAIN_ADMISSION_CREDENTIAL,
     DOMAIN_ADMISSION_DECISION,
@@ -64,6 +64,15 @@ class KeyBag:
     executor_pub: Ed25519PublicKey
     audit_priv: Ed25519PrivateKey
     audit_pub: Ed25519PublicKey
+    # AUTH_IDENTITY: a recognised, active identity key. Per the frozen
+    # design §28 QA-P8, this key is registered as AUTHORIZED for
+    # SubjectBinding + evidence-manifest signatures but is NOT
+    # authorized to sign QualificationCredential artifacts. (Signing
+    # a QualificationCredential with this key should be rejected at
+    # the issuer-authorization check, even though the signature
+    # cryptographically verifies.)
+    auth_identity_priv: Ed25519PrivateKey
+    auth_identity_pub: Ed25519PublicKey
 
     @classmethod
     def fresh(cls) -> "KeyBag":
@@ -75,6 +84,7 @@ class KeyBag:
         trust_priv, trust_pub = generate_keypair()
         executor_priv, executor_pub = generate_keypair()
         audit_priv, audit_pub = generate_keypair()
+        auth_identity_priv, auth_identity_pub = generate_keypair()
         return cls(
             policy_priv=policy_priv, policy_pub=policy_pub,
             identity_priv=identity_priv, identity_pub=identity_pub,
@@ -84,6 +94,8 @@ class KeyBag:
             trust_priv=trust_priv, trust_pub=trust_pub,
             executor_priv=executor_priv, executor_pub=executor_pub,
             audit_priv=audit_priv, audit_pub=audit_pub,
+            auth_identity_priv=auth_identity_priv,
+            auth_identity_pub=auth_identity_pub,
         )
 
 
@@ -175,6 +187,52 @@ class FixtureHarness:
             policy=policy,
             clock=Clock(now_unix_ms=1_700_000_000_000),
         )
+
+
+# --- Issuer Authorization Registry (frozen §6 + §28 QA-P8) ---------------
+
+
+@dataclass
+class IssuerAuthorizationRegistry:
+    """Maps (key_id, artifact_type) → bool.
+
+    The frozen design §6 requires a recognized authority identity
+    (key) to have explicit permission to sign each artifact type.
+    AUTH_IDENTITY is recognised and active, but it is NOT authorized
+    to sign QualificationCredential artifacts — only R11 is.
+
+    This registry is consulted by the EAP (and by case functions) to
+    distinguish "cryptographically valid signature from a recognized
+    key" from "authorized to sign this artifact type".
+    """
+
+    auth_role: str
+    artifact_type_permissions: Dict[Tuple[str, str], bool]
+
+    @classmethod
+    def build_default(cls, *, auth_identity_key_id: str, r11_key_id: str) -> "IssuerAuthorizationRegistry":
+        from qa_poc.models import (
+            DOMAIN_ADMISSION_CREDENTIAL,
+            DOMAIN_QUALIFICATION_CREDENTIAL,
+            DOMAIN_QUALIFICATION_EVIDENCE_MANIFEST,
+        )
+
+        # Per frozen design: AUTH_IDENTITY authorizes SubjectBinding +
+        # evidence-manifest signatures. R11 authorizes QualificationCredential.
+        perms = {
+            (auth_identity_key_id, DOMAIN_QUALIFICATION_EVIDENCE_MANIFEST): True,
+            (auth_identity_key_id, DOMAIN_QUALIFICATION_CREDENTIAL): False,
+            (auth_identity_key_id, DOMAIN_ADMISSION_CREDENTIAL): False,
+            (r11_key_id, DOMAIN_QUALIFICATION_CREDENTIAL): True,
+        }
+        return cls(auth_role=auth_identity_key_id, artifact_type_permissions=perms)
+
+    def is_authorized(self, key_id: str, artifact_type: str) -> bool:
+        return self.artifact_type_permissions.get((key_id, artifact_type), False)
+
+    def lookup(self, key_id: str, artifact_type: str) -> bool:
+        """Function-style lookup (drop-in for callable registries)."""
+        return self.is_authorized(key_id=key_id, artifact_type=artifact_type)
 
 
 def issue_qualification_and_admission(

@@ -40,6 +40,7 @@ from .models import (
     with_signature,
 )
 from .policies import ProfileRegistry, ProfileResolution, verify_profile_signature
+from .admission import DependencyEvaluationError
 from .subject_binding import SubjectBinding
 
 
@@ -277,5 +278,25 @@ class QualificationAuthority:
             )
             sig = sign_ed25519(self.r11_priv, credential.signature_domain, artifact_payload(credential))
             credential = with_signature(credential, sig)
-
         return manifest, decision, credential
+
+
+def check_qualification_usable(*, qualification, clock, revocation_lookup) -> None:
+    """Verify a QualificationCredential is currently usable.
+
+    A qualification is unusable if:
+      - the active clock has reached or passed `expires_at_unix_ms`, or
+      - the revocation_lookup says it has been revoked.
+    """
+    if clock.now_unix_ms >= qualification.expires_at_unix_ms:
+        raise DependencyEvaluationError(
+            "AX_QUALIFICATION_EXPIRED: qualification expired at "
+            f"{qualification.expires_at_unix_ms}, current={clock.now_unix_ms}"
+        )
+    is_revoked, reason = revocation_lookup(qualification.credential_id)
+    if is_revoked:
+        raise DependencyEvaluationError(
+            f"AX_QUALIFICATION_REVOKED: {reason or 'revoked'} "
+            f"(credential_id={qualification.credential_id})"
+        )
+    return None

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Callable, Optional, Tuple
 
 from .admission import AdmissionCredential, QualificationCredential
 from .canonical import canonical_sha256
@@ -88,7 +88,52 @@ class AuthorizationAuthority:
         nonce: str,
         snapshot_reference: str,
         clock: Clock,
-    ) -> CapabilityToken:
+        revocation_lookup: Optional[Callable[[str], Tuple[bool, str]]] = None,
+        qualification_revocation_lookup: Optional[Callable[[str], Tuple[bool, str]]] = None,
+    ) -> "CapabilityToken | None":
+        """Issue a new CapabilityToken bound to the (qualification,
+        admission) pair.
+
+        Per frozen §19, recursive eligibility is evaluated AT ISSUANCE
+        TIME: both the bound qualification and the bound admission
+        must be currently usable (not revoked, not expired). When
+        `revocation_lookup` or `qualification_revocation_lookup` are
+        provided, this check is enforced. If either bound artifact is
+        unusable, NO CapabilityToken is issued (returns None).
+
+        The TrustDecision issuance is also a downstream consumer of
+        the same constraint: if no CapabilityToken is issued, no
+        TrustDecision is issued either.
+        """
+        from .admission import check_admission_usable, DependencyEvaluationError
+        from .qualification import check_qualification_usable
+
+        # Pre-issuance: admission must be present, qualified must be present.
+        if admission is None:
+            return None
+        if qualification is None:
+            return None
+
+        if revocation_lookup is not None:
+            try:
+                check_admission_usable(
+                    admission=admission,
+                    clock=clock,
+                    qualification=qualification,
+                    revocation_lookup=revocation_lookup,
+                )
+            except DependencyEvaluationError:
+                return None
+        if qualification_revocation_lookup is not None:
+            try:
+                check_qualification_usable(
+                    qualification=qualification,
+                    clock=clock,
+                    revocation_lookup=qualification_revocation_lookup,
+                )
+            except DependencyEvaluationError:
+                return None
+
         sb_digest = subject_binding.digest()
         params_d = parameters_digest(parameters)
         issued_at = clock.now_unix_ms

@@ -82,6 +82,7 @@ def execute_bound_action(
     new_resource_value: str,
     clock: Clock,
     live_proof_verifier: Optional[Callable[[], None]] = None,
+    issuer_authorization_lookup: Optional[Callable[[str, str], bool]] = None,
 ) -> EapResult:
     """Execute the bound action at the EAP. This is the load-bearing
     call for QA-P1..QA-P14.
@@ -89,7 +90,41 @@ def execute_bound_action(
     All validations happen INSIDE the executor-owned BEGIN IMMEDIATE
     transaction; any failure rolls back and the audit row written is
     EXECUTION_DENIED (in a separate transaction per §24).
+
+    `issuer_authorization_lookup` is an optional (key_id, artifact_type)
+    -> bool function consulted after signature verification. The
+    signature may cryptographically verify against the supplied pub,
+    but the publisher key may still lack artifact-type permission
+    (frozen §6 + §28 QA-P8). When provided, the EAP denies with
+    `ISSUER_NOT_AUTHORIZED_FOR_ARTIFACT_TYPE` if the lookup fails.
     """
+
+    # Helper: cross-check authorization after a successful verify_artifact
+    def _check_authorized(artifact_type: str, pub: Ed25519PublicKey, label: str):
+        if issuer_authorization_lookup is None:
+            return None
+        try:
+            from cryptography.hazmat.primitives import serialization
+            from qa_poc.crypto import key_id_from_public_pem
+            pem = pub.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+            kid = key_id_from_public_pem(pem)
+        except Exception:
+            kid = "<unknown>"
+        if not issuer_authorization_lookup(kid, artifact_type):
+            return _deny(
+                conn,
+                bundle,
+                action_digest_val,
+                bound_qualification,
+                bound_admission,
+                f"ISSUER_NOT_AUTHORIZED_FOR_ARTIFACT_TYPE: {label} signed by key_id={kid[:16]}... which lacks permission for {artifact_type}",
+                resource_id,
+                clock,
+            )
+        return None
 
     # Build action_digest for nonce binding
     action_digest_val = canonical_sha256(bundle.action)
@@ -110,6 +145,9 @@ def execute_bound_action(
             resource_id,
             clock,
         )
+    auth_check = _check_authorized(DOMAIN_CAPABILITY_TOKEN, auth_pub, "capability_token")
+    if auth_check is not None:
+        return auth_check
 
     # (2) TrustDecision
     try:
@@ -125,6 +163,32 @@ def execute_bound_action(
             resource_id,
             clock,
         )
+    auth_check = _check_authorized(DOMAIN_TRUST_DECISION, trust_pub, "trust_decision")
+    if auth_check is not None:
+        return auth_check
+
+    # (1b) Bound qualification: verify signature against the supplied
+    # qualification_pub (which the caller may have overridden for QA-P8
+    # purposes), then consult the authorization registry if provided.
+    try:
+        verify_artifact(bound_qualification, qualification_pub)
+    except (DigestMismatchError, SignatureError) as e:
+        return _deny(
+            conn,
+            bundle,
+            action_digest_val,
+            bound_qualification,
+            bound_admission,
+            f"BOUND_QUALIFICATION_VERIFY_FAILED: {type(e).__name__}: {e}",
+            resource_id,
+            clock,
+        )
+    from qa_poc.models import DOMAIN_QUALIFICATION_CREDENTIAL
+    auth_check = _check_authorized(
+        DOMAIN_QUALIFICATION_CREDENTIAL, qualification_pub, "qualification_credential"
+    )
+    if auth_check is not None:
+        return auth_check
 
     # (3) TrustDecision.verdict must be AUTHORIZED
     if bundle.trust_decision.verdict != "AUTHORIZED":

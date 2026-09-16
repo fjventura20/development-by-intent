@@ -160,3 +160,13 @@ def append_direct_bypass_denied(
             except Exception:
                 pass
             raise
+
+
+def verify_audit_chain(conn) -> bool:
+    """Verify the audit chain.
+
+    Re-exported from `trusted.enforcement_store.verify_audit_chain` so
+    that callers can use the helper from either module.
+    """
+    from .enforcement_store import verify_audit_chain as _verify
+    return _verify(conn)
