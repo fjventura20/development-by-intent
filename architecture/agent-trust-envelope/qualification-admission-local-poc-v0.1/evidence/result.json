@@ -1,0 +1,60 @@
+{
+  "result_status": "READY_FOR_FORMAL_RUN_REVIEW",
+  "implementation_commit": "3adcfb1b4ff5a9f346449ca3479e86a5b72b0750",
+  "implementation_branch": "feature/ate-qa-local-poc-v010-implementation",
+  "implementation_pushed_to_origin": true,
+  "frozen_architecture_commit": "c881ba76f83392a242415fa4c37a1f61ae6dd92b",
+  "poc_design_freeze_commit": "4f0eb8e55f621283474fe03af0f060f7866affb8",
+  "poc_design_blob_sha1": "48cc34a67a68da573fd96fdbd597ffd85bb7ec90",
+  "frozen_artifacts_unchanged": true,
+  "test_summary": {
+    "framework": "pytest 9.1.1",
+    "python_version": "3.12.3",
+    "total": 43,
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "wall_clock_seconds": 1.17
+  },
+  "preflight_summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "items": {
+      "PF1": "PASS",
+      "PF2": "PASS",
+      "PF3": "PASS",
+      "PF4": "PASS",
+      "PF5": "PASS",
+      "PF6": "PASS",
+      "PF7": "PASS",
+      "PF8": "PASS",
+      "PF9": "PASS",
+      "PF10": "PASS",
+      "PF11": "PASS",
+      "PF12": "PASS",
+      "PF13": "PASS",
+      "PF14": "PASS"
+    }
+  },
+  "dev_imp_corrections": {
+    "DEV-IMP-1": {
+      "status": "CLOSED",
+      "note": "GitHub resolves the design to blob 48cc34a67a68da573fd96fdbd597ffd85bb7ec90 at both 31d4219 and 4f0eb8e5. Operator hash-type confusion (sha256sum on raw bytes vs git blob ID). Preflight now uses git ls-tree to read the Git blob ID."
+    },
+    "DEV-IMP-2": {
+      "status": "ACCEPTED",
+      "note": "EAP credential-transplant check retained. Regression test test_dev_imp2_credential_transplant_regression added."
+    },
+    "DEV-IMP-3": {
+      "status": "CORRECTED",
+      "note": "Non-recursive construction: id assigned before digest; digest over {id, semantic_fields}; signing payload {id, semantic_fields, digest} excluding signature; verify_artifact() recomputes digest, compares, then verifies signature. Four mutation regression tests added (id_mutation_is_detected, self_digest_mutation_is_detected, semantic_field_mutation_is_detected, equivalent_canonical_form_has_same_digest)."
+    }
+  },
+  "bootstrap_executed": true,
+  "bootstrap_output": "BOOTSTRAP READY\nENV=/var/lib/ate/poc/bootstrap.env\nauthority_uid=993 executor_uid=995",
+  "formal_qa_p1_p14_run_executed": false,
+  "formal_run_authorization_token_used": false,
+  "recommendation": "READY_FOR_FORMAL_RUN_REVIEW"
+}

@@ -1,0 +1,53 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/fjventura20/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/fjventura20/devProjectsU/development-by-intent-ateqa/architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1
+plugins: cov-7.1.0, asyncio-1.4.0, anyio-4.13.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 43 items
+
+tests/test_canonical.py::test_reordered_keys_produce_same_canonical_bytes PASSED [  2%]
+tests/test_canonical.py::test_reordered_keys_same_canonical_bytes PASSED [  4%]
+tests/test_canonical.py::test_semantic_mutation_changes_digest PASSED    [  6%]
+tests/test_canonical.py::test_duplicate_key_rejected_at_parse_time PASSED [  9%]
+tests/test_canonical.py::test_float_rejected PASSED                      [ 11%]
+tests/test_canonical.py::test_nan_rejected PASSED                        [ 13%]
+tests/test_canonical.py::test_non_string_object_keys_rejected PASSED     [ 16%]
+tests/test_canonical.py::test_nfc_normalization PASSED                   [ 18%]
+tests/test_canonical.py::test_unicode_separators_ensure_ascii_false PASSED [ 20%]
+tests/test_canonical.py::test_int_overflow_rejected PASSED               [ 23%]
+tests/test_preflight.py::test_preflight_1_frozen_architecture_blob PASSED [ 25%]
+tests/test_preflight.py::test_preflight_2_poc_design_blob PASSED         [ 27%]
+tests/test_preflight.py::test_preflight_3_os_identities_exist PASSED     [ 30%]
+tests/test_preflight.py::test_preflight_4_orchestration_path_exists PASSED [ 32%]
+tests/test_preflight.py::test_preflight_5_trusted_code_not_requester_writable PASSED [ 34%]
+tests/test_preflight.py::test_preflight_6_authority_keys_not_requester_readable PASSED [ 37%]
+tests/test_preflight.py::test_preflight_7_executor_audit_keys_not_requester_readable PASSED [ 39%]
+tests/test_preflight.py::test_preflight_8_enforcement_store_not_requester_authority_writable PASSED [ 41%]
+tests/test_preflight.py::test_preflight_9_direct_bypass_probe_fails PASSED [ 44%]
+tests/test_preflight.py::test_preflight_10_canonicalization_self_test PASSED [ 46%]
+tests/test_preflight.py::test_preflight_11_signing_domain_separation PASSED [ 48%]
+tests/test_preflight.py::test_preflight_12_monotonic_control_epoch PASSED [ 51%]
+tests/test_preflight.py::test_preflight_13_audit_chain_self_test PASSED  [ 53%]
+tests/test_preflight.py::test_preflight_14_sqlite_serialization_available PASSED [ 55%]
+tests/test_qa_matrix.py::test_qa_p1_happy_path PASSED                    [ 58%]
+tests/test_qa_matrix.py::test_qa_p2_no_admission_means_no_capability PASSED [ 60%]
+tests/test_qa_matrix.py::test_qa_p4_admission_revocation_blocks_eap PASSED [ 62%]
+tests/test_qa_matrix.py::test_qa_p5_qualification_revocation_blocks_eap PASSED [ 65%]
+tests/test_qa_matrix.py::test_qa_p6_qualification_expired_blocks_eap PASSED [ 67%]
+tests/test_qa_matrix.py::test_qa_p7_agent_b_subject_binding_mismatch PASSED [ 69%]
+tests/test_qa_matrix.py::test_dev_imp2_credential_transplant_regression PASSED [ 72%]
+tests/test_qa_matrix.py::test_qa_p11_subcase_a_revocation_commits_before_eap PASSED [ 74%]
+tests/test_qa_matrix.py::test_qa_p11_subcase_b_eap_commits_before_revocation PASSED [ 76%]
+tests/test_qa_matrix.py::test_qa_p14_admission_expired_blocks_eap PASSED [ 79%]
+tests/test_signing.py::test_sign_verify_round_trip PASSED                [ 81%]
+tests/test_signing.py::test_wrong_domain_verification_fails PASSED       [ 83%]
+tests/test_signing.py::test_payload_mutation_verification_fails PASSED   [ 86%]
+tests/test_signing.py::test_key_id_stability PASSED                      [ 88%]
+tests/test_signing.py::test_artifact_payload_excludes_signature PASSED   [ 90%]
+tests/test_signing.py::test_dev_imp3_id_mutation_is_detected PASSED      [ 93%]
+tests/test_signing.py::test_dev_imp3_self_digest_mutation_is_detected PASSED [ 95%]
+tests/test_signing.py::test_dev_imp3_semantic_field_mutation_is_detected PASSED [ 97%]
+tests/test_signing.py::test_dev_imp3_equivalent_canonical_form_has_same_digest PASSED [100%]
+
+============================== 43 passed in 1.17s ==============================
