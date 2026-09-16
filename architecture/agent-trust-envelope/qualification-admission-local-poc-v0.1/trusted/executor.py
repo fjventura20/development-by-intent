@@ -281,6 +281,29 @@ def execute_bound_action(
             clock,
         )
 
+    # (8b) Historical TrustStateReference coherence (§15).
+    # The capability, the trust decision, the bound qualification,
+    # and the bound admission MUST all reference the same coherent
+    # committed-state snapshot. If any pair disagrees, the EAP
+    # denies with *_TRUST_STATE_INCONSISTENT.
+    snap_refs = {
+        "capability": bundle.capability.historical_trust_state_reference,
+        "trust_decision": bundle.trust_decision.historical_trust_state_reference,
+        "qualification": bound_qualification.historical_trust_state_reference,
+        "admission": bound_admission.historical_trust_state_reference,
+    }
+    if len(set(snap_refs.values())) > 1:
+        return _deny(
+            conn,
+            bundle,
+            action_digest_val,
+            bound_qualification,
+            bound_admission,
+            "TRUST_STATE_INCONSISTENT: snapshot_reference mismatch across capability/trust_decision/qualification/admission",
+            resource_id,
+            clock,
+        )
+
     # (9) Recursive qualification -> admission usability (§19)
     try:
         check_admission_usable(

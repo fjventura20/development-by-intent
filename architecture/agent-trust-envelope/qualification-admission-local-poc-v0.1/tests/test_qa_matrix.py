@@ -32,6 +32,7 @@ import pytest
 from qa_poc.admission import DependencyEvaluationError, check_admission_usable
 from qa_poc.clock import Clock
 from tests._helpers import (
+    FIXED_SNAPSHOT_REF,
     FixtureHarness,
     _no_revocations,
     close_temp_store,
@@ -64,14 +65,14 @@ def test_qa_p1_happy_path():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p1-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "hello"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -149,14 +150,14 @@ def test_qa_p4_admission_revocation_blocks_eap():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p4-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -211,14 +212,14 @@ def test_qa_p5_qualification_revocation_blocks_eap():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p5-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -273,14 +274,14 @@ def test_qa_p6_qualification_expired_blocks_eap():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p6-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -335,14 +336,14 @@ def test_qa_p7_agent_b_subject_binding_mismatch():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p7-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -410,14 +411,14 @@ def test_dev_imp2_credential_transplant_regression():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-dev-imp2",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -530,14 +531,14 @@ def test_qa_p11_subcase_a_revocation_commits_before_eap():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p11a",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -588,14 +589,14 @@ def test_qa_p11_subcase_b_eap_commits_before_revocation():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p11b-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(
@@ -682,14 +683,14 @@ def test_qa_p11_subcase_b_eap_commits_before_revocation():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p11b-2",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td2 = h.authorization.issue_trust_decision(
             capability=cap2,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "y"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle2 = BoundActionBundle(
@@ -739,14 +740,14 @@ def test_qa_p14_admission_expired_blocks_eap():
             risk_class="R2",
             capability_class="demo-resource-write",
             nonce="nonce-p14-1",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         td = h.authorization.issue_trust_decision(
             capability=cap,
             requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "x"}},
             verdict="AUTHORIZED",
-            snapshot_reference="snap",
+            snapshot_reference=FIXED_SNAPSHOT_REF,
             clock=h.clock,
         )
         bundle = BoundActionBundle(

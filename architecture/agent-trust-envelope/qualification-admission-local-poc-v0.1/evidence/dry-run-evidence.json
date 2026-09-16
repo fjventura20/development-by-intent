@@ -1,21 +1,20 @@
 {
-  "run_id": "ate-poc-v010-impl-dryrun-preflight-001",
-  "implementation_commit": "3adcfb1b4ff5a9f346449ca3479e86a5b72b0750",
+  "run_id": "ate-poc-v010-correction-dryrun-preflight-001",
+  "implementation_commit": "PENDING",
   "implementation_branch": "feature/ate-qa-local-poc-v010-implementation",
-  "implementation_pushed_to_origin": true,
   "frozen_architecture_commit": "c881ba76f83392a242415fa4c37a1f61ae6dd92b",
   "poc_design_freeze_commit": "4f0eb8e55f621283474fe03af0f060f7866affb8",
   "poc_design_blob_sha1": "48cc34a67a68da573fd96fdbd597ffd85bb7ec90",
-  "test_run_timestamp_utc": "2026-09-16T20:53:00Z",
+  "test_run_timestamp_utc": "2026-09-16T21:30:00Z",
   "test_framework": "pytest 9.1.1",
   "python_version": "3.12.3",
   "test_summary": {
-    "total_tests": 43,
-    "passed": 43,
+    "total_tests": 50,
+    "passed": 50,
     "failed": 0,
     "skipped": 0,
     "xfailed": 0,
-    "wall_clock_seconds": 1.17
+    "wall_clock_seconds": 1.35
   },
   "test_breakdown": {
     "test_canonical.py": {
@@ -26,12 +25,17 @@
     "test_signing.py": {
       "tests": 9,
       "passed": 9,
-      "purpose": "frozen §8 Ed25519 signing + domain-separation tests + DEV-IMP-3 mutation regression tests"
+      "purpose": "frozen §8 Ed25519 signing + domain-separation tests + DEV-IMP-3 mutation regression tests (id/digest/semantic-field/equivalent-canonical-form)"
     },
     "test_qa_matrix.py": {
       "tests": 10,
       "passed": 10,
-      "purpose": "QA-P dev/dry-run coverage: P1, P2, P4, P5, P6, P7, P11a, P11b, P14 + DEV-IMP-2 transplant regression"
+      "purpose": "QA-P dev/dry-run coverage: P1, P2, P4, P5, P6, P7, P11a, P11b, P14-deny + DEV-IMP-2 transplant regression"
+    },
+    "test_qa_matrix_missing.py": {
+      "tests": 7,
+      "passed": 7,
+      "purpose": "explicit executable tests for QA-P3, P8, P9, P10, P12, P13, P14-full (review-boundary renewal)"
     },
     "test_preflight.py": {
       "tests": 14,
@@ -40,41 +44,50 @@
     }
   },
   "preflight_results": [
-    {"item": "PF1", "name": "frozen_architecture_blob", "result": "PASS", "evidence": "git ls-tree c881ba76 shows AGENT-QUALIFICATION-ADMISSION-v0.2.2-FREEZE.md"},
+    {"item": "PF1", "name": "frozen_architecture_blob", "result": "PASS", "evidence": "git cat-file -t c881ba76 → commit; v0.2.2 freeze markdown reachable"},
     {"item": "PF2", "name": "poc_design_blob", "result": "PASS", "evidence": "git ls-tree 4f0eb8e5 shows blob 48cc34a67a68da573fd96fdbd597ffd85bb7ec90 for ATE-QUALIFICATION-ADMISSION-LOCAL-POC-v0.1.2-DESIGN.md"},
-    {"item": "PF3", "name": "os_identities_exist", "result": "PASS", "evidence": "ate-requester(uid=994), ate-authority(uid=993), ate-executor(uid=995)"},
-    {"item": "PF4", "name": "trusted_orchestration_path", "result": "PASS", "evidence": "bootstrap.sh exists, readable, executable-or-readable-by-root"},
-    {"item": "PF5", "name": "trusted_code_not_requester_writable", "result": "PASS", "evidence": "/opt/ate-poc-v010/bin mode 0755 (dir) + 0555 (files) — sudo -n -u ate-requester test -w exits nonzero"},
-    {"item": "PF6", "name": "authority_keys_not_requester_readable", "result": "PASS", "evidence": "/var/lib/ate/poc/authority/authority_signing.key mode 0600 owned by ate-authority — sudo -n -u ate-requester test -r exits nonzero"},
-    {"item": "PF7", "name": "executor_audit_keys_not_requester_authority_readable", "result": "PASS", "evidence": "/var/lib/ate/poc/executor/{executor,audit}_signing.key mode 0600 owned by ate-executor — sudo -n -u ate-requester/ate-authority test -r exits nonzero"},
-    {"item": "PF8", "name": "enforcement_store_not_requester_authority_writable", "result": "PASS", "evidence": "/var/lib/ate/poc/executor/enforcement.db mode 0600 owned by ate-executor — sudo -n -u ate-requester/ate-authority test -w exits nonzero"},
-    {"item": "PF9", "name": "direct_bypass_probe_fails", "result": "PASS", "evidence": "in-process enforcement store PRAGMA: journal_mode=WAL, synchronous=2 (FULL), foreign_keys=1"},
-    {"item": "PF10", "name": "canonicalization_self_test", "result": "PASS", "evidence": "test_canonical.py: 10/10 PASS — reordered keys same digest, semantic mutation differs, float/NaN/duplicate-key/int-overflow all rejected"},
-    {"item": "PF11", "name": "signing_domain_separation", "result": "PASS", "evidence": "test_preflight.py::test_preflight_11_signing_domain_separation — cross-domain verification fails, signing bytes include 0x00 separator"},
-    {"item": "PF12", "name": "monotonic_control_epoch", "result": "PASS", "evidence": "test_preflight.py::test_preflight_12 — two ControlRecords increment epoch +1 each, replay of record_id rejected"},
+    {"item": "PF3", "name": "os_identities_exist", "result": "PASS", "evidence": "pwd.getpwnam(ate-requester/ate-authority/ate-executor) all return entries"},
+    {"item": "PF4", "name": "trusted_orchestration_path", "result": "PASS", "evidence": "bootstrap.sh exists, readable; takes two source-dir args; installs qa_poc/ and trusted/ as packages under /opt/ate-poc-v010/"},
+    {"item": "PF5", "name": "trusted_code_not_requester_writable", "result": "PASS", "evidence": "/opt/ate-poc-v010/ mode 0755 (dir) + 0555 (files); sudo -n -u ate-requester test -w /opt/ate-poc-v010 exits nonzero"},
+    {"item": "PF6", "name": "authority_keys_not_requester_readable", "result": "PASS", "evidence": "/var/lib/ate/poc/authority/authority_signing.key mode 0600 owned by ate-authority; sudo -n -u ate-requester test -r exits nonzero"},
+    {"item": "PF7", "name": "executor_audit_keys_not_requester_authority_readable", "result": "PASS", "evidence": "/var/lib/ate/poc/executor/{executor,audit}_signing.key mode 0600 owned by ate-executor; sudo -n -u ate-requester/ate-authority test -r both exit nonzero"},
+    {"item": "PF8", "name": "enforcement_store_not_requester_authority_writable", "result": "PASS", "evidence": "/var/lib/ate/poc/executor/enforcement.db mode 0600 owned by ate-executor; sudo -n -u ate-requester/ate-authority test -w both exit nonzero"},
+    {"item": "PF9", "name": "direct_bypass_probe", "result": "PASS", "evidence": "REAL bypass attempt: ate-requester/ate-authority sqlite3 UPDATE on enforcement.db denied (exit nonzero); ate-requester dd overwrite denied (exit nonzero); resource state unchanged (baseline == after); see tests/test_qa_matrix_missing.py::test_qa_p12_requester_direct_bypass_attempt_denied"},
+    {"item": "PF10", "name": "canonicalization_self_test", "result": "PASS", "evidence": "test_preflight.py::test_preflight_10 — 10/10 test_canonical.py cases pass"},
+    {"item": "PF11", "name": "signing_domain_separation", "result": "PASS", "evidence": "test_preflight.py::test_preflight_11 — cross-domain verification fails, signing bytes include 0x00 separator"},
+    {"item": "PF12", "name": "monotonic_control_epoch", "result": "PASS", "evidence": "test_preflight.py::test_preflight_12 — two ControlRecords increment epoch +1 each; replay of record_id rejected"},
     {"item": "PF13", "name": "audit_chain_self_test", "result": "PASS", "evidence": "test_preflight.py::test_preflight_13 — 5-event chain verifies; tampering one row breaks chain"},
-    {"item": "PF14", "name": "sqlite_serialization_available", "result": "PASS", "evidence": "test_preflight.py::test_preflight_14 — BEGIN IMMEDIATE works, eap_transaction context manager commits and rolls back correctly"}
+    {"item": "PF14", "name": "sqlite_serialization_available", "result": "PASS", "evidence": "test_preflight.py::test_preflight_14 — BEGIN IMMEDIATE works; eap_transaction commits/rolls back correctly; applied_epoch UNIQUE enforced"}
   ],
-  "qa_matrix_dev_dry_run_results": [
-    {"case": "QA-P1 happy path", "result": "PASS", "evidence": "EXECUTION_SUCCEEDED + mutation_count=1, audit chain valid"},
-    {"case": "QA-P2 no admission", "result": "PASS", "evidence": "qualification issued without admission → capability issuance refused"},
-    {"case": "QA-P4 admission revoked before EAP", "result": "PASS", "evidence": "EXECUTION_DENIED, reason AX_ADMISSION_REVOKED, mutation_count=0"},
-    {"case": "QA-P5 qualification revoked before EAP", "result": "PASS", "evidence": "EXECUTION_DENIED (cascade), mutation_count=0"},
-    {"case": "QA-P6 qualification expired before EAP", "result": "PASS", "evidence": "EXECUTION_DENIED with QUALIFICATION_EXPIRED reason"},
-    {"case": "QA-P7 Agent B reuses Agent A chain", "result": "PASS", "evidence": "EXECUTION_DENIED with SUBJECT_BINDING_IDENTITY_NOT_BOUND_TO_CREDENTIALS"},
-    {"case": "QA-P11a revocation commits before EAP", "result": "PASS", "evidence": "ControlRecord applied, observed epoch incremented, EAP denied"},
-    {"case": "QA-P11b EAP commits before revocation", "result": "PASS", "evidence": "First EAP succeeds (mutation_count=1), revocation applied, subsequent EAP denied"},
-    {"case": "QA-P14 admission expired before EAP", "result": "PASS", "evidence": "EXECUTION_DENIED with ADMISSION_EXPIRED reason, mutation_count=0"},
-    {"case": "DEV-IMP-2 credential transplant regression", "result": "PASS", "evidence": "EXECUTION_DENIED with SUBJECT_BINDING reason on Agent B subject_binding with Agent A credentials"}
+  "qa_p_matrix_dev_dry_run_results": [
+    {"case": "QA-P1 happy path", "test": "test_qa_p1_happy_path", "result": "PASS", "evidence": "EXECUTION_SUCCEEDED + mutation_count=1, audit chain valid"},
+    {"case": "QA-P2 qualified but not admitted", "test": "test_qa_p2_no_admission_means_no_capability", "result": "PASS", "evidence": "qualification issued without admission → capability issuance refused"},
+    {"case": "QA-P3 admission revoked before new capability", "test": "test_qa_p3_admission_revocation_before_capability_blocks_issuance", "result": "PASS", "evidence": "ADMISSION_REVOCATION ControlRecord applied to executor state; subsequent EAP with the now-revoked admission denied with AX_ADMISSION_REVOKED; mutation_count=0; resource unchanged"},
+    {"case": "QA-P4 pre-issued capability, admission revoked before EAP", "test": "test_qa_p4_admission_revocation_blocks_eap", "result": "PASS", "evidence": "EXECUTION_DENIED with AX_ADMISSION_REVOKED reason; mutation_count=0"},
+    {"case": "QA-P5 pre-issued capability, qualification revoked before EAP", "test": "test_qa_p5_qualification_revocation_blocks_eap", "result": "PASS", "evidence": "EXECUTION_DENIED with AX_QUALIFICATION_REVOKED reason (cascade); mutation_count=0"},
+    {"case": "QA-P6 qualification expires after capability issuance before EAP", "test": "test_qa_p6_qualification_expired_blocks_eap", "result": "PASS", "evidence": "EXECUTION_DENIED with AX_QUALIFICATION_EXPIRED reason after TestClock advance past expiry"},
+    {"case": "QA-P7 Agent B reuses Agent A chain", "test": "test_qa_p7_agent_b_subject_binding_mismatch + test_dev_imp2_credential_transplant_regression", "result": "PASS", "evidence": "Two explicit tests: (1) capability+admission issued for agent-a subject_binding but bundle carries agent-b SB → EAP denies with SUBJECT_BINDING_IDENTITY_NOT_BOUND_TO_CREDENTIALS; (2) capability issued with agent-b SB paired with agent-a credentials → EAP denies"},
+    {"case": "QA-P8 valid signature from unauthorized qualification issuer", "test": "test_qa_p8_valid_signature_unauthorized_issuer_rejected", "result": "PASS", "evidence": "QualificationCredential signed with r12-admission key (not the authorized r11-qualification key) → verify_artifact raises against r11_pub; EAP rejects the unauthorized-issuer credential"},
+    {"case": "QA-P9 mixed/incoherent trust-state view", "test": "test_qa_p9_mixed_trust_state_view_rejected", "result": "PASS", "evidence": "Bundle with capability+td using INCOHERENT snapshot ref while qualification/admission use FIXED_SNAPSHOT_REF → EAP denies with TRUST_STATE_INCONSISTENT reason"},
+    {"case": "QA-P10 canonical payload / digest substitution", "test": "test_qa_p10_canonical_payload_digest_substitution", "result": "PASS", "evidence": "(1) tamper semantic field of CapabilityToken → verify_artifact raises; (2) duplicate-key JSON text → canonicalize_json_text raises CanonicalDuplicateKeyError; (3) float value → canonical_sha256 raises"},
+    {"case": "QA-P11a revocation commits before EAP", "test": "test_qa_p11_subcase_a_revocation_commits_before_eap", "result": "PASS", "evidence": "QUALIFICATION_REVOCATION ControlRecord applied → epoch incremented → EAP begins → revocation visible to dependency evaluation → DENY; mutation_count=0"},
+    {"case": "QA-P11b EAP commits before revocation", "test": "test_qa_p11_subcase_b_eap_commits_before_revocation", "result": "PASS", "evidence": "First EAP commits (mutation_count=1); revocation ControlRecord applied afterward; subsequent EAP denied; mutation_count remains 1"},
+    {"case": "QA-P12 direct protected-resource bypass", "test": "test_qa_p12_requester_direct_bypass_attempt_denied", "result": "PASS", "evidence": "REAL bypass attempt as ate-requester via sqlite3 UPDATE → denied (exit 1); dd filesystem overwrite → denied (exit 1); ate-authority sqlite3 UPDATE → denied (exit 1); resource state unchanged (baseline_value == after_value); mutation_count unchanged"},
+    {"case": "QA-P13 unrecognized future qualification-profile version/digest", "test": "test_qa_p13_unrecognized_future_qualification_profile_rejected", "result": "PASS", "evidence": "v2 profile published with same profile_id but different profile_digest; qualification issued under v2; admission authority rejects with AX_QUALIFICATION_PROFILE_UNRECOGNIZED"},
+    {"case": "QA-P14 denial of expired credential", "test": "test_qa_p14_admission_expired_blocks_eap", "result": "PASS", "evidence": "TestClock advanced 13h (past 12h admission expiry); EAP denied with AX_ADMISSION_EXPIRED reason"},
+    {"case": "QA-P14 full review-boundary renewal", "test": "test_qa_p14_full_review_boundary_renewal", "result": "PASS", "evidence": "(1) old admission unusable after expiry; (2) renewal issued with NEW admission_credential_id and NEW credential_digest (distinct from old); (3) old artifact remains valid historical evidence (verify_artifact still passes for old); (4) new admission + EAP succeeds → EXECUTION_SUCCEEDED + mutation_count=1"}
   ],
   "dev_imp3_mutation_tests": [
-    {"case": "id_mutation_is_detected", "result": "PASS", "evidence": "verify_artifact raises DigestMismatchError when credential_id is changed"},
-    {"case": "self_digest_mutation_is_detected", "result": "PASS", "evidence": "verify_artifact raises on credential_digest change"},
-    {"case": "semantic_field_mutation_is_detected", "result": "PASS", "evidence": "verify_artifact raises on subject_identity_id change"},
-    {"case": "equivalent_canonical_form_has_same_digest", "result": "PASS", "evidence": "reversed-key digest_input produces same canonical_sha256"}
+    {"case": "id_mutation_is_detected", "result": "PASS"},
+    {"case": "self_digest_mutation_is_detected", "result": "PASS"},
+    {"case": "semantic_field_mutation_is_detected", "result": "PASS"},
+    {"case": "equivalent_canonical_form_has_same_digest", "result": "PASS"}
   ],
-  "bootstrap_output": "BOOTSTRAP READY\nENV=/var/lib/ate/poc/bootstrap.env\nauthority_uid=993 executor_uid=995",
-  "formal_run_executed": false,
+  "bootstrap_output": "enforcement.db schema initialized at /var/lib/ate/poc/executor/enforcement.db; epoch=0\nBOOTSTRAP READY\nENV=/var/lib/ate/poc/bootstrap.env\nauthority_uid=993 executor_uid=995",
+  "run_formal_py_status": "FULLY_WIRED_BUT_NOT_EXECUTED",
+  "run_formal_py_token_required": "ATE-FORMAL-RUN-AUTHORIZED-BY-FRANK-AS-PI-2026-09-16",
+  "run_formal_py_refusal_verified": "without token: prints REFUSED message + exit 77; with wrong token: same; cannot be launched without the token",
+  "formal_qa_p1_p14_run_executed": false,
   "formal_run_authorization_token_used": false,
   "recommendation": "READY_FOR_FORMAL_RUN_REVIEW"
 }

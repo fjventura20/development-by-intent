@@ -20,7 +20,7 @@ import shutil
 import sqlite3
 import tempfile
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from qa_poc.admission import AdmissionAuthority, AdmissionCredential, QualificationCredential
 from qa_poc.authorization import AuthorizationAuthority, CapabilityToken, TrustDecision
@@ -37,6 +37,8 @@ from qa_poc.models import (
     DOMAIN_QUALIFICATION_EVIDENCE_MANIFEST,
     DOMAIN_QUALIFICATION_REQUIREMENTS_PROFILE,
     DOMAIN_TRUST_DECISION,
+    AdmissionPolicy,
+    QualificationRequirementsProfile,
 )
 from qa_poc.policies import PolicyRegistry, ProfileRegistry
 from qa_poc.qualification import QualificationAuthority
@@ -102,8 +104,8 @@ class FixtureHarness:
     qualification: QualificationAuthority
     admission: AdmissionAuthority
     authorization: AuthorizationAuthority
-    profile: object
-    policy: object
+    profile: QualificationRequirementsProfile
+    policy: AdmissionPolicy
     clock: Clock
 
     @classmethod
@@ -230,3 +232,254 @@ def close_temp_store(conn: sqlite3.Connection, tmp: str) -> None:
         conn.close()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+# -- Revocation registry (real, mutated by ControlRecord application) ---------
+
+
+class RevocationRegistry:
+    """Maps credential_id → (is_revoked: bool, reason: str).
+
+    Updated by the executor when a QUALIFICATION_REVOCATION or
+    ADMISSION_REVOCATION ControlRecord is applied. The revocation_lookup
+    callable used by `execute_bound_action` and `check_admission_usable`
+    reads from this registry.
+    """
+
+    def __init__(self) -> None:
+        self._by_id: Dict[str, Tuple[bool, str]] = {}
+
+    def revoke(self, credential_id: str, *, reason: str = "revoked") -> None:
+        self._by_id[credential_id] = (True, reason)
+
+    def lookup(self, credential_id: str) -> Tuple[bool, str]:
+        return self._by_id.get(credential_id, (False, ""))
+
+
+def apply_revocation_control_record(
+    conn,
+    *,
+    record_id: str,
+    target_type: str,  # "qualification" or "admission"
+    target_id: str,
+    target_digest: str,
+    issuer_priv,
+    issuer_pub,
+    issuer_authority_id: str,
+    issuer_key_id: str,
+    registry: RevocationRegistry,
+    reason: str,
+    created_at_unix_ms: int,
+    change_type_authorization_ok: Callable[[str, str], bool] = lambda ct, k: True,
+) -> int:
+    """Apply a revocation ControlRecord to the executor-owned store,
+    updating `registry` so the revocation_lookup picks it up.
+
+    Returns the new applied_epoch.
+    """
+    from qa_poc.crypto import sign_ed25519
+    from qa_poc.models import (
+        ControlRecord,
+        DOMAIN_CONTROL_RECORD,
+        artifact_payload,
+        compute_id_and_digest,
+    )
+    from trusted.control_apply import apply_control_record
+
+    epoch_before = enforcement_store.current_epoch(conn)
+    change_type = (
+        "QUALIFICATION_REVOCATION" if target_type == "qualification"
+        else "ADMISSION_REVOCATION"
+    )
+    semantic = {
+        "previous_epoch": epoch_before,
+        "new_epoch": epoch_before + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": created_at_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    rec_proto = ControlRecord(
+        record_id="",
+        previous_epoch=epoch_before,
+        new_epoch=epoch_before + 1,
+        change_type=change_type,
+        target_type=target_type,
+        target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=created_at_unix_ms,
+        issuer_authority_id=issuer_authority_id,
+        issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(
+        rec_proto,
+        semantic_fields=semantic,
+        id_prefix="rev",
+        id_salt=(record_id, target_id),
+    )
+    sig = sign_ed25519(issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    rec = rec.__class__(**{**rec.__dict__, "signature": sig})
+
+    new_epoch = apply_control_record(
+        conn,
+        record=rec,
+        issuer_pub=issuer_pub,
+        change_type_authorization_lookup=change_type_authorization_ok,
+        created_at_unix_ms=created_at_unix_ms,
+    )
+    registry.revoke(target_id, reason=reason)
+    return new_epoch
+
+
+# -- Bundle helpers (issue cap + td + EAP, capturing full evidence) ---------
+
+
+@dataclass
+class BundleWithEvidence:
+    """Captures the cap + td + audit evidence around an EAP call."""
+    subject_binding: SubjectBinding
+    qualification: QualificationCredential
+    admission: AdmissionCredential
+    capability: CapabilityToken
+    trust_decision: TrustDecision
+    eap_result: "EapResult"  # forward ref
+    initial_mutation_count: int
+    final_mutation_count: int
+    initial_resource_value: str
+    final_resource_value: str
+    audit_before: list
+    audit_after: list
+    initial_epoch: int
+    final_epoch: int
+    applied_control_records: list
+
+
+def issue_capability_trust_decision(
+    harness: FixtureHarness,
+    *,
+    subject_binding: SubjectBinding,
+    qualification: QualificationCredential,
+    admission: AdmissionCredential,
+    nonce: str,
+    target: str = "resource-A",
+    parameters: Optional[dict] = None,
+    session_identity: str = "sess-test",
+    snapshot_reference: str = FIXED_SNAPSHOT_REF,
+) -> Tuple[CapabilityToken, TrustDecision]:
+    if parameters is None:
+        parameters = {"new_value": "hello"}
+    cap = harness.authorization.issue_capability_token(
+        subject_binding=subject_binding,
+        qualification=qualification,
+        admission=admission,
+        session_identity=session_identity,
+        operation="WRITE",
+        target=target,
+        parameters=parameters,
+        risk_class="R2",
+        capability_class="demo-resource-write",
+        nonce=nonce,
+        snapshot_reference=snapshot_reference,
+        clock=harness.clock,
+    )
+    td = harness.authorization.issue_trust_decision(
+        capability=cap,
+        requested_action={"target": target, "operation": "WRITE", "parameters": parameters},
+        verdict="AUTHORIZED",
+        snapshot_reference=snapshot_reference,
+        clock=harness.clock,
+    )
+    return cap, td
+
+
+def run_eap_and_collect_evidence(
+    harness: FixtureHarness,
+    *,
+    conn,
+    subject_binding: SubjectBinding,
+    qualification: QualificationCredential,
+    admission: AdmissionCredential,
+    capability: CapabilityToken,
+    trust_decision: TrustDecision,
+    revocation_registry: RevocationRegistry,
+    resource_id: str,
+    new_resource_value: str,
+    live_proof_verifier: Optional[Callable[[], None]] = None,
+) -> BundleWithEvidence:
+    """Run the EAP, capture full before/after state."""
+    from trusted.executor import BoundActionBundle, execute_bound_action
+
+    bundle = BoundActionBundle(
+        subject_binding=subject_binding,
+        capability=capability,
+        trust_decision=trust_decision,
+        action={"target": resource_id, "operation": "WRITE", "parameters": {"new_value": new_resource_value}},
+    )
+    initial_res = enforcement_store.read_protected_resource(conn, resource_id) or {}
+    initial_mc = initial_res.get("mutation_count", 0)
+    initial_value = initial_res.get("value", "")
+    initial_epoch = enforcement_store.current_epoch(conn)
+    audit_before = enforcement_store.read_audit(conn)
+    applied_before = conn.execute(
+        "SELECT record_id, target_type, target_id, target_digest, status, issued_at_unix_ms, applied_at_unix_ms, applied_epoch, record_digest FROM applied_control_records ORDER BY applied_epoch"
+    ).fetchall()
+
+    result = execute_bound_action(
+        conn,
+        bundle=bundle,
+        auth_pub=harness.keys.auth_pub,
+        trust_pub=harness.keys.trust_pub,
+        revocation_lookup=revocation_registry.lookup,
+        bound_qualification=qualification,
+        bound_admission=admission,
+        qualification_pub=harness.keys.r11_pub,
+        admission_pub=harness.keys.r12_pub,
+        resource_id=resource_id,
+        new_resource_value=new_resource_value,
+        clock=harness.clock,
+        live_proof_verifier=live_proof_verifier,
+    )
+
+    audit_after = enforcement_store.read_audit(conn)
+    applied_after = conn.execute(
+        "SELECT record_id, target_type, target_id, target_digest, status, issued_at_unix_ms, applied_at_unix_ms, applied_epoch, record_digest FROM applied_control_records ORDER BY applied_epoch"
+    ).fetchall()
+    final_res = enforcement_store.read_protected_resource(conn, resource_id) or {}
+    final_mc = final_res.get("mutation_count", 0)
+    final_value = final_res.get("value", "")
+    final_epoch = enforcement_store.current_epoch(conn)
+
+    return BundleWithEvidence(
+        subject_binding=subject_binding,
+        qualification=qualification,
+        admission=admission,
+        capability=capability,
+        trust_decision=trust_decision,
+        eap_result=result,
+        initial_mutation_count=initial_mc,
+        final_mutation_count=final_mc,
+        initial_resource_value=initial_value,
+        final_resource_value=final_value,
+        audit_before=audit_before,
+        audit_after=audit_after,
+        initial_epoch=initial_epoch,
+        final_epoch=final_epoch,
+        applied_control_records=[
+            {
+                "record_id": r[0],
+                "target_type": r[1],
+                "target_id": r[2],
+                "target_digest": r[3],
+                "status": r[4],
+                "issued_at_unix_ms": r[5],
+                "applied_at_unix_ms": r[6],
+                "applied_epoch": r[7],
+                "record_digest": r[8],
+            }
+            for r in applied_after
+        ],
+    )

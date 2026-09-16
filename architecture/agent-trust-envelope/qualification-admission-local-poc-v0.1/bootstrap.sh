@@ -9,16 +9,19 @@
 # identities, same mode bits — so this PoC can reuse prior AegisNexus
 # OS-boundary work safely):
 #
-#   /opt/ate-poc-v010/bin/          (root:root 0755; files 0555)
-#   /etc/ate/                        (root:root 0755)
-#     authority_pubkey.pem           (root:root 0644)
-#   /var/lib/ate/poc/                (root:root 0755)
-#     authority/                     (ate-authority:ate-authority 0700)
-#       authority_signing.key        (ate-authority:ate-authority 0600)
-#     executor/                      (ate-executor:ate-executor 0700)
-#       enforcement.db               (ate-executor:ate-executor 0600)
-#       executor_signing.key         (ate-executor:ate-executor 0600)
-#       audit_signing.key            (ate-executor:ate-executor 0600)
+#   /opt/ate-poc-v010/                        root:root 0755
+#     qa_poc/                                  root:root 0755 (files 0555)
+#     trusted/                                root:root 0755 (files 0555)
+#   /etc/ate/                                 root:root 0755
+#     authority_pubkey.pem                    root:root 0644
+#   /var/lib/ate/poc/                         root:root 0755
+#     authority/                              ate-authority:ate-authority 0700
+#       authority_signing.key                 ate-authority:ate-authority 0600
+#     executor/                               ate-executor:ate-executor 0700
+#       enforcement.db                        ate-executor:ate-executor 0600
+#         (schema applied by ate-executor on bootstrap)
+#       executor_signing.key                  ate-executor:ate-executor 0600
+#       audit_signing.key                     ate-executor:ate-executor 0600
 #
 # This PoC does not use long-lived IPC services; the EAP and
 # apply_control_record are invoked in-process by the formal runner as
@@ -28,7 +31,7 @@
 
 set -euo pipefail
 
-ATE_OPT_BIN="${ATE_OPT_BIN:-/opt/ate-poc-v010/bin}"
+ATE_OPT_ROOT="${ATE_OPT_ROOT:-/opt/ate-poc-v010}"
 ATE_ETC="${ATE_ETC:-/etc/ate}"
 ATE_VAR_LIB="${ATE_VAR_LIB:-/var/lib/ate/poc}"
 
@@ -37,19 +40,35 @@ if [ "$(id -u)" -ne 0 ] && ! sudo -n true 2>/dev/null; then
   exit 3
 fi
 
-# --- 1. Install trusted code (root-owned, world-readable+executable) ------
-# Caller passes one or more source dirs containing *.py modules.
-for src in "$@"; do
-  if [ ! -d "$src" ]; then
-    echo "source dir not found: $src" >&2
-    exit 4
-  fi
-  sudo -n install -d -o root -g root -m 0755 "$ATE_OPT_BIN"
-  for f in "$src"/*.py; do
-    [ -e "$f" ] || continue
-    base="$(basename "$f")"
-    sudo -n install -o root -g root -m 0555 "$f" "$ATE_OPT_BIN/$base"
-  done
+# Caller passes TWO source dirs: qa_poc then trusted
+if [ "$#" -lt 2 ]; then
+  echo "usage: bootstrap.sh <qa_poc-source-dir> <trusted-source-dir>" >&2
+  exit 4
+fi
+QA_SRC="$1"
+TRUSTED_SRC="$2"
+
+if [ ! -d "$QA_SRC" ] || [ ! -d "$TRUSTED_SRC" ]; then
+  echo "qa_poc or trusted source dir not found" >&2
+  exit 5
+fi
+
+# --- 1. Install trusted code as packages (root-owned, world-readable+executable)
+# We preserve the qa_poc/ and trusted/ subdirectory structure so the
+# Python imports resolve as packages.
+for sub in qa_poc trusted; do
+  sudo -n install -d -o root -g root -m 0755 "$ATE_OPT_ROOT/$sub"
+done
+
+for f in "$QA_SRC"/*.py; do
+  [ -e "$f" ] || continue
+  base="$(basename "$f")"
+  sudo -n install -o root -g root -m 0555 "$f" "$ATE_OPT_ROOT/qa_poc/$base"
+done
+for f in "$TRUSTED_SRC"/*.py; do
+  [ -e "$f" ] || continue
+  base="$(basename "$f")"
+  sudo -n install -o root -g root -m 0555 "$f" "$ATE_OPT_ROOT/trusted/$base"
 done
 
 # --- 2. Ensure OS identities (idempotent) ----------------------------------
@@ -82,7 +101,6 @@ sudo -n touch "$EXECUTOR_DB"
 sudo -n chown ate-executor:ate-executor "$EXECUTOR_DB"
 sudo -n chmod 0600 "$EXECUTOR_DB"
 
-# Generate all keypairs via root, install with proper ownership.
 sudo -n /usr/bin/python3 - "$EXECUTOR_KEY" "$EXECUTOR_AUDIT_KEY" "$AUTHORITY_KEY" "$AUTHORITY_PUBKEY" <<'PYEOF'
 import sys, os
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -95,7 +113,6 @@ priv_targets = [
 ]
 pub_path = sys.argv[4]
 
-# Pick the authority priv (last in list) and publish its public key
 authority_priv = priv_targets[2][1]
 
 for path, priv in priv_targets:
@@ -126,10 +143,22 @@ sudo -n chmod 0600 "$AUTHORITY_KEY"
 sudo -n chown root:root "$AUTHORITY_PUBKEY"
 sudo -n chmod 0644 "$AUTHORITY_PUBKEY"
 
-# --- 6. Write bootstrap.env -------------------------------------------------
+# --- 6. Initialize enforcement.db schema as ate-executor ------------------
+# The EAP/control-record code uses this DB; open_store applies the
+# schema + WAL + synchronous=FULL + foreign_keys=ON pragmas.
+sudo -n /usr/bin/python3 - "$EXECUTOR_DB" <<'PYEOF'
+import sys, os
+sys.path.insert(0, '/opt/ate-poc-v010')
+from trusted import enforcement_store
+conn = enforcement_store.open_store(sys.argv[1])
+print(f"enforcement.db schema initialized at {sys.argv[1]}; epoch={enforcement_store.current_epoch(conn)}")
+conn.close()
+PYEOF
+
+# --- 7. Write bootstrap.env -------------------------------------------------
 ENV_FILE="$ATE_VAR_LIB/bootstrap.env"
 sudo -n bash -c "cat > '$ENV_FILE' <<EOF
-ATE_OPT_BIN=$ATE_OPT_BIN
+ATE_OPT_ROOT=$ATE_OPT_ROOT
 ATE_ETC=$ATE_ETC
 ATE_VAR_LIB=$ATE_VAR_LIB
 ATE_AUTHORITY_KEY=$AUTHORITY_KEY
