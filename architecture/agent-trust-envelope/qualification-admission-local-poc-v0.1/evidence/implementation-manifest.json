@@ -1,6 +1,6 @@
 {
   "schema_version": "ate-poc-impl-manifest/v0.2",
-  "implementation_commit": "PENDING",
+  "implementation_commit": "a7f88006da0ab3d8904c35e1afac7c95aa2d44a6",
   "implementation_branch": "feature/ate-qa-local-poc-v010-implementation",
   "base_branch": "origin/main",
   "base_commit": "4f0eb8e55f621283474fe03af0f060f7866affb8",
@@ -13,39 +13,171 @@
     "missing_qa_cases_implemented": "QA-P3, P8, P9, P10, P12, P13, P14-full all have explicit executable tests in tests/test_qa_matrix_missing.py (7 tests, all PASS). No proxy tests, no skipped cases."
   },
   "files": [
-    {"path": ".gitignore", "kind": "config", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/README.md", "kind": "doc", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/bootstrap.sh", "kind": "trusted_tooling", "change": "modified — installs qa_poc/ and trusted/ as packages, initializes enforcement.db schema as ate-executor"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/run_formal.py", "kind": "trusted_tooling", "change": "modified — full wired runner: PF1..PF14 → QA-P1..QA-P14 → classification"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/__init__.py", "kind": "package_marker", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/canonical.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/clock.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/crypto.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/models.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/subject_binding.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/policies.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/qualification.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/admission.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/authorization.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/evidence.py", "kind": "implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/__init__.py", "kind": "package_marker", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/enforcement_store.py", "kind": "trusted_implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/audit_ingest.py", "kind": "trusted_implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/control_apply.py", "kind": "trusted_implementation", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/executor.py", "kind": "trusted_implementation", "change": "modified — added §15 TrustStateReference coherence check (8b)"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/conftest.py", "kind": "test_infra", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/_helpers.py", "kind": "test_infra", "change": "modified — RevocationRegistry, apply_revocation_control_record, BundleWithEvidence, issue_capability_trust_decision, run_eap_and_collect_evidence"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_canonical.py", "kind": "test", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_signing.py", "kind": "test", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_qa_matrix.py", "kind": "test", "change": "modified — uses FIXED_SNAPSHOT_REF for snapshot coherence"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_qa_matrix_missing.py", "kind": "test", "change": "new — explicit tests for QA-P3, P8, P9, P10, P12, P13, P14-full (review-boundary renewal)"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_preflight.py", "kind": "test", "change": "existing"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/test-output.txt", "kind": "evidence", "change": "modified"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/dry-run-evidence.json", "kind": "evidence", "change": "modified — adds QA-P3/P8/P9/P10/P12/P13/P14-full inventory"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-report.md", "kind": "evidence", "change": "modified — updated with corrections"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-manifest.json", "kind": "evidence", "change": "modified"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/preflight-report.md", "kind": "evidence", "change": "modified — PF9 is now real bypass probe"},
-    {"path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/result.json", "kind": "evidence", "change": "modified"}
+    {
+      "path": ".gitignore",
+      "kind": "config",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/README.md",
+      "kind": "doc",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/bootstrap.sh",
+      "kind": "trusted_tooling",
+      "change": "modified \u2014 installs qa_poc/ and trusted/ as packages, initializes enforcement.db schema as ate-executor"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/run_formal.py",
+      "kind": "trusted_tooling",
+      "change": "modified \u2014 full wired runner: PF1..PF14 \u2192 QA-P1..QA-P14 \u2192 classification"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/__init__.py",
+      "kind": "package_marker",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/canonical.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/clock.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/crypto.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/models.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/subject_binding.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/policies.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/qualification.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/admission.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/authorization.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/evidence.py",
+      "kind": "implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/__init__.py",
+      "kind": "package_marker",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/enforcement_store.py",
+      "kind": "trusted_implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/audit_ingest.py",
+      "kind": "trusted_implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/control_apply.py",
+      "kind": "trusted_implementation",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/trusted/executor.py",
+      "kind": "trusted_implementation",
+      "change": "modified \u2014 added \u00a715 TrustStateReference coherence check (8b)"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/conftest.py",
+      "kind": "test_infra",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/_helpers.py",
+      "kind": "test_infra",
+      "change": "modified \u2014 RevocationRegistry, apply_revocation_control_record, BundleWithEvidence, issue_capability_trust_decision, run_eap_and_collect_evidence"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_canonical.py",
+      "kind": "test",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_signing.py",
+      "kind": "test",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_qa_matrix.py",
+      "kind": "test",
+      "change": "modified \u2014 uses FIXED_SNAPSHOT_REF for snapshot coherence"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_qa_matrix_missing.py",
+      "kind": "test",
+      "change": "new \u2014 explicit tests for QA-P3, P8, P9, P10, P12, P13, P14-full (review-boundary renewal)"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/tests/test_preflight.py",
+      "kind": "test",
+      "change": "existing"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/test-output.txt",
+      "kind": "evidence",
+      "change": "modified"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/dry-run-evidence.json",
+      "kind": "evidence",
+      "change": "modified \u2014 adds QA-P3/P8/P9/P10/P12/P13/P14-full inventory"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-report.md",
+      "kind": "evidence",
+      "change": "modified \u2014 updated with corrections"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-manifest.json",
+      "kind": "evidence",
+      "change": "modified"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/preflight-report.md",
+      "kind": "evidence",
+      "change": "modified \u2014 PF9 is now real bypass probe"
+    },
+    {
+      "path": "architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/result.json",
+      "kind": "evidence",
+      "change": "modified"
+    }
   ],
   "frozen_artifacts_unchanged": true,
   "test_summary": {
@@ -79,12 +211,36 @@
     "QA-P14-full": "tests/test_qa_matrix_missing.py::test_qa_p14_full_review_boundary_renewal"
   },
   "deviations": [
-    {"id": "DEV-IMP-1", "status": "CLOSED", "note": "GitHub resolves design to blob 48cc34a67a68da573fd96fdbd597ffd85bb7ec90 at both 31d4219 and 4f0eb8e5. Verified via git ls-tree."},
-    {"id": "DEV-IMP-2", "status": "ACCEPTED", "note": "EAP credential-transplant check retained; test_dev_imp2_credential_transplant_regression added."},
-    {"id": "DEV-IMP-3", "status": "CORRECTED", "note": "Non-recursive construction: id before digest; digest over {id, semantic_fields}; signing payload {id, semantic_fields, digest} excluding signature; verify_artifact recomputes and compares. Four mutation regression tests."},
-    {"id": "ChatGPT-correction-1 (PF9 real probe)", "status": "RESOLVED", "note": "PF9 now performs real bypass attempt (sqlite3 UPDATE + dd filesystem overwrite + ate-authority UPDATE) and verifies resource state unchanged. Implemented in tests/test_qa_matrix_missing.py::test_qa_p12 and run_formal.py PF9."},
-    {"id": "ChatGPT-correction-2 (real run_formal.py)", "status": "RESOLVED", "note": "run_formal.py is fully wired: PF1..PF14 gate → QA-P1..QA-P14 execution → per-case evidence → audit + resource verification → classification. Cannot launch without token."},
-    {"id": "ChatGPT-correction-3 (missing QA cases)", "status": "RESOLVED", "note": "QA-P3, P8, P9, P10, P12, P13, P14-full all have explicit executable tests. No proxy tests, no skipped cases."}
+    {
+      "id": "DEV-IMP-1",
+      "status": "CLOSED",
+      "note": "GitHub resolves design to blob 48cc34a67a68da573fd96fdbd597ffd85bb7ec90 at both 31d4219 and 4f0eb8e5. Verified via git ls-tree."
+    },
+    {
+      "id": "DEV-IMP-2",
+      "status": "ACCEPTED",
+      "note": "EAP credential-transplant check retained; test_dev_imp2_credential_transplant_regression added."
+    },
+    {
+      "id": "DEV-IMP-3",
+      "status": "CORRECTED",
+      "note": "Non-recursive construction: id before digest; digest over {id, semantic_fields}; signing payload {id, semantic_fields, digest} excluding signature; verify_artifact recomputes and compares. Four mutation regression tests."
+    },
+    {
+      "id": "ChatGPT-correction-1 (PF9 real probe)",
+      "status": "RESOLVED",
+      "note": "PF9 now performs real bypass attempt (sqlite3 UPDATE + dd filesystem overwrite + ate-authority UPDATE) and verifies resource state unchanged. Implemented in tests/test_qa_matrix_missing.py::test_qa_p12 and run_formal.py PF9."
+    },
+    {
+      "id": "ChatGPT-correction-2 (real run_formal.py)",
+      "status": "RESOLVED",
+      "note": "run_formal.py is fully wired: PF1..PF14 gate \u2192 QA-P1..QA-P14 execution \u2192 per-case evidence \u2192 audit + resource verification \u2192 classification. Cannot launch without token."
+    },
+    {
+      "id": "ChatGPT-correction-3 (missing QA cases)",
+      "status": "RESOLVED",
+      "note": "QA-P3, P8, P9, P10, P12, P13, P14-full all have explicit executable tests. No proxy tests, no skipped cases."
+    }
   ],
   "run_formal_py": {
     "status": "FULLY_WIRED_BUT_NOT_EXECUTED",

@@ -1,6 +1,6 @@
 # Implementation Report — ATE Qualification & Admission Local PoC v0.1 (corrected)
 
-**Implementation commit SHA:** see git log on `feature/ate-qa-local-poc-v010-implementation` (latest correction commit at time of push)
+**Implementation commit SHA:** `a7f88006da0ab3d8904c35e1afac7c95aa2d44a6`
 **Implementation branch:** `feature/ate-qa-local-poc-v010-implementation`
 **Base branch:** `origin/main` @ `4f0eb8e55f621283474fe03af0f060f7866affb8` (PoC design freeze)
 
