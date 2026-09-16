@@ -1,0 +1,106 @@
+{
+  "implementation_commit": "fd6756ac0e2860e2454d20a9ea81847f9cfc2667",
+  "required_cases": [
+    "QA-P1",
+    "QA-P2",
+    "QA-P3",
+    "QA-P4",
+    "QA-P5",
+    "QA-P6",
+    "QA-P7",
+    "QA-P8",
+    "QA-P9",
+    "QA-P10",
+    "QA-P11a",
+    "QA-P11b",
+    "QA-P12",
+    "QA-P13",
+    "QA-P14-deny",
+    "QA-P14-renewal"
+  ],
+  "all_pass_fail": {
+    "QA-P1": "PASS",
+    "QA-P2": "PASS",
+    "QA-P3": "PASS",
+    "QA-P4": "PASS",
+    "QA-P5": "PASS",
+    "QA-P6": "PASS",
+    "QA-P7": "PASS",
+    "QA-P8": "PASS",
+    "QA-P9": "PASS",
+    "QA-P10": "PASS",
+    "QA-P11a": "PASS",
+    "QA-P11b": "PASS",
+    "QA-P12": "PASS",
+    "QA-P13": "PASS",
+    "QA-P14-deny": "PASS",
+    "QA-P14-renewal": "PASS"
+  },
+  "final_mutation_counts": {
+    "QA-P1": [
+      0,
+      1
+    ],
+    "QA-P2": [
+      0,
+      0
+    ],
+    "QA-P3": [
+      0,
+      0
+    ],
+    "QA-P4": [
+      0,
+      0
+    ],
+    "QA-P5": [
+      0,
+      0
+    ],
+    "QA-P6": [
+      0,
+      0
+    ],
+    "QA-P7": [
+      0,
+      0
+    ],
+    "QA-P8": [
+      0,
+      0
+    ],
+    "QA-P9": [
+      0,
+      0
+    ],
+    "QA-P10": [
+      0,
+      0
+    ],
+    "QA-P11a": [
+      0,
+      0
+    ],
+    "QA-P11b": [
+      0,
+      1
+    ],
+    "QA-P12": [
+      0,
+      0
+    ],
+    "QA-P13": [
+      0,
+      0
+    ],
+    "QA-P14-deny": [
+      0,
+      0
+    ],
+    "QA-P14-renewal": [
+      0,
+      1
+    ]
+  },
+  "classification": "QUALIFICATION_ADMISSION_LOCAL_POC_PASS"
+}

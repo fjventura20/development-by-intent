@@ -1,0 +1,4 @@
+  File "<string>", line 22
+    'all_pass_fail': {c.test_id: c.pass_fail for c in cases],
+                                                           ^
+SyntaxError: closing parenthesis ']' does not match opening parenthesis '{'

@@ -1,0 +1,16 @@
+PF1: PASS  (frozen_architecture_blob)
+PF2: PASS  (poc_design_blob)
+PF3: PASS  (os_identities_exist)
+PF4: PASS  (orchestration_path)
+PF5: PASS  (trusted_code_not_requester_writable)
+PF6: PASS  (authority_keys_not_requester_readable)
+PF7: PASS  (executor_audit_keys_not_requester_authority_readable)
+PF8: PASS  (enforcement_store_not_requester_authority_writable)
+PF9: PASS  (direct_bypass_probe)
+PF10: PASS  (canonicalization_self_test)
+PF11: PASS  (signing_domain_separation)
+PF12: PASS  (monotonic_control_epoch)
+PF13: PASS  (audit_chain_self_test)
+PF14: PASS  (sqlite_serialization_available)
+
+PREFLIGHT PASS: True

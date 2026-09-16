@@ -1,0 +1,364 @@
+{
+  "implementation_commit": "fd6756ac0e2860e2454d20a9ea81847f9cfc2667",
+  "branch": "feature/ate-qa-local-poc-v010-implementation",
+  "prior_pushed_baseline": "a7f88006da0ab3d8904c35e1afac7c95aa2d44a6",
+  "worktree_clean": true,
+  "test_results": {
+    "framework": "pytest",
+    "python_version": "3.12.3",
+    "total": 61,
+    "passed": 61,
+    "failed": 0,
+    "skipped": 0
+  },
+  "preflight_results": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "items": {
+      "PF1": "PASS",
+      "PF2": "PASS",
+      "PF3": "PASS",
+      "PF4": "PASS",
+      "PF5": "PASS",
+      "PF6": "PASS",
+      "PF7": "PASS",
+      "PF8": "PASS",
+      "PF9": "PASS",
+      "PF10": "PASS",
+      "PF11": "PASS",
+      "PF12": "PASS",
+      "PF13": "PASS",
+      "PF14": "PASS"
+    }
+  },
+  "case_results": {
+    "QA-P1": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_SUCCEEDED",
+      "reason_code": "",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 1,
+      "audit_sequence_range": [
+        1,
+        2
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P2": {
+      "pass_fail": "PASS",
+      "verdict": "NO_BUNDLE_ISSUED",
+      "reason_code": "ADMISSION_REQUIRED_FOR_CAPABILITY_ISSUANCE",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        0,
+        0
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P3": {
+      "pass_fail": "PASS",
+      "verdict": "NO_BUNDLE_ISSUED",
+      "reason_code": "ADMISSION_REVOCATION_PRECLUDES_CAPABILITY_ISSUANCE",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P4": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "AX_ADMISSION_REVOKED: qa-p4-revocation",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        2
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P5": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "AX_QUALIFICATION_REVOKED: qa-p5-revocation",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        2
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P6": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "CAPABILITY_EXPIRED",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P7": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "SUBJECT_BINDING_IDENTITY_NOT_BOUND_TO_CREDENTIALS",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P8": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "ISSUER_NOT_AUTHORIZED_FOR_ARTIFACT_TYPE: capability_token signed by key_id=f575d05bbd062fe7... which lacks permission for ate.authorization.capability_token.v1",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {
+        "crypto_signature_valid_against_auth_identity_pub": "PASS",
+        "auth_identity_recognized_active": "PASS",
+        "auth_identity_lacks_r11_qualcred_permission": "PASS",
+        "issuer_authorization_check_rejects": "PASS",
+        "no_protected_mutation": "PASS"
+      }
+    },
+    "QA-P9": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "TRUST_STATE_INCONSISTENT: snapshot_reference mismatch across capability/trust_decision/qualification/admission",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P10": {
+      "pass_fail": "PASS",
+      "verdict": "CANONICAL_SUBSTITUTION_PROBE",
+      "reason_code": "qa_p10_equiv_canonical_form_same_digest=PASS; qa_p10_semantic_mutation_digest_mismatch=PASS; qa_p10_duplicate_key_rejected_at_parse_time=PASS; qa_p10_float_rejected=PASS",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        0,
+        0
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {
+        "qa_p10_equiv_canonical_form_same_digest": "PASS",
+        "qa_p10_semantic_mutation_digest_mismatch": "PASS",
+        "qa_p10_duplicate_key_rejected_at_parse_time": "PASS",
+        "qa_p10_float_rejected": "PASS"
+      }
+    },
+    "QA-P11a": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "AX_QUALIFICATION_REVOKED: qa-p11a-revocation",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        2
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P11b": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "AX_QUALIFICATION_REVOKED: qa-p11b-revocation",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 1,
+      "audit_sequence_range": [
+        1,
+        4
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P12": {
+      "pass_fail": "PASS",
+      "verdict": "BYPASS_ATTEMPT",
+      "reason_code": "requester_sqlite3_bypass_denied=PASS; requester_dd_bypass_denied=PASS; authority_sqlite3_bypass_denied=PASS; resource_state_unchanged=PASS",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        0,
+        0
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {
+        "requester_sqlite3_bypass_denied": "PASS",
+        "requester_dd_bypass_denied": "PASS",
+        "authority_sqlite3_bypass_denied": "PASS",
+        "resource_state_unchanged": "PASS"
+      }
+    },
+    "QA-P13": {
+      "pass_fail": "PASS",
+      "verdict": "AX_QUALIFICATION_PROFILE_UNRECOGNIZED",
+      "reason_code": "ADMISSION_DENIED_FUTURE_PROFILE",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        0,
+        0
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P14-deny": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_DENIED",
+      "reason_code": "CAPABILITY_EXPIRED",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 0,
+      "audit_sequence_range": [
+        1,
+        1
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {}
+    },
+    "QA-P14-renewal": {
+      "pass_fail": "PASS",
+      "verdict": "EXECUTION_SUCCEEDED",
+      "reason_code": "",
+      "initial_mutation_count": 0,
+      "final_mutation_count": 1,
+      "audit_sequence_range": [
+        1,
+        2
+      ],
+      "audit_chain_valid": true,
+      "subcheck_results": {
+        "old_admission_id_distinct": "PASS",
+        "new_admission_digest_distinct": "PASS",
+        "old_artifact_remains_valid_historical_evidence": "PASS",
+        "new_admission_eap_succeeds": "PASS"
+      }
+    }
+  },
+  "classification": "QUALIFICATION_ADMISSION_LOCAL_POC_PASS",
+  "fr_closure": {
+    "FR-1": {
+      "frozen_semantics": "QA-P3: admission revocation BEFORE capability issuance means no CapabilityToken is issued, no EAP reached",
+      "implementation": "AuthorizationAuthority.issue_capability_token returns None when revocation_lookup flags bound admission as revoked",
+      "case_test_id": "QA-P3",
+      "case_pass_fail": "PASS",
+      "case_mutation_count": 0
+    },
+    "FR-2": {
+      "frozen_semantics": "QA-P8: AUTH_IDENTITY key is recognized/active but lacks permission to sign QualificationCredential",
+      "implementation": "IssuerAuthorizationRegistry + execute_bound_action cross-check; case_p8 signs with AUTH_IDENTITY privkey, verifies against AUTH_IDENTITY pub, authorization rejects",
+      "case_test_id": "QA-P8",
+      "case_pass_fail": "PASS",
+      "case_verdict": "EXECUTION_DENIED"
+    },
+    "FR-3": {
+      "frozen_semantics": "Each case produces a structured FormalEvidence with full \u00a729 schema",
+      "implementation": "qa_poc/formal_runner.py:FormalEvidence dataclass; tests/case_functions.py:16 case functions",
+      "schema_fields": [
+        "test_id",
+        "fixture_id",
+        "verdict",
+        "reason_code",
+        "initial_resource_value",
+        "final_resource_value",
+        "initial_mutation_count",
+        "final_mutation_count",
+        "starting_applied_epoch",
+        "ending_applied_epoch",
+        "qualification_credential_id",
+        "qualification_credential_digest",
+        "admission_credential_id",
+        "admission_credential_digest",
+        "capability_token_id",
+        "capability_token_digest",
+        "trust_decision_id",
+        "trust_decision_digest",
+        "applied_control_records",
+        "audit_sequence_start",
+        "audit_sequence_end",
+        "audit_chain_valid",
+        "subcheck_results",
+        "enforcement_failure_reason",
+        "invalid_run_reason"
+      ],
+      "isolated_dbs": "case-dbs/<test_id>/enforcement.db per case"
+    },
+    "FR-4": {
+      "frozen_semantics": "Run-level \u00a729 record",
+      "implementation": "run_formal.main() builds run_record dict with all required fields",
+      "run_record_fields": [
+        "run_id",
+        "implementation_commit",
+        "poc_design_freeze_blob",
+        "qualification_admission_freeze_commit",
+        "evidence_dir",
+        "preflight",
+        "frozen_spec_locks",
+        "public_key_manifest",
+        "canonicalization_profile",
+        "qa_p1_p14_results",
+        "classification",
+        "required_cases",
+        "deviations"
+      ]
+    },
+    "FR-5": {
+      "frozen_semantics": "ENFORCEMENT_FAILURE overrides ordinary FAIL when (a) direct bypass succeeded OR (b) pre-EAP invalidation + protected mutation",
+      "implementation": "formal_runner.classify checks enforcement_failure_reason BEFORE pass/fail tally; test_runner_classification.py has 11 regression tests covering both override paths",
+      "override_paths_tested": [
+        "test_fr5_enforcement_failure_overrides_qa_pass",
+        "test_fr5_direct_bypass_succeeded_with_mutation_is_enforcement_failure",
+        "test_fr5_pre_eap_invalidation_plus_mutation_is_enforcement_failure"
+      ]
+    },
+    "FR-6": {
+      "frozen_semantics": "Matrix completeness fail-closed: required cases must all be present; QA-P10 must include all subchecks",
+      "implementation": "formal_runner.classify returns INVALID_RUN on missing/duplicate/unrecognized case or missing required subcheck",
+      "regression_tests": [
+        "test_fr6_omitted_case_is_invalid_run_never_pass",
+        "test_fr6_duplicate_case_is_invalid_run",
+        "test_fr6_unrecognised_case_id_is_invalid_run",
+        "test_fr6_missing_qa_p10_subcheck_is_invalid_run",
+        "test_fr6_invalid_run_reason_on_any_case_is_invalid_run"
+      ]
+    },
+    "FR-7": {
+      "frozen_semantics": "Classification consumes FormalEvidence list, not pytest output",
+      "implementation": "formal_runner.classify(List[FormalEvidence]) -> str; pytest is a thin wrapper that calls run_all_cases and asserts the classification",
+      "regression_tests": [
+        "test_fr7_preflight_failed_is_invalid_run_even_if_cases_pass",
+        "test_fr7_any_qa_case_fail_is_fail_not_pass",
+        "test_fr7_all_qa_cases_pass_with_valid_subchecks_is_pass"
+      ]
+    }
+  }
+}
