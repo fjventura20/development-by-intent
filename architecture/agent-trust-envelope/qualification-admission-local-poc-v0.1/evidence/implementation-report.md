@@ -7,9 +7,17 @@
 
 ## Files changed since prior baseline
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/dry-run-evidence.json`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/formal-evidence-cases.json`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/formal-evidence-summary.json`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/formal-readiness-evidence.json`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-commit-sha.txt`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-manifest.json`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/implementation-report.md`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/preflight-console.txt`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/preflight-report.md`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/result.json`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/run-all-cases.txt`
+- `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/evidence/test-output.txt`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/authorization.py`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/formal_runner.py`
 - `architecture/agent-trust-envelope/qualification-admission-local-poc-v0.1/qa_poc/qualification.py`
