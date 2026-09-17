@@ -16,10 +16,9 @@ if ! grep -q '^def as_user' tests/host_runtime.py 2>/dev/null; then
 else
   echo "fr11_enforce_runtime.py already applied; skipping"
 fi
-# Same-principal nested authority/executor scopes must be re-entrant.
 python3 tools/fr11_fix_reentrant_uid.py
-# Keep pytest's preflight cases aligned with the FR-11 eight-key topology.
 python3 tools/fr11_fix_pytest_preflight.py
+python3 tools/fr11_fix_p8_semantics.py
 
 echo "== Syntax checks =="
 python3 -m py_compile \
@@ -28,7 +27,8 @@ python3 -m py_compile \
   tests/host_runtime.py \
   tests/case_functions.py \
   tests/_helpers.py \
-  tests/test_preflight.py
+  tests/test_preflight.py \
+  tests/test_qa_matrix_missing.py
 bash -n bootstrap.sh
 
 echo "== Development tests (ephemeral fixture keys; no scored run) =="
@@ -131,6 +131,12 @@ for c in cases:
 classification=classify(preflight_pass=True, cases=cases)
 print('DRY-RUN CLASSIFICATION:', classification)
 assert classification=='QUALIFICATION_ADMISSION_LOCAL_POC_PASS', classification
+# QA-P8 must have failed for the exact frozen unauthorized qualification-issuer reason.
+p8=next(c for c in cases if c.test_id=='QA-P8')
+assert 'qualification_credential' in p8.reason_code, p8.reason_code
+assert 'ate.qualification.credential.v1' in p8.reason_code, p8.reason_code
+assert 'capability_token' not in p8.reason_code, p8.reason_code
+print('QA-P8 exact issuer-authorization path: PASS')
 PY
 
 echo "FR-11 VERIFY COMPLETE: PASS"
