@@ -1167,15 +1167,21 @@ expected_tests = (
     "test_fr13_six_literal_frozen_spec_locks_present",
     "test_fr13_controller_keybag_loader_does_not_load_private_pem",
     "test_fr13_remote_signer_is_signature_only_proxy",
+    "test_fr13_run_formal_six_lock_block_appears_exactly_once",
 )
 if test.exists():
     existing = test.read_text()
-    if all(t in existing for t in expected_tests):
-        print("test_fr13_successor.py: regression tests already present; skipping (idempotent no-op)")
+    test_counts = {
+        name: existing.count(f"def {name}(")
+        for name in expected_tests
+    }
+    if all(count == 1 for count in test_counts.values()):
+        print("test_fr13_successor.py: each expected regression test appears exactly once; "
+              "skipping (idempotent no-op)")
     else:
         raise SystemExit(
-            "test_fr13_successor.py exists but does not contain all expected "
-            "test names; refusing further mutation. Manual review required.")
+            "test_fr13_successor.py expected-test counts are not exactly one: "
+            f"{test_counts}. Refusing further mutation. Manual review required.")
 else:
     test.write_text(r'''import inspect
 from types import SimpleNamespace
@@ -1216,6 +1222,22 @@ def test_fr13_remote_signer_is_signature_only_proxy():
     public = {x for x in dir(host_runtime.RemoteEd25519Signer) if not x.startswith("_")}
     assert "sign" in public and "public_key" in public
     assert "private_bytes" not in public
+
+
+def test_fr13_run_formal_six_lock_block_appears_exactly_once():
+    """FR-13 PF1 six-lock block must appear EXACTLY ONCE in run_formal.py."""
+    src = inspect.getsource(run_formal.run_preflight)
+    block = (
+        '    # PF1 also binds the exact six frozen specification blobs from the\n'
+        '    # v0.2.2 freeze manifest.  Missing/mismatched locks fail closed.\n'
+        '    locks = verify_frozen_spec_locks(repo_dir)\n'
+        '    pf1 = next((x for x in results if x.item == "PF1"), None)\n'
+        '    if pf1 is not None:\n'
+        '        if not all(x["verified"] for x in locks):\n'
+        '            pf1.result = "FAIL"\n'
+        '        pf1.evidence += "; six_spec_locks=" + ("PASS" if all(x["verified"] for x in locks) else "FAIL")\n'
+    )
+    assert src.count(block) == 1
 ''')
 
 print("FR-13 successor corrections applied")

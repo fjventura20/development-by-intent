@@ -59,25 +59,3 @@ def test_fr13_run_formal_six_lock_block_appears_exactly_once():
     )
     n = src.count(block)
     assert n == 1, f"PF1 six-lock block appears {n} times; expected exactly 1"
-
-
-def test_fr13_run_formal_six_lock_block_appears_exactly_once():
-    """FR-13 PF1 six-lock block must appear EXACTLY ONCE in run_formal.py.
-
-    Patcher residue from earlier runs could leave many copies. This regression
-    test asserts exactly one occurrence so a duplicate-paste bug is caught
-    before it pollutes scored evidence.
-    """
-    src = inspect.getsource(run_formal.run_preflight)
-    block = (
-        '    # PF1 also binds the exact six frozen specification blobs from the\n'
-        '    # v0.2.2 freeze manifest.  Missing/mismatched locks fail closed.\n'
-        '    locks = verify_frozen_spec_locks(repo_dir)\n'
-        '    pf1 = next((x for x in results if x.item == "PF1"), None)\n'
-        '    if pf1 is not None:\n'
-        '        if not all(x["verified"] for x in locks):\n'
-        '            pf1.result = "FAIL"\n'
-        '        pf1.evidence += "; six_spec_locks=" + ("PASS" if all(x["verified"] for x in locks) else "FAIL")\n'
-    )
-    n = src.count(block)
-    assert n == 1, f"PF1 six-lock block appears {n} times; expected exactly 1"
