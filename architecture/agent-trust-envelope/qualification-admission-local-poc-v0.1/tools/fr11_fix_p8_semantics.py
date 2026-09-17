@@ -8,6 +8,9 @@ explicitly denying AUTH_IDENTITY permission to sign QualificationCredential.
 
 This script also replaces the stale pytest QA-P8 regression with a direct
 assertion over the authoritative case_p8() evidence.
+
+The repair is idempotent: if all target markers are already present, it exits
+successfully without modifying the working tree.
 """
 from pathlib import Path
 
@@ -24,8 +27,27 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
+# Fast idempotency check. A previous successful verifier run may already have
+# applied this repair to an otherwise-uncommitted working tree.
+h_existing = helpers_path.read_text()
+c_existing = case_path.read_text()
+t_existing = test_path.read_text()
+if all((
+    "authorization_key_id: str | None = None" in h_existing,
+    "trust_decision_key_id: str | None = None" in h_existing,
+    "issuer_authorization_check_rejects_qualification_credential" in c_existing,
+    "authorization_key_id=authorization_kid" in c_existing,
+    "trust_decision_key_id=trust_decision_kid" in c_existing,
+    "case_p8(h, tmp)" in t_existing,
+    "qualification_credential\" in ev.reason_code" in t_existing,
+)):
+    print("QA-P8 semantic correction already applied; skipping")
+    print("Formal scored run remains unauthorized.")
+    raise SystemExit(0)
+
+
 # 1) Registry supports the legitimate capability + trust-decision signers.
-h = helpers_path.read_text()
+h = h_existing
 old_sig = '''    @classmethod
     def build_default(cls, *, auth_identity_key_id: str, r11_key_id: str) -> "IssuerAuthorizationRegistry":
 '''
@@ -81,7 +103,7 @@ helpers_path.write_text(h)
 
 # 2) Formal case computes and allows the legitimate auth/trust signer IDs,
 #    while still forbidding AUTH_IDENTITY for QualificationCredential.
-c = case_path.read_text()
+c = c_existing
 old_ids = '''        r11_kid = key_id_from_public_pem(
             harness.keys.r11_pub.public_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -141,7 +163,7 @@ case_path.write_text(c)
 
 
 # 3) Replace the stale pytest QA-P8 block with a regression over case_p8.
-t = test_path.read_text()
+t = t_existing
 start = t.index('def test_qa_p8_valid_signature_unauthorized_issuer_rejected')
 end = t.index('\n\n# --- QA-P9:', start)
 new_test = '''def test_qa_p8_valid_signature_unauthorized_issuer_rejected():
