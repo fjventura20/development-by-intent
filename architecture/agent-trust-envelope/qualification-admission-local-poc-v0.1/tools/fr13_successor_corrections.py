@@ -229,9 +229,30 @@ new_tail = '''        live_proof_verifier=live_proof_verifier,\n        issuer_a
 if old_tail in c:
     c = replace_once(c, old_tail, new_tail, "_run_eap hook forwarding")
 
-p11_start = c.index('def case_p11a(')
-p12_start = c.index('\ndef case_p12(', p11_start)
-p11_new = r'''def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+# Idempotency fix (2026-09-17): the prior version did `c.index('def case_p11a(')`
+# without checking whether the helper block was already present. Because the
+# new block (p11_new) itself contains `def case_p11a(`, every run found the
+# FIRST occurrence (inside the previously-inserted block) and inserted ANOTHER
+# copy above it. Over N runs, case_functions.py accumulated N copies of
+# _build_signed_revocation_record, _drop_to_executor_if_host, and _child_open_store,
+# plus N defs of case_p11a. The Python interpreter silently took the last
+# definition, so the file still worked — but the byte-residue was massive.
+#
+# Fix: count how many copies of the helper function exist; if exactly 1, skip;
+# if >1, fail closed so the operator runs the dedup cleanup; if 0, apply once.
+p11_helper_signature = 'def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):'
+n_p11_helpers = c.count(p11_helper_signature)
+if n_p11_helpers == 1:
+    print("case_functions P11 helper block: exactly one copy present; skipping (idempotent no-op)")
+elif n_p11_helpers > 1:
+    raise SystemExit(
+        f"case_functions P11 helper block appears {n_p11_helpers} times. "
+        "This is patcher residue from earlier runs. Refusing further mutation; "
+        "manual cleanup required (see 20260917T194500Z-ate-fr13-runner-dedup-cleanup-001).")
+else:  # n_p11_helpers == 0; apply once
+    p11_start = c.index('def case_p11a(')
+    p12_start = c.index('\ndef case_p12(', p11_start)
+    p11_new = r'''def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
     from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
     epoch = enforcement_store.current_epoch(conn)
     change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
@@ -477,8 +498,8 @@ def case_p11b(harness, evidence_dir) -> FormalEvidence:
     finally:
         conn.close()
 '''
-c = c[:p11_start] + p11_new + c[p12_start:]
-cases.write_text(c)
+    c = c[:p11_start] + p11_new + c[p12_start:]
+    cases.write_text(c)
 
 
 # ---------------------------------------------------------------------------
@@ -497,10 +518,50 @@ if helper_anchor in r and "def preflight_is_complete_and_passing" not in r:
     r = replace_once(r, helper_anchor, helper_code + helper_anchor, "preflight helpers")
 
 # Before run_preflight returns, make PF1 depend on all six exact locks.
+# IDEMPOTENCY FIX (2026-09-17): previously this section duplicated the block
+# every time the patcher ran, because the anchor (`return_anchor`) was inside
+# the new replacement, so `return_anchor in r` always matched. Detect the
+# already-applied shape first and no-op; detect duplicate-inserted residue
+# (more than one copy of the block) and fail closed so the operator can
+# dedupe via the cleanup handoff; otherwise apply once.
 return_anchor = '''    order = {f"PF{i}": i for i in range(1, 15)}\n    results.sort(key=lambda r: order.get(r.item, 99))\n    return results\n'''
-return_new = '''    # PF1 also binds the exact six frozen specification blobs from the\n    # v0.2.2 freeze manifest.  Missing/mismatched locks fail closed.\n    locks = verify_frozen_spec_locks(repo_dir)\n    pf1 = next((x for x in results if x.item == "PF1"), None)\n    if pf1 is not None:\n        if not all(x["verified"] for x in locks):\n            pf1.result = "FAIL"\n        pf1.evidence += "; six_spec_locks=" + ("PASS" if all(x["verified"] for x in locks) else "FAIL")\n    order = {f"PF{i}": i for i in range(1, 15)}\n    results.sort(key=lambda r: order.get(r.item, 99))\n    return results\n'''
-if return_anchor in r:
+six_lock_block = (
+    '    # PF1 also binds the exact six frozen specification blobs from the\n'
+    '    # v0.2.2 freeze manifest.  Missing/mismatched locks fail closed.\n'
+    '    locks = verify_frozen_spec_locks(repo_dir)\n'
+    '    pf1 = next((x for x in results if x.item == "PF1"), None)\n'
+    '    if pf1 is not None:\n'
+    '        if not all(x["verified"] for x in locks):\n'
+    '            pf1.result = "FAIL"\n'
+    '        pf1.evidence += "; six_spec_locks=" + ("PASS" if all(x["verified"] for x in locks) else "FAIL")\n'
+)
+n_six_lock = r.count(six_lock_block)
+if n_six_lock == 1:
+    print("run_formal PF1 six-lock block: exactly one copy present; skipping (idempotent no-op)")
+elif n_six_lock > 1:
+    raise SystemExit(
+        f"run_formal PF1 six-lock block appears {n_six_lock} times in run_formal.py. "
+        "This is patcher residue from earlier runs. Refusing further mutation; "
+        "manual cleanup required (see 20260917T194500Z-ate-fr13-runner-dedup-cleanup-001).")
+elif n_six_lock == 0 and return_anchor in r:
+    return_new = (
+        '    # PF1 also binds the exact six frozen specification blobs from the\n'
+        '    # v0.2.2 freeze manifest.  Missing/mismatched locks fail closed.\n'
+        '    locks = verify_frozen_spec_locks(repo_dir)\n'
+        '    pf1 = next((x for x in results if x.item == "PF1"), None)\n'
+        '    if pf1 is not None:\n'
+        '        if not all(x["verified"] for x in locks):\n'
+        '            pf1.result = "FAIL"\n'
+        '        pf1.evidence += "; six_spec_locks=" + ("PASS" if all(x["verified"] for x in locks) else "FAIL")\n'
+        '    order = {f"PF{i}": i for i in range(1, 15)}\n'
+        '    results.sort(key=lambda r: order.get(r.item, 99))\n'
+        '    return results\n'
+    )
     r = replace_once(r, return_anchor, return_new, "PF1 exact locks")
+elif return_anchor not in r:
+    raise SystemExit(
+        "run_formal.py return_anchor not found and no six-lock block present; "
+        "shape unrecognized.")
 
 r = r.replace('default: /var/lib/ate/poc/formal-evidence', 'default: /var/lib/ate/poc/formal-evidence-002')
 r = r.replace('evidence_dir = args.evidence_dir or "/var/lib/ate/poc/formal-evidence"',
@@ -1091,17 +1152,32 @@ else:
             "host_runtime.py shape unrecognized: original prepare_executor_case_dir "
             "block not found. Refusing further mutation.")
 
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # Regression tests for the corrected invariants
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# IDEMPOTENCY FIX (2026-09-17): previously the patcher unconditionally
+# rewrote tests/test_fr13_successor.py to a hard-coded 4-test version
+# every run, clobbering any additional regression tests added by the
+# operator (e.g. test_fr13_run_formal_six_lock_block_appears_exactly_once).
+# Detect whether the file already exists with the expected test names and
+# only rewrite if missing; otherwise no-op.
 test = ROOT / "tests" / "test_fr13_successor.py"
-
-# ---------------------------------------------------------------------------
-# Regression tests for the corrected invariants
-# ---------------------------------------------------------------------------
-test = ROOT / "tests" / "test_fr13_successor.py"
-
-test.write_text(r'''import inspect
+expected_tests = (
+    "test_fr13_preflight_requires_exact_pf1_pf14",
+    "test_fr13_six_literal_frozen_spec_locks_present",
+    "test_fr13_controller_keybag_loader_does_not_load_private_pem",
+    "test_fr13_remote_signer_is_signature_only_proxy",
+)
+if test.exists():
+    existing = test.read_text()
+    if all(t in existing for t in expected_tests):
+        print("test_fr13_successor.py: regression tests already present; skipping (idempotent no-op)")
+    else:
+        raise SystemExit(
+            "test_fr13_successor.py exists but does not contain all expected "
+            "test names; refusing further mutation. Manual review required.")
+else:
+    test.write_text(r'''import inspect
 from types import SimpleNamespace
 
 import run_formal
