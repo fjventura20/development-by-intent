@@ -16,6 +16,9 @@ if ! grep -q '^def as_user' tests/host_runtime.py 2>/dev/null; then
 else
   echo "fr11_enforce_runtime.py already applied; skipping"
 fi
+# Always run the idempotent same-principal repair. Nested executor/authority
+# scopes are expected in the host-mode proxies.
+python3 tools/fr11_fix_reentrant_uid.py
 
 echo "== Syntax checks =="
 python3 -m py_compile \
@@ -106,6 +109,11 @@ os.makedirs(edir, exist_ok=True)
 cases=run_all_cases(harness=None, evidence_dir=edir)
 for c in cases:
     print(f'{c.test_id}: {c.pass_fail} {c.verdict} {c.reason_code}')
+    if c.invalid_run_reason or c.error:
+        print(f'  invalid_run_reason={c.invalid_run_reason!r}')
+        print(f'  error={c.error!r}')
+        if c.traceback:
+            print(c.traceback)
 classification=classify(preflight_pass=True, cases=cases)
 print('DRY-RUN CLASSIFICATION:', classification)
 assert classification=='QUALIFICATION_ADMISSION_LOCAL_POC_PASS', classification
