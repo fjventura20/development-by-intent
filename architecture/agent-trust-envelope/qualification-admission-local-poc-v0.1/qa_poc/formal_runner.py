@@ -221,8 +221,12 @@ def run_all_cases(*, harness, evidence_dir: str) -> List[FormalEvidence]:
         # clock state leaks. QA-P12 ignores the harness (it operates
         # on the real OS boundary), but the harness is still passed
         # for API uniformity.
-        from tests._helpers import FixtureHarness
-        fresh_harness = FixtureHarness.build()
+        if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+            from tests.host_runtime import build_host_harness
+            fresh_harness = build_host_harness()
+        else:
+            from tests._helpers import FixtureHarness
+            fresh_harness = FixtureHarness.build()
         try:
             ev = fn(fresh_harness, evidence_dir)
         except Exception as e:

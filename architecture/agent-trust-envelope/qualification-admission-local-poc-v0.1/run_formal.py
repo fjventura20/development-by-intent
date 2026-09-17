@@ -160,23 +160,66 @@ def run_preflight(repo_dir: str) -> List[PreflightResult]:
             "PASS" if r.returncode != 0 else "FAIL",
             f"{opt_root} returncode={r.returncode}",
         ))
-        # PF6
-        key = "/var/lib/ate/poc/authority/authority_signing.key"
-        if _exists_as_root(key):
-            r = _sudo_run_as("ate-requester", ["test", "-r", key])
-            results.append(PreflightResult("PF6", "authority_keys_not_requester_readable",
-                "PASS" if r.returncode != 0 else "FAIL",
-                f"{key} returncode={r.returncode}"))
-        else:
-            results.append(PreflightResult("PF6", "authority_keys_not_requester_readable", "FAIL", f"{key} not bootstrapped"))
-        # PF7
+        # PF6 — six distinct authority private keys are owned/readable only
+        # by ate-authority (and root), never ate-requester.
+        authority_keys = [
+            "/var/lib/ate/poc/authority/policy_signing.key",
+            "/var/lib/ate/poc/authority/identity_signing.key",
+            "/var/lib/ate/poc/authority/r11_qualification_signing.key",
+            "/var/lib/ate/poc/authority/r12_admission_signing.key",
+            "/var/lib/ate/poc/authority/authorization_signing.key",
+            "/var/lib/ate/poc/authority/trust_decision_signing.key",
+        ]
+        ok6 = True
+        pf6_notes = []
+        for k in authority_keys:
+            exists = _exists_as_root(k)
+            req_denied = exists and _sudo_run_as("ate-requester", ["test", "-r", k]).returncode != 0
+            auth_reads = exists and _sudo_run_as("ate-authority", ["test", "-r", k]).returncode == 0
+            st = subprocess.run(["sudo", "-n", "stat", "-c", "%U:%G:%a", k], capture_output=True, text=True) if exists else None
+            stat_ok = bool(st and st.returncode == 0 and st.stdout.strip() == "ate-authority:ate-authority:600")
+            ok6 = ok6 and exists and req_denied and auth_reads and stat_ok
+            pf6_notes.append(f"{os.path.basename(k)}={'ok' if (exists and req_denied and auth_reads and stat_ok) else 'bad'}")
+        results.append(PreflightResult(
+            "PF6", "authority_keys_not_requester_readable",
+            "PASS" if ok6 else "FAIL", "; ".join(pf6_notes)))
+
+        # PF7 — executor/audit private keys readable only by ate-executor;
+        # bootstrap public manifest must contain eight distinct key IDs.
         exec_keys = [
             "/var/lib/ate/poc/executor/executor_signing.key",
             "/var/lib/ate/poc/executor/audit_signing.key",
         ]
-        ok = all(_exists_as_root(k) and all(_sudo_run_as(p, ["test", "-r", k]).returncode != 0 for p in ("ate-requester", "ate-authority")) for k in exec_keys)
-        results.append(PreflightResult("PF7", "executor_audit_keys_not_requester_authority_readable",
-            "PASS" if ok else "FAIL", "all checks passed" if ok else "at least one check failed"))
+        ok7 = True
+        pf7_notes = []
+        for k in exec_keys:
+            exists = _exists_as_root(k)
+            requester_denied = exists and _sudo_run_as("ate-requester", ["test", "-r", k]).returncode != 0
+            authority_denied = exists and _sudo_run_as("ate-authority", ["test", "-r", k]).returncode != 0
+            executor_reads = exists and _sudo_run_as("ate-executor", ["test", "-r", k]).returncode == 0
+            st = subprocess.run(["sudo", "-n", "stat", "-c", "%U:%G:%a", k], capture_output=True, text=True) if exists else None
+            stat_ok = bool(st and st.returncode == 0 and st.stdout.strip() == "ate-executor:ate-executor:600")
+            ok7 = ok7 and exists and requester_denied and authority_denied and executor_reads and stat_ok
+            pf7_notes.append(f"{os.path.basename(k)}={'ok' if (exists and requester_denied and authority_denied and executor_reads and stat_ok) else 'bad'}")
+        manifest_path = "/etc/ate/poc-public/public_key_manifest.json"
+        try:
+            manifest = json.load(open(manifest_path))
+            ids = [x["key_id"] for x in manifest.get("keys", [])]
+            labels = {x["label"] for x in manifest.get("keys", [])}
+            expected_labels = {
+                "AUTH_POLICY", "AUTH_IDENTITY", "AUTH_R11_QUALIFICATION",
+                "AUTH_R12_ADMISSION", "AUTH_AUTHORIZATION",
+                "AUTH_TRUST_DECISION", "AUTH_EXECUTOR", "AUTH_AUDIT",
+            }
+            manifest_ok = len(ids) == 8 and len(set(ids)) == 8 and labels == expected_labels
+        except Exception as e:
+            manifest_ok = False
+            pf7_notes.append(f"manifest_error={e}")
+        ok7 = ok7 and manifest_ok
+        pf7_notes.append(f"eight_distinct_manifest_keys={manifest_ok}")
+        results.append(PreflightResult(
+            "PF7", "executor_audit_keys_not_requester_authority_readable",
+            "PASS" if ok7 else "FAIL", "; ".join(pf7_notes)))
         # PF8
         db = "/var/lib/ate/poc/executor/enforcement.db"
         if _exists_as_root(db):
@@ -262,54 +305,23 @@ def run_preflight(repo_dir: str) -> List[PreflightResult]:
 
 
 def build_public_key_manifest(repo_dir: str):
-    """Build the §29 public-key manifest from the harness.
+    """Load the exact bootstrap public-key manifest used by the formal run.
 
-    Only public identifiers + digests; no private key material.
+    This must describe the same signer identities loaded by
+    tests.host_runtime; generating a fresh fixture KeyBag here would make
+    §29 evidence non-reproducible.
     """
-    from cryptography.hazmat.primitives import serialization
-    from qa_poc.crypto import key_id_from_public_pem
-    from tests._helpers import FixtureHarness
-    h = FixtureHarness.build()
-    keys = h.keys
-    out = []
-    def add(label, pub, authorized_artifact_types):
-        pem = pub.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo,
-        )
-        kid = key_id_from_public_pem(pem)
-        out.append({
-            "key_id": kid,
-            "label": label,
-            "authority_role": label,
-            "public_key_pem_sha256": hashlib.sha256(pem).hexdigest(),
-            "authorized_artifact_types": authorized_artifact_types,
-        })
-    add("r11-qualification-authority", keys.r11_pub, [
-        "ate.qualification.credential.v1",
-        "ate.qualification.decision.v1",
-    ])
-    add("r12-admission-authority", keys.r12_pub, [
-        "ate.admission.credential.v1",
-        "ate.admission.decision.v1",
-    ])
-    add("auth-authorization-authority", keys.auth_pub, [
-        "ate.authorization.capability_token.v1",
-    ])
-    add("trust-authorization-authority", keys.trust_pub, [
-        "ate.authorization.trust_decision.v1",
-    ])
-    add("executor", keys.executor_pub, [
-        "ate.executor.control_record.v1",
-    ])
-    add("audit", keys.audit_pub, [])
-    add("auth-identity", keys.auth_identity_pub, [
-        # Per FR-2 / frozen §6: AUTH_IDENTITY is recognized but is NOT
-        # authorized to sign QualificationCredential artifacts.
-        "ate.qualification.evidence_manifest.v1",
-    ])
-    return out
+    path = "/etc/ate/poc-public/public_key_manifest.json"
+    with open(path, "r") as f:
+        data = json.load(f)
+    keys = data.get("keys", [])
+    ids = [x.get("key_id") for x in keys]
+    if len(keys) != 8 or len(set(ids)) != 8:
+        raise RuntimeError("FR-11 public-key manifest must contain eight distinct key IDs")
+    return keys
 
+
+# --- Canonicalization profile
 
 # --- Canonicalization profile ----------------------------------------------
 
@@ -403,10 +415,21 @@ def main() -> int:
 
     # --- Step 3: run every QA-P case in fresh-fixture environment ---
     from qa_poc.formal_runner import run_all_cases, classify, REQUIRED_CASES
-    from tests._helpers import FixtureHarness
 
-    h = FixtureHarness.build()
-    cases = run_all_cases(harness=h, evidence_dir=evidence_dir)
+    # FR-11: the scored run must use the bootstrap-created signer identities,
+    # never fresh per-case keys. Root is the trusted local test controller for
+    # this synthetic PoC and is required only so it can construct the in-memory
+    # authority fixtures from custody-protected keys; requester/authority/
+    # executor OS permission checks remain enforced by preflight.
+    if os.geteuid() != 0:
+        run_record["classification"] = "INVALID_RUN"
+        run_record["stopped_reason"] = "formal_host_key_load_requires_trusted_root_controller"
+        with open(os.path.join(evidence_dir, "run_record.json"), "w") as f:
+            json.dump(run_record, f, indent=2)
+        print("INVALID_RUN — authorized formal run must be launched by the trusted root controller", file=sys.stderr)
+        return 1
+    os.environ["ATE_USE_BOOTSTRAP_KEYS"] = "1"
+    cases = run_all_cases(harness=None, evidence_dir=evidence_dir)
 
     # --- Step 4: classify from structured evidence (FR-5/6/7) ---
     classification = classify(preflight_pass=True, cases=cases)

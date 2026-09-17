@@ -210,11 +210,20 @@ class IssuerAuthorizationRegistry:
     artifact_type_permissions: Dict[Tuple[str, str], bool]
 
     @classmethod
-    def build_default(cls, *, auth_identity_key_id: str, r11_key_id: str) -> "IssuerAuthorizationRegistry":
+    def build_default(
+        cls,
+        *,
+        auth_identity_key_id: str,
+        r11_key_id: str,
+        authorization_key_id: str | None = None,
+        trust_decision_key_id: str | None = None,
+    ) -> "IssuerAuthorizationRegistry":
         from qa_poc.models import (
             DOMAIN_ADMISSION_CREDENTIAL,
+            DOMAIN_CAPABILITY_TOKEN,
             DOMAIN_QUALIFICATION_CREDENTIAL,
             DOMAIN_QUALIFICATION_EVIDENCE_MANIFEST,
+            DOMAIN_TRUST_DECISION,
         )
 
         # Per frozen design: AUTH_IDENTITY authorizes SubjectBinding +
@@ -225,6 +234,10 @@ class IssuerAuthorizationRegistry:
             (auth_identity_key_id, DOMAIN_ADMISSION_CREDENTIAL): False,
             (r11_key_id, DOMAIN_QUALIFICATION_CREDENTIAL): True,
         }
+        if authorization_key_id is not None:
+            perms[(authorization_key_id, DOMAIN_CAPABILITY_TOKEN)] = True
+        if trust_decision_key_id is not None:
+            perms[(trust_decision_key_id, DOMAIN_TRUST_DECISION)] = True
         return cls(auth_role=auth_identity_key_id, artifact_type_permissions=perms)
 
     def is_authorized(self, key_id: str, artifact_type: str) -> bool:
@@ -383,16 +396,23 @@ def apply_revocation_control_record(
         id_prefix="rev",
         id_salt=(record_id, target_id),
     )
-    sig = sign_ed25519(issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+        from tests.host_runtime import authority_call, executor_call
+        sig = authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    else:
+        sig = sign_ed25519(issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
     rec = rec.__class__(**{**rec.__dict__, "signature": sig})
 
-    new_epoch = apply_control_record(
-        conn,
+    apply_kwargs = dict(
         record=rec,
         issuer_pub=issuer_pub,
         change_type_authorization_lookup=change_type_authorization_ok,
         created_at_unix_ms=created_at_unix_ms,
     )
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+        new_epoch = executor_call(apply_control_record, conn, **apply_kwargs)
+    else:
+        new_epoch = apply_control_record(conn, **apply_kwargs)
     registry.revoke(target_id, reason=reason)
     return new_epoch
 

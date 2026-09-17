@@ -87,15 +87,32 @@ from tests._helpers import (
 
 
 def _setup_case_dir(case_id: str, evidence_dir: str) -> Tuple[str, sqlite3.Connection]:
-    """Create a fresh per-case temp directory and open a fresh
-    enforcement store there."""
+    """Create an isolated case DB. Formal-host mode opens it as ate-executor."""
     case_dir = os.path.join(evidence_dir, "case-dbs", case_id)
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+        from tests.host_runtime import prepare_executor_case_dir
+        conn = prepare_executor_case_dir(case_dir)
+        return case_dir, conn
     if os.path.exists(case_dir):
         shutil.rmtree(case_dir)
     os.makedirs(case_dir, exist_ok=True)
     db_path = os.path.join(case_dir, "enforcement.db")
     conn = enforcement_store.open_store(db_path)
     return case_dir, conn
+
+
+def _executor_call(fn, *args, **kwargs):
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+        from tests.host_runtime import executor_call
+        return executor_call(fn, *args, **kwargs)
+    return fn(*args, **kwargs)
+
+
+def _authority_call(fn, *args, **kwargs):
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") == "1":
+        from tests.host_runtime import authority_call
+        return authority_call(fn, *args, **kwargs)
+    return fn(*args, **kwargs)
 
 
 def _make_strict_auth_lookup(harness) -> Callable[[str, str], bool]:
@@ -218,7 +235,8 @@ def _run_eap(harness, *, conn, sb, q, a, cap, td, reg, resource_id, new_value,
         trust_decision=td,
         action={"target": resource_id, "operation": "WRITE", "parameters": {"new_value": new_value}},
     )
-    return execute_bound_action(
+    return _executor_call(
+        execute_bound_action,
         conn,
         bundle=bundle,
         auth_pub=harness.keys.auth_pub,
@@ -819,7 +837,8 @@ def case_p8(harness, evidence_dir) -> FormalEvidence:
         cred, _ = compute_id_and_digest(
             proto, semantic_fields=semantic, id_prefix="qfc", id_salt=(sb.digest(),)
         )
-        sig = sign_ed25519(
+        sig = _authority_call(
+            sign_ed25519,
             harness.keys.auth_identity_priv,
             DOMAIN_QUALIFICATION_CREDENTIAL,
             artifact_payload(cred),
@@ -849,9 +868,23 @@ def case_p8(harness, evidence_dir) -> FormalEvidence:
                 format=serialization.PublicFormat.SubjectPublicKeyInfo,
             )
         )
+        authorization_kid = key_id_from_public_pem(
+            harness.keys.auth_pub.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+        )
+        trust_decision_kid = key_id_from_public_pem(
+            harness.keys.trust_pub.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+        )
         reg_auth = IssuerAuthorizationRegistry.build_default(
             auth_identity_key_id=auth_identity_kid,
             r11_key_id=r11_kid,
+            authorization_key_id=authorization_kid,
+            trust_decision_key_id=trust_decision_kid,
         )
         # Steps 2+3 are encoded in the registry:
         #   - recognized/active means the auth_identity has at least
@@ -900,10 +933,15 @@ def case_p8(harness, evidence_dir) -> FormalEvidence:
             "crypto_signature_valid_against_auth_identity_pub": "PASS" if crypto_valid else "FAIL",
             "auth_identity_recognized_active": "PASS" if auth_id_recognized else "FAIL",
             "auth_identity_lacks_r11_qualcred_permission": "PASS" if auth_id_lacks_r11_qualcred else "FAIL",
-            "issuer_authorization_check_rejects": (
-                "PASS" if (result.verdict == "EXECUTION_DENIED"
-                            and "ISSUER_NOT_AUTHORIZED" in result.reason_code)
-                else "FAIL"
+            "issuer_authorization_check_rejects_qualification_credential": (
+                "PASS" if (
+                    result.verdict == "EXECUTION_DENIED"
+                    and "ISSUER_NOT_AUTHORIZED_FOR_ARTIFACT_TYPE" in result.reason_code
+                    and "qualification_credential" in result.reason_code
+                    and DOMAIN_QUALIFICATION_CREDENTIAL in result.reason_code
+                    and "capability_token" not in result.reason_code
+                    and "trust_decision" not in result.reason_code
+                ) else "FAIL"
             ),
             "no_protected_mutation": "",  # filled after final read
         }
@@ -1154,11 +1192,11 @@ def case_p11a(harness, evidence_dir) -> FormalEvidence:
         td = _make_trust_decision(harness, cap=cap)
 
         # === Barrier step 1: acquire write lock via control-record txn ===
-        barrier.acquire_holding()
+        _executor_call(barrier.acquire_holding)
 
         # === Barrier step 2: EAP attempts to begin (SQLITE_BUSY) ===
         # We attempt an EAP-style BEGIN IMMEDIATE on a separate connection.
-        eap_attempt_ok, eap_err = barrier.attempt_write(
+        eap_attempt_ok, eap_err = _executor_call(barrier.attempt_write,
             "INSERT INTO protected_resource (resource_id, value, mutation_count) "
             "VALUES ('__barrier_probe__', 'probe', 0)"
         )
@@ -1168,7 +1206,7 @@ def case_p11a(harness, evidence_dir) -> FormalEvidence:
         # First: release the holding lock (ROLLBACK so we don't actually
         # mutate the fixture), then commit the real CR via the in-process
         # apply_revocation_control_record path.
-        barrier.release_holding()
+        _executor_call(barrier.release_holding)
 
         apply_revocation_control_record(
             conn,
@@ -1246,7 +1284,7 @@ def case_p11a(harness, evidence_dir) -> FormalEvidence:
             applied_control_records=capture_applied_control_records(conn),
         )
     finally:
-        barrier.release_holding()
+        _executor_call(barrier.release_holding)
         conn.close()
 
 
@@ -1280,19 +1318,19 @@ def case_p11b(harness, evidence_dir) -> FormalEvidence:
         # The EAP itself uses conn (in-process). We hold an additional
         # BEGIN IMMEDIATE on a separate connection to demonstrate the
         # control-record contention against an in-progress EAP.
-        holding_conn = barrier.acquire_holding()
+        holding_conn = _executor_call(barrier.acquire_holding)
 
         # === Barrier step 2: CR attempts to commit while EAP is in flight ===
         # CR tries to UPDATE — gets SQLITE_BUSY because the holding
         # connection (EAP-equivalent) holds the write lock.
-        cr_attempt_ok, cr_err = barrier.attempt_write(
+        cr_attempt_ok, cr_err = _executor_call(barrier.attempt_write,
             "INSERT INTO protected_resource (resource_id, value, mutation_count) "
             "VALUES ('__barrier_probe_cr__', 'probe', 0)"
         )
         ev_cr_busy_blocked = (not cr_attempt_ok)
 
         # === Barrier step 3: release the holding connection (EAP-equivalent commits) ===
-        barrier.release_holding()
+        _executor_call(barrier.release_holding)
 
         # === Barrier step 4: EAP commits (in-process conn) — mutation_count=1 ===
         result1 = _run_eap(
@@ -1381,7 +1419,7 @@ def case_p11b(harness, evidence_dir) -> FormalEvidence:
             applied_control_records=capture_applied_control_records(conn),
         )
     finally:
-        barrier.release_holding()
+        _executor_call(barrier.release_holding)
         conn.close()
 
 
@@ -1571,19 +1609,56 @@ def case_p13(harness, evidence_dir) -> FormalEvidence:
 
 
 def case_p14_deny(harness, evidence_dir) -> FormalEvidence:
-    """QA-P14 deny: admission expires before EAP -> EAP denies with AX_ADMISSION_EXPIRED."""
+    """QA-P14 deny: old AdmissionCredential expires while downstream
+    artifacts remain nominally valid -> EAP must deny ADMISSION_EXPIRED.
+
+    This isolates the frozen admission-review boundary rather than allowing
+    CapabilityToken/TrustDecision expiry to mask it.
+    """
     sb = make_subject_binding(identity_id="agent-p14d", challenge="p14d")
-    q, a = issue_qualification_and_admission(harness, subject_binding=sb)
+
+    QUAL_TTL_MS = 48 * 3600 * 1000
+    ADM_TTL_MS = 6 * 3600 * 1000
+    CAP_TTL_MS = 48 * 3600 * 1000
+    TD_TTL_MS = 48 * 3600 * 1000
+    ADVANCE_MS = ADM_TTL_MS + 60_000
+
+    q, a = issue_qualification_and_admission(
+        harness,
+        subject_binding=sb,
+        qualification_lifetime_ms=QUAL_TTL_MS,
+        admission_lifetime_ms=ADM_TTL_MS,
+    )
     case_dir, conn = _setup_case_dir("QA-P14-deny", evidence_dir)
     reg = RevocationRegistry()
     try:
         _insert_initial_resource(conn, "resource-A", "p14d-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
-        cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p14d-1")
-        td = _make_trust_decision(harness, cap=cap)
-        # Advance clock past admission expiry (12h + 1)
-        harness.clock = harness.clock.advance_ms(13 * 3600 * 1000)
+
+        cap = _make_capability(
+            harness, sb=sb, q=q, a=a, nonce="nonce-p14d-1",
+            capability_lifetime_ms=CAP_TTL_MS,
+        )
+        td = _make_trust_decision(
+            harness, cap=cap, trust_decision_lifetime_ms=TD_TTL_MS,
+        )
+
+        qual_exp = q.expires_at_unix_ms
+        adm_exp = a.expires_at_unix_ms
+        cap_exp = cap.expires_at_unix_ms
+        td_exp = td.expires_at_unix_ms
+        assert adm_exp < qual_exp
+        assert adm_exp < cap_exp
+        assert adm_exp < td_exp
+
+        harness.clock = harness.clock.advance_ms(ADVANCE_MS)
+        now = harness.clock.now_unix_ms
+        assert now > adm_exp
+        assert now < qual_exp
+        assert now < cap_exp
+        assert now < td_exp
+
         result = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
             resource_id="resource-A", new_value="p14d-write",
@@ -1596,24 +1671,43 @@ def case_p14_deny(harness, evidence_dir) -> FormalEvidence:
             reason_code=result.reason_code,
             qualification_id=q.credential_id,
             qualification_digest=q.credential_digest,
+            qualification_expires_at_unix_ms=qual_exp,
             admission_id=a.credential_id,
             admission_digest=a.credential_digest,
+            admission_expires_at_unix_ms=adm_exp,
             capability_id=cap.token_id,
             capability_digest=cap.token_digest,
+            capability_expires_at_unix_ms=cap_exp,
             trust_decision_id=td.trust_decision_id,
             trust_decision_digest=td.trust_decision_digest,
+            trust_decision_expires_at_unix_ms=td_exp,
         )
         ev.eap_reached = True
         final_value, final_mc = _read_resource(conn, "resource-A")
+
+        admission_expired = "ADMISSION_EXPIRED" in result.reason_code
+        masked = any(x in result.reason_code for x in (
+            "QUALIFICATION_EXPIRED", "CAPABILITY_EXPIRED", "TRUST_DECISION_EXPIRED"
+        ))
+        ev.subcheck_results = {
+            "admission_expired_in_reason": admission_expired,
+            "qualification_still_nominal": now < qual_exp,
+            "capability_still_nominal": now < cap_exp,
+            "trust_decision_still_nominal": now < td_exp,
+            "no_masking_expiry_reason": not masked,
+            "no_protected_mutation": final_mc == initial_mc,
+        }
         ev.pass_fail = (
-            "PASS" if (result.verdict == "EXECUTION_DENIED"
-                        and ("ADMISSION_EXPIRED" in result.reason_code
-                             or "CAPABILITY_EXPIRED" in result.reason_code)
-                        and final_mc == initial_mc)
-            else "FAIL"
+            "PASS" if (
+                result.verdict == "EXECUTION_DENIED"
+                and admission_expired
+                and not masked
+                and final_mc == initial_mc
+                and now < qual_exp and now < cap_exp and now < td_exp
+            ) else "FAIL"
         )
-        if final_mc > initial_mc and ev.pass_fail == "PASS":
-            ev.enforcement_failure_reason = "unauthorized protected mutation"
+        if final_mc > initial_mc:
+            ev.enforcement_failure_reason = "unauthorized protected mutation after expired admission"
         return _populate_evidence(
             ev, conn,
             resource_id="resource-A",

@@ -163,120 +163,27 @@ def test_qa_p3_admission_revocation_before_capability_blocks_issuance():
 
 
 def test_qa_p8_valid_signature_unauthorized_issuer_rejected():
-    """QA-P8 (design §28): Use active recognized AUTH_IDENTITY key to
-    sign a QualificationCredential even though that key lacks
-    permission for the artifact type -> issuer authorization denied.
-
-    The PoC's verification path uses `verify_artifact` which calls
-    `verify_ed25519` against the issuer public key. To verify issuer
-    authorization (separate from signature validity), the verification
-    path accepts an `authorized_issuer_pub` per artifact type. We add
-    `verify_artifact_with_authorization` that checks:
-      - signature is valid
-      - issuer_pub matches the authorized issuer for the artifact class
-
-    If the artifact was signed with a key other than AUTH_R11_QUALIFICATION,
-    the verifier must reject with an issuer-authorization error.
+    """QA-P8 must reject AUTH_IDENTITY specifically as an unauthorized
+    QualificationCredential issuer, after valid capability/trust signers pass.
     """
+    import tempfile
+    from tests.case_functions import case_p8
+
     h = FixtureHarness.build()
-    sb = make_subject_binding(identity_id="agent-a", challenge="p8")
-    evidence = build_evidence_bundle(subject_binding=sb)
-    # Issue a qualification using the R12 key (wrong issuer for a
-    # qualification credential) — should be rejected at verification.
-    bad_issuer_priv = h.keys.r12_priv  # NOT the r11 key
-    bad_issuer_pub = h.keys.r12_pub
-
-    # Build a signed-but-unauthorized QualificationCredential by hand.
-    semantic = {
-        "profile_id": h.profile.profile_id,
-        "profile_digest": h.profile.profile_digest,
-        "subject_identity_id": sb.subject_identity_id,
-        "subject_binding_digest": sb.digest(),
-        "issued_at_unix_ms": h.clock.now_unix_ms,
-        "expires_at_unix_ms": h.clock.now_unix_ms + 24 * 3600 * 1000,
-        "historical_trust_state_reference": FIXED_SNAPSHOT_REF,
-    }
-    proto = QualificationCredential(
-        credential_id="",
-        profile_id=semantic["profile_id"],
-        profile_digest=semantic["profile_digest"],
-        subject_identity_id=semantic["subject_identity_id"],
-        subject_binding_digest=semantic["subject_binding_digest"],
-        issued_at_unix_ms=semantic["issued_at_unix_ms"],
-        expires_at_unix_ms=semantic["expires_at_unix_ms"],
-        historical_trust_state_reference=semantic["historical_trust_state_reference"],
-        credential_digest="",
-    )
-    cred, _ = compute_id_and_digest(
-        proto, semantic_fields=semantic, id_prefix="qfc", id_salt=(sb.digest(),)
-    )
-    sig = sign_ed25519(
-        bad_issuer_priv, DOMAIN_QUALIFICATION_CREDENTIAL, artifact_payload(cred)
-    )
-    cred = with_signature(cred, sig)
-
-    # Signature verifies against the wrong issuer pub (so signature is valid)
-    verify_artifact(cred, bad_issuer_pub)
-    # But against the AUTHORIZED R11 issuer pub, signature must fail
-    with pytest.raises(Exception):
-        verify_artifact(cred, h.keys.r11_pub)
-    # And our EAP layer also requires the R11 issuer for the bound
-    # qualification — the credential must be signed by r11 (the
-    # AUTHORIZED qualification authority per §6). The EAP would call
-    # `verify_artifact(bound_qualification, r11_pub)` and reject.
-    conn, tmp = open_temp_store()
-    rev = RevocationRegistry()
-    try:
-        enforcement_store.insert_protected_resource(
-            conn, resource_id="resource-A", value="initial"
-        )
-        # Try to issue a capability using the unauthorized-issuer
-        # credential. The EAP will refuse to verify the bound
-        # qualification against the wrong issuer pub.
-        a_real = None  # We don't have a valid admission — but a
-        # malformed admission is fine; we expect the EAP to deny on
-        # the first verification step.
-        # For a more pointed test, build an admission under a
-        # legitimate path and pair it with the unauthorized qual:
-        from qa_poc.admission import AdmissionAuthority
-        from qa_poc.policies import PolicyRegistry
-
-        # Use a fresh AdmissionAuthority and a real qualification:
-        sb_legit = make_subject_binding(identity_id="agent-b", challenge="p8-legit")
-        q_legit, a_legit = issue_qualification_and_admission(h, subject_binding=sb_legit)
-        # Now construct an EAP bundle that pairs the legitimate
-        # admission with the unauthorized-issuer credential.
-        cap, td = issue_capability_trust_decision(
-            h,
-            subject_binding=sb_legit,
-            qualification=cred,  # UNSIGNED-BY-AUTHORIZED-ISSUER
-            admission=a_legit,
-            nonce="nonce-p8",
-        )
-        bundle = run_eap_and_collect_evidence(
-            h,
-            conn=conn,
-            subject_binding=sb_legit,
-            qualification=cred,
-            admission=a_legit,
-            capability=cap,
-            trust_decision=td,
-            revocation_registry=rev,
-            resource_id="resource-A",
-            new_resource_value="p8-write",
-        )
-        # EAP must deny because the bound qualification fails
-        # verification against the AUTHORIZED r11 pub.
-        assert bundle.eap_result.verdict == "EXECUTION_DENIED"
-        # The reason is "CAPABILITY_VERIFY_FAILED" because the EAP
-        # verifies the capability's bound qualification-credential-id
-        # against the bound_qualification parameter, but here we
-        # passed cred (unauthorized). The verify path fails.
-        # The mutation must NOT have happened.
-        assert bundle.final_mutation_count == 0
-        assert bundle.final_resource_value == "initial"
-    finally:
-        close_temp_store(conn, tmp)
+    with tempfile.TemporaryDirectory(prefix="qa-p8-regression-") as tmp:
+        ev = case_p8(h, tmp)
+    assert ev.pass_fail == "PASS", ev.to_dict()
+    assert ev.verdict == "EXECUTION_DENIED"
+    assert "ISSUER_NOT_AUTHORIZED_FOR_ARTIFACT_TYPE" in ev.reason_code
+    assert "qualification_credential" in ev.reason_code
+    assert DOMAIN_QUALIFICATION_CREDENTIAL in ev.reason_code
+    assert "capability_token" not in ev.reason_code
+    assert "trust_decision" not in ev.reason_code
+    assert ev.subcheck_results["crypto_signature_valid_against_auth_identity_pub"] == "PASS"
+    assert ev.subcheck_results["auth_identity_recognized_active"] == "PASS"
+    assert ev.subcheck_results["auth_identity_lacks_r11_qualcred_permission"] == "PASS"
+    assert ev.subcheck_results["issuer_authorization_check_rejects_qualification_credential"] == "PASS"
+    assert ev.subcheck_results["no_protected_mutation"] == "PASS"
 
 
 # --- QA-P9: mixed/incoherent trust-state view ------------------------------
@@ -1189,3 +1096,22 @@ def test_fr10_r12_admission_revocation_accepted():
         assert enforcement_store.current_epoch(conn) == epoch_before + 1
     finally:
         close_temp_store(conn, tmp)
+
+
+# --- FR-12: QA-P14 admission-expiry isolation -------------------------------
+
+def test_fr12_p14_admission_expiry_is_not_masked(tmp_path):
+    from tests.case_functions import case_p14_deny
+    h = FixtureHarness.build()
+    ev = case_p14_deny(h, str(tmp_path))
+    assert ev.pass_fail == "PASS", (ev.verdict, ev.reason_code, ev.subcheck_results)
+    assert ev.verdict == "EXECUTION_DENIED"
+    assert "ADMISSION_EXPIRED" in ev.reason_code
+    assert "CAPABILITY_EXPIRED" not in ev.reason_code
+    assert "TRUST_DECISION_EXPIRED" not in ev.reason_code
+    assert "QUALIFICATION_EXPIRED" not in ev.reason_code
+    assert ev.subcheck_results["admission_expired_in_reason"] is True
+    assert ev.subcheck_results["qualification_still_nominal"] is True
+    assert ev.subcheck_results["capability_still_nominal"] is True
+    assert ev.subcheck_results["trust_decision_still_nominal"] is True
+    assert ev.final_mutation_count == ev.initial_mutation_count

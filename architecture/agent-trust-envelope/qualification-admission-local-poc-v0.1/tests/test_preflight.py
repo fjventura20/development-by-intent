@@ -183,9 +183,9 @@ def bootstrap_state():
 
 def test_preflight_5_trusted_code_not_requester_writable(bootstrap_state):
     """The trusted code directory is not writable by ate-requester."""
-    opt_bin = "/opt/ate-poc-v010/bin"
+    opt_bin = "/opt/ate-poc-v010"
     if not _exists_as_root(opt_bin):
-        pytest.skip(f"trusted code dir not installed: {opt_bin}")
+        pytest.fail(f"trusted code dir not installed: {opt_bin}")
     # As ate-requester, attempt to write to the dir
     cmd = [
         "sudo", "-n", "-u", "ate-requester",
@@ -197,14 +197,23 @@ def test_preflight_5_trusted_code_not_requester_writable(bootstrap_state):
 
 
 def test_preflight_6_authority_keys_not_requester_readable(bootstrap_state):
-    """Authority private key is not readable by ate-requester."""
-    key = "/var/lib/ate/poc/authority/authority_signing.key"
-    if not _exists_as_root(key):
-        pytest.skip(f"authority key not bootstrapped: {key}")
-    cmd = ["sudo", "-n", "-u", "ate-requester", "test", "-r", key]
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    assert res.returncode != 0, "authority key readable by ate-requester (BAD)"
-
+    """All six authority private keys exist and are unreadable by ate-requester."""
+    keys = [
+        "/var/lib/ate/poc/authority/policy_signing.key",
+        "/var/lib/ate/poc/authority/identity_signing.key",
+        "/var/lib/ate/poc/authority/r11_qualification_signing.key",
+        "/var/lib/ate/poc/authority/r12_admission_signing.key",
+        "/var/lib/ate/poc/authority/authorization_signing.key",
+        "/var/lib/ate/poc/authority/trust_decision_signing.key",
+    ]
+    for key in keys:
+        assert _exists_as_root(key), f"authority key not bootstrapped: {key}"
+        res = subprocess.run(
+            ["sudo", "-n", "-u", "ate-requester", "test", "-r", key],
+            capture_output=True,
+            text=True,
+        )
+        assert res.returncode != 0, f"authority key readable by ate-requester: {key}"
 
 def test_preflight_7_executor_audit_keys_not_requester_readable(bootstrap_state):
     """Executor + audit private keys not readable by ate-requester or ate-authority."""
@@ -235,32 +244,52 @@ def test_preflight_8_enforcement_store_not_requester_authority_writable(bootstra
 
 
 def test_preflight_9_direct_bypass_probe_fails():
-    """A direct SQLite mutation by a non-executor-uid simulation must fail.
+    """Real requester/authority direct mutation attempts are denied and state is unchanged."""
+    db = "/var/lib/ate/poc/executor/enforcement.db"
+    assert _exists_as_root(db), f"enforcement.db not bootstrapped: {db}"
+    fixture_id = "pytest-pf9-fixture"
+    fixture_value = "PYTEST-PF9-baseline"
 
-    We can't actually flip UIDs in the test process, but we verify the
-    OS-level contract by checking that the bootstrap installs ownership
-    correctly (covered above). Here we add a structural check: the
-    enforcement store must REJECT any direct mutation that isn't via the
-    executor interface by checking the WAL/synchronous controls.
-    """
-    tmp = tempfile.mkdtemp(prefix="ate-poc-preflight-")
-    try:
-        db_path = os.path.join(tmp, "enforcement.db")
-        conn = enforcement_store.open_store(db_path)
-        # Confirm the pragmas are in effect
-        cur = conn.execute("PRAGMA journal_mode")
-        mode = cur.fetchone()[0]
-        assert str(mode).lower() == "wal", f"expected WAL journal mode, got {mode}"
-        cur = conn.execute("PRAGMA synchronous")
-        sync = cur.fetchone()[0]
-        # 2 == FULL
-        assert int(sync) == 2, f"expected synchronous=FULL (2), got {sync}"
-        cur = conn.execute("PRAGMA foreign_keys")
-        fk = cur.fetchone()[0]
-        assert int(fk) == 1, f"expected foreign_keys=ON, got {fk}"
-        conn.close()
-    finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+    init = subprocess.run([
+        "sudo", "-n", "-u", "ate-executor", "sqlite3", db,
+        f"INSERT OR REPLACE INTO protected_resource (resource_id, value, mutation_count) "
+        f"VALUES ('{fixture_id}', '{fixture_value}', 0);",
+    ], capture_output=True, text=True)
+    assert init.returncode == 0, init.stderr
+
+    baseline = subprocess.run([
+        "sudo", "-n", "-u", "ate-executor", "sqlite3", db,
+        f"SELECT value, mutation_count FROM protected_resource WHERE resource_id='{fixture_id}';",
+    ], capture_output=True, text=True)
+    assert baseline.returncode == 0, baseline.stderr
+
+    bypass_sql = (
+        f"UPDATE protected_resource SET value='BYPASS-VALUE', mutation_count=999 "
+        f"WHERE resource_id='{fixture_id}';"
+    )
+    req_sql = subprocess.run(
+        ["sudo", "-n", "-u", "ate-requester", "sqlite3", db, bypass_sql],
+        capture_output=True, text=True,
+    )
+    req_dd = subprocess.run(
+        ["sudo", "-n", "-u", "ate-requester", "dd", "if=/dev/zero", f"of={db}",
+         "bs=1", "count=1", "conv=notrunc"],
+        capture_output=True, text=True,
+    )
+    auth_sql = subprocess.run(
+        ["sudo", "-n", "-u", "ate-authority", "sqlite3", db, bypass_sql],
+        capture_output=True, text=True,
+    )
+    after = subprocess.run([
+        "sudo", "-n", "-u", "ate-executor", "sqlite3", db,
+        f"SELECT value, mutation_count FROM protected_resource WHERE resource_id='{fixture_id}';",
+    ], capture_output=True, text=True)
+
+    assert req_sql.returncode != 0
+    assert req_dd.returncode != 0
+    assert auth_sql.returncode != 0
+    assert after.returncode == 0, after.stderr
+    assert after.stdout.strip() == baseline.stdout.strip()
 
 
 # -- Item 10: canonicalization self-test passes ----------------------------
