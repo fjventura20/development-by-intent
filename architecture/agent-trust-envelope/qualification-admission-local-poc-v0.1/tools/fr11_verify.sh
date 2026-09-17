@@ -16,9 +16,10 @@ if ! grep -q '^def as_user' tests/host_runtime.py 2>/dev/null; then
 else
   echo "fr11_enforce_runtime.py already applied; skipping"
 fi
-# Always run the idempotent same-principal repair. Nested executor/authority
-# scopes are expected in the host-mode proxies.
+# Same-principal nested authority/executor scopes must be re-entrant.
 python3 tools/fr11_fix_reentrant_uid.py
+# Keep pytest's preflight cases aligned with the FR-11 eight-key topology.
+python3 tools/fr11_fix_pytest_preflight.py
 
 echo "== Syntax checks =="
 python3 -m py_compile \
@@ -26,11 +27,24 @@ python3 -m py_compile \
   run_formal.py \
   tests/host_runtime.py \
   tests/case_functions.py \
-  tests/_helpers.py
+  tests/_helpers.py \
+  tests/test_preflight.py
 bash -n bootstrap.sh
 
 echo "== Development tests (ephemeral fixture keys; no scored run) =="
-python3 -m pytest -q tests/
+set +e
+DEV_OUT="$(python3 -m pytest -q -rs tests/ 2>&1)"
+DEV_RC=$?
+set -e
+printf '%s\n' "$DEV_OUT"
+if [ "$DEV_RC" -ne 0 ]; then
+  echo "ERROR: development test suite failed with exit $DEV_RC" >&2
+  exit "$DEV_RC"
+fi
+if grep -Eq '[0-9]+ skipped' <<<"$DEV_OUT"; then
+  echo "ERROR: development suite contains skipped tests; zero skips required" >&2
+  exit 1
+fi
 
 echo "== Bootstrap eight-key host topology =="
 sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted"
