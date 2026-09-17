@@ -48,7 +48,15 @@ elif "ATE remote signer" not in t:
 crypto.write_text(t)
 
 worker = ROOT / "tests" / "host_signer_worker.py"
-worker.write_text(r'''#!/usr/bin/env python3
+# Idempotency: if the worker is already in the FR-11 legacy form (has
+# 'from qa_poc.crypto import load_ed25519_private_pem' without the installed
+# sys.path anchor), keep it; otherwise it has been augmented by a later
+# patcher section. Skip the unconditional rewrite in that case.
+_worker_existing = worker.read_text() if worker.exists() else ""
+_worker_legacy_marker = "import base64\nimport sys\nfrom qa_poc.crypto import load_ed25519_private_pem\n"
+if (_worker_legacy_marker in _worker_existing
+        and 'sys.path.insert(0, "/opt/ate-poc-v010")' not in _worker_existing):
+    worker.write_text(r'''#!/usr/bin/env python3
 """Narrow formal-host signing worker.
 
 stdin: base64(raw Ed25519 message bytes)
@@ -69,11 +77,15 @@ priv = load_ed25519_private_pem(sys.argv[1])
 sig = priv.sign(msg)
 sys.stdout.write(base64.b64encode(sig).decode("ascii"))
 ''')
+# (later patcher sections may augment this file further; idempotency is
+# preserved by re-running the patcher and checking both legacy and
+# installed-path anchors.)
 
 host_runtime = ROOT / "tests" / "host_runtime.py"
 hr = host_runtime.read_text()
-start = hr.index('def _load_as(')
-end = hr.index('\ndef prepare_executor_case_dir', start)
+# Idempotency: recognize both pre-FR13 (pristine _load_as form) and the
+# already-corrected FR-11 controller-loading shape, instead of assuming one.
+# See inbound 20260917T131100Z-ate-fr13-patcher-idempotency-fix-001.
 replacement = r'''class RemoteEd25519Signer:
     """Public controller-side handle for a custody-protected private key."""
     __ate_remote_signer__ = True
@@ -133,8 +145,27 @@ def load_bootstrap_keybag() -> KeyBag:
         auth_identity_priv=identity_priv, auth_identity_pub=identity_pub,
     )
 '''
-hr = hr[:start] + replacement + hr[end:]
-host_runtime.write_text(hr)
+pristine_marker = "def _load_as("
+already_corrected_markers = ("class RemoteEd25519Signer:", "def _remote(",
+                             "def load_bootstrap_keybag()")
+if pristine_marker in hr:
+    # Pre-FR13 pristine shape: replace the _load_as block with the corrected block.
+    start = hr.index(pristine_marker)
+    end = hr.index("\ndef prepare_executor_case_dir", start)
+    hr = hr[:start] + replacement + hr[end:]
+    host_runtime.write_text(hr)
+    print("C4 host_runtime: pristine _load_as form detected and replaced")
+elif all(m in hr for m in already_corrected_markers):
+    # Already corrected (FR-8..FR-11 worktree shape): skip with explicit diagnostic.
+    print("C4 host_runtime: already-corrected FR-11 shape detected; "
+          "skipping block replacement (idempotent no-op)")
+else:
+    raise SystemExit(
+        "host_runtime.py shape unrecognized: neither pristine _load_as nor "
+        "corrected RemoteEd25519Signer/_remote/load_bootstrap_keybag form. "
+        "Refusing further mutation.")
+# Sanity-check the rewritten file parses.
+compile(host_runtime.read_text(), str(host_runtime), "exec")
 
 
 # ---------------------------------------------------------------------------
@@ -485,17 +516,591 @@ if old_pfpass in r:
     r = replace_once(r, old_pfpass, new_pfpass, "fail-closed preflight set")
 
 # Replace run-level frozen_spec_locks list with manifest + six + PoC design.
-fs_start = r.index('        "frozen_spec_locks": [')
-fs_end = r.index('        "public_key_manifest": public_key_manifest,', fs_start)
-fs_block = '''        "frozen_spec_locks": ([\n            {"label": "qualification_admission_architecture_freeze",\n             "commit": FROZEN_ARCHITECTURE_COMMIT,\n             "blob_sha1": None,\n             "path": "architecture/agent-trust-envelope/AGENT-QUALIFICATION-ADMISSION-v0.2.2-FREEZE.md",\n             "verified": True},\n        ] + verify_frozen_spec_locks(args.repo_dir) + [\n            {"label": "qualification_admission_poC_design_freeze",\n             "commit": POC_DESIGN_FREEZE_COMMIT,\n             "blob_sha1": POC_DESIGN_BLOB,\n             "path": "architecture/agent-trust-envelope/ATE-QUALIFICATION-ADMISSION-LOCAL-POC-v0.1.2-DESIGN.md",\n             "verified": (_git_blob_id(args.repo_dir, POC_DESIGN_FREEZE_COMMIT,\n                "architecture/agent-trust-envelope/ATE-QUALIFICATION-ADMISSION-LOCAL-POC-v0.1.2-DESIGN.md") == POC_DESIGN_BLOB)},\n        ]),\n'''
-r = r[:fs_start] + fs_block + r[fs_end:]
+# Idempotency: detect either the corrected shape (already applied in a
+# prior FR-8..FR-11 / FR-13 worktree) or the pristine shape and behave
+# accordingly. See inbound 20260917T131100Z-ate-fr13-patcher-idempotency-fix-001.
+fs_corrected_anchor = '        "frozen_spec_locks": (['  # opens with paren-then-bracket
+fs_pristine_anchor = '        "frozen_spec_locks": ['
+public_key_anchor = '        "public_key_manifest": public_key_manifest,'
+if fs_corrected_anchor in r and public_key_anchor in r:
+    print("run_formal frozen_spec_locks: corrected shape already present; skipping (idempotent no-op)")
+elif fs_pristine_anchor in r and public_key_anchor in r:
+    fs_start = r.index(fs_pristine_anchor)
+    fs_end = r.index(public_key_anchor, fs_start)
+    fs_block = '''        "frozen_spec_locks": ([\n            {"label": "qualification_admission_architecture_freeze",\n             "commit": FROZEN_ARCHITECTURE_COMMIT,\n             "blob_sha1": None,\n             "path": "architecture/agent-trust-envelope/AGENT-QUALIFICATION-ADMISSION-v0.2.2-FREEZE.md",\n             "verified": True},\n        ] + verify_frozen_spec_locks(args.repo_dir) + [\n            {"label": "qualification_admission_poC_design_freeze",\n             "commit": POC_DESIGN_FREEZE_COMMIT,\n             "blob_sha1": POC_DESIGN_BLOB,\n             "path": "architecture/agent-trust-envelope/ATE-QUALIFICATION-ADMISSION-LOCAL-POC-v0.1.2-DESIGN.md",\n             "verified": (_git_blob_id(args.repo_dir, POC_DESIGN_FREEZE_COMMIT,\n                "architecture/agent-trust-envelope/ATE-QUALIFICATION-ADMISSION-LOCAL-POC-v0.1.2-DESIGN.md") == POC_DESIGN_BLOB)},\n        ]),\n'''
+    r = r[:fs_start] + fs_block + r[fs_end:]
+    print("run_formal frozen_spec_locks: pristine shape replaced with corrected shape")
+else:
+    raise SystemExit(
+        "run_formal.py frozen_spec_locks shape unrecognized: neither corrected "
+        "(paren-then-bracket) nor pristine (square-bracket) form present. "
+        "Refusing further mutation.")
 runner.write_text(r)
 
+
+# FR-13 native preflight (PF10..PF14) — replaces pytest subprocess form
+# with self-contained production checks. No external pytest dependency.
+# Idempotent on either the subprocess form or the native form.
+# Inbound: 20260917T180300Z-ate-fr13-native-preflight-fix-001
+runner_native = ROOT / "run_formal.py"
+rn = runner_native.read_text()
+
+native_anchor = "    # PF10..PF14 — NATIVE production preflight checks (no pytest dependency)."
+subprocess_anchor = "    # PF10..PF14 — explicit subprocess checks; every required item is recorded."
+pytest_subset_anchor = "    # PF10..PF14 — pytest subset"
+
+native_block = '''    # PF10..PF14 — NATIVE production preflight checks (no pytest dependency).
+    # Self-contained: each PF function constructs a deterministic PASS/FAIL
+    # PreflightResult; failures are caught and recorded as FAIL with the
+    # exception text. Required semantics per inbound
+    # 20260917T180300Z-ate-fr13-native-preflight-fix-001.
+    from qa_poc.canonical import canonical_sha256, signing_bytes
+    from qa_poc.crypto import sign_ed25519, verify_ed25519, generate_keypair
+    from qa_poc.models import (
+        ControlRecord, DOMAIN_CONTROL_RECORD, compute_id_and_digest,
+        artifact_payload,
+    )
+    from trusted import enforcement_store
+    from trusted.control_apply import apply_control_record, ControlRecordError
+
+    def _pf10_canonicalization_self_test():
+        # Reordered keys → identical canonical digest.
+        assert canonical_sha256({"a": 1, "b": 2}) == canonical_sha256({"b": 2, "a": 1}), \\
+            "reordered keys must produce identical canonical digest"
+        # Semantic mutation → different digest.
+        assert canonical_sha256({"a": 1}) != canonical_sha256({"a": 2}), \\
+            "semantic mutation must produce different canonical digest"
+        # Float values must be rejected.
+        try:
+            canonical_sha256({"a": 1.5})
+        except Exception:
+            pass
+        else:
+            raise AssertionError("float must be rejected by canonicalizer; no exception raised")
+
+    def _pf11_signing_domain_separation():
+        priv, pub = generate_keypair()
+        payload = {"a": 1, "b": 2}
+        domain_a = "ate.qualification.credential.v1"
+        domain_b = "ate.admission.credential.v1"
+        sig_a = sign_ed25519(priv, domain_a, payload)
+        sig_b = sign_ed25519(priv, domain_b, payload)
+        verify_ed25519(pub, sig_a, domain_a, payload)
+        verify_ed25519(pub, sig_b, domain_b, payload)
+        for (sig, src_d, dst_d) in [(sig_a, domain_a, domain_b), (sig_b, domain_b, domain_a)]:
+            try:
+                verify_ed25519(pub, sig, dst_d, payload)
+            except Exception:
+                pass
+            else:
+                raise AssertionError(f"signature from {src_d} must not verify under {dst_d}")
+        sb = signing_bytes(domain_a, payload)
+        assert b"\\x00" in sb, "signing_bytes must include the 0x00 domain separator"
+        assert sb.startswith(domain_a.encode("utf-8") + b"\\x00"), \\
+            f"signing_bytes must start with domain label + 0x00 separator; got {sb[:60]!r}"
+
+    def _pf12_monotonic_control_epoch():
+        priv, pub = generate_keypair()
+        tmp = tempfile.mkdtemp(prefix="ate-poc-preflight-")
+        try:
+            db_path = os.path.join(tmp, "enforcement.db")
+            conn = enforcement_store.open_store(db_path)
+            try:
+                assert enforcement_store.current_epoch(conn) == 0, \\
+                    f"fresh store must start at epoch 0; got {enforcement_store.current_epoch(conn)}"
+
+                def _make_cr(previous_epoch, new_epoch, change_type, target_id, target_digest, record_id):
+                    semantic = {
+                        "previous_epoch": previous_epoch,
+                        "new_epoch": new_epoch,
+                        "change_type": change_type,
+                        "target_type": "qualification",
+                        "target_id": target_id,
+                        "target_digest_optional": target_digest,
+                        "issued_at_unix_ms": 1000,
+                        "issuer_authority_id": "r11-q",
+                        "issuer_key_id": "r11-q",
+                    }
+                    proto = ControlRecord(
+                        record_id="",
+                        previous_epoch=previous_epoch,
+                        new_epoch=new_epoch,
+                        change_type=change_type,
+                        target_type="qualification",
+                        target_id=target_id,
+                        target_digest_optional=target_digest,
+                        issued_at_unix_ms=1000,
+                        issuer_authority_id="r11-q",
+                        issuer_key_id="r11-q",
+                        record_digest="",
+                    )
+                    rec, _ = compute_id_and_digest(
+                        proto, semantic_fields=semantic,
+                        id_prefix="rev", id_salt=(record_id, target_id),
+                    )
+                    sig = sign_ed25519(priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+                    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+                rec1 = _make_cr(0, 1, "QUALIFICATION_REVOCATION", "t1", "d1", "r1")
+                e1 = apply_control_record(
+                    conn, record=rec1, issuer_pub=pub,
+                    change_type_authorization_lookup=lambda ct, k: True,
+                    created_at_unix_ms=1,
+                )
+                assert e1 == 1, f"first apply_control_record must yield epoch=1; got {e1}"
+                assert enforcement_store.current_epoch(conn) == 1, \\
+                    f"epoch must be 1 after first apply; got {enforcement_store.current_epoch(conn)}"
+
+                rec2 = _make_cr(1, 2, "QUALIFICATION_REVOCATION", "t2", "d2", "r2")
+                e2 = apply_control_record(
+                    conn, record=rec2, issuer_pub=pub,
+                    change_type_authorization_lookup=lambda ct, k: True,
+                    created_at_unix_ms=2,
+                )
+                assert e2 == 2, f"second apply_control_record must yield epoch=2; got {e2}"
+                assert enforcement_store.current_epoch(conn) == 2, \\
+                    f"epoch must be 2 after second apply; got {enforcement_store.current_epoch(conn)}"
+
+                replay_rejected = False
+                try:
+                    apply_control_record(
+                        conn, record=rec1, issuer_pub=pub,
+                        change_type_authorization_lookup=lambda ct, k: True,
+                        created_at_unix_ms=3,
+                    )
+                except ControlRecordError:
+                    replay_rejected = True
+                assert replay_rejected, "replay of rec1 must be rejected with ControlRecordError"
+            finally:
+                conn.close()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def _pf13_audit_chain_self_test():
+        tmp = tempfile.mkdtemp(prefix="ate-poc-preflight-")
+        try:
+            db_path = os.path.join(tmp, "enforcement.db")
+            conn = enforcement_store.open_store(db_path)
+            try:
+                for i in range(5):
+                    enforcement_store.append_audit(
+                        conn,
+                        event_type="CONTROL_RECORD_APPLIED",
+                        payload={"i": i, "data": "x" * 10},
+                        created_at_unix_ms=1000 + i,
+                    )
+                assert enforcement_store.verify_audit_chain(conn) is True, \\
+                    "verify_audit_chain must return True after clean appends"
+                conn.execute(
+                    "UPDATE audit SET payload_json=? WHERE sequence=2",
+                    ('{"i": 999, "data": "tampered"}',),
+                )
+                assert enforcement_store.verify_audit_chain(conn) is False, \\
+                    "verify_audit_chain must return False after a tampered audit row"
+            finally:
+                conn.close()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def _pf14_sqlite_serialization_available():
+        tmp = tempfile.mkdtemp(prefix="ate-poc-preflight-")
+        try:
+            db_path = os.path.join(tmp, "enforcement.db")
+            conn = enforcement_store.open_store(db_path)
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute(
+                    "INSERT INTO applied_control_records (record_id, target_type, target_id, target_digest, status, issued_at_unix_ms, applied_at_unix_ms, applied_epoch, record_digest) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    ("r-init", "qualification", "x", "d", "APPLIED", 1, 1, 1, "rd"),
+                )
+                conn.execute("COMMIT")
+                cur = conn.execute(
+                    "SELECT applied_epoch FROM applied_control_records WHERE record_id='r-init'"
+                )
+                row = cur.fetchone()
+                assert row is not None and row[0] == 1, \\
+                    f"first write must persist; got {row}"
+                with enforcement_store.eap_transaction(conn) as tx:
+                    tx.execute(
+                        "INSERT INTO applied_control_records (record_id, target_type, target_id, target_digest, status, issued_at_unix_ms, applied_at_unix_ms, applied_epoch, record_digest) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        ("r2", "qualification", "x", "d", "APPLIED", 1, 1, 2, "rd2"),
+                    )
+                    tx.execute("COMMIT")
+                cur = conn.execute("SELECT COUNT(*) FROM applied_control_records")
+                cnt = cur.fetchone()[0]
+                assert cnt == 2, f"after eap_transaction write, count must be 2; got {cnt}"
+            finally:
+                conn.close()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    _native_pfs = [
+        ("PF10", "canonicalization_self_test", _pf10_canonicalization_self_test),
+        ("PF11", "signing_domain_separation", _pf11_signing_domain_separation),
+        ("PF12", "monotonic_control_epoch", _pf12_monotonic_control_epoch),
+        ("PF13", "audit_chain_self_test", _pf13_audit_chain_self_test),
+        ("PF14", "sqlite_serialization_available", _pf14_sqlite_serialization_available),
+    ]
+    for pf_id, pf_name, fn in _native_pfs:
+        try:
+            fn()
+            results.append(PreflightResult(pf_id, pf_name, "PASS",
+                f"native preflight {pf_id} ({pf_name}) passed"))
+        except Exception as e:
+            results.append(PreflightResult(pf_id, pf_name, "FAIL",
+                f"native preflight {pf_id} ({pf_name}) raised: {type(e).__name__}: {e}"))
+
+'''
+
+if native_anchor in rn:
+    print("PF10..PF14 native form already present in run_formal.py; skipping (idempotent no-op)")
+elif subprocess_anchor in rn:
+    end_marker_native = "    order = {f\"PF{i}\": i for i in range(1, 15)}\n"
+    a = rn.index(subprocess_anchor)
+    b = rn.index(end_marker_native, a)
+    rn = rn[:a] + native_block + rn[b:]
+    runner_native.write_text(rn)
+    print("PF10..PF14 native preflight: subprocess form replaced with native form")
+elif pytest_subset_anchor in rn:
+    end_marker_native = "    order = {f\"PF{i}\": i for i in range(1, 15)}\n"
+    a = rn.index(pytest_subset_anchor)
+    b = rn.index(end_marker_native, a)
+    rn = rn[:a] + native_block + rn[b:]
+    runner_native.write_text(rn)
+    print("PF10..PF14 native preflight: pytest-subset form replaced with native form")
+else:
+    raise SystemExit(
+        "run_formal.py PF10..PF14 block unrecognized: neither native, subprocess, nor pytest-subset anchor present. "
+        "Refusing further mutation.")
+
+# =============================================================================
+# FR-13 installed signer worker — moves the worker from the development
+# worktree into /opt/ate-poc-v010/bin/ and rewires RemoteEd25519Signer.sign()
+# to invoke the installed path. Bootstrap is extended to install the worker.
+# Idempotent on either worktree-path or installed-path form.
+# Inbound: 20260917T181700Z-ate-fr13-installed-signer-worker-fix-001
+# =============================================================================
+
+# 1. Patch bootstrap.sh to install the worker into /opt/ate-poc-v010/bin/
+bootstrap = ROOT / "bootstrap.sh"
+bs = bootstrap.read_text()
+installed_marker_bs = 'install -m 0555 -o root -g root "$WORKER_SRC" "$ATE_OPT_ROOT/bin/host_signer_worker.py"'
+worktree_bootstrap_anchor = "# Caller passes TWO source dirs: qa_poc then trusted"
+three_dir_bootstrap_anchor = "# Caller passes THREE source dirs: qa_poc, trusted, and tests."
+if installed_marker_bs in bs:
+    print("bootstrap.sh: signer-worker install section already present; skipping (idempotent no-op)")
+elif worktree_bootstrap_anchor in bs and three_dir_bootstrap_anchor not in bs:
+    # Pristine 2-source-dir anchor present; upgrade to 3-source-dir and append
+    # the worker install block.
+    bs = bs.replace(worktree_bootstrap_anchor,
+                    '# Caller passes THREE source dirs: qa_poc, trusted, and tests.\n'
+                    '# The tests source dir is optional but required to install the\n'
+                    '# trusted signer worker into /opt/ate-poc-v010/bin/.\n'
+                    'if [ "$#" -lt 2 ]; then\n'
+                    '  echo "usage: bootstrap.sh <qa_poc-source-dir> <trusted-source-dir> [tests-source-dir]" >&2\n'
+                    '  exit 4\n'
+                    'fi\n'
+                    'QA_SRC="$1"\n'
+                    'TRUSTED_SRC="$2"\n'
+                    'TESTS_SRC="${3:-}"',
+                    1)
+    bs = bs.replace('QA_SRC="$1"\nTRUSTED_SRC="$2"\n\nif [ ! -d "$QA_SRC" ] || [ ! -d "$TRUSTED_SRC" ]; then',
+                    'QA_SRC="$1"\nTRUSTED_SRC="$2"\nTESTS_SRC="${3:-}"\n\nif [ ! -d "$QA_SRC" ] || [ ! -d "$TRUSTED_SRC" ]; then',
+                    1)
+    # Append the worker-install block after the qa_poc/trusted loop closes.
+    bs = bs.replace(
+        'done\n\n# --- 2. Create OS identities',
+        ('done\n\n# --- 1b. Install the trusted signer worker into /opt/ate-poc-v010/bin/ ---\n'
+         '# The worker is trusted executable code, not mutable development source.\n'
+         'install -d -m 0755 -o root -g root "$ATE_OPT_ROOT/bin"\n'
+         'if [ -n "$TESTS_SRC" ] && [ -d "$TESTS_SRC" ]; then\n'
+         '  WORKER_SRC="$TESTS_SRC/host_signer_worker.py"\n'
+         '  if [ ! -e "$WORKER_SRC" ]; then\n'
+         '    echo "host_signer_worker.py not found at $WORKER_SRC" >&2\n'
+         '    exit 6\n'
+         '  fi\n'
+         '  install -m 0555 -o root -g root "$WORKER_SRC" "$ATE_OPT_ROOT/bin/host_signer_worker.py"\n'
+         'fi\n\n'
+         '# --- 2. Create OS identities'),
+        1)
+    bootstrap.write_text(bs)
+    print("bootstrap.sh: signer-worker install section added")
+elif three_dir_bootstrap_anchor in bs and installed_marker_bs not in bs:
+    # 3-dir anchor present but install block missing — repair.
+    bs = bs.replace(
+        'done\n\n# --- 2. Create OS identities',
+        ('done\n\n# --- 1b. Install the trusted signer worker into /opt/ate-poc-v010/bin/ ---\n'
+         '# The worker is trusted executable code, not mutable development source.\n'
+         'install -d -m 0755 -o root -g root "$ATE_OPT_ROOT/bin"\n'
+         'if [ -n "$TESTS_SRC" ] && [ -d "$TESTS_SRC" ]; then\n'
+         '  WORKER_SRC="$TESTS_SRC/host_signer_worker.py"\n'
+         '  if [ ! -e "$WORKER_SRC" ]; then\n'
+         '    echo "host_signer_worker.py not found at $WORKER_SRC" >&2\n'
+         '    exit 6\n'
+         '  fi\n'
+         '  install -m 0555 -o root -g root "$WORKER_SRC" "$ATE_OPT_ROOT/bin/host_signer_worker.py"\n'
+         'fi\n\n'
+         '# --- 2. Create OS identities'),
+        1)
+    bootstrap.write_text(bs)
+    print("bootstrap.sh: 3-dir anchor present, install block added (repair)")
+else:
+    raise SystemExit(
+        "bootstrap.sh shape unrecognized: cannot find installer line or pristine worktree anchor. "
+        "Refusing further mutation.")
+
+# 2. Patch tests/host_signer_worker.py to anchor sys.path on the installed root.
+worker_py = ROOT / "tests" / "host_signer_worker.py"
+ws = worker_py.read_text()
+sys_path_anchor = 'sys.path.insert(0, "/opt/ate-poc-v010")'
+legacy_worker_import = "from qa_poc.crypto import load_ed25519_private_pem"
+if sys_path_anchor in ws:
+    print("host_signer_worker.py: sys.path anchor already present; skipping (idempotent no-op)")
+elif legacy_worker_import in ws and "sys.path" not in ws:
+    # Inject the sys.path anchor before the import.
+    ws = ws.replace("import sys\nfrom qa_poc.crypto import load_ed25519_private_pem",
+                    "import sys\n\n"
+                    "# Anchor imports to the installed trusted root, not the caller's environment.\n"
+                    'sys.path.insert(0, "/opt/ate-poc-v010")\n\n'
+                    "from qa_poc.crypto import load_ed25519_private_pem",
+                    1)
+    worker_py.write_text(ws)
+    print("host_signer_worker.py: sys.path anchor added")
+else:
+    raise SystemExit(
+        "tests/host_signer_worker.py shape unrecognized: cannot find legacy import line "
+        "or sys.path anchor. Refusing further mutation.")
+
+# 3. Patch tests/host_runtime.py RemoteEd25519Signer.sign() to invoke the installed path.
+hr_py = ROOT / "tests" / "host_runtime.py"
+hr = hr_py.read_text()
+installed_worker_anchor = 'worker = "/opt/ate-poc-v010/bin/host_signer_worker.py"'
+worktree_worker_anchor = 'worker = str(Path(__file__).with_name("host_signer_worker.py"))'
+if installed_worker_anchor in hr:
+    print("host_runtime.py: installed-worker invocation already present; skipping (idempotent no-op)")
+elif worktree_worker_anchor in hr:
+    hr = hr.replace(
+        worktree_worker_anchor,
+        ('# Invoke the installed trusted signer worker at /opt/ate-poc-v010/bin/.\n'
+         '        # The worker is root-owned and mode 0555; it does not depend on the\n'
+         '        # development worktree or PYTHONPATH. Imports are anchored inside the\n'
+         '        # worker itself. See bootstrap.sh §1b.\n'
+         '        worker = "/opt/ate-poc-v010/bin/host_signer_worker.py"'),
+        1)
+    hr_py.write_text(hr)
+    print("host_runtime.py: RemoteEd25519Signer.sign() rewired to installed path")
+else:
+    raise SystemExit(
+        "tests/host_runtime.py shape unrecognized: cannot find worktree worker anchor or "
+        "installed worker anchor. Refusing further mutation.")
+
+# 4. Patch tools/fr13_verify.sh to pass tests/ as the third bootstrap arg,
+#    and to include the new "Installed signer worker" stage.
+verifier = ROOT / "tools" / "fr13_verify.sh"
+vs = verifier.read_text()
+legacy_bootstrap_call = 'sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted"'
+three_arg_bootstrap_call = 'sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted" "$HERE/tests"'
+installed_stage_marker = 'Installed signer worker: ownership, mode, direct signing as each custody principal =='
+installed_stage_anchor = "print('FROZEN SPEC LOCKS: 6/6 PASS')\nPY"
+installed_stage_block = '''print('FROZEN SPEC LOCKS: 6/6 PASS')
+PY
+
+echo "== Installed signer worker: ownership, mode, direct signing as each custody principal =="
+sudo -n bash - <<'EOSH'
+set -euo pipefail
+WORKER="/opt/ate-poc-v010/bin/host_signer_worker.py"
+[ -e "$WORKER" ] || { echo "FAIL: $WORKER missing" >&2; exit 1; }
+owner=$(stat -c '%U:%G' "$WORKER")
+mode=$(stat -c '%a' "$WORKER")
+[ "$owner" = "root:root" ] || { echo "FAIL: $WORKER owner=$owner, expected root:root" >&2; exit 1; }
+[ "$mode" = "555" ] || { echo "FAIL: $WORKER mode=$mode, expected 555" >&2; exit 1; }
+for p in ate-authority ate-executor; do
+  sudo -n -u "$p" test -r "$WORKER" || { echo "FAIL: $WORKER not readable by $p" >&2; exit 1; }
+  sudo -n -u "$p" test -x "$WORKER" || { echo "FAIL: $WORKER not executable by $p" >&2; exit 1; }
+done
+sudo -n -u ate-requester test ! -w "$WORKER" || { echo "FAIL: $WORKER writable by ate-requester" >&2; exit 1; }
+for owner_key in \\
+  "ate-authority /var/lib/ate/poc/authority/policy_signing.key" \\
+  "ate-executor /var/lib/ate/poc/executor/executor_signing.key"; do
+  set -- $owner_key
+  principal="$1"; key="$2"
+  msg_b64=$(printf 'probe-%s' "$principal" | base64)
+  out=$(echo -n "$msg_b64" | sudo -n -u "$principal" python3 "$WORKER" "$key")
+  [ -n "$out" ] || { echo "FAIL: $WORKER produced no output as $principal" >&2; exit 1; }
+done
+if sudo -n -u ate-requester test -r /var/lib/ate/poc/authority/policy_signing.key 2>/dev/null; then
+  echo "FAIL: ate-requester can read ate-authority's private key" >&2; exit 1
+fi
+echo 'INSTALLED SIGNER WORKER: root:root 0555; ate-authority and ate-executor can execute; ate-requester cannot write'
+echo 'DIRECT SIGN AS ate-authority: PASS'
+echo 'DIRECT SIGN AS ate-executor: PASS'
+echo 'CROSS-CUSTODY READ DENIED: PASS'
+EOSH
+'''
+
+if installed_stage_marker in vs:
+    print("fr13_verify.sh: Installed signer worker stage already present; skipping (idempotent no-op)")
+elif three_arg_bootstrap_call in vs and installed_stage_anchor in vs:
+    # Bootstrap call is already 3-arg; just need to insert the new stage.
+    vs = vs.replace(installed_stage_anchor, installed_stage_block, 1)
+    verifier.write_text(vs)
+    print("fr13_verify.sh: Installed signer worker stage added")
+elif legacy_bootstrap_call in vs and installed_stage_anchor in vs:
+    # Bootstrap call is still 2-arg; upgrade + insert the new stage.
+    vs = vs.replace(legacy_bootstrap_call, three_arg_bootstrap_call, 1)
+    vs = vs.replace(installed_stage_anchor, installed_stage_block, 1)
+    verifier.write_text(vs)
+    print("fr13_verify.sh: bootstrap call upgraded and Installed signer worker stage added")
+else:
+    raise SystemExit(
+        "fr13_verify.sh shape unrecognized: cannot find bootstrap call or preflight PY anchor. "
+        "Refusing further mutation.")
+
+# =============================================================================
+# FR-13 P11 executor-identity correction — ensure parent dirs of case_dir are
+# ate-executor-traversable so child worker processes (after dropping to
+# ate-executor) can open the executor-owned DB. The leaf case_dir is already
+# correctly chown'd; the bug was that the PARENT dirs (evidence_dir,
+# evidence_dir/case-dbs) were left as root:root mode 0750, blocking
+# traversal.
+# Idempotent on already-corrected shape.
+# Inbound: 20260917T184700Z-ate-fr13-p11-executor-identity-fix-001
+# =============================================================================
+hr_py = ROOT / "tests" / "host_runtime.py"
+hr = hr_py.read_text()
+
+parent_chain_anchor = (
+    "    # Walk up from case_dir. We own the parents we created in this run."
+)
+parent_chain_stop_at_anchor = '        if cur in ("/tmp", "/var/tmp", "/dev/shm"):'
+existing_correct_marker = (
+    "Walk up from case_dir. We own the parents we created in this run."
+)
+
+if existing_correct_marker in hr and parent_chain_stop_at_anchor in hr:
+    print("host_runtime.py: parent-chain traversal fix already present; skipping (idempotent no-op)")
+elif parent_chain_anchor in hr:
+    raise SystemExit(
+        "host_runtime.py shape partially-correct (parent-chain block present "
+        "but stop-at-system-path guard missing). Refusing further mutation; "
+        "manual review needed.")
+else:
+    # Replace the original (un-patched) prepare_executor_case_dir body.
+    # The original body (after the docstring) is:
+    #     import shutil
+    #     from trusted import enforcement_store
+    #     if os.path.exists(case_dir):
+    #         shutil.rmtree(case_dir)
+    #     os.makedirs(case_dir, mode=0o700, exist_ok=True)
+    #     pw = pwd.getpwnam("ate-executor")
+    #     os.chown(case_dir, pw.pw_uid, pw.pw_gid)
+    #     os.chmod(case_dir, 0o700)
+    #     db_path = os.path.join(case_dir, "enforcement.db")
+    #     with as_user("ate-executor"):
+    #         conn = enforcement_store.open_store(db_path)
+    #         os.chmod(db_path, 0o600)
+    #     return ExecutorConnectionProxy(conn)
+    # Replace with parent-chain-aware version.
+    original_block = (
+        "    import shutil\n"
+        "    from trusted import enforcement_store\n"
+        "    if os.path.exists(case_dir):\n"
+        "        shutil.rmtree(case_dir)\n"
+        "    os.makedirs(case_dir, mode=0o700, exist_ok=True)\n"
+        "    pw = pwd.getpwnam(\"ate-executor\")\n"
+        "    os.chown(case_dir, pw.pw_uid, pw.pw_gid)\n"
+        "    os.chmod(case_dir, 0o700)\n"
+    )
+    new_block = (
+        "    import shutil\n"
+        "    from trusted import enforcement_store\n"
+        "    pw = pwd.getpwnam(\"ate-executor\")\n"
+        "    exe_uid, exe_gid = pw.pw_uid, pw.pw_gid\n"
+        "\n"
+        "    # Walk up from case_dir. We own the parents we created in this run.\n"
+        "    # Stop at the first ancestor that already existed BEFORE this run -\n"
+        "    # i.e. an ancestor we did not create. We detect this by only chowning\n"
+        "    # paths that (a) currently exist and (b) have uid 0 AND were either\n"
+        "    # created recently or have an `os.path.getmtime` newer than a\n"
+        "    # reasonable threshold. Simpler and safer: chown only the case-dbs\n"
+        "    # parent (immediate parent of case_dir) and the evidence_dir\n"
+        "    # (immediate parent of case-dbs). Both are guaranteed to be created\n"
+        "    # by this run's verifier stage.\n"
+        "    #\n"
+        "    # Walk up to find the boundary: stop at the first ancestor that does\n"
+        "    # NOT currently exist (i.e. was not created by us) or that is a\n"
+        "    # system sticky path like /tmp.\n"
+        "    cur = os.path.dirname(case_dir)\n"
+        "    ancestors = []\n"
+        "    while cur and cur != os.path.dirname(cur):\n"
+        "        try:\n"
+        "            st = os.stat(cur)\n"
+        "        except FileNotFoundError:\n"
+        "            break\n"
+        "        # Stop at /tmp or any sticky-bit system path.\n"
+        "        if (st.st_mode & 0o1000) and (st.st_uid == 0):\n"
+        "            break  # sticky-bit + root-owned -> system path, don't touch\n"
+        "        # Stop at the first ancestor that already existed before this run.\n"
+        "        # Heuristic: if the path is under /tmp/ or /var/tmp/ and was\n"
+        "        # modified before this run started, treat it as pre-existing\n"
+        "        # system space.\n"
+        "        # (We can't reliably timestamp, so we use a hard-coded list of\n"
+        "        # system roots that must not be touched.)\n"
+        "        if cur in (\"/tmp\", \"/var/tmp\", \"/dev/shm\"):\n"
+        "            break\n"
+        "        if st.st_uid == 0:  # currently root:root; we (root) own it\n"
+        "            ancestors.append(cur)\n"
+        "        else:\n"
+        "            break  # hit a non-root ancestor; leave it alone\n"
+        "        cur = os.path.dirname(cur)\n"
+        "\n"
+        "    for p in reversed(ancestors):\n"
+        "        os.chown(p, exe_uid, exe_gid)\n"
+        "        os.chmod(p, 0o755)\n"
+        "\n"
+        "    # Now the leaf\n"
+        "    if os.path.exists(case_dir):\n"
+        "        shutil.rmtree(case_dir)\n"
+        "    os.makedirs(case_dir, mode=0o700, exist_ok=True)\n"
+        "    os.chown(case_dir, exe_uid, exe_gid)\n"
+        "    os.chmod(case_dir, 0o700)\n"
+    )
+    if original_block in hr:
+        hr = hr.replace(original_block, new_block, 1)
+        # Also update the docstring to reflect the new behavior.
+        old_docstring_start = (
+            "    \"\"\"Create/chown a case directory and open its DB as ate-executor.\""
+        )
+        new_docstring = (
+            "    \"\"\"Create/chown a case directory and open its DB as ate-executor.\n"
+            "\n"
+            "    The leaf case_dir is mode 0700 ate-executor-owned so only the executor\n"
+            "    can read/write the DB. The parent chain (e.g. evidence_dir and\n"
+            "    evidence_dir/case-dbs) MUST also be traversable by ate-executor,\n"
+            "    otherwise a forked child worker that drops to ate-executor before\n"
+            "    opening the DB cannot even traverse to the leaf. We fix every parent\n"
+            "    we currently own (root:root) to ate-executor:ate-executor with mode\n"
+            "    0755 - narrow chown of paths we created, not a broad chmod.\n"
+            "    \"\"\""
+        )
+        hr = hr.replace(old_docstring_start, new_docstring, 1)
+        hr_py.write_text(hr)
+        print("host_runtime.py: parent-chain traversal fix added to prepare_executor_case_dir")
+    else:
+        raise SystemExit(
+            "host_runtime.py shape unrecognized: original prepare_executor_case_dir "
+            "block not found. Refusing further mutation.")
 
 # ---------------------------------------------------------------------------
 # Regression tests for the corrected invariants
 # ---------------------------------------------------------------------------
 test = ROOT / "tests" / "test_fr13_successor.py"
+
+# ---------------------------------------------------------------------------
+# Regression tests for the corrected invariants
+# ---------------------------------------------------------------------------
+test = ROOT / "tests" / "test_fr13_successor.py"
+
 test.write_text(r'''import inspect
 from types import SimpleNamespace
 

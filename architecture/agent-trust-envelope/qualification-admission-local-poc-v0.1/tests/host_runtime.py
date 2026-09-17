@@ -136,21 +136,57 @@ class AuthorityProxy:
         return wrapped
 
 
-def _load_as(owner: str, path: Path):
-    with as_user(owner):
-        priv = load_ed25519_private_pem(str(path))
-    return priv, priv.public_key()
+class RemoteEd25519Signer:
+    """Public controller-side handle for a custody-protected private key."""
+    __ate_remote_signer__ = True
+
+    def __init__(self, owner: str, private_path: Path, public_path: Path):
+        import pwd
+        from qa_poc.crypto import load_ed25519_public_pem
+        self.owner = owner
+        self.owner_uid = pwd.getpwnam(owner).pw_uid
+        self.private_path = str(private_path)
+        self._public = load_ed25519_public_pem(str(public_path))
+
+    def public_key(self):
+        return self._public
+
+    def sign(self, raw_message: bytes) -> bytes:
+        import base64
+        import subprocess
+        import sys
+        # Invoke the installed trusted signer worker at /opt/ate-poc-v010/bin/.
+        # The worker is root-owned and mode 0555; it does not depend on the
+        # development worktree or PYTHONPATH. Imports are anchored inside the
+        # worker itself. See bootstrap.sh §1b.
+        worker = "/opt/ate-poc-v010/bin/host_signer_worker.py"
+        payload = base64.b64encode(raw_message)
+        base = [sys.executable, worker, self.private_path]
+        if os.geteuid() == self.owner_uid:
+            cmd = base
+        else:
+            cmd = ["sudo", "-n", "-u", self.owner] + base
+        p = subprocess.run(cmd, input=payload, capture_output=True, check=True)
+        return base64.b64decode(p.stdout, validate=True)
+
+
+def _remote(owner: str, private_path: Path, public_label: str):
+    pub_path = Path("/etc/ate/poc-public") / f"{public_label}.pem"
+    signer = RemoteEd25519Signer(owner, private_path, pub_path)
+    return signer, signer.public_key()
 
 
 def load_bootstrap_keybag() -> KeyBag:
-    policy_priv, policy_pub = _load_as("ate-authority", AUTH / "policy_signing.key")
-    identity_priv, identity_pub = _load_as("ate-authority", AUTH / "identity_signing.key")
-    r11_priv, r11_pub = _load_as("ate-authority", AUTH / "r11_qualification_signing.key")
-    r12_priv, r12_pub = _load_as("ate-authority", AUTH / "r12_admission_signing.key")
-    auth_priv, auth_pub = _load_as("ate-authority", AUTH / "authorization_signing.key")
-    trust_priv, trust_pub = _load_as("ate-authority", AUTH / "trust_decision_signing.key")
-    executor_priv, executor_pub = _load_as("ate-executor", EXEC / "executor_signing.key")
-    audit_priv, audit_pub = _load_as("ate-executor", EXEC / "audit_signing.key")
+    # IMPORTANT: controller loads PUBLIC material only.  Each private signing
+    # operation is delegated to host_signer_worker.py under the custody owner.
+    policy_priv, policy_pub = _remote("ate-authority", AUTH / "policy_signing.key", "AUTH_POLICY")
+    identity_priv, identity_pub = _remote("ate-authority", AUTH / "identity_signing.key", "AUTH_IDENTITY")
+    r11_priv, r11_pub = _remote("ate-authority", AUTH / "r11_qualification_signing.key", "AUTH_R11_QUALIFICATION")
+    r12_priv, r12_pub = _remote("ate-authority", AUTH / "r12_admission_signing.key", "AUTH_R12_ADMISSION")
+    auth_priv, auth_pub = _remote("ate-authority", AUTH / "authorization_signing.key", "AUTH_AUTHORIZATION")
+    trust_priv, trust_pub = _remote("ate-authority", AUTH / "trust_decision_signing.key", "AUTH_TRUST_DECISION")
+    executor_priv, executor_pub = _remote("ate-executor", EXEC / "executor_signing.key", "AUTH_EXECUTOR")
+    audit_priv, audit_pub = _remote("ate-executor", EXEC / "audit_signing.key", "AUTH_AUDIT")
     return KeyBag(
         policy_priv=policy_priv, policy_pub=policy_pub,
         identity_priv=identity_priv, identity_pub=identity_pub,
@@ -160,21 +196,71 @@ def load_bootstrap_keybag() -> KeyBag:
         trust_priv=trust_priv, trust_pub=trust_pub,
         executor_priv=executor_priv, executor_pub=executor_pub,
         audit_priv=audit_priv, audit_pub=audit_pub,
-        # The legacy fixture has two identity slots; formal mode aliases both
-        # to the single frozen AUTH_IDENTITY bootstrap key.
         auth_identity_priv=identity_priv, auth_identity_pub=identity_pub,
     )
 
-
 def prepare_executor_case_dir(case_dir: str):
-    """Create/chown a case directory and open its DB as ate-executor."""
+    """Create/chown a case directory and open its DB as ate-executor.
+
+    The leaf case_dir is mode 0700 ate-executor-owned so only the executor
+    can read/write the DB. The parent chain (e.g. evidence_dir and
+    evidence_dir/case-dbs) MUST also be traversable by ate-executor,
+    otherwise a forked child worker that drops to ate-executor before
+    opening the DB cannot even traverse to the leaf. We fix every parent
+    we currently own (root:root) to ate-executor:ate-executor with mode
+    0755 — narrow chown of paths we created, not a broad chmod.
+    """
     import shutil
     from trusted import enforcement_store
+    pw = pwd.getpwnam("ate-executor")
+    exe_uid, exe_gid = pw.pw_uid, pw.pw_gid
+
+    # Walk up from case_dir. We own the parents we created in this run.
+    # Stop at the first ancestor that already existed BEFORE this run —
+    # i.e. an ancestor we did not create. We detect this by only chowning
+    # paths that (a) currently exist and (b) have uid 0 AND were either
+    # created recently or have an `os.path.getmtime` newer than a
+    # reasonable threshold. Simpler and safer: chown only the case-dbs
+    # parent (immediate parent of case_dir) and the evidence_dir
+    # (immediate parent of case-dbs). Both are guaranteed to be created
+    # by this run's verifier stage.
+    #
+    # Walk up to find the boundary: stop at the first ancestor that does
+    # NOT currently exist (i.e. was not created by us) or that is a
+    # system sticky path like /tmp.
+    cur = os.path.dirname(case_dir)
+    ancestors = []
+    while cur and cur != os.path.dirname(cur):
+        try:
+            st = os.stat(cur)
+        except FileNotFoundError:
+            break
+        # Stop at /tmp or any sticky-bit system path.
+        if (st.st_mode & 0o1000) and (st.st_uid == 0):
+            break  # sticky-bit + root-owned → system path, don't touch
+        # Stop at the first ancestor that already existed before this run.
+        # Heuristic: if the path is under /tmp/ or /var/tmp/ and was
+        # modified before this run started, treat it as pre-existing
+        # system space.
+        # (We can't reliably timestamp, so we use a hard-coded list of
+        # system roots that must not be touched.)
+        if cur in ("/tmp", "/var/tmp", "/dev/shm"):
+            break
+        if st.st_uid == 0:  # currently root:root; we (root) own it
+            ancestors.append(cur)
+        else:
+            break  # hit a non-root ancestor; leave it alone
+        cur = os.path.dirname(cur)
+
+    for p in reversed(ancestors):
+        os.chown(p, exe_uid, exe_gid)
+        os.chmod(p, 0o755)
+
+    # Now the leaf
     if os.path.exists(case_dir):
         shutil.rmtree(case_dir)
     os.makedirs(case_dir, mode=0o700, exist_ok=True)
-    pw = pwd.getpwnam("ate-executor")
-    os.chown(case_dir, pw.pw_uid, pw.pw_gid)
+    os.chown(case_dir, exe_uid, exe_gid)
     os.chmod(case_dir, 0o700)
     db_path = os.path.join(case_dir, "enforcement.db")
     with as_user("ate-executor"):

@@ -45,10 +45,15 @@ __all__ = [
 ]
 
 
-def _to_priv(obj) -> Ed25519PrivateKey:
+def _to_priv(obj):
     if isinstance(obj, Ed25519PrivateKey):
         return obj
-    raise TypeError("expected Ed25519PrivateKey")
+    # Formal-host mode deliberately uses a narrow remote signer proxy.
+    # The proxy exposes only .sign(raw_bytes) and never returns private bytes
+    # or an Ed25519PrivateKey object to the trusted controller.
+    if getattr(obj, "__ate_remote_signer__", False) and callable(getattr(obj, "sign", None)):
+        return obj
+    raise TypeError("expected Ed25519PrivateKey or ATE remote signer")
 
 
 def _to_pub(obj) -> Ed25519PublicKey:

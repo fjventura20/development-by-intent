@@ -83,6 +83,8 @@ def execute_bound_action(
     clock: Clock,
     live_proof_verifier: Optional[Callable[[], None]] = None,
     issuer_authorization_lookup: Optional[Callable[[str, str], bool]] = None,
+    transaction_before_begin_hook=None,
+    transaction_after_begin_hook=None,
 ) -> EapResult:
     """Execute the bound action at the EAP. This is the load-bearing
     call for QA-P1..QA-P14.
@@ -128,6 +130,15 @@ def execute_bound_action(
 
     # Build action_digest for nonce binding
     action_digest_val = canonical_sha256(bundle.action)
+
+    # Frozen §23/§25: the authoritative EAP transaction is acquired BEFORE
+    # scored validation/current-state evaluation.  This closes the validation
+    # -> lock race and lets QA-P11 order the actual EAP transaction.
+    if transaction_before_begin_hook is not None:
+        transaction_before_begin_hook()
+    conn.execute("BEGIN IMMEDIATE")
+    if transaction_after_begin_hook is not None:
+        transaction_after_begin_hook()
 
     # === Validate signatures & canonical forms (DEV-IMP-3) ===
     # (1) CapabilityToken: recompute digest from (id, semantic fields),

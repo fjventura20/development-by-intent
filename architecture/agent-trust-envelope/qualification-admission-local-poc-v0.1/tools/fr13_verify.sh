@@ -38,7 +38,7 @@ if grep -Eq '[0-9]+ skipped' <<<"$DEV_OUT"; then
 fi
 
 echo "== Bootstrap existing eight-key host topology =="
-sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted"
+sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted" "$HERE/tests"
 
 echo "== Exact PF1..PF14 preflight + six frozen spec locks =="
 sudo -n env PYTHONPATH="$HERE" python3 - <<'PY'
@@ -55,6 +55,54 @@ assert len(locks)==6 and all(x['verified'] for x in locks), locks
 print('PREFLIGHT EXACT SET: 14/14 PASS')
 print('FROZEN SPEC LOCKS: 6/6 PASS')
 PY
+
+echo "== Installed signer worker: ownership, mode, direct signing as each custody principal =="
+sudo -n bash - <<'EOSH'
+set -euo pipefail
+WORKER="/opt/ate-poc-v010/bin/host_signer_worker.py"
+[ -e "$WORKER" ] || { echo "FAIL: $WORKER missing" >&2; exit 1; }
+owner=$(stat -c '%U:%G' "$WORKER")
+mode=$(stat -c '%a' "$WORKER")
+[ "$owner" = "root:root" ] || { echo "FAIL: $WORKER owner=$owner, expected root:root" >&2; exit 1; }
+[ "$mode" = "555" ] || { echo "FAIL: $WORKER mode=$mode, expected 555" >&2; exit 1; }
+for p in ate-authority ate-executor; do
+  sudo -n -u "$p" test -r "$WORKER" || { echo "FAIL: $WORKER not readable by $p" >&2; exit 1; }
+  sudo -n -u "$p" test -x "$WORKER" || { echo "FAIL: $WORKER not executable by $p" >&2; exit 1; }
+done
+sudo -n -u ate-requester test ! -w "$WORKER" || { echo "FAIL: $WORKER writable by ate-requester" >&2; exit 1; }
+for owner_key in \
+  "ate-authority /var/lib/ate/poc/authority/policy_signing.key" \
+  "ate-executor /var/lib/ate/poc/executor/executor_signing.key"; do
+  set -- $owner_key
+  principal="$1"; key="$2"
+  msg_b64=$(printf 'probe-%s' "$principal" | base64)
+  out=$(echo -n "$msg_b64" | sudo -n -u "$principal" python3 "$WORKER" "$key")
+  [ -n "$out" ] || { echo "FAIL: $WORKER produced no output as $principal" >&2; exit 1; }
+done
+if sudo -n -u ate-requester test -r /var/lib/ate/poc/authority/policy_signing.key 2>/dev/null; then
+  echo "FAIL: ate-requester can read ate-authority's private key" >&2; exit 1
+fi
+echo 'INSTALLED SIGNER WORKER: root:root 0555; ate-authority and ate-executor can execute; ate-requester cannot write'
+echo 'DIRECT SIGN AS ate-authority: PASS'
+echo 'DIRECT SIGN AS ate-executor: PASS'
+echo 'CROSS-CUSTODY READ DENIED: PASS'
+EOSH
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "== Private-key custody: controller holds proxies only =="
 sudo -n env PYTHONPATH="$HERE" python3 - <<'PY'

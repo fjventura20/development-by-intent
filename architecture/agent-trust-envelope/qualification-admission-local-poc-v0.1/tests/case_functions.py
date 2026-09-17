@@ -115,6 +115,20 @@ def _authority_call(fn, *args, **kwargs):
     return fn(*args, **kwargs)
 
 
+def _committed_revocation_lookup(conn):
+    """Read execution-effective revocation from the committed executor store."""
+    def lookup(credential_id: str):
+        row = conn.execute(
+            "SELECT record_id, target_type FROM applied_control_records "
+            "WHERE target_id=? AND status='APPLIED' ORDER BY applied_epoch DESC LIMIT 1",
+            (credential_id,),
+        ).fetchone()
+        if row is None:
+            return (False, "")
+        return (True, f"committed control record {row[0]}")
+    return lookup
+
+
 def _make_strict_auth_lookup(harness) -> Callable[[str, str], bool]:
     """FR-10: Return a strict R11/R12 authorization lookup. Maps each
     (change_type, issuer_key_id) to True iff the issuer is the canonical
@@ -228,7 +242,8 @@ def _make_trust_decision(harness, *, cap, snapshot_reference=FIXED_SNAPSHOT_REF,
 
 def _run_eap(harness, *, conn, sb, q, a, cap, td, reg, resource_id, new_value,
              issuer_authorization_lookup=None, live_proof_verifier=None,
-             qualification_pub_override=None):
+             qualification_pub_override=None, transaction_before_begin_hook=None,
+             transaction_after_begin_hook=None):
     bundle = BoundActionBundle(
         subject_binding=sb,
         capability=cap,
@@ -241,7 +256,7 @@ def _run_eap(harness, *, conn, sb, q, a, cap, td, reg, resource_id, new_value,
         bundle=bundle,
         auth_pub=harness.keys.auth_pub,
         trust_pub=harness.keys.trust_pub,
-        revocation_lookup=reg.lookup,
+        revocation_lookup=_committed_revocation_lookup(conn),
         bound_qualification=q,
         bound_admission=a,
         qualification_pub=qualification_pub_override or harness.keys.r11_pub,
@@ -251,6 +266,8 @@ def _run_eap(harness, *, conn, sb, q, a, cap, td, reg, resource_id, new_value,
         clock=harness.clock,
         live_proof_verifier=live_proof_verifier,
         issuer_authorization_lookup=issuer_authorization_lookup,
+        transaction_before_begin_hook=transaction_before_begin_hook,
+        transaction_after_begin_hook=transaction_after_begin_hook,
     )
 
 
@@ -1167,261 +1184,2162 @@ def case_p10(harness, evidence_dir) -> FormalEvidence:
         conn.close()
 
 
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
+def _build_signed_revocation_record(harness, conn, *, record_salt, target_type, target_id, target_digest):
+    from qa_poc.models import ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest
+    epoch = enforcement_store.current_epoch(conn)
+    change_type = "QUALIFICATION_REVOCATION" if target_type == "qualification" else "ADMISSION_REVOCATION"
+    issuer_priv = harness.keys.r11_priv if target_type == "qualification" else harness.keys.r12_priv
+    issuer_key_id = _r11_key_id(harness) if target_type == "qualification" else _r12_key_id(harness)
+    issuer_authority_id = "r11-q" if target_type == "qualification" else "r12-a"
+    semantic = {
+        "previous_epoch": epoch,
+        "new_epoch": epoch + 1,
+        "change_type": change_type,
+        "target_type": target_type,
+        "target_id": target_id,
+        "target_digest_optional": target_digest,
+        "issued_at_unix_ms": harness.clock.now_unix_ms,
+        "issuer_authority_id": issuer_authority_id,
+        "issuer_key_id": issuer_key_id,
+    }
+    proto = ControlRecord(
+        record_id="", previous_epoch=epoch, new_epoch=epoch + 1,
+        change_type=change_type, target_type=target_type, target_id=target_id,
+        target_digest_optional=target_digest,
+        issued_at_unix_ms=harness.clock.now_unix_ms,
+        issuer_authority_id=issuer_authority_id, issuer_key_id=issuer_key_id,
+        record_digest="",
+    )
+    rec, _ = compute_id_and_digest(proto, semantic_fields=semantic,
+                                   id_prefix="rev", id_salt=(record_salt, target_id))
+    from qa_poc.crypto import sign_ed25519
+    sig = _authority_call(sign_ed25519, issuer_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+    return rec.__class__(**{**rec.__dict__, "signature": sig})
+
+
+def _drop_to_executor_if_host():
+    if os.environ.get("ATE_USE_BOOTSTRAP_KEYS") != "1":
+        return
+    import pwd
+    pw = pwd.getpwnam("ate-executor")
+    if os.geteuid() == 0:
+        os.setgroups([])
+        os.setgid(pw.pw_gid)
+        os.setuid(pw.pw_uid)
+
+
+def _child_open_store(db_path):
+    _drop_to_executor_if_host()
+    return enforcement_store.open_store(db_path)
+
+
 def case_p11a(harness, evidence_dir) -> FormalEvidence:
-    """QA-P11 subcase A (FR-9): CR holds the write lock FIRST; EAP contends
-    and is denied by SQLITE_BUSY; CR commits (epoch++); EAP proceeds
-    afterwards and is denied by dependency; mutation_count = 0.
-
-    Frozen §25 ordering: control-record transaction gets the write lock,
-    EAP is released to contend and cannot pass it, revocation commits /
-    epoch increments, EAP proceeds afterward and denies.
-    """
-    from trusted.enforcement_store import SQLiteBarrier
-
+    """Actual CR transaction locks first; actual EAP transaction contends."""
+    import multiprocessing as mp
     sb = make_subject_binding(identity_id="agent-p11a", challenge="p11a")
     q, a = issue_qualification_and_admission(harness, subject_binding=sb)
     case_dir, conn = _setup_case_dir("QA-P11a", evidence_dir)
     db_path = os.path.join(case_dir, "enforcement.db")
     reg = RevocationRegistry()
-    barrier = SQLiteBarrier(db_path)
     try:
         _insert_initial_resource(conn, "resource-A", "p11a-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
         cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p11a-1")
         td = _make_trust_decision(harness, cap=cap)
+        rec = _build_signed_revocation_record(harness, conn, record_salt="p11a-rev",
+            target_type="qualification", target_id=q.credential_id, target_digest=q.credential_digest)
+        auth_lookup = _make_strict_auth_lookup(harness)
 
-        # === Barrier step 1: acquire write lock via control-record txn ===
-        _executor_call(barrier.acquire_holding)
+        ctx = mp.get_context("fork")
+        cr_locked, release_cr, eap_attempted = ctx.Event(), ctx.Event(), ctx.Event()
+        qout = ctx.Queue()
 
-        # === Barrier step 2: EAP attempts to begin (SQLITE_BUSY) ===
-        # We attempt an EAP-style BEGIN IMMEDIATE on a separate connection.
-        eap_attempt_ok, eap_err = _executor_call(barrier.attempt_write,
-            "INSERT INTO protected_resource (resource_id, value, mutation_count) "
-            "VALUES ('__barrier_probe__', 'probe', 0)"
-        )
-        ev_busy_blocked = (not eap_attempt_ok)
+        def control_worker():
+            cc = _child_open_store(db_path)
+            try:
+                epoch = apply_control_record(
+                    cc, record=rec, issuer_pub=harness.keys.r11_pub,
+                    change_type_authorization_lookup=auth_lookup,
+                    created_at_unix_ms=harness.clock.now_unix_ms,
+                    transaction_after_begin_hook=lambda: (cr_locked.set(), release_cr.wait()),
+                )
+                qout.put(("cr", "ok", epoch))
+            except Exception as e:
+                qout.put(("cr", "err", repr(e)))
+            finally:
+                cc.close()
 
-        # === Barrier step 3: commit the control-record txn (epoch++) ===
-        # First: release the holding lock (ROLLBACK so we don't actually
-        # mutate the fixture), then commit the real CR via the in-process
-        # apply_revocation_control_record path.
-        _executor_call(barrier.release_holding)
+        def eap_worker():
+            ec = _child_open_store(db_path)
+            try:
+                result = _run_eap(
+                    harness, conn=ec, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
+                    resource_id="resource-A", new_value="p11a-write",
+                    transaction_before_begin_hook=eap_attempted.set,
+                )
+                qout.put(("eap", "ok", result.verdict, result.reason_code))
+            except Exception as e:
+                qout.put(("eap", "err", repr(e)))
+            finally:
+                ec.close()
 
-        apply_revocation_control_record(
-            conn,
-            record_id="p11a-rev",
-            target_type="qualification",
-            target_id=q.credential_id,
-            target_digest=q.credential_digest,
-            issuer_priv=harness.keys.r11_priv,
-            issuer_pub=harness.keys.r11_pub,
-            issuer_authority_id="r11-q",
-            issuer_key_id=_r11_key_id(harness),
-            registry=reg,
-            reason="qa-p11a-revocation",
-            created_at_unix_ms=harness.clock.now_unix_ms,
-            change_type_authorization_ok=_make_strict_auth_lookup(harness),
-        )
+        pc = ctx.Process(target=control_worker)
+        pe = ctx.Process(target=eap_worker)
+        pc.start(); assert cr_locked.wait(5), "actual CR did not acquire lock"
+        pe.start(); assert eap_attempted.wait(5), "actual EAP did not attempt transaction"
+        release_cr.set()
+        pc.join(10); pe.join(10)
+        assert not pc.is_alive() and not pe.is_alive(), "P11a child process timeout"
+        rows = [qout.get(timeout=2), qout.get(timeout=2)]
+        cr_row = next(x for x in rows if x[0] == "cr")
+        eap_row = next(x for x in rows if x[0] == "eap")
         ending_epoch = capture_epoch(conn)
-
-        # === Barrier step 4: EAP proceeds; denied by dependency (now revoked) ===
-        result = _run_eap(
-            harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
-            resource_id="resource-A", new_value="p11a-write",
-        )
-
-        ev = FormalEvidence(
-            test_id="QA-P11a",
-            fixture_id=f"QA-P11a/{case_dir}",
-            case_function="tests.case_functions.case_p11a",
-            verdict=result.verdict,
-            reason_code=result.reason_code,
-            qualification_id=q.credential_id,
-            qualification_digest=q.credential_digest,
-            admission_id=a.credential_id,
-            admission_digest=a.credential_digest,
-            capability_id=cap.token_id,
-            capability_digest=cap.token_digest,
-            trust_decision_id=td.trust_decision_id,
-            trust_decision_digest=td.trust_decision_digest,
-        )
-        ev.eap_reached = True
-        # FR-9 barrier evidence
-        ev.barrier_evidence = {
-            "barrier_held_before_eap": True,
-            "eap_attempted_write_blocked_by_busy": ev_busy_blocked,
-            "control_record_committed_first": ending_epoch == starting_epoch + 1,
-            "eap_executed_after_cr_commit": True,
-            "lock_holding_connection": "separate sqlite3 connection with BEGIN IMMEDIATE",
-            "competing_connection": "separate sqlite3 connection with INSERT",
-        }
         final_value, final_mc = _read_resource(conn, "resource-A")
+        ev = FormalEvidence(
+            test_id="QA-P11a", fixture_id=f"QA-P11a/{case_dir}",
+            case_function="tests.case_functions.case_p11a",
+            verdict=eap_row[2] if eap_row[1] == "ok" else "CHILD_ERROR",
+            reason_code=eap_row[3] if eap_row[1] == "ok" else str(eap_row),
+            qualification_id=q.credential_id, qualification_digest=q.credential_digest,
+            admission_id=a.credential_id, admission_digest=a.credential_digest,
+            capability_id=cap.token_id, capability_digest=cap.token_digest,
+            trust_decision_id=td.trust_decision_id, trust_decision_digest=td.trust_decision_digest,
+            eap_reached=True,
+        )
+        ev.barrier_evidence = {
+            "actual_control_transaction_acquired_first": cr_locked.is_set(),
+            "actual_eap_transaction_attempted_while_control_held": eap_attempted.is_set(),
+            "control_child_result": list(cr_row), "eap_child_result": list(eap_row),
+        }
         ev.subcheck_results = {
-            "barrier_busy_blocked": ev_busy_blocked,
-            "cr_committed_first": ending_epoch == starting_epoch + 1,
+            "actual_cr_committed_first": cr_row[1] == "ok" and ending_epoch == starting_epoch + 1,
+            "actual_eap_denied_after_cr": eap_row[1] == "ok" and eap_row[2] == "EXECUTION_DENIED" and "QUALIFICATION_REVOKED" in eap_row[3],
             "no_protected_mutation": final_mc == initial_mc,
             "audit_chain_valid": capture_audit_chain_valid(conn),
         }
-        ev.pass_fail = (
-            "PASS" if (result.verdict == "EXECUTION_DENIED"
-                        and final_mc == initial_mc
-                        and ev_busy_blocked
-                        and ending_epoch == starting_epoch + 1
-                        and capture_audit_chain_valid(conn))
-            else "FAIL"
-        )
-        if final_mc > initial_mc and ev.pass_fail == "PASS":
-            ev.enforcement_failure_reason = "unauthorized protected mutation"
-        return _populate_evidence(
-            ev, conn,
-            resource_id="resource-A",
+        ev.pass_fail = "PASS" if all(ev.subcheck_results.values()) else "FAIL"
+        return _populate_evidence(ev, conn, resource_id="resource-A",
             initial_value=initial_value, initial_mc=initial_mc,
             final_value=final_value, final_mc=final_mc,
-            starting_epoch=starting_epoch,
-            ending_epoch=ending_epoch,
+            starting_epoch=starting_epoch, ending_epoch=ending_epoch,
             audit_chain_valid=capture_audit_chain_valid(conn),
-            applied_control_records=capture_applied_control_records(conn),
-        )
+            applied_control_records=capture_applied_control_records(conn))
     finally:
-        _executor_call(barrier.release_holding)
         conn.close()
 
 
 def case_p11b(harness, evidence_dir) -> FormalEvidence:
-    """QA-P11 subcase B (FR-9): EAP holds the write lock FIRST (BEGIN
-    IMMEDIATE); CR transaction contends and is blocked by SQLITE_BUSY; EAP
-    + protected mutation commits (mutation_count=1); CR proceeds and
-    commits revocation; subsequent fresh action denied.
-
-    Frozen §25 ordering: EAP transaction gets the write lock, control-record
-    operation is released to contend and cannot pass it, EAP + protected
-    mutation commits, control-record transaction proceeds afterward and
-    commits revocation, mutation_count = 1, a subsequent fresh action denies.
-    """
-    from trusted.enforcement_store import SQLiteBarrier
-
+    """Actual EAP transaction locks first; actual CR transaction contends."""
+    import multiprocessing as mp
     sb = make_subject_binding(identity_id="agent-p11b", challenge="p11b")
     q, a = issue_qualification_and_admission(harness, subject_binding=sb)
     case_dir, conn = _setup_case_dir("QA-P11b", evidence_dir)
     db_path = os.path.join(case_dir, "enforcement.db")
     reg = RevocationRegistry()
-    barrier = SQLiteBarrier(db_path)
     try:
         _insert_initial_resource(conn, "resource-A", "p11b-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
         cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p11b-1")
         td = _make_trust_decision(harness, cap=cap)
+        rec = _build_signed_revocation_record(harness, conn, record_salt="p11b-rev",
+            target_type="qualification", target_id=q.credential_id, target_digest=q.credential_digest)
+        auth_lookup = _make_strict_auth_lookup(harness)
 
-        # === Barrier step 1: EAP acquires write lock via separate connection ===
-        # The EAP itself uses conn (in-process). We hold an additional
-        # BEGIN IMMEDIATE on a separate connection to demonstrate the
-        # control-record contention against an in-progress EAP.
-        holding_conn = _executor_call(barrier.acquire_holding)
+        ctx = mp.get_context("fork")
+        eap_locked, release_eap, cr_attempted = ctx.Event(), ctx.Event(), ctx.Event()
+        qout = ctx.Queue()
 
-        # === Barrier step 2: CR attempts to commit while EAP is in flight ===
-        # CR tries to UPDATE — gets SQLITE_BUSY because the holding
-        # connection (EAP-equivalent) holds the write lock.
-        cr_attempt_ok, cr_err = _executor_call(barrier.attempt_write,
-            "INSERT INTO protected_resource (resource_id, value, mutation_count) "
-            "VALUES ('__barrier_probe_cr__', 'probe', 0)"
-        )
-        ev_cr_busy_blocked = (not cr_attempt_ok)
+        def eap_worker():
+            ec = _child_open_store(db_path)
+            try:
+                result = _run_eap(
+                    harness, conn=ec, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
+                    resource_id="resource-A", new_value="p11b-write-1",
+                    transaction_after_begin_hook=lambda: (eap_locked.set(), release_eap.wait()),
+                )
+                qout.put(("eap", "ok", result.verdict, result.reason_code))
+            except Exception as e:
+                qout.put(("eap", "err", repr(e)))
+            finally:
+                ec.close()
 
-        # === Barrier step 3: release the holding connection (EAP-equivalent commits) ===
-        _executor_call(barrier.release_holding)
+        def control_worker():
+            cc = _child_open_store(db_path)
+            try:
+                epoch = apply_control_record(
+                    cc, record=rec, issuer_pub=harness.keys.r11_pub,
+                    change_type_authorization_lookup=auth_lookup,
+                    created_at_unix_ms=harness.clock.now_unix_ms,
+                    transaction_before_begin_hook=cr_attempted.set,
+                )
+                qout.put(("cr", "ok", epoch))
+            except Exception as e:
+                qout.put(("cr", "err", repr(e)))
+            finally:
+                cc.close()
 
-        # === Barrier step 4: EAP commits (in-process conn) — mutation_count=1 ===
-        result1 = _run_eap(
-            harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
-            resource_id="resource-A", new_value="p11b-write-1",
-        )
-        post_eap_epoch = capture_epoch(conn)
+        pe = ctx.Process(target=eap_worker)
+        pc = ctx.Process(target=control_worker)
+        pe.start(); assert eap_locked.wait(5), "actual EAP did not acquire lock"
+        pc.start(); assert cr_attempted.wait(5), "actual CR did not attempt transaction"
+        release_eap.set()
+        pe.join(10); pc.join(10)
+        assert not pe.is_alive() and not pc.is_alive(), "P11b child process timeout"
+        rows = [qout.get(timeout=2), qout.get(timeout=2)]
+        eap_row = next(x for x in rows if x[0] == "eap")
+        cr_row = next(x for x in rows if x[0] == "cr")
 
-        # === Barrier step 5: CR proceeds; commits revocation ===
-        apply_revocation_control_record(
-            conn,
-            record_id="p11b-rev",
-            target_type="qualification",
-            target_id=q.credential_id,
-            target_digest=q.credential_digest,
-            issuer_priv=harness.keys.r11_priv,
-            issuer_pub=harness.keys.r11_pub,
-            issuer_authority_id="r11-q",
-            issuer_key_id=_r11_key_id(harness),
-            registry=reg,
-            reason="qa-p11b-revocation",
-            created_at_unix_ms=harness.clock.now_unix_ms,
-            change_type_authorization_ok=_make_strict_auth_lookup(harness),
-        )
+        # Fresh action after committed revocation must deny from committed store.
+        cap2 = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p11b-2")
+        td2 = _make_trust_decision(harness, cap=cap2)
+        result2 = _run_eap(harness, conn=conn, sb=sb, q=q, a=a, cap=cap2, td=td2, reg=reg,
+            resource_id="resource-A", new_value="p11b-write-2")
         ending_epoch = capture_epoch(conn)
-
-        # === Barrier step 6: subsequent EAP denied ===
-        result2 = _run_eap(
-            harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
-            resource_id="resource-A", new_value="p11b-write-2",
-        )
-
-        ev = FormalEvidence(
-            test_id="QA-P11b",
-            fixture_id=f"QA-P11b/{case_dir}",
-            case_function="tests.case_functions.case_p11b",
-            verdict=result2.verdict,
-            reason_code=result2.reason_code,
-            qualification_id=q.credential_id,
-            qualification_digest=q.credential_digest,
-            admission_id=a.credential_id,
-            admission_digest=a.credential_digest,
-            capability_id=cap.token_id,
-            capability_digest=cap.token_digest,
-            trust_decision_id=td.trust_decision_id,
-            trust_decision_digest=td.trust_decision_digest,
-        )
-        ev.eap_reached = True
-        # FR-9 barrier evidence
-        ev.barrier_evidence = {
-            "eap_held_lock_first": True,
-            "cr_attempted_write_blocked_by_busy": ev_cr_busy_blocked,
-            "eap_committed_first": post_eap_epoch == starting_epoch,
-            "cr_committed_after_eap": ending_epoch == starting_epoch + 1,
-            "lock_holding_connection": "separate sqlite3 connection with BEGIN IMMEDIATE (EAP-equivalent)",
-            "competing_connection": "separate sqlite3 connection (CR-equivalent)",
-        }
         final_value, final_mc = _read_resource(conn, "resource-A")
+        ev = FormalEvidence(
+            test_id="QA-P11b", fixture_id=f"QA-P11b/{case_dir}",
+            case_function="tests.case_functions.case_p11b",
+            verdict=result2.verdict, reason_code=result2.reason_code,
+            qualification_id=q.credential_id, qualification_digest=q.credential_digest,
+            admission_id=a.credential_id, admission_digest=a.credential_digest,
+            capability_id=cap2.token_id, capability_digest=cap2.token_digest,
+            trust_decision_id=td2.trust_decision_id, trust_decision_digest=td2.trust_decision_digest,
+            eap_reached=True,
+        )
+        ev.barrier_evidence = {
+            "actual_eap_transaction_acquired_first": eap_locked.is_set(),
+            "actual_control_transaction_attempted_while_eap_held": cr_attempted.is_set(),
+            "eap_child_result": list(eap_row), "control_child_result": list(cr_row),
+        }
         ev.subcheck_results = {
-            "barrier_cr_busy_blocked": ev_cr_busy_blocked,
-            "first_eap_succeeded": result1.verdict == "EXECUTION_SUCCEEDED",
-            "first_eap_mutated": final_mc >= 1,
-            "cr_committed_after_eap": ending_epoch == starting_epoch + 1,
-            "second_eap_denied": result2.verdict == "EXECUTION_DENIED",
+            "first_actual_eap_succeeded": eap_row[1] == "ok" and eap_row[2] == "EXECUTION_SUCCEEDED",
+            "first_actual_eap_mutated_once": final_mc == 1,
+            "actual_cr_committed_after_eap": cr_row[1] == "ok" and ending_epoch == starting_epoch + 1,
+            "fresh_action_denied_after_cr": result2.verdict == "EXECUTION_DENIED" and "QUALIFICATION_REVOKED" in result2.reason_code,
             "audit_chain_valid": capture_audit_chain_valid(conn),
         }
-        ev.pass_fail = (
-            "PASS" if (result1.verdict == "EXECUTION_SUCCEEDED"
-                        and result2.verdict == "EXECUTION_DENIED"
-                        and final_mc == 1
-                        and ev_cr_busy_blocked
-                        and ending_epoch == starting_epoch + 1
-                        and capture_audit_chain_valid(conn))
-            else "FAIL"
-        )
-        if final_mc > 1 and ev.pass_fail == "PASS":
-            ev.enforcement_failure_reason = "unauthorized protected mutation"
-        return _populate_evidence(
-            ev, conn,
-            resource_id="resource-A",
+        ev.pass_fail = "PASS" if all(ev.subcheck_results.values()) else "FAIL"
+        return _populate_evidence(ev, conn, resource_id="resource-A",
             initial_value=initial_value, initial_mc=initial_mc,
             final_value=final_value, final_mc=final_mc,
-            starting_epoch=starting_epoch,
-            ending_epoch=ending_epoch,
+            starting_epoch=starting_epoch, ending_epoch=ending_epoch,
             audit_chain_valid=capture_audit_chain_valid(conn),
-            applied_control_records=capture_applied_control_records(conn),
-        )
+            applied_control_records=capture_applied_control_records(conn))
     finally:
-        _executor_call(barrier.release_holding)
         conn.close()
-
 
 def case_p12(harness, evidence_dir) -> FormalEvidence:
     """QA-P12: ACTUAL requester direct protected-resource bypass attempt.

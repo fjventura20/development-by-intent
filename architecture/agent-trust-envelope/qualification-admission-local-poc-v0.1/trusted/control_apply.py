@@ -66,6 +66,8 @@ def apply_control_record(
     issuer_pub: Ed25519PublicKey,
     change_type_authorization_lookup: Callable[[str, str], bool],
     created_at_unix_ms: int,
+    transaction_before_begin_hook=None,
+    transaction_after_begin_hook=None,
 ) -> int:
     """Apply a ControlRecord to the executor-owned store.
 
@@ -80,7 +82,11 @@ def apply_control_record(
         raise ControlRecordError("CONTROL_RECORD_ISSUER_NOT_AUTHORIZED")
 
     # Now the executor-owned serialized write transaction
-    with enforcement_store.eap_transaction(conn) as tx:
+    with enforcement_store.eap_transaction(
+        conn,
+        before_begin_hook=transaction_before_begin_hook,
+        after_begin_hook=transaction_after_begin_hook,
+    ) as tx:
         try:
             # Monotonic-epoch check (frozen §16)
             current = enforcement_store.current_epoch(tx)

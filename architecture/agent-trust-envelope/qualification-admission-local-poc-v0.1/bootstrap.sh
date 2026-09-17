@@ -54,13 +54,16 @@ if [ "$(id -u)" -ne 0 ] && ! sudo -n true 2>/dev/null; then
   exit 3
 fi
 
-# Caller passes TWO source dirs: qa_poc then trusted
+# Caller passes THREE source dirs: qa_poc, trusted, and tests.
+# The tests source dir is optional but required to install the
+# trusted signer worker into /opt/ate-poc-v010/bin/.
 if [ "$#" -lt 2 ]; then
-  echo "usage: bootstrap.sh <qa_poc-source-dir> <trusted-source-dir>" >&2
+  echo "usage: bootstrap.sh <qa_poc-source-dir> <trusted-source-dir> [tests-source-dir]" >&2
   exit 4
 fi
 QA_SRC="$1"
 TRUSTED_SRC="$2"
+TESTS_SRC="${3:-}"
 
 if [ ! -d "$QA_SRC" ] || [ ! -d "$TRUSTED_SRC" ]; then
   echo "qa_poc or trusted source dir not found" >&2
@@ -78,6 +81,23 @@ for sub in qa_poc trusted; do
     install -m 0555 -o root -g root "$f" "$ATE_OPT_ROOT/$sub/"
   done
 done
+
+# --- 1b. Install the trusted signer worker into /opt/ate-poc-v010/bin/ ---
+# The worker is trusted executable code, not mutable development source. It must
+# not execute from the development worktree, and it must not require the
+# development PYTHONPATH to be inherited by the sudo'd subprocess. Installing
+# it under /opt/ate-poc-v010/bin/ as root-owned 0555 keeps it inside the
+# existing trusted-code boundary. The worker itself imports qa_poc.crypto
+# from the same trusted root via sys.path manipulation.
+install -d -m 0755 -o root -g root "$ATE_OPT_ROOT/bin"
+if [ -n "$TESTS_SRC" ] && [ -d "$TESTS_SRC" ]; then
+  WORKER_SRC="$TESTS_SRC/host_signer_worker.py"
+  if [ ! -e "$WORKER_SRC" ]; then
+    echo "host_signer_worker.py not found at $WORKER_SRC" >&2
+    exit 6
+  fi
+  install -m 0555 -o root -g root "$WORKER_SRC" "$ATE_OPT_ROOT/bin/host_signer_worker.py"
+fi
 
 # --- 2. Create OS identities (idempotent) ---
 for name in ate-requester ate-authority ate-executor; do

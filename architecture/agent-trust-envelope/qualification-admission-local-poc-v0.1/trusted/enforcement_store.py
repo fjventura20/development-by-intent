@@ -102,14 +102,27 @@ def open_store(db_path: str) -> sqlite3.Connection:
 
 
 @contextmanager
-def eap_transaction(conn: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
-    """Use BEGIN IMMEDIATE for the EAP transaction (frozen §17 + §23).
+def eap_transaction(
+    conn: sqlite3.Connection,
+    *,
+    before_begin_hook=None,
+    after_begin_hook=None,
+) -> Iterator[sqlite3.Connection]:
+    """BEGIN IMMEDIATE transaction with deterministic test-only hooks.
 
-    The caller must issue all writes inside this block and call
-    `conn.execute("COMMIT")` explicitly on success. On exception, the
-    context manager issues ROLLBACK and re-raises.
+    If the caller already owns a transaction (execute_bound_action begins its
+    transaction before validation), this context adopts it rather than issuing
+    a nested BEGIN.
     """
+    already = bool(getattr(conn, "in_transaction", False))
+    if already:
+        yield conn
+        return
+    if before_begin_hook is not None:
+        before_begin_hook()
     conn.execute("BEGIN IMMEDIATE")
+    if after_begin_hook is not None:
+        after_begin_hook()
     try:
         yield conn
     except BaseException:
