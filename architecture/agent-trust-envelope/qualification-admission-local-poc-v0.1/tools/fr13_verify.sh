@@ -7,6 +7,7 @@ export PYTHONPATH="$HERE"
 
 echo "== FR-13 successor patch application =="
 python3 tools/fr13_successor_corrections.py
+python3 tools/fr13_fix_preflight_collection.py
 
 echo "== Syntax checks =="
 python3 -m py_compile \
@@ -18,7 +19,8 @@ python3 -m py_compile \
   tests/host_runtime.py \
   tests/host_signer_worker.py \
   tests/case_functions.py \
-  tests/test_fr13_successor.py
+  tests/test_fr13_successor.py \
+  tools/fr13_fix_preflight_collection.py
 
 echo "== Development tests: zero failures / zero skips required =="
 set +e
@@ -40,7 +42,6 @@ sudo -n bash bootstrap.sh "$HERE/qa_poc" "$HERE/trusted"
 
 echo "== Exact PF1..PF14 preflight + six frozen spec locks =="
 sudo -n env PYTHONPATH="$HERE" python3 - <<'PY'
-import os
 import run_formal
 repo='/home/fjventura20/devProjectsU/development-by-intent-ateqa'
 r=run_formal.run_preflight(repo)
