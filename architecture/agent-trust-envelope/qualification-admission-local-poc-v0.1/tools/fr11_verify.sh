@@ -6,8 +6,16 @@ cd "$HERE"
 export PYTHONPATH="$HERE"
 
 echo "== FR-11 patch application =="
-python3 tools/fr11_finalize.py
-python3 tools/fr11_enforce_runtime.py
+if ! grep -q 'PUB_ROOT="/etc/ate/poc-public"' bootstrap.sh 2>/dev/null; then
+  python3 tools/fr11_finalize.py
+else
+  echo "fr11_finalize.py already applied; skipping"
+fi
+if ! grep -q '^def as_user' tests/host_runtime.py 2>/dev/null; then
+  python3 tools/fr11_enforce_runtime.py
+else
+  echo "fr11_enforce_runtime.py already applied; skipping"
+fi
 
 echo "== Syntax checks =="
 python3 -m py_compile \
