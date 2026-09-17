@@ -1,27 +1,39 @@
 #!/usr/bin/env bash
-# ATE Qualification & Admission Local PoC v0.1 — bootstrap.
+# ATE Qualification & Admission Local PoC v0.1 — bootstrap (FR-11).
 #
-# Installs the OS boundary: identities ate-requester / ate-authority /
-# ate-executor (no login, no sudo), and the executor-owned enforcement
-# store + key directories with the correct ownership / mode bits.
+# Installs the OS boundary, the executor-owned enforcement store, and
+# EIGHT distinct keypairs under proper ownership / mode bits:
 #
-# Layout (mirrors the v0.2 P1 enforcement harness contract — same
-# identities, same mode bits — so this PoC can reuse prior AegisNexus
-# OS-boundary work safely):
+#   AUTH_POLICY                : publishes QualificationRequirementsProfile
+#   AUTH_IDENTITY              : publishes IdentityProfile
+#   AUTH_R11_QUALIFICATION     : signs QualificationEvidenceManifest /
+#                                QualificationDecision / QualificationCredential
+#                                AND signs QUALIFICATION_REVOCATION ControlRecords
+#   AUTH_R12_ADMISSION         : signs AdmissionEvidenceManifest /
+#                                AdmissionDecision / AdmissionCredential
+#                                AND signs ADMISSION_REVOCATION ControlRecords
+#   AUTH_AUTHORIZATION         : signs CapabilityToken
+#   AUTH_TRUST_DECISION        : signs TrustDecision
+#   AUTH_EXECUTOR              : signs ControlRecord
+#   AUTH_AUDIT                 : signs audit-trail hash chain (per §26)
+#
+# Layout (frozen §4-§7):
 #
 #   /opt/ate-poc-v010/                        root:root 0755
 #     qa_poc/                                  root:root 0755 (files 0555)
 #     trusted/                                root:root 0755 (files 0555)
-#   /etc/ate/                                 root:root 0755
-#     authority_pubkey.pem                    root:root 0644
 #   /var/lib/ate/poc/                         root:root 0755
 #     authority/                              ate-authority:ate-authority 0700
-#       authority_signing.key                 ate-authority:ate-authority 0600
+#       policy_signing.key                    ate-authority 0600
+#       identity_signing.key                  ate-authority 0600
+#       r11_qualification_signing.key        ate-authority 0600
+#       r12_admission_signing.key            ate-authority 0600
+#       authorization_signing.key            ate-authority 0600
+#       trust_decision_signing.key           ate-authority 0600
 #     executor/                               ate-executor:ate-executor 0700
-#       enforcement.db                        ate-executor:ate-executor 0600
-#         (schema applied by ate-executor on bootstrap)
-#       executor_signing.key                  ate-executor:ate-executor 0600
-#       audit_signing.key                     ate-executor:ate-executor 0600
+#       executor_signing.key                  ate-executor 0600
+#       audit_signing.key                     ate-executor 0600
+#       enforcement.db                        ate-executor 0600
 #
 # This PoC does not use long-lived IPC services; the EAP and
 # apply_control_record are invoked in-process by the formal runner as
@@ -31,9 +43,11 @@
 
 set -euo pipefail
 
-ATE_OPT_ROOT="${ATE_OPT_ROOT:-/opt/ate-poc-v010}"
-ATE_ETC="${ATE_ETC:-/etc/ate}"
-ATE_VAR_LIB="${ATE_VAR_LIB:-/var/lib/ate/poc}"
+export ATE_OPT_ROOT="${ATE_OPT_ROOT:-/opt/ate-poc-v010}"
+export ATE_VAR_LIB="${ATE_VAR_LIB:-/var/lib/ate/poc}"
+
+# Preserve env through sudo invocations (FR-11)
+export SUDO_ASKPASS="/bin/false"
 
 if [ "$(id -u)" -ne 0 ] && ! sudo -n true 2>/dev/null; then
   echo "must run as root or with passwordless sudo" >&2
@@ -54,121 +68,159 @@ if [ ! -d "$QA_SRC" ] || [ ! -d "$TRUSTED_SRC" ]; then
 fi
 
 # --- 1. Install trusted code as packages (root-owned, world-readable+executable)
-# We preserve the qa_poc/ and trusted/ subdirectory structure so the
-# Python imports resolve as packages.
 for sub in qa_poc trusted; do
-  sudo -n install -d -o root -g root -m 0755 "$ATE_OPT_ROOT/$sub"
+  src="$QA_SRC"
+  [ "$sub" = "trusted" ] && src="$TRUSTED_SRC"
+  install -d -m 0755 -o root -g root "$ATE_OPT_ROOT/$sub"
+  # Copy all .py files (preserving __init__.py)
+  for f in "$src"/*.py; do
+    [ -e "$f" ] || continue
+    install -m 0555 -o root -g root "$f" "$ATE_OPT_ROOT/$sub/"
+  done
 done
 
-for f in "$QA_SRC"/*.py; do
-  [ -e "$f" ] || continue
-  base="$(basename "$f")"
-  sudo -n install -o root -g root -m 0555 "$f" "$ATE_OPT_ROOT/qa_poc/$base"
+# --- 2. Create OS identities (idempotent) ---
+for name in ate-requester ate-authority ate-executor; do
+  if ! getent group "$name" > /dev/null 2>&1; then
+    groupadd --system "$name"
+  fi
+  if ! id "$name" > /dev/null 2>&1; then
+    useradd --system --no-create-home --shell /usr/sbin/nologin \
+            --gid "$name" --groups "$name" "$name"
+  fi
 done
-for f in "$TRUSTED_SRC"/*.py; do
-  [ -e "$f" ] || continue
-  base="$(basename "$f")"
-  sudo -n install -o root -g root -m 0555 "$f" "$ATE_OPT_ROOT/trusted/$base"
-done
 
-# --- 2. Ensure OS identities (idempotent) ----------------------------------
-for grp in ate-requester ate-authority ate-executor; do
-  sudo -n groupadd -f "$grp" >/dev/null
-done
-id ate-requester >/dev/null 2>&1 || sudo -n useradd -r -s /usr/sbin/nologin -G ate-requester ate-requester
-id ate-authority >/dev/null 2>&1 || sudo -n useradd -r -s /usr/sbin/nologin -G ate-authority ate-authority
-id ate-executor >/dev/null 2>&1  || sudo -n useradd -r -s /usr/sbin/nologin -G ate-executor ate-executor
+# --- 3. Create key directories ---
+install -d -m 0700 -o ate-authority -g ate-authority "$ATE_VAR_LIB/authority"
+install -d -m 0700 -o ate-executor  -g ate-executor  "$ATE_VAR_LIB/executor"
 
-# --- 3. Mutable state directories -------------------------------------------
-sudo -n install -d -o root -g root -m 0755 "$ATE_VAR_LIB"
-sudo -n install -d -o ate-authority -g ate-authority -m 0700 "$ATE_VAR_LIB/authority"
-sudo -n install -d -o ate-executor -g ate-executor -m 0700 "$ATE_VAR_LIB/executor"
-
-# --- 4. /etc/ate/ for public authority pubkey ------------------------------
-sudo -n install -d -o root -g root -m 0755 "$ATE_ETC"
-sudo -n touch "$ATE_ETC/authority_pubkey.pem"
-sudo -n chown root:root "$ATE_ETC/authority_pubkey.pem"
-sudo -n chmod 0644 "$ATE_ETC/authority_pubkey.pem"
-
-# --- 5. Generate authority + executor keypairs (root) and install ----------
-EXECUTOR_DB="$ATE_VAR_LIB/executor/enforcement.db"
-EXECUTOR_KEY="$ATE_VAR_LIB/executor/executor_signing.key"
-EXECUTOR_AUDIT_KEY="$ATE_VAR_LIB/executor/audit_signing.key"
-AUTHORITY_KEY="$ATE_VAR_LIB/authority/authority_signing.key"
-AUTHORITY_PUBKEY="$ATE_ETC/authority_pubkey.pem"
-
-sudo -n touch "$EXECUTOR_DB"
-sudo -n chown ate-executor:ate-executor "$EXECUTOR_DB"
-sudo -n chmod 0600 "$EXECUTOR_DB"
-
-sudo -n /usr/bin/python3 - "$EXECUTOR_KEY" "$EXECUTOR_AUDIT_KEY" "$AUTHORITY_KEY" "$AUTHORITY_PUBKEY" <<'PYEOF'
-import sys, os
+# --- 4. Generate the EIGHT distinct keypairs (if absent) ---
+generate_key() {
+  local keyfile="$1"
+  local owner="$2"
+  if [ -s "$keyfile" ]; then
+    echo "[bootstrap] keep existing $keyfile"
+  else
+    sudo -n -u "$owner" python3 -c "
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
-
-priv_targets = [
-    (sys.argv[1], Ed25519PrivateKey.generate()),
-    (sys.argv[2], Ed25519PrivateKey.generate()),
-    (sys.argv[3], Ed25519PrivateKey.generate()),
-]
-pub_path = sys.argv[4]
-
-authority_priv = priv_targets[2][1]
-
-for path, priv in priv_targets:
-    pem = priv.private_bytes(
+priv = Ed25519PrivateKey.generate()
+with open('$keyfile', 'wb') as f:
+    f.write(priv.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
-    )
-    tmp = path + ".tmp"
-    with open(tmp, "wb") as f:
-        f.write(pem)
-    os.replace(tmp, path)
+    ))
+import os; os.chmod('$keyfile', 0o600)
+"
+  fi
+}
 
-pub_pem = authority_priv.public_key().public_bytes(
+generate_key "$ATE_VAR_LIB/authority/policy_signing.key"        ate-authority
+generate_key "$ATE_VAR_LIB/authority/identity_signing.key"      ate-authority
+generate_key "$ATE_VAR_LIB/authority/r11_qualification_signing.key" ate-authority
+generate_key "$ATE_VAR_LIB/authority/r12_admission_signing.key"     ate-authority
+generate_key "$ATE_VAR_LIB/authority/authorization_signing.key"     ate-authority
+generate_key "$ATE_VAR_LIB/authority/trust_decision_signing.key"    ate-authority
+generate_key "$ATE_VAR_LIB/executor/executor_signing.key"       ate-executor
+generate_key "$ATE_VAR_LIB/executor/audit_signing.key"          ate-executor
+
+# --- 5. Generate public-key manifest (used by run_formal.py) ---
+export PUB_MANIFEST="$ATE_VAR_LIB/authority/public_key_manifest.json"
+extract_pub_pem() {
+  local keyfile="$1"
+  python3 -c "
+from cryptography.hazmat.primitives import serialization
+with open('$keyfile', 'rb') as f:
+    priv = serialization.load_pem_private_key(f.read(), password=None)
+pub = priv.public_key()
+print(pub.public_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PublicFormat.SubjectPublicKeyInfo,
-)
-tmp = pub_path + ".tmp"
-with open(tmp, "wb") as f:
-    f.write(pub_pem)
-os.replace(tmp, pub_path)
-PYEOF
+).decode('ascii'))
+"
+}
 
-sudo -n chown ate-executor:ate-executor "$EXECUTOR_KEY" "$EXECUTOR_AUDIT_KEY"
-sudo -n chmod 0600 "$EXECUTOR_KEY" "$EXECUTOR_AUDIT_KEY"
-sudo -n chown ate-authority:ate-authority "$AUTHORITY_KEY"
-sudo -n chmod 0600 "$AUTHORITY_KEY"
-sudo -n chown root:root "$AUTHORITY_PUBKEY"
-sudo -n chmod 0644 "$AUTHORITY_PUBKEY"
+# Build manifest as ate-authority (writes only its own files)
+sudo -n -u ate-authority env ATE_VAR_LIB="$ATE_VAR_LIB" ATE_OPT_ROOT="$ATE_OPT_ROOT" PUB_MANIFEST="$PUB_MANIFEST" bash -c '
+set -euo pipefail
+mkdir -p "$ATE_VAR_LIB/authority"
+KEY_DIR="$ATE_VAR_LIB/authority"
+EX_KEY_DIR="$ATE_VAR_LIB/executor"
+EMIT=$(mktemp)
+python3 - <<PY
+import hashlib, json, os, sys
+from cryptography.hazmat.primitives import serialization
+KEYS = [
+  ("AUTH_POLICY",                "$KEY_DIR/policy_signing.key"),
+  ("AUTH_IDENTITY",              "$KEY_DIR/identity_signing.key"),
+  ("AUTH_R11_QUALIFICATION",     "$KEY_DIR/r11_qualification_signing.key"),
+  ("AUTH_R12_ADMISSION",         "$KEY_DIR/r12_admission_signing.key"),
+  ("AUTH_AUTHORIZATION",         "$KEY_DIR/authorization_signing.key"),
+  ("AUTH_TRUST_DECISION",        "$KEY_DIR/trust_decision_signing.key"),
+  ("AUTH_EXECUTOR",              "$EX_KEY_DIR/executor_signing.key"),
+  ("AUTH_AUDIT",                 "$EX_KEY_DIR/audit_signing.key"),
+]
+ARTIFACTS = {
+  "AUTH_POLICY": ["ate.qualification.profile.v1"],
+  "AUTH_IDENTITY": ["ate.qualification.evidence_manifest.v1"],
+  "AUTH_R11_QUALIFICATION": [
+    "ate.qualification.credential.v1",
+    "ate.qualification.decision.v1",
+    "ate.control_record.v1:QUALIFICATION_REVOCATION",
+    "ate.control_record.v1:QUALIFICATION_SUSPENSION",
+  ],
+  "AUTH_R12_ADMISSION": [
+    "ate.admission.credential.v1",
+    "ate.admission.decision.v1",
+    "ate.control_record.v1:ADMISSION_REVOCATION",
+    "ate.control_record.v1:ADMISSION_SUSPENSION",
+  ],
+  "AUTH_AUTHORIZATION": ["ate.authorization.capability_token.v1"],
+  "AUTH_TRUST_DECISION": ["ate.authorization.trust_decision.v1"],
+  "AUTH_EXECUTOR": ["ate.control_record.v1"],
+  "AUTH_AUDIT": ["ate.audit.v1"],
+}
+out = {"version": 1, "keys": []}
+for label, kp in KEYS:
+    with open(kp, "rb") as f:
+        priv = serialization.load_pem_private_key(f.read(), password=None)
+    pub_pem = priv.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    ).decode("ascii")
+    digest = hashlib.sha256(pub_pem.encode("ascii")).hexdigest()
+    out["keys"].append({
+        "label": label,
+        "public_key_pem_sha256": digest,
+        "authorized_artifact_types": ARTIFACTS[label],
+    })
+with open("'$PUB_MANIFEST'", "w") as f:
+    json.dump(out, f, indent=2)
+PY
+chmod 0644 "'$PUB_MANIFEST'"
+'
 
-# --- 6. Initialize enforcement.db schema as ate-executor ------------------
-# The EAP/control-record code uses this DB; open_store applies the
-# schema + WAL + synchronous=FULL + foreign_keys=ON pragmas.
-sudo -n /usr/bin/python3 - "$EXECUTOR_DB" <<'PYEOF'
-import sys, os
-sys.path.insert(0, '/opt/ate-poc-v010')
+# --- 6. Initialize enforcement.db schema (ate-executor) ---
+ENF_DB="$ATE_VAR_LIB/executor/enforcement.db"
+if [ -s "$ENF_DB" ]; then
+  echo "[bootstrap] keep existing $ENF_DB"
+else
+  sudo -n -u ate-executor python3 - <<PY
+import sys
+sys.path.insert(0, "$ATE_OPT_ROOT")
 from trusted import enforcement_store
-conn = enforcement_store.open_store(sys.argv[1])
-print(f"enforcement.db schema initialized at {sys.argv[1]}; epoch={enforcement_store.current_epoch(conn)}")
+import os
+conn = enforcement_store.open_store("$ENF_DB")
 conn.close()
-PYEOF
+PY
+fi
+chmod 0600 "$ENF_DB"
 
-# --- 7. Write bootstrap.env -------------------------------------------------
-ENV_FILE="$ATE_VAR_LIB/bootstrap.env"
-sudo -n bash -c "cat > '$ENV_FILE' <<EOF
-ATE_OPT_ROOT=$ATE_OPT_ROOT
-ATE_ETC=$ATE_ETC
-ATE_VAR_LIB=$ATE_VAR_LIB
-ATE_AUTHORITY_KEY=$AUTHORITY_KEY
-ATE_AUTHORITY_PUBKEY=$AUTHORITY_PUBKEY
-ATE_EXECUTOR_DB=$EXECUTOR_DB
-ATE_EXECUTOR_KEY=$EXECUTOR_KEY
-ATE_EXECUTOR_AUDIT_KEY=$EXECUTOR_AUDIT_KEY
-EOF"
-sudo -n chmod 0644 "$ENV_FILE"
-
+# --- 7. Summary ---
+authority_uid=$(id -u ate-authority)
+executor_uid=$(id -u ate-executor)
 echo "BOOTSTRAP READY"
-echo "ENV=$ENV_FILE"
-echo "authority_uid=$(id -u ate-authority) executor_uid=$(id -u ate-executor)"
+echo "ENV=$ATE_VAR_LIB/bootstrap.env"
+echo "authority_uid=$authority_uid executor_uid=$executor_uid"
+echo "PUBLIC_KEY_MANIFEST=$PUB_MANIFEST"

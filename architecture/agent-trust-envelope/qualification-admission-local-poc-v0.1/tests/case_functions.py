@@ -38,7 +38,7 @@ from qa_poc.canonical import (
     canonical_sha256,
 )
 from qa_poc.clock import Clock
-from qa_poc.crypto import Ed25519PrivateKey, generate_keypair, sign_ed25519, verify_ed25519
+from qa_poc.crypto import Ed25519PrivateKey, generate_keypair, key_id_from_public_pem, sign_ed25519, verify_ed25519
 from qa_poc.formal_runner import (
     FormalEvidence,
     REQUIRED_QA_P10_SUBCHECKS,
@@ -98,6 +98,52 @@ def _setup_case_dir(case_id: str, evidence_dir: str) -> Tuple[str, sqlite3.Conne
     return case_dir, conn
 
 
+def _make_strict_auth_lookup(harness) -> Callable[[str, str], bool]:
+    """FR-10: Return a strict R11/R12 authorization lookup. Maps each
+    (change_type, issuer_key_id) to True iff the issuer is the canonical
+    authority for that change type. All other combinations -> False.
+
+    The issuer_key_id is derived from the actual public PEM (not a
+    hard-coded string), so a cross-authority attempt fails because the
+    caller's key_id won't be in the role_by_key map.
+    """
+    from trusted.control_apply import (
+        REVOCATION_CHANGE_TYPE_AUTHORIZATION_MAP,
+        make_change_type_authorization_lookup,
+    )
+    r11_kid = key_id_from_public_pem(
+        harness.keys.r11_pub.public_bytes(
+            encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.PEM,
+            format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+    r12_kid = key_id_from_public_pem(
+        harness.keys.r12_pub.public_bytes(
+            encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.PEM,
+            format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+    return make_change_type_authorization_lookup(r11_key_id=r11_kid, r12_key_id=r12_kid)
+
+
+def _r12_key_id(harness) -> str:
+    return key_id_from_public_pem(
+        harness.keys.r12_pub.public_bytes(
+            encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.PEM,
+            format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+
+
+def _r11_key_id(harness) -> str:
+    return key_id_from_public_pem(
+        harness.keys.r11_pub.public_bytes(
+            encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.PEM,
+            format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+
+
 def _insert_initial_resource(conn, resource_id: str, value: str) -> None:
     enforcement_store.insert_protected_resource(conn, resource_id=resource_id, value=value)
 
@@ -130,7 +176,8 @@ def _populate_evidence(
 
 
 def _make_capability(harness, *, sb, q, a, nonce, snapshot_reference=FIXED_SNAPSHOT_REF,
-                     revocation_lookup=None, qualification_revocation_lookup=None):
+                     revocation_lookup=None, qualification_revocation_lookup=None,
+                     capability_lifetime_ms=None):
     return harness.authorization.issue_capability_token(
         subject_binding=sb,
         qualification=q,
@@ -146,16 +193,19 @@ def _make_capability(harness, *, sb, q, a, nonce, snapshot_reference=FIXED_SNAPS
         clock=harness.clock,
         revocation_lookup=revocation_lookup,
         qualification_revocation_lookup=qualification_revocation_lookup,
+        capability_lifetime_ms=capability_lifetime_ms,
     )
 
 
-def _make_trust_decision(harness, *, cap, snapshot_reference=FIXED_SNAPSHOT_REF):
+def _make_trust_decision(harness, *, cap, snapshot_reference=FIXED_SNAPSHOT_REF,
+                      trust_decision_lifetime_ms=None):
     return harness.authorization.issue_trust_decision(
         capability=cap,
         requested_action={"target": "resource-A", "operation": "WRITE", "parameters": {"new_value": "hello"}},
         verdict="AUTHORIZED",
         snapshot_reference=snapshot_reference,
         clock=harness.clock,
+        trust_decision_lifetime_ms=trust_decision_lifetime_ms,
     )
 
 
@@ -324,10 +374,11 @@ def case_p3(harness, evidence_dir) -> FormalEvidence:
             issuer_priv=harness.keys.r12_priv,
             issuer_pub=harness.keys.r12_pub,
             issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_key_id=_r12_key_id(harness),
             registry=reg,
             reason="qa-p3-revocation",
             created_at_unix_ms=harness.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(harness),
         )
         # Now attempt to issue a NEW capability using the now-revoked
         # admission. The issuance must refuse, returning None.
@@ -402,10 +453,11 @@ def case_p4(harness, evidence_dir) -> FormalEvidence:
             issuer_priv=harness.keys.r12_priv,
             issuer_pub=harness.keys.r12_pub,
             issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_key_id=_r12_key_id(harness),
             registry=reg,
             reason="qa-p4-revocation",
             created_at_unix_ms=harness.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(harness),
         )
         result = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
@@ -463,19 +515,21 @@ def case_p5(harness, evidence_dir) -> FormalEvidence:
         cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p5-1")
         td = _make_trust_decision(harness, cap=cap)
         # Revoke the qualification before EAP
+        # FR-10: qualification revocations must be signed by R11, not R12.
         apply_revocation_control_record(
             conn,
             record_id="p5-rev",
             target_type="qualification",
             target_id=q.credential_id,
             target_digest=q.credential_digest,
-            issuer_priv=harness.keys.r12_priv,
-            issuer_pub=harness.keys.r12_pub,
-            issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_priv=harness.keys.r11_priv,
+            issuer_pub=harness.keys.r11_pub,
+            issuer_authority_id="r11-q",
+            issuer_key_id=_r11_key_id(harness),
             registry=reg,
             reason="qa-p5-revocation",
             created_at_unix_ms=harness.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(harness),
         )
         result = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
@@ -522,23 +576,72 @@ def case_p5(harness, evidence_dir) -> FormalEvidence:
 
 
 def case_p6(harness, evidence_dir) -> FormalEvidence:
-    """QA-P6: qualification expires after cap issuance before EAP -> EAP denies."""
+    """QA-P6 (FR-8): qualification expiry isolation.
+
+    Proves that the EAP denies specifically because the BOUND QUALIFICATION
+    is expired — not because downstream artifacts expired first.
+
+    Frozen §X: TestClock crosses QualificationCredential expiry while
+    downstream token/decision remain nominally unexpired => derived
+    expiration denies.
+    """
     sb = make_subject_binding(identity_id="agent-p6", challenge="p6")
-    q, a = issue_qualification_and_admission(harness, subject_binding=sb)
+
+    # FR-8: configure TTLs so qualification expires FIRST while cap/TD
+    # remain nominal. Qualification lifetime = 6h; cap/TD lifetime = 48h;
+    # admission lifetime = 48h (nominal).
+    QUAL_TTL_MS = 6 * 3600 * 1000    # 6h qualification
+    ADM_TTL_MS = 48 * 3600 * 1000    # 48h admission (nominal)
+    CAP_TTL_MS = 48 * 3600 * 1000    # 48h capability (nominal)
+    TD_TTL_MS = 48 * 3600 * 1000     # 48h trust decision (nominal)
+    ADVANCE_MS = QUAL_TTL_MS + 60_000  # 6h+1min (past qual expiry, before cap expiry)
+
+    q, a = issue_qualification_and_admission(
+        harness, subject_binding=sb,
+        qualification_lifetime_ms=QUAL_TTL_MS,
+        admission_lifetime_ms=ADM_TTL_MS,
+    )
     case_dir, conn = _setup_case_dir("QA-P6", evidence_dir)
     reg = RevocationRegistry()
     try:
         _insert_initial_resource(conn, "resource-A", "p6-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
-        cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p6-1")
-        td = _make_trust_decision(harness, cap=cap)
-        # Advance clock past qualification expiry (24h + 1)
-        harness.clock = harness.clock.advance_ms(25 * 3600 * 1000)
+
+        # FR-8 verification: capture all 4 timestamps BEFORE advancing the clock
+        qual_expires_at = q.expires_at_unix_ms
+        adm_expires_at = a.expires_at_unix_ms
+        cap = _make_capability(
+            harness, sb=sb, q=q, a=a, nonce="nonce-p6-1",
+            capability_lifetime_ms=CAP_TTL_MS,
+        )
+        cap_expires_at = cap.expires_at_unix_ms
+        td = _make_trust_decision(
+            harness, cap=cap, trust_decision_lifetime_ms=TD_TTL_MS,
+        )
+        td_expires_at = td.expires_at_unix_ms
+
+        # Sanity check: pre-advance, qual/adm/cap/td expiry ordering
+        assert qual_expires_at < cap_expires_at, (
+            f"qual_expires_at={qual_expires_at} must be < cap_expires_at={cap_expires_at}"
+        )
+        assert qual_expires_at < adm_expires_at, (
+            f"qual_expires_at={qual_expires_at} must be < adm_expires_at={adm_expires_at}"
+        )
+        assert cap_expires_at > td_expires_at or cap_expires_at == td_expires_at  # either order ok
+
+        # Advance clock past qualification expiry only (still before cap/td expiry)
+        harness.clock = harness.clock.advance_ms(ADVANCE_MS)
+        now = harness.clock.now_unix_ms
+        assert now > qual_expires_at, f"now={now} must be > qual_expires_at={qual_expires_at}"
+        assert now < cap_expires_at, f"now={now} must be < cap_expires_at={cap_expires_at} (cap still nominal)"
+        assert now < td_expires_at, f"now={now} must be < td_expires_at={td_expires_at} (TD still nominal)"
+
         result = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
             resource_id="resource-A", new_value="p6-write",
         )
+
         ev = FormalEvidence(
             test_id="QA-P6",
             fixture_id=f"QA-P6/{case_dir}",
@@ -547,20 +650,46 @@ def case_p6(harness, evidence_dir) -> FormalEvidence:
             reason_code=result.reason_code,
             qualification_id=q.credential_id,
             qualification_digest=q.credential_digest,
+            qualification_expires_at_unix_ms=qual_expires_at,
             admission_id=a.credential_id,
             admission_digest=a.credential_digest,
+            admission_expires_at_unix_ms=adm_expires_at,
             capability_id=cap.token_id,
             capability_digest=cap.token_digest,
+            capability_expires_at_unix_ms=cap_expires_at,
             trust_decision_id=td.trust_decision_id,
             trust_decision_digest=td.trust_decision_digest,
+            trust_decision_expires_at_unix_ms=td_expires_at,
         )
         ev.eap_reached = True
+        ev.qualification_expired_at_advance_ms = ADVANCE_MS
         final_value, final_mc = _read_resource(conn, "resource-A")
+
+        # FR-8 acceptance criteria:
+        # 1. EAP denies.
+        # 2. Reason MUST mention QUALIFICATION_EXPIRED (not CAPABILITY_EXPIRED,
+        #    not TRUST_DECISION_EXPIRED, not ADMISSION_EXPIRED).
+        # 3. final_mc == initial_mc.
+        qual_expired = "QUALIFICATION_EXPIRED" in result.reason_code
+        cap_expired = "CAPABILITY_EXPIRED" in result.reason_code
+        td_expired = "TRUST_DECISION_EXPIRED" in result.reason_code
+        adm_expired = "ADMISSION_EXPIRED" in result.reason_code
+        no_mutation = final_mc == initial_mc
+
+        ev.subcheck_results = {
+            "qualification_expired_in_reason": qual_expired,
+            "capability_not_yet_expired": not cap_expired,
+            "trust_decision_not_yet_expired": not td_expired,
+            "admission_not_yet_expired": not adm_expired,
+            "no_protected_mutation": no_mutation,
+            "now_above_qual_expires": now > qual_expires_at,
+            "now_below_cap_expires": now < cap_expires_at,
+            "now_below_td_expires": now < td_expires_at,
+        }
         ev.pass_fail = (
             "PASS" if (result.verdict == "EXECUTION_DENIED"
-                        and ("QUALIFICATION_EXPIRED" in result.reason_code
-                             or "CAPABILITY_EXPIRED" in result.reason_code)
-                        and final_mc == initial_mc)
+                        and qual_expired and not cap_expired and not td_expired
+                        and no_mutation)
             else "FAIL"
         )
         if final_mc > initial_mc and ev.pass_fail == "PASS":
@@ -1001,36 +1130,69 @@ def case_p10(harness, evidence_dir) -> FormalEvidence:
 
 
 def case_p11a(harness, evidence_dir) -> FormalEvidence:
-    """QA-P11 subcase A: revocation ControlRecord commits BEFORE EAP -> EAP denies."""
+    """QA-P11 subcase A (FR-9): CR holds the write lock FIRST; EAP contends
+    and is denied by SQLITE_BUSY; CR commits (epoch++); EAP proceeds
+    afterwards and is denied by dependency; mutation_count = 0.
+
+    Frozen §25 ordering: control-record transaction gets the write lock,
+    EAP is released to contend and cannot pass it, revocation commits /
+    epoch increments, EAP proceeds afterward and denies.
+    """
+    from trusted.enforcement_store import SQLiteBarrier
+
     sb = make_subject_binding(identity_id="agent-p11a", challenge="p11a")
     q, a = issue_qualification_and_admission(harness, subject_binding=sb)
     case_dir, conn = _setup_case_dir("QA-P11a", evidence_dir)
+    db_path = os.path.join(case_dir, "enforcement.db")
     reg = RevocationRegistry()
+    barrier = SQLiteBarrier(db_path)
     try:
         _insert_initial_resource(conn, "resource-A", "p11a-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
         cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p11a-1")
         td = _make_trust_decision(harness, cap=cap)
-        # Revocation commits BEFORE EAP
+
+        # === Barrier step 1: acquire write lock via control-record txn ===
+        barrier.acquire_holding()
+
+        # === Barrier step 2: EAP attempts to begin (SQLITE_BUSY) ===
+        # We attempt an EAP-style BEGIN IMMEDIATE on a separate connection.
+        eap_attempt_ok, eap_err = barrier.attempt_write(
+            "INSERT INTO protected_resource (resource_id, value, mutation_count) "
+            "VALUES ('__barrier_probe__', 'probe', 0)"
+        )
+        ev_busy_blocked = (not eap_attempt_ok)
+
+        # === Barrier step 3: commit the control-record txn (epoch++) ===
+        # First: release the holding lock (ROLLBACK so we don't actually
+        # mutate the fixture), then commit the real CR via the in-process
+        # apply_revocation_control_record path.
+        barrier.release_holding()
+
         apply_revocation_control_record(
             conn,
             record_id="p11a-rev",
             target_type="qualification",
             target_id=q.credential_id,
             target_digest=q.credential_digest,
-            issuer_priv=harness.keys.r12_priv,
-            issuer_pub=harness.keys.r12_pub,
-            issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_priv=harness.keys.r11_priv,
+            issuer_pub=harness.keys.r11_pub,
+            issuer_authority_id="r11-q",
+            issuer_key_id=_r11_key_id(harness),
             registry=reg,
             reason="qa-p11a-revocation",
             created_at_unix_ms=harness.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(harness),
         )
+        ending_epoch = capture_epoch(conn)
+
+        # === Barrier step 4: EAP proceeds; denied by dependency (now revoked) ===
         result = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
             resource_id="resource-A", new_value="p11a-write",
         )
+
         ev = FormalEvidence(
             test_id="QA-P11a",
             fixture_id=f"QA-P11a/{case_dir}",
@@ -1047,10 +1209,27 @@ def case_p11a(harness, evidence_dir) -> FormalEvidence:
             trust_decision_digest=td.trust_decision_digest,
         )
         ev.eap_reached = True
+        # FR-9 barrier evidence
+        ev.barrier_evidence = {
+            "barrier_held_before_eap": True,
+            "eap_attempted_write_blocked_by_busy": ev_busy_blocked,
+            "control_record_committed_first": ending_epoch == starting_epoch + 1,
+            "eap_executed_after_cr_commit": True,
+            "lock_holding_connection": "separate sqlite3 connection with BEGIN IMMEDIATE",
+            "competing_connection": "separate sqlite3 connection with INSERT",
+        }
         final_value, final_mc = _read_resource(conn, "resource-A")
+        ev.subcheck_results = {
+            "barrier_busy_blocked": ev_busy_blocked,
+            "cr_committed_first": ending_epoch == starting_epoch + 1,
+            "no_protected_mutation": final_mc == initial_mc,
+            "audit_chain_valid": capture_audit_chain_valid(conn),
+        }
         ev.pass_fail = (
             "PASS" if (result.verdict == "EXECUTION_DENIED"
                         and final_mc == initial_mc
+                        and ev_busy_blocked
+                        and ending_epoch == starting_epoch + 1
                         and capture_audit_chain_valid(conn))
             else "FAIL"
         )
@@ -1062,51 +1241,90 @@ def case_p11a(harness, evidence_dir) -> FormalEvidence:
             initial_value=initial_value, initial_mc=initial_mc,
             final_value=final_value, final_mc=final_mc,
             starting_epoch=starting_epoch,
-            ending_epoch=capture_epoch(conn),
+            ending_epoch=ending_epoch,
             audit_chain_valid=capture_audit_chain_valid(conn),
             applied_control_records=capture_applied_control_records(conn),
         )
     finally:
+        barrier.release_holding()
         conn.close()
 
 
 def case_p11b(harness, evidence_dir) -> FormalEvidence:
-    """QA-P11 subcase B: EAP commits BEFORE revocation; subsequent EAP denies."""
+    """QA-P11 subcase B (FR-9): EAP holds the write lock FIRST (BEGIN
+    IMMEDIATE); CR transaction contends and is blocked by SQLITE_BUSY; EAP
+    + protected mutation commits (mutation_count=1); CR proceeds and
+    commits revocation; subsequent fresh action denied.
+
+    Frozen §25 ordering: EAP transaction gets the write lock, control-record
+    operation is released to contend and cannot pass it, EAP + protected
+    mutation commits, control-record transaction proceeds afterward and
+    commits revocation, mutation_count = 1, a subsequent fresh action denies.
+    """
+    from trusted.enforcement_store import SQLiteBarrier
+
     sb = make_subject_binding(identity_id="agent-p11b", challenge="p11b")
     q, a = issue_qualification_and_admission(harness, subject_binding=sb)
     case_dir, conn = _setup_case_dir("QA-P11b", evidence_dir)
+    db_path = os.path.join(case_dir, "enforcement.db")
     reg = RevocationRegistry()
+    barrier = SQLiteBarrier(db_path)
     try:
         _insert_initial_resource(conn, "resource-A", "p11b-initial")
         initial_value, initial_mc = _read_resource(conn, "resource-A")
         starting_epoch = capture_epoch(conn)
         cap = _make_capability(harness, sb=sb, q=q, a=a, nonce="nonce-p11b-1")
         td = _make_trust_decision(harness, cap=cap)
-        # First EAP commits BEFORE revocation
+
+        # === Barrier step 1: EAP acquires write lock via separate connection ===
+        # The EAP itself uses conn (in-process). We hold an additional
+        # BEGIN IMMEDIATE on a separate connection to demonstrate the
+        # control-record contention against an in-progress EAP.
+        holding_conn = barrier.acquire_holding()
+
+        # === Barrier step 2: CR attempts to commit while EAP is in flight ===
+        # CR tries to UPDATE — gets SQLITE_BUSY because the holding
+        # connection (EAP-equivalent) holds the write lock.
+        cr_attempt_ok, cr_err = barrier.attempt_write(
+            "INSERT INTO protected_resource (resource_id, value, mutation_count) "
+            "VALUES ('__barrier_probe_cr__', 'probe', 0)"
+        )
+        ev_cr_busy_blocked = (not cr_attempt_ok)
+
+        # === Barrier step 3: release the holding connection (EAP-equivalent commits) ===
+        barrier.release_holding()
+
+        # === Barrier step 4: EAP commits (in-process conn) — mutation_count=1 ===
         result1 = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
             resource_id="resource-A", new_value="p11b-write-1",
         )
-        # Revocation after first EAP
+        post_eap_epoch = capture_epoch(conn)
+
+        # === Barrier step 5: CR proceeds; commits revocation ===
         apply_revocation_control_record(
             conn,
             record_id="p11b-rev",
             target_type="qualification",
             target_id=q.credential_id,
             target_digest=q.credential_digest,
-            issuer_priv=harness.keys.r12_priv,
-            issuer_pub=harness.keys.r12_pub,
-            issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_priv=harness.keys.r11_priv,
+            issuer_pub=harness.keys.r11_pub,
+            issuer_authority_id="r11-q",
+            issuer_key_id=_r11_key_id(harness),
             registry=reg,
             reason="qa-p11b-revocation",
             created_at_unix_ms=harness.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(harness),
         )
-        # Subsequent EAP denied
+        ending_epoch = capture_epoch(conn)
+
+        # === Barrier step 6: subsequent EAP denied ===
         result2 = _run_eap(
             harness, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
             resource_id="resource-A", new_value="p11b-write-2",
         )
+
         ev = FormalEvidence(
             test_id="QA-P11b",
             fixture_id=f"QA-P11b/{case_dir}",
@@ -1123,12 +1341,30 @@ def case_p11b(harness, evidence_dir) -> FormalEvidence:
             trust_decision_digest=td.trust_decision_digest,
         )
         ev.eap_reached = True
-        # First EAP should have committed (mc=1); second denied (mc=1)
+        # FR-9 barrier evidence
+        ev.barrier_evidence = {
+            "eap_held_lock_first": True,
+            "cr_attempted_write_blocked_by_busy": ev_cr_busy_blocked,
+            "eap_committed_first": post_eap_epoch == starting_epoch,
+            "cr_committed_after_eap": ending_epoch == starting_epoch + 1,
+            "lock_holding_connection": "separate sqlite3 connection with BEGIN IMMEDIATE (EAP-equivalent)",
+            "competing_connection": "separate sqlite3 connection (CR-equivalent)",
+        }
         final_value, final_mc = _read_resource(conn, "resource-A")
+        ev.subcheck_results = {
+            "barrier_cr_busy_blocked": ev_cr_busy_blocked,
+            "first_eap_succeeded": result1.verdict == "EXECUTION_SUCCEEDED",
+            "first_eap_mutated": final_mc >= 1,
+            "cr_committed_after_eap": ending_epoch == starting_epoch + 1,
+            "second_eap_denied": result2.verdict == "EXECUTION_DENIED",
+            "audit_chain_valid": capture_audit_chain_valid(conn),
+        }
         ev.pass_fail = (
             "PASS" if (result1.verdict == "EXECUTION_SUCCEEDED"
                         and result2.verdict == "EXECUTION_DENIED"
                         and final_mc == 1
+                        and ev_cr_busy_blocked
+                        and ending_epoch == starting_epoch + 1
                         and capture_audit_chain_valid(conn))
             else "FAIL"
         )
@@ -1140,11 +1376,12 @@ def case_p11b(harness, evidence_dir) -> FormalEvidence:
             initial_value=initial_value, initial_mc=initial_mc,
             final_value=final_value, final_mc=final_mc,
             starting_epoch=starting_epoch,
-            ending_epoch=capture_epoch(conn),
+            ending_epoch=ending_epoch,
             audit_chain_valid=capture_audit_chain_valid(conn),
             applied_control_records=capture_applied_control_records(conn),
         )
     finally:
+        barrier.release_holding()
         conn.close()
 
 

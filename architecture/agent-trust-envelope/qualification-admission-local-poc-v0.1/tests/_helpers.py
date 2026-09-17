@@ -240,6 +240,8 @@ def issue_qualification_and_admission(
     *,
     subject_binding: SubjectBinding,
     trust_domain: str = "local-ate-demo",
+    qualification_lifetime_ms: Optional[int] = None,
+    admission_lifetime_ms: Optional[int] = None,
 ) -> Tuple[QualificationCredential, AdmissionCredential]:
     """Run the qualification -> admission pipeline for a SubjectBinding."""
     from qa_poc.qualification import build_evidence_bundle
@@ -252,6 +254,7 @@ def issue_qualification_and_admission(
         evidence=evidence,
         snapshot_reference=FIXED_SNAPSHOT_REF,
         clock=harness.clock,
+        qualification_lifetime_ms=qualification_lifetime_ms,
     )
     assert q_cred is not None
     _a_manifest, _a_decision, a_cred = harness.admission.evaluate(
@@ -262,6 +265,7 @@ def issue_qualification_and_admission(
         snapshot_reference=FIXED_SNAPSHOT_REF,
         clock=harness.clock,
         revocation_lookup=_no_revocations,
+        admission_lifetime_ms=admission_lifetime_ms,
     )
     assert a_cred is not None
     return q_cred, a_cred
@@ -328,7 +332,7 @@ def apply_revocation_control_record(
     registry: RevocationRegistry,
     reason: str,
     created_at_unix_ms: int,
-    change_type_authorization_ok: Callable[[str, str], bool] = lambda ct, k: True,
+    change_type_authorization_ok: Callable[[str, str], bool],  # FR-10: required, no permissive default
 ) -> int:
     """Apply a revocation ControlRecord to the executor-owned store,
     updating `registry` so the revocation_lookup picks it up.

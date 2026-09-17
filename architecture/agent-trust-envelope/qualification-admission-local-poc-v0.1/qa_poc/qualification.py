@@ -161,6 +161,7 @@ class QualificationAuthority:
         evidence: EvidenceBundle,
         snapshot_reference: str,
         clock: Clock,
+        qualification_lifetime_ms: Optional[int] = None,
     ) -> Tuple[QualificationEvidenceManifest, QualificationDecision, Optional[QualificationCredential]]:
         res = self.registry.resolve(qualification_domain, role)
         sb_digest = subject_binding.digest()
@@ -249,7 +250,11 @@ class QualificationAuthority:
         credential: Optional[QualificationCredential] = None
         if decision_str == "GRANTED":
             issued_at = clock.now_unix_ms
-            expires_at = issued_at + 24 * 3600 * 1000  # 24h
+            # FR-8: lifetime is configurable per-case (env ATE_QUALIFICATION_LIFETIME_MS).
+            import os as _os
+            default_qual_lifetime = int(_os.environ.get("ATE_QUALIFICATION_LIFETIME_MS", str(24 * 3600 * 1000)))
+            qual_lifetime_ms = qualification_lifetime_ms if qualification_lifetime_ms is not None else default_qual_lifetime
+            expires_at = issued_at + int(qual_lifetime_ms)
             semantic_payload = {
                 "profile_id": res.profile.profile_id,
                 "profile_digest": res.profile.profile_digest,

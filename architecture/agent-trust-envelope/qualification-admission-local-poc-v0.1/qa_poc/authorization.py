@@ -90,6 +90,7 @@ class AuthorizationAuthority:
         clock: Clock,
         revocation_lookup: Optional[Callable[[str], Tuple[bool, str]]] = None,
         qualification_revocation_lookup: Optional[Callable[[str], Tuple[bool, str]]] = None,
+        capability_lifetime_ms: Optional[int] = None,
     ) -> "CapabilityToken | None":
         """Issue a new CapabilityToken bound to the (qualification,
         admission) pair.
@@ -137,7 +138,13 @@ class AuthorizationAuthority:
         sb_digest = subject_binding.digest()
         params_d = parameters_digest(parameters)
         issued_at = clock.now_unix_ms
-        expires_at = issued_at + 3600 * 1000  # 1h
+        # FR-8: TTL is configurable per-case for deterministic isolation.
+        # Production default is 1 hour; tests can override via this
+        # parameter (or env var ATE_CAPABILITY_LIFETIME_MS).
+        import os as _os
+        default_cap_lifetime = int(_os.environ.get("ATE_CAPABILITY_LIFETIME_MS", str(3600 * 1000)))
+        cap_lifetime_ms = capability_lifetime_ms if capability_lifetime_ms is not None else default_cap_lifetime
+        expires_at = issued_at + int(cap_lifetime_ms)
 
         # DEV-IMP-3 non-recursive construction
         semantic_payload = {
@@ -194,6 +201,7 @@ class AuthorizationAuthority:
         verdict: str,
         snapshot_reference: str,
         clock: Clock,
+        trust_decision_lifetime_ms: Optional[int] = None,
     ) -> TrustDecision:
         a_digest = action_digest(
             target=capability.target,
@@ -201,7 +209,11 @@ class AuthorizationAuthority:
             parameters=requested_action.get("parameters", {}),
         )
         issued_at = clock.now_unix_ms
-        expires_at = issued_at + 5 * 60 * 1000  # 5min
+        # FR-8: TTL configurable per-case (env ATE_TRUST_DECISION_LIFETIME_MS).
+        import os as _os
+        default_td_lifetime = int(_os.environ.get("ATE_TRUST_DECISION_LIFETIME_MS", str(5 * 60 * 1000)))
+        td_lifetime_ms = trust_decision_lifetime_ms if trust_decision_lifetime_ms is not None else default_td_lifetime
+        expires_at = issued_at + int(td_lifetime_ms)
 
         semantic_payload = {
             "capability_token_id": capability.token_id,

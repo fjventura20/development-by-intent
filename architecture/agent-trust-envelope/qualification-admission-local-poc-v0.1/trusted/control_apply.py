@@ -138,3 +138,40 @@ def apply_control_record(
             except Exception:
                 pass
             raise
+
+
+
+# FR-10: frozen §16 + §29 require:
+#   - AUTH_R11_QUALIFICATION may issue QUALIFICATION_REVOCATION / SUSPENSION.
+#   - AUTH_R12_ADMISSION   may issue ADMISSION_REVOCATION / SUSPENSION.
+# The helper below is the canonical mapping; the lookup callable passed
+# into apply_control_record() must implement this mapping (or a strict
+# subset/superset, but never a more permissive one).
+
+REVOCATION_CHANGE_TYPE_AUTHORIZATION_MAP = {
+    # change_type              : required_authority_role
+    "QUALIFICATION_REVOCATION": "AUTH_R11_QUALIFICATION",
+    "QUALIFICATION_SUSPENSION": "AUTH_R11_QUALIFICATION",
+    "ADMISSION_REVOCATION":     "AUTH_R12_ADMISSION",
+    "ADMISSION_SUSPENSION":     "AUTH_R12_ADMISSION",
+}
+
+
+def make_change_type_authorization_lookup(*, r11_key_id: str, r12_key_id: str):
+    """Return a strict authorization lookup that maps each (change_type,
+    issuer_key_id) pair to True iff the issuer key is the canonical
+    authority for that change type.
+
+    Reject everything else (incl. cross-authority attempts). Negative
+    tests use this as the production lookup.
+    """
+    role_by_key = {r11_key_id: "AUTH_R11_QUALIFICATION",
+                   r12_key_id: "AUTH_R12_ADMISSION"}
+    def lookup(change_type: str, issuer_key_id: str) -> bool:
+        expected_role = REVOCATION_CHANGE_TYPE_AUTHORIZATION_MAP.get(change_type)
+        if expected_role is None:
+            # Unknown change type -> reject (fail-closed)
+            return False
+        actual_role = role_by_key.get(issuer_key_id)
+        return actual_role == expected_role
+    return lookup

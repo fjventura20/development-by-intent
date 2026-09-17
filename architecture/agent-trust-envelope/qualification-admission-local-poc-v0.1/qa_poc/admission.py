@@ -196,6 +196,7 @@ class AdmissionAuthority:
         snapshot_reference: str,
         clock: Clock,
         revocation_lookup,
+        admission_lifetime_ms: Optional[int] = None,
     ) -> Tuple[AdmissionEvidenceManifest, AdmissionDecision, Optional[AdmissionCredential]]:
         # 1. Resolve active policy
         res = self.registry.resolve(trust_domain, role)
@@ -297,7 +298,11 @@ class AdmissionAuthority:
         credential: Optional[AdmissionCredential] = None
         if decision_str == "GRANTED":
             issued_at = clock.now_unix_ms
-            expires_at = issued_at + 12 * 3600 * 1000  # 12h
+            # FR-8: lifetime is configurable per-case (env ATE_ADMISSION_LIFETIME_MS).
+            import os as _os
+            default_adm_lifetime = int(_os.environ.get("ATE_ADMISSION_LIFETIME_MS", str(12 * 3600 * 1000)))
+            adm_lifetime_ms = admission_lifetime_ms if admission_lifetime_ms is not None else default_adm_lifetime
+            expires_at = issued_at + int(adm_lifetime_ms)
             semantic_payload = {
                 "policy_id": res.policy.policy_id,
                 "policy_digest": res.policy.policy_digest,

@@ -118,6 +118,8 @@ def test_qa_p3_admission_revocation_before_capability_blocks_issuance():
             nonce="nonce-p3-1",
         )
         # Apply ADMISSION_REVOCATION before any EAP attempt
+        # FR-10: admission revocation must be signed by R12.
+        from tests.case_functions import _make_strict_auth_lookup, _r12_key_id
         new_epoch = apply_revocation_control_record(
             conn,
             record_id="p3-rev-1",
@@ -127,10 +129,11 @@ def test_qa_p3_admission_revocation_before_capability_blocks_issuance():
             issuer_priv=h.keys.r12_priv,
             issuer_pub=h.keys.r12_pub,
             issuer_authority_id="r12-a",
-            issuer_key_id="r12-a",
+            issuer_key_id=_r12_key_id(h),
             registry=rev,
             reason="qa-p3-revocation",
             created_at_unix_ms=h.clock.now_unix_ms,
+            change_type_authorization_ok=_make_strict_auth_lookup(h),
         )
         assert new_epoch == 1
         # Attempt EAP — must be denied because admission is now revoked
@@ -780,5 +783,409 @@ def test_qa_p14_full_review_boundary_renewal():
         assert bundle.eap_result.verdict == "EXECUTION_SUCCEEDED"
         assert bundle.final_mutation_count == 1
         assert bundle.final_resource_value == "p14-renewal-write"
+    finally:
+        close_temp_store(conn, tmp)
+
+
+
+# === FR-8 regression: QA-P6 must not be satisfied by CAPABILITY_EXPIRED ===
+
+def test_fr8_qa_p6_fails_if_satisfied_by_capability_expired_alone():
+    """FR-8: if the only thing that expired is the capability (not the
+    qualification), the case should FAIL — it must isolate the
+    qualification expiry condition.
+    """
+    from tests.case_functions import (
+        case_p6, _setup_case_dir, _insert_initial_resource,
+        _make_capability, _make_trust_decision, _run_eap,
+    )
+
+    h = FixtureHarness.build()
+    sb = make_subject_binding(identity_id="agent-fr8", challenge="fr8")
+    q, a = issue_qualification_and_admission(
+        h, subject_binding=sb,
+        qualification_lifetime_ms=200 * 3600 * 1000,  # 200h
+        admission_lifetime_ms=200 * 3600 * 1000,
+    )
+    case_dir, conn = _setup_case_dir("FR-8-regression", "")
+    reg = RevocationRegistry()
+    try:
+        _insert_initial_resource(conn, "resource-A", "fr8-initial")
+        cap = _make_capability(
+            h, sb=sb, q=q, a=a, nonce="nonce-fr8-1",
+            capability_lifetime_ms=2 * 3600 * 1000,  # 2h cap
+        )
+        td = _make_trust_decision(
+            h, cap=cap, trust_decision_lifetime_ms=2 * 3600 * 1000,
+        )
+        h.clock = h.clock.advance_ms(3 * 3600 * 1000)
+        result = _run_eap(
+            h, conn=conn, sb=sb, q=q, a=a, cap=cap, td=td, reg=reg,
+            resource_id="resource-A", new_value="fr8-write",
+        )
+        # The result MUST be CAPABILITY_EXPIRED (NOT QUALIFICATION_EXPIRED).
+        # This proves the regression test correctly distinguishes the two
+        # conditions.
+        assert "CAPABILITY_EXPIRED" in result.reason_code, (
+            f"Expected CAPABILITY_EXPIRED. Got: {result.reason_code!r}"
+        )
+        assert "QUALIFICATION_EXPIRED" not in result.reason_code, (
+            f"Qualification should NOT be expired here. Got: {result.reason_code!r}"
+        )
+    finally:
+        conn.close()
+
+
+def test_fr8_qa_p6_official_case_uses_qualification_expiry_not_cap():
+    """FR-8: run the official case_p6 and verify the recorded reason is
+    QUALIFICATION_EXPIRED specifically, with subcheck evidence that
+    cap/td/adm were NOT expired at EAP time.
+    """
+    import tempfile
+    from tests.case_functions import case_p6
+
+    h = FixtureHarness.build()
+    tmp = tempfile.mkdtemp(prefix="fr8-")
+    try:
+        ev = case_p6(h, tmp)
+        assert ev.pass_fail == "PASS", (
+            f"Official case_p6 must PASS with FR-8 isolation. Got {ev.pass_fail!r}. "
+            f"reason={ev.reason_code!r}, subchecks={ev.subcheck_results!r}"
+        )
+        assert "QUALIFICATION_EXPIRED" in ev.reason_code, (
+            f"Official case_p6 reason must mention QUALIFICATION_EXPIRED. "
+            f"Got: {ev.reason_code!r}"
+        )
+        assert ev.subcheck_results["qualification_expired_in_reason"] is True
+        assert ev.subcheck_results["capability_not_yet_expired"] is True
+        assert ev.subcheck_results["trust_decision_not_yet_expired"] is True
+        assert ev.subcheck_results["admission_not_yet_expired"] is True
+        assert ev.subcheck_results["no_protected_mutation"] is True
+        # Verify timestamps prove ordering
+        now_after = ev.qualification_expires_at_unix_ms + ev.qualification_expired_at_advance_ms
+        assert now_after > ev.qualification_expires_at_unix_ms
+        assert now_after < ev.capability_expires_at_unix_ms, (
+            f"now_after={now_after} must be < capability_expires_at={ev.capability_expires_at_unix_ms}"
+        )
+        assert now_after < ev.trust_decision_expires_at_unix_ms, (
+            f"now_after={now_after} must be < trust_decision_expires_at={ev.trust_decision_expires_at_unix_ms}"
+        )
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+
+# === FR-10 regression: cross-authority revocation must fail ===
+
+def test_fr10_r12_attempts_qualification_revocation_rejected():
+    """FR-10: R12 (admission authority) attempts QUALIFICATION_REVOCATION
+    => rejected, epoch unchanged, registry not updated.
+    """
+    from trusted.control_apply import (
+        ControlRecordError,
+        apply_control_record,
+        make_change_type_authorization_lookup,
+    )
+    from trusted import enforcement_store
+    from qa_poc.models import (
+        ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest,
+    )
+    from qa_poc.crypto import sign_ed25519, key_id_from_public_pem
+    from cryptography.hazmat.primitives import serialization
+
+    conn, tmp = open_temp_store()
+    try:
+        h = FixtureHarness.build()
+        sb = make_subject_binding(identity_id="agent-fr10a", challenge="fr10a")
+        q, a = issue_qualification_and_admission(h, subject_binding=sb)
+
+        # Build a ControlRecord QUALIFICATION_REVOCATION signed with R12 key.
+        r11_kid = key_id_from_public_pem(h.keys.r11_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        r12_kid = key_id_from_public_pem(h.keys.r12_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        lookup = make_change_type_authorization_lookup(r11_key_id=r11_kid, r12_key_id=r12_kid)
+
+        epoch_before = enforcement_store.current_epoch(conn)
+        semantic = {
+            "previous_epoch": epoch_before,
+            "new_epoch": epoch_before + 1,
+            "change_type": "QUALIFICATION_REVOCATION",
+            "target_type": "qualification",
+            "target_id": q.credential_id,
+            "target_digest_optional": q.credential_digest,
+            "issued_at_unix_ms": 0,
+            "issuer_authority_id": "r12-a",
+            "issuer_key_id": r12_kid,
+        }
+        rec_proto = ControlRecord(
+            record_id="",
+            previous_epoch=epoch_before,
+            new_epoch=epoch_before + 1,
+            change_type="QUALIFICATION_REVOCATION",
+            target_type="qualification",
+            target_id=q.credential_id,
+            target_digest_optional=q.credential_digest,
+            issued_at_unix_ms=0,
+            issuer_authority_id="r12-a",
+            issuer_key_id=r12_kid,
+            record_digest="",
+        )
+        rec, _ = compute_id_and_digest(
+            rec_proto, semantic_fields=semantic, id_prefix="rev",
+            id_salt=("fr10a", q.credential_id),
+        )
+        sig = sign_ed25519(h.keys.r12_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+        from dataclasses import asdict
+        from dataclasses import replace as dc_replace
+        rec = dc_replace(rec, signature=sig)
+
+        with pytest.raises(ControlRecordError) as exc:
+            apply_control_record(
+                conn,
+                record=rec,
+                issuer_pub=h.keys.r12_pub,
+                change_type_authorization_lookup=lookup,
+                created_at_unix_ms=0,
+            )
+        assert "ISSUER_NOT_AUTHORIZED" in str(exc.value) or "not authorized" in str(exc.value).lower(), (
+            f"Expected issuer-not-authorized error. Got: {exc.value!r}"
+        )
+        # Epoch must be unchanged
+        assert enforcement_store.current_epoch(conn) == epoch_before
+    finally:
+        close_temp_store(conn, tmp)
+
+
+def test_fr10_r11_attempts_admission_revocation_rejected():
+    """FR-10: R11 (qualification authority) attempts ADMISSION_REVOCATION
+    => rejected, epoch unchanged, registry not updated.
+    """
+    from trusted.control_apply import (
+        ControlRecordError,
+        apply_control_record,
+        make_change_type_authorization_lookup,
+    )
+    from trusted import enforcement_store
+    from qa_poc.models import (
+        ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest,
+    )
+    from qa_poc.crypto import sign_ed25519, key_id_from_public_pem
+    from cryptography.hazmat.primitives import serialization
+    from dataclasses import replace as dc_replace
+
+    conn, tmp = open_temp_store()
+    try:
+        h = FixtureHarness.build()
+        sb = make_subject_binding(identity_id="agent-fr10b", challenge="fr10b")
+        q, a = issue_qualification_and_admission(h, subject_binding=sb)
+
+        r11_kid = key_id_from_public_pem(h.keys.r11_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        r12_kid = key_id_from_public_pem(h.keys.r12_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        lookup = make_change_type_authorization_lookup(r11_key_id=r11_kid, r12_key_id=r12_kid)
+
+        epoch_before = enforcement_store.current_epoch(conn)
+        semantic = {
+            "previous_epoch": epoch_before,
+            "new_epoch": epoch_before + 1,
+            "change_type": "ADMISSION_REVOCATION",
+            "target_type": "admission",
+            "target_id": a.credential_id,
+            "target_digest_optional": a.credential_digest,
+            "issued_at_unix_ms": 0,
+            "issuer_authority_id": "r11-q",
+            "issuer_key_id": r11_kid,
+        }
+        rec_proto = ControlRecord(
+            record_id="",
+            previous_epoch=epoch_before,
+            new_epoch=epoch_before + 1,
+            change_type="ADMISSION_REVOCATION",
+            target_type="admission",
+            target_id=a.credential_id,
+            target_digest_optional=a.credential_digest,
+            issued_at_unix_ms=0,
+            issuer_authority_id="r11-q",
+            issuer_key_id=r11_kid,
+            record_digest="",
+        )
+        rec, _ = compute_id_and_digest(
+            rec_proto, semantic_fields=semantic, id_prefix="rev",
+            id_salt=("fr10b", a.credential_id),
+        )
+        sig = sign_ed25519(h.keys.r11_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+        rec = dc_replace(rec, signature=sig)
+
+        with pytest.raises(ControlRecordError) as exc:
+            apply_control_record(
+                conn,
+                record=rec,
+                issuer_pub=h.keys.r11_pub,
+                change_type_authorization_lookup=lookup,
+                created_at_unix_ms=0,
+            )
+        assert "ISSUER_NOT_AUTHORIZED" in str(exc.value) or "not authorized" in str(exc.value).lower()
+        assert enforcement_store.current_epoch(conn) == epoch_before
+    finally:
+        close_temp_store(conn, tmp)
+
+
+def test_fr10_r11_qualification_revocation_accepted():
+    """FR-10 positive: R11 signed QUALIFICATION_REVOCATION => accepted."""
+    from trusted.control_apply import (
+        apply_control_record,
+        make_change_type_authorization_lookup,
+    )
+    from trusted import enforcement_store
+    from qa_poc.models import (
+        ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest,
+    )
+    from qa_poc.crypto import sign_ed25519, key_id_from_public_pem
+    from cryptography.hazmat.primitives import serialization
+    from dataclasses import replace as dc_replace
+
+    conn, tmp = open_temp_store()
+    try:
+        h = FixtureHarness.build()
+        sb = make_subject_binding(identity_id="agent-fr10c", challenge="fr10c")
+        q, a = issue_qualification_and_admission(h, subject_binding=sb)
+
+        r11_kid = key_id_from_public_pem(h.keys.r11_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        r12_kid = key_id_from_public_pem(h.keys.r12_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        lookup = make_change_type_authorization_lookup(r11_key_id=r11_kid, r12_key_id=r12_kid)
+
+        epoch_before = enforcement_store.current_epoch(conn)
+        semantic = {
+            "previous_epoch": epoch_before,
+            "new_epoch": epoch_before + 1,
+            "change_type": "QUALIFICATION_REVOCATION",
+            "target_type": "qualification",
+            "target_id": q.credential_id,
+            "target_digest_optional": q.credential_digest,
+            "issued_at_unix_ms": 0,
+            "issuer_authority_id": "r11-q",
+            "issuer_key_id": r11_kid,
+        }
+        rec_proto = ControlRecord(
+            record_id="",
+            previous_epoch=epoch_before,
+            new_epoch=epoch_before + 1,
+            change_type="QUALIFICATION_REVOCATION",
+            target_type="qualification",
+            target_id=q.credential_id,
+            target_digest_optional=q.credential_digest,
+            issued_at_unix_ms=0,
+            issuer_authority_id="r11-q",
+            issuer_key_id=r11_kid,
+            record_digest="",
+        )
+        rec, _ = compute_id_and_digest(
+            rec_proto, semantic_fields=semantic, id_prefix="rev",
+            id_salt=("fr10c", q.credential_id),
+        )
+        sig = sign_ed25519(h.keys.r11_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+        rec = dc_replace(rec, signature=sig)
+
+        new_epoch = apply_control_record(
+            conn,
+            record=rec,
+            issuer_pub=h.keys.r11_pub,
+            change_type_authorization_lookup=lookup,
+            created_at_unix_ms=0,
+        )
+        assert new_epoch == epoch_before + 1
+        assert enforcement_store.current_epoch(conn) == epoch_before + 1
+    finally:
+        close_temp_store(conn, tmp)
+
+
+def test_fr10_r12_admission_revocation_accepted():
+    """FR-10 positive: R12 signed ADMISSION_REVOCATION => accepted."""
+    from trusted.control_apply import (
+        apply_control_record,
+        make_change_type_authorization_lookup,
+    )
+    from trusted import enforcement_store
+    from qa_poc.models import (
+        ControlRecord, DOMAIN_CONTROL_RECORD, artifact_payload, compute_id_and_digest,
+    )
+    from qa_poc.crypto import sign_ed25519, key_id_from_public_pem
+    from cryptography.hazmat.primitives import serialization
+    from dataclasses import replace as dc_replace
+
+    conn, tmp = open_temp_store()
+    try:
+        h = FixtureHarness.build()
+        sb = make_subject_binding(identity_id="agent-fr10d", challenge="fr10d")
+        q, a = issue_qualification_and_admission(h, subject_binding=sb)
+
+        r11_kid = key_id_from_public_pem(h.keys.r11_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        r12_kid = key_id_from_public_pem(h.keys.r12_pub.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ))
+        lookup = make_change_type_authorization_lookup(r11_key_id=r11_kid, r12_key_id=r12_kid)
+
+        epoch_before = enforcement_store.current_epoch(conn)
+        semantic = {
+            "previous_epoch": epoch_before,
+            "new_epoch": epoch_before + 1,
+            "change_type": "ADMISSION_REVOCATION",
+            "target_type": "admission",
+            "target_id": a.credential_id,
+            "target_digest_optional": a.credential_digest,
+            "issued_at_unix_ms": 0,
+            "issuer_authority_id": "r12-a",
+            "issuer_key_id": r12_kid,
+        }
+        rec_proto = ControlRecord(
+            record_id="",
+            previous_epoch=epoch_before,
+            new_epoch=epoch_before + 1,
+            change_type="ADMISSION_REVOCATION",
+            target_type="admission",
+            target_id=a.credential_id,
+            target_digest_optional=a.credential_digest,
+            issued_at_unix_ms=0,
+            issuer_authority_id="r12-a",
+            issuer_key_id=r12_kid,
+            record_digest="",
+        )
+        rec, _ = compute_id_and_digest(
+            rec_proto, semantic_fields=semantic, id_prefix="rev",
+            id_salt=("fr10d", a.credential_id),
+        )
+        sig = sign_ed25519(h.keys.r12_priv, DOMAIN_CONTROL_RECORD, artifact_payload(rec))
+        rec = dc_replace(rec, signature=sig)
+
+        new_epoch = apply_control_record(
+            conn,
+            record=rec,
+            issuer_pub=h.keys.r12_pub,
+            change_type_authorization_lookup=lookup,
+            created_at_unix_ms=0,
+        )
+        assert new_epoch == epoch_before + 1
+        assert enforcement_store.current_epoch(conn) == epoch_before + 1
     finally:
         close_temp_store(conn, tmp)

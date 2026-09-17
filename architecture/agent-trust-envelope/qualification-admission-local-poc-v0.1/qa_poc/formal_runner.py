@@ -71,6 +71,14 @@ class FormalEvidence:
     trust_decision_id: Optional[str] = None
     trust_decision_digest: Optional[str] = None
 
+    # --- FR-8: per-artifact expiry timestamps (so a case can prove
+    # ordering at EAP) ---
+    qualification_expires_at_unix_ms: int = 0
+    admission_expires_at_unix_ms: int = 0
+    capability_expires_at_unix_ms: int = 0
+    trust_decision_expires_at_unix_ms: int = 0
+    qualification_expired_at_advance_ms: int = 0  # how far the clock was advanced
+
     # --- Control records applied during this case ---
     applied_control_records: List[Dict[str, Any]] = field(default_factory=list)
 

@@ -269,3 +269,83 @@ def insert_protected_resource(conn: sqlite3.Connection, *, resource_id: str, val
         "INSERT OR IGNORE INTO protected_resource (resource_id, value, mutation_count) VALUES (?, ?, 0)",
         (resource_id, value),
     )
+
+
+
+# === FR-9: deterministic SQLite write-lock barriers ==========================
+#
+# QA-P11 requires deterministic ordering between a control-record transaction
+# and an EAP transaction. The EAP uses BEGIN IMMEDIATE (acquires the SQLite
+# write lock); any concurrent write against the same DB will block until the
+# EAP commits or rolls back, or will return SQLITE_BUSY after the busy_timeout.
+#
+# The helpers below expose a test-only barrier mechanism using a SEPARATE
+# sqlite3 connection that acquires BEGIN IMMEDIATE first. A second connection
+# then attempts to write — it blocks (or returns SQLITE_BUSY depending on
+# busy_timeout). When the first commits, the second's write proceeds against
+# the post-commit state. This is fully deterministic: no sleeps, no timing
+# inference.
+#
+# These helpers are used by case_p11a / case_p11b in tests/case_functions.py.
+
+class BarrierLockHeld(Exception):
+    pass
+
+
+class SQLiteBarrier:
+    """Two-connection barrier against a single on-disk SQLite DB.
+
+    Usage:
+        barrier = SQLiteBarrier(db_path)
+        barrier.acquire_holding()       # conn A: BEGIN IMMEDIATE + ROLLBACK at end
+        # conn B attempts write, observes SQLITE_BUSY or proceeds
+        ...
+
+    The holding connection does NOT commit its BEGIN IMMEDIATE; we ROLLBACK
+    at the end so the test fixture isn't mutated. The competing write either
+    saw SQLITE_BUSY (lock contended) or proceeded AFTER rollback (no
+    contention).
+    """
+
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+        self._holding_conn = None
+        self._busy_timeout_ms = 200  # short; we want deterministic BUSY
+
+    def acquire_holding(self) -> sqlite3.Connection:
+        """Open a separate connection and BEGIN IMMEDIATE (acquires write lock)."""
+        if self._holding_conn is not None:
+            raise BarrierLockHeld("already holding")
+        c = sqlite3.connect(self.db_path, timeout=0.5, isolation_level=None)
+        c.execute("PRAGMA busy_timeout = 0")
+        c.execute("BEGIN IMMEDIATE")
+        self._holding_conn = c
+        return c
+
+    def release_holding(self):
+        """ROLLBACK the holding transaction (so test fixture is unchanged)."""
+        if self._holding_conn is None:
+            return
+        try:
+            self._holding_conn.execute("ROLLBACK")
+        finally:
+            self._holding_conn.close()
+            self._holding_conn = None
+
+    def attempt_write(self, sql: str, params: tuple = ()) -> Tuple[bool, Optional[str]]:
+        """Try to execute sql on a new short-lived connection. Returns
+        (success, error_or_none). success=False means the write was blocked
+        (SQLITE_BUSY).
+        """
+        c = sqlite3.connect(self.db_path, timeout=0.5, isolation_level=None)
+        c.execute("PRAGMA busy_timeout = 0")
+        try:
+            c.execute(sql, params)
+            return True, None
+        except sqlite3.OperationalError as e:
+            err = str(e)
+            if "locked" in err.lower() or "busy" in err.lower():
+                return False, err
+            raise
+        finally:
+            c.close()
