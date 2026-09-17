@@ -40,7 +40,7 @@ echo "== Formal preflight function only (NO authorization token) =="
 python3 - <<'PY'
 import os
 import run_formal
-repo=os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
+repo=os.path.abspath(os.path.join(os.getcwd(), '../../..'))
 results=run_formal.run_preflight(repo)
 for r in results:
     print(f'{r.item}: {r.result}  {r.name}  {r.evidence}')
