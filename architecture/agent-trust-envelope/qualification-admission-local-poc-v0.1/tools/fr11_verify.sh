@@ -5,7 +5,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$HERE"
 export PYTHONPATH="$HERE"
 
-echo "== FR-11 patch application =="
+echo "== FR-11/FR-12 patch application =="
 if ! grep -q 'PUB_ROOT="/etc/ate/poc-public"' bootstrap.sh 2>/dev/null; then
   python3 tools/fr11_finalize.py
 else
@@ -19,6 +19,7 @@ fi
 python3 tools/fr11_fix_reentrant_uid.py
 python3 tools/fr11_fix_pytest_preflight.py
 python3 tools/fr11_fix_p8_semantics.py
+python3 tools/fr12_fix_p14_admission_expiry.py
 
 echo "== Syntax checks =="
 python3 -m py_compile \
@@ -131,13 +132,24 @@ for c in cases:
 classification=classify(preflight_pass=True, cases=cases)
 print('DRY-RUN CLASSIFICATION:', classification)
 assert classification=='QUALIFICATION_ADMISSION_LOCAL_POC_PASS', classification
-# QA-P8 must have failed for the exact frozen unauthorized qualification-issuer reason.
+
 p8=next(c for c in cases if c.test_id=='QA-P8')
 assert 'qualification_credential' in p8.reason_code, p8.reason_code
 assert 'ate.qualification.credential.v1' in p8.reason_code, p8.reason_code
 assert 'capability_token' not in p8.reason_code, p8.reason_code
 print('QA-P8 exact issuer-authorization path: PASS')
+
+p14=next(c for c in cases if c.test_id=='QA-P14-deny')
+assert 'ADMISSION_EXPIRED' in p14.reason_code, p14.reason_code
+assert 'CAPABILITY_EXPIRED' not in p14.reason_code, p14.reason_code
+assert 'TRUST_DECISION_EXPIRED' not in p14.reason_code, p14.reason_code
+assert 'QUALIFICATION_EXPIRED' not in p14.reason_code, p14.reason_code
+assert p14.subcheck_results.get('admission_expired_in_reason') is True, p14.subcheck_results
+assert p14.subcheck_results.get('qualification_still_nominal') is True, p14.subcheck_results
+assert p14.subcheck_results.get('capability_still_nominal') is True, p14.subcheck_results
+assert p14.subcheck_results.get('trust_decision_still_nominal') is True, p14.subcheck_results
+print('QA-P14 exact admission-expiry path: PASS')
 PY
 
-echo "FR-11 VERIFY COMPLETE: PASS"
+echo "FR-11/FR-12 VERIFY COMPLETE: PASS"
 echo "Formal QA-P1..QA-P14 run was NOT authorized or executed by run_formal.py."
