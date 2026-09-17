@@ -6,8 +6,9 @@ connection proxy which is itself executor-scoped. That nested same-principal
 call must be a no-op, not an error. Cross-principal switching from a non-root
 effective UID remains prohibited.
 
-This script patches the generated tests/host_runtime.py only. It does not run
-tests, bootstrap, preflight, or the formal scored run.
+This repair is idempotent and also strips trailing whitespace from the scored
+case file exposed by git diff --check. It does not run tests, bootstrap,
+preflight, or the formal scored run.
 """
 from pathlib import Path
 
@@ -59,8 +60,24 @@ def as_user(name: str):
         os.seteuid(current_uid)
         os.setegid(current_gid)
 '''
-if text.count(old) != 1:
-    raise SystemExit(f"expected one as_user block; found {text.count(old)}")
-path.write_text(text.replace(old, new, 1))
-print("FR-11 reentrant UID repair applied: tests/host_runtime.py")
+marker = "Already executing as the requested principal: nested scope is a no-op."
+if marker in text:
+    print("FR-11 reentrant UID repair already applied; skipping host_runtime.py")
+elif text.count(old) == 1:
+    path.write_text(text.replace(old, new, 1))
+    print("FR-11 reentrant UID repair applied: tests/host_runtime.py")
+else:
+    raise SystemExit(f"unexpected as_user implementation; old-block count={text.count(old)}")
+
+# Clean trailing whitespace exposed by git diff --check without changing
+# semantics. This is intentionally limited to the scored-case source.
+case_path = ROOT / "tests" / "case_functions.py"
+case_text = case_path.read_text()
+cleaned = "\n".join(line.rstrip() for line in case_text.splitlines()) + "\n"
+if cleaned != case_text:
+    case_path.write_text(cleaned)
+    print("Trailing whitespace cleaned: tests/case_functions.py")
+else:
+    print("No trailing whitespace cleanup needed")
+
 print("Formal scored run remains unauthorized.")
