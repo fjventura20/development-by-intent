@@ -12,6 +12,7 @@ import copy
 import pytest
 
 from conformance.models import RuntimeEvidence
+from fixtures.bootstrap import ACTION_PAYLOAD
 
 
 def test_ab01_r13_rejects_fabricated_current_evidence(authority_harness):
@@ -114,7 +115,7 @@ def test_ab05_authorization_rejects_non_governed_action(harness):
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="DELETE_RESOURCE",
-        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        action_payload=ACTION_PAYLOAD,
         qualification=h.qualification,
         admission=h.admission,
         nonce="ab05-non-governed-action",
@@ -134,7 +135,7 @@ def test_ab06_authorization_rejects_stale_active_qualification_after_revocation(
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
-        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        action_payload=ACTION_PAYLOAD,
         qualification=stale_active_qualification,
         admission=h.admission,
         nonce="ab06-stale-active-qa",
@@ -152,7 +153,7 @@ def test_ab07_authorization_rejects_mutated_participant_subject_binding(harness)
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
-        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        action_payload=ACTION_PAYLOAD,
         qualification=h.qualification,
         admission=h.admission,
         nonce="ab07-mutated-subject",
