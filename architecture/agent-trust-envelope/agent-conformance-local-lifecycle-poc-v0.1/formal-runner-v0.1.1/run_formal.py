@@ -250,7 +250,7 @@ def main() -> int:
     classification = "INCONCLUSIVE_EVIDENCE_INVALID"
     try:
         h, controls = bootstrap.build_harness_with_controls(prefix=f"{mode}-successor")
-        e = bootstrap.attach_executor(h)
+        e = controls.attach_executor(h)
 
         # Explicit preflight proof: exactly the two predeclared profiles are
         # present in the installed frozen registry and profile v1 is active.
@@ -481,9 +481,7 @@ def main() -> int:
 
         # C0 consumed executor authority. Re-grant after successful restoration,
         # matching the existing development lifecycle fixture.
-        h.state_store.grant_protected_resource_authority(
-            h.protected_resource_authority_token,
-        )
+        controls.regrant_protected_resource_authority()
 
         cap2 = h.authorization.issue_capability(
             subject=h.subject,
