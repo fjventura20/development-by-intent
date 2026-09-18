@@ -974,14 +974,20 @@ def test_h7_r13_rejects_caller_lie_about_qualification_state(authority_harness):
 
 
 def test_h8_revoked_qualification_cannot_be_rolled_back_by_reregistration(authority_harness):
-    """A previously signed ACTIVE fixture cannot overwrite revoked authoritative state."""
+    """Previously signed ACTIVE QA fixtures cannot overwrite revoked authoritative state."""
     h, _, controls = authority_harness
-    active_snapshot = copy.deepcopy(h.qualification)
+    active_qualification = copy.deepcopy(h.qualification)
+    active_admission = copy.deepcopy(h.admission)
 
     controls.revoke_qualification(h.qualification.artifact_id)
+    controls.revoke_admission(h.admission.artifact_id)
     assert h.state_store.qualification_state_for(h.subject.subject_id) == "REVOKED"
+    assert h.state_store.admission_state_for(h.subject.subject_id) == "REVOKED"
 
     with pytest.raises(PermissionError):
-        h.state_store.register_qualification_fixture(active_snapshot)
+        h.state_store.register_qualification_fixture(active_qualification)
+    with pytest.raises(PermissionError):
+        h.state_store.register_admission_fixture(active_admission)
 
     assert h.state_store.qualification_state_for(h.subject.subject_id) == "REVOKED"
+    assert h.state_store.admission_state_for(h.subject.subject_id) == "REVOKED"
