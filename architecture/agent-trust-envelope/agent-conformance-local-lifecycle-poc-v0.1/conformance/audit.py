@@ -15,6 +15,7 @@ recorder public key.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 from dataclasses import InitVar, dataclass, field
 from typing import Any, Callable, Dict, List, Optional
@@ -49,7 +50,7 @@ class AuditRecorder:
         self._records: List[AuditRecord] = []
 
     def records(self) -> List[AuditRecord]:
-        return list(self._records)
+        return [copy.deepcopy(r) for r in self._records]
 
     def append(
         self,
@@ -67,6 +68,7 @@ class AuditRecorder:
             sequence = 1
             prev_hash = GENESIS_PREV_HASH
 
+        payload = copy.deepcopy(payload)
         payload_digest = canonical_sha256(payload)
         canonical_record = {
             "artifact_kind": "AuditRecord",
