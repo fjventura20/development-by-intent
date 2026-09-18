@@ -590,15 +590,18 @@ def test_h1_registry_registration_closed_after_freeze(authority_harness):
 
 
 def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(authority_harness):
-    """Exact final-review attack: valid signer + correct digest cannot replace registry."""
+    """Valid signer + correct fake digest cannot restore from N+1."""
     h, _, controls = authority_harness
     from conformance.models import ConformanceProfile
     from conformance.profile_registry import ProfileRegistry
 
-    # Observe runtime v2 while authoritative active profile remains predeclared v1.
+    # Establish the real invalidated state first.
     h.observer.submit_measured_runtime("v2", "rt-ev-v2-h1")
+    trigger = h.observer.observe_change(
+        h.subject.subject_id, h.subject.trust_domain,
+    )
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2-h1")
-    r13_before = h.r13.evaluate(
+    r13_invalidated = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
         runtime_evidence=ev_v2,
@@ -606,8 +609,22 @@ def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(author
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    assert r13_before.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
+    assert r13_invalidated.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
+    h.r14.publish_transition(
+        subject=h.subject,
+        prior_state=LIFECYCLE_CONFORMANT,
+        new_state=LIFECYCLE_REATTESTATION_REQUIRED,
+        rationale="H1 exact attack precondition",
+        r13_evaluation=r13_invalidated,
+        trigger_observation=trigger,
+    )
+    assert h.state_store.current_state(h.subject.subject_id) == (
+        LIFECYCLE_REATTESTATION_REQUIRED
+    )
+    assert h.state_store.state_epoch(h.subject.subject_id) == 2
 
+    # Simulate an attacker who somehow has a valid profile-signer operation:
+    # the profile and its digest are both valid, but it was invented after freeze.
     fake = ConformanceProfile(
         artifact_id="profile-fake-valid-signer",
         profile_id="local-conformance-poc",
@@ -623,7 +640,8 @@ def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(author
     fake_registry.register(fake)
     fake_registry.freeze()
 
-    # Correct digest is known. Replacement is rejected before activation exists.
+    # Exact correct-digest attack: registry replacement is rejected, and
+    # participant-facing activation is unavailable even with the right digest.
     with pytest.raises(PermissionError):
         h.state_store.install_profile_registry(fake_registry)
     with pytest.raises(PermissionError):
@@ -642,6 +660,10 @@ def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(author
         trust_state_current=True,
     )
     assert r13_after.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
+    assert h.state_store.current_state(h.subject.subject_id) == (
+        LIFECYCLE_REATTESTATION_REQUIRED
+    )
+    assert h.state_store.state_epoch(h.subject.subject_id) == 2
 
 
 def test_h3_no_profile_private_key_or_activation_token_on_harness(harness):
