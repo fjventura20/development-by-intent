@@ -154,6 +154,42 @@ class AuditRecorder:
         return True
 
 
+
+def verify_records(records: List[AuditRecord], public_key: Ed25519PublicKey) -> bool:
+    """Verify an arbitrary ledger snapshot without mutating a recorder."""
+    prev_hash = GENESIS_PREV_HASH
+    expected_seq = 1
+    for rec in records:
+        if rec.event_sequence != expected_seq:
+            return False
+        if rec.prev_hash != prev_hash:
+            return False
+        pd = canonical_sha256(rec.payload)
+        if rec.payload_digest != pd:
+            return False
+        canonical_record = {
+            "artifact_kind": "AuditRecord",
+            "event_sequence": rec.event_sequence,
+            "event_kind": rec.event_kind,
+            "payload": rec.payload,
+            "prev_hash": rec.prev_hash,
+            "payload_digest": rec.payload_digest,
+            "logical_ts": rec.logical_ts,
+        }
+        if rec.record_hash != canonical_sha256(canonical_record):
+            return False
+        if not verify_ed25519(
+            public_key,
+            rec.signature,
+            rec.signature_domain,
+            rec.signing_payload(),
+        ):
+            return False
+        prev_hash = rec.record_hash
+        expected_seq += 1
+    return True
+
+
 def copy_and_tamper(records: List[AuditRecord], tamper_index: int) -> List[AuditRecord]:
     """Return a deep-copied ledger with one record's payload mutated.
 
