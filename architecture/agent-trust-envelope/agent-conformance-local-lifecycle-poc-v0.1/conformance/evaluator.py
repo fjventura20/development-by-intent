@@ -17,7 +17,7 @@ verifier rejects it.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import Any, Dict, Optional
 
 from .crypto import (
@@ -50,12 +50,13 @@ class R13Evaluator:
     """
 
     evaluator_id: str
-    private_key: Ed25519PrivateKey
+    private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     clock: LogicalClock
     state_store: Any  # G2 fix: required for profile resolution.
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
+        self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
 
     def evaluate(
@@ -136,7 +137,7 @@ class R13Evaluator:
             signature_domain="ate.conformance.r13_eval.v1",
         )
         evaln.signature = sign_ed25519(
-            self.private_key, evaln.signature_domain, evaln.signing_payload(),
+            self.__private_key, evaln.signature_domain, evaln.signing_payload(),
         )
         return evaln
 
