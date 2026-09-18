@@ -104,10 +104,10 @@ def test_f2_forged_r13_signature_rejected_at_r14_path(harness):
     assert h.state_store.current_state(h.subject.subject_id) == state_before
 
 
-def test_f2_r13_subject_mismatch_rejected(harness):
+def test_f2_r13_subject_mismatch_rejected(authority_harness):
     """F2: an R13 evaluation bound to a different subject is rejected
     at the R14 publication path."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
     h.observer.submit_measured_runtime("v2", "rt-ev-v2")
@@ -116,9 +116,7 @@ def test_f2_r13_subject_mismatch_rejected(harness):
     # Tamper subject_id and re-sign with the real R13 key so signature
     # is valid but binding is wrong.
     r13.subject_id = "different-subject"
-    r13.signature = sign_ed25519(
-        h.r13.private_key, r13.signature_domain, r13.signing_payload(),
-    )
+    controls.sign_r13_for_attack_test(r13)
     with pytest.raises(TransitionInputError):
         h.r14.publish_transition(
             subject=h.subject,
@@ -303,14 +301,14 @@ def test_f4_tampered_artifact_digest_rejected(harness):
 # ---------------------------------------------------------------------------
 
 
-def test_f5_executor_reads_fixtures_by_artifact_id_from_state_store(harness):
+def test_f5_executor_reads_fixtures_by_artifact_id_from_state_store(authority_harness):
     """F5: the executor resolves the current qualification fixture by
     artifact_id from StateStore (not from a caller-supplied object).
     We verify the boundary by re-pointing the capability's
     `qualification_artifact_id` at an unregistered id and observing
     denial. G3 fix: `get_qualification_fixture()` returns a deep
     copy; caller mutations cannot reach authoritative state."""
-    h, e = harness
+    h, e, controls = authority_harness
 
     # The harness exposes a reference to the fixture it registered
     # (call it `caller_fixture`). It is NOT the authoritative record.
@@ -349,11 +347,7 @@ def test_f5_executor_reads_fixtures_by_artifact_id_from_state_store(harness):
     # at step 4, regardless of whether the caller could supply a
     # matching object.
     cap.qualification_artifact_id = "qual-does-not-exist"
-    cap.signature = sign_ed25519(
-        h.authorization.private_key,
-        cap.signature_domain,
-        cap.signing_payload(),
-    )
+    controls.sign_capability_for_attack_test(cap)
     res = e.execute(
         subject=h.subject,
         capability=cap,
@@ -365,7 +359,7 @@ def test_f5_executor_reads_fixtures_by_artifact_id_from_state_store(harness):
     assert res.reason == REASON_FIXTURE_UNREGISTERED
 
 
-def test_f5_unregistered_qualification_artifact_id_denied(harness):
+def test_f5_unregistered_qualification_artifact_id_denied(authority_harness):
     """F5: a capability bound to a qualification artifact_id that
     is NOT registered in StateStore is denied at step 4."""
     h, e = harness
@@ -384,11 +378,7 @@ def test_f5_unregistered_qualification_artifact_id_denied(harness):
 
     # Re-point the capability at an unregistered artifact_id and re-sign.
     cap.qualification_artifact_id = "qual-does-not-exist"
-    cap.signature = sign_ed25519(
-        h.authorization.private_key,
-        cap.signature_domain,
-        cap.signing_payload(),
-    )
+    controls.sign_capability_for_attack_test(cap)
     res = e.execute(
         subject=h.subject,
         capability=cap,
@@ -734,10 +724,10 @@ def test_h2_no_public_qual_admission_writer_token(harness):
 # ---------------------------------------------------------------------------
 
 
-def test_g4_mismatched_trigger_evidence_id_rejected(harness):
+def test_g4_mismatched_trigger_evidence_id_rejected(authority_harness):
     """G4: a trigger whose current_evidence_id does not match the
     R13 evaluation's runtime_evidence_id is rejected at R14."""
-    h, _ = harness
+    h, _, controls = authority_harness
     from conformance.canonical import canonical_sha256
     from conformance.crypto import sign_ed25519
     from conformance.models import R13Evaluation, TriggerObservation
@@ -782,11 +772,7 @@ def test_g4_mismatched_trigger_evidence_id_rejected(harness):
         event_sequence=h.clock.now(),
         signature_domain="ate.conformance.trigger_observation.v1",
     )
-    mismatch_trigger.signature = sign_ed25519(
-        h.observer.private_key,
-        mismatch_trigger.signature_domain,
-        mismatch_trigger.signing_payload(),
-    )
+    controls.sign_trigger_for_attack_test(mismatch_trigger)
     with pytest.raises(TransitionInputError):
         h.r14.publish_transition(
             subject=h.subject,
@@ -800,10 +786,10 @@ def test_g4_mismatched_trigger_evidence_id_rejected(harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == 1
 
 
-def test_g4_mismatched_trigger_value_digest_rejected(harness):
+def test_g4_mismatched_trigger_value_digest_rejected(authority_harness):
     """G4: a trigger whose current_value_digest does not match the
     measured runtime value R13 evaluated is rejected."""
-    h, _ = harness
+    h, _, controls = authority_harness
     from conformance.canonical import canonical_sha256
     from conformance.crypto import sign_ed25519
     from conformance.models import TriggerObservation
@@ -838,11 +824,7 @@ def test_g4_mismatched_trigger_value_digest_rejected(harness):
         event_sequence=h.clock.now(),
         signature_domain="ate.conformance.trigger_observation.v1",
     )
-    mismatch_digest_trigger.signature = sign_ed25519(
-        h.observer.private_key,
-        mismatch_digest_trigger.signature_domain,
-        mismatch_digest_trigger.signing_payload(),
-    )
+    controls.sign_trigger_for_attack_test(mismatch_digest_trigger)
     with pytest.raises(TransitionInputError):
         h.r14.publish_transition(
             subject=h.subject,
@@ -855,10 +837,10 @@ def test_g4_mismatched_trigger_value_digest_rejected(harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == 1
 
 
-def test_g4_unresolved_evidence_id_rejected(harness):
+def test_g4_unresolved_evidence_id_rejected(authority_harness):
     """G4: a trigger whose current_evidence_id does not resolve in
     the observer-authoritative store is rejected."""
-    h, _ = harness
+    h, _, controls = authority_harness
     from conformance.canonical import canonical_sha256
     from conformance.crypto import sign_ed25519
     from conformance.models import TriggerObservation
@@ -890,11 +872,7 @@ def test_g4_unresolved_evidence_id_rejected(harness):
         event_sequence=h.clock.now(),
         signature_domain="ate.conformance.trigger_observation.v1",
     )
-    unresolved_trigger.signature = sign_ed25519(
-        h.observer.private_key,
-        unresolved_trigger.signature_domain,
-        unresolved_trigger.signing_payload(),
-    )
+    controls.sign_trigger_for_attack_test(unresolved_trigger)
     with pytest.raises(TransitionInputError):
         h.r14.publish_transition(
             subject=h.subject,
@@ -905,3 +883,23 @@ def test_g4_unresolved_evidence_id_rejected(harness):
             trigger_observation=unresolved_trigger,
         )
     assert h.state_store.state_epoch(h.subject.subject_id) == 1
+
+# ---------------------------------------------------------------------------
+# H4 regression: participant-facing authorities expose no raw signing key API
+# ---------------------------------------------------------------------------
+
+def test_h4_no_public_authority_private_keys_on_participant_harness(harness):
+    """Logical fixture/API boundary: participant-facing authorities must not
+    expose raw signing private keys as public attributes.
+
+    This PoC does not claim OS/process isolation against Python introspection.
+    """
+    h, _ = harness
+    authorities = {
+        "r14": h.r14,
+        "r13": h.r13,
+        "observer": h.observer,
+        "authorization": h.authorization,
+    }
+    exposed = [name for name, obj in authorities.items() if hasattr(obj, "private_key")]
+    assert exposed == [], f"participant-facing authorities expose private_key: {exposed}"
