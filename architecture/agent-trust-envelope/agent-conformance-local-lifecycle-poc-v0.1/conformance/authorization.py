@@ -176,16 +176,52 @@ class AuthorizationService:
         it was issued against (F5); the executor resolves the current
         authoritative fixture objects from StateStore at step 4.
         """
+        # Resolve authoritative identity first; caller SubjectState is only
+        # a request envelope and cannot redefine role/domain binding.
+        try:
+            authoritative_subject = self.store.get_subject(subject.subject_id)
+        except KeyError:
+            return None
+        if (
+            subject.role_id != authoritative_subject.role_id
+            or subject.trust_domain != authoritative_subject.trust_domain
+        ):
+            return None
+
+        # Resolve current QA fixtures by stable artifact ID before signing.
+        # Caller-supplied signed snapshots may be stale after revocation.
+        authoritative_qualification = self.store.get_qualification_fixture(
+            qualification.artifact_id,
+        )
+        authoritative_admission = self.store.get_admission_fixture(
+            admission.artifact_id,
+        )
+        if authoritative_qualification is None or authoritative_admission is None:
+            return None
         if not self.verify_qualification(
-            qualification, subject.subject_id, subject.role_id, subject.trust_domain,
+            authoritative_qualification,
+            authoritative_subject.subject_id,
+            authoritative_subject.role_id,
+            authoritative_subject.trust_domain,
         ):
             return None
         if not self.verify_admission(
-            admission, subject.subject_id, subject.role_id, subject.trust_domain,
+            authoritative_admission,
+            authoritative_subject.subject_id,
+            authoritative_subject.role_id,
+            authoritative_subject.trust_domain,
         ):
             return None
-        # Authoritative state check (F3 reads StateStore, not subject fields).
-        if self.store.current_state(subject.subject_id) != LIFECYCLE_CONFORMANT:
+
+        # Caller artifacts must identify the same authoritative records; their
+        # mutable fields do not determine authorization.
+        if (
+            qualification.artifact_id != authoritative_qualification.artifact_id
+            or admission.artifact_id != authoritative_admission.artifact_id
+        ):
+            return None
+
+        if self.store.current_state(authoritative_subject.subject_id) != LIFECYCLE_CONFORMANT:
             return None
 
         action_digest = canonical_sha256({"action": action, "payload": action_payload})
@@ -194,12 +230,12 @@ class AuthorizationService:
 
         cap = ExecutionCapability(
             artifact_id=f"cap-{nonce}",
-            subject_id=subject.subject_id,
-            role_id=subject.role_id,
-            trust_domain=subject.trust_domain,
+            subject_id=authoritative_subject.subject_id,
+            role_id=authoritative_subject.role_id,
+            trust_domain=authoritative_subject.trust_domain,
             action_digest=action_digest,
-            observed_conformance_state=self.store.current_state(subject.subject_id),
-            observed_state_epoch=self.store.state_epoch(subject.subject_id),
+            observed_conformance_state=self.store.current_state(authoritative_subject.subject_id),
+            observed_state_epoch=self.store.state_epoch(authoritative_subject.subject_id),
             nonce=nonce,
             issued_at=clock_now,
             expires_at=clock_now + ttl_ticks,
