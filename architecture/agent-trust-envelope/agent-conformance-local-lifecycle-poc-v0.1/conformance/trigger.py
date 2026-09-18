@@ -49,28 +49,9 @@ class TriggerObserver:
         self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
 
-    # ---- privileged write path (used by harness, NOT by subject) ----
-
-    def _submit_measured_runtime_trusted(self, value: str, artifact_id: str) -> str:
-        """Trusted observer write path retained outside participant APIs."""
-        from .models import RuntimeEvidence
-
-        ev = RuntimeEvidence(
-            artifact_id=artifact_id,
-            subject_id="agent-001",
-            trust_domain="local-poc",
-            measured_runtime_version=value,
-            observer_id=self.observer_id,
-            logical_ts=self.clock.advance(),
-            event_sequence=self.clock.now(),
-            signature_domain="ate.conformance.runtime_evidence.v1",
-        )
-        # Sign the runtime evidence with the observer's key (same
-        # authority that signs triggers — frozen §13).
-        ev.signature = sign_ed25519(
-            self.__private_key, ev.signature_domain, ev.signing_payload(),
-        )
-        return self.store._record_evidence_trusted(ev)  # noqa: SLF001
+    # Runtime evidence writes are intentionally not methods on the
+    # participant-visible observer object. Bootstrap retains the trusted
+    # measurement/signing closure.
 
     def submit_measured_runtime(self, *args: Any, **kwargs: Any) -> str:
         raise PermissionError(
