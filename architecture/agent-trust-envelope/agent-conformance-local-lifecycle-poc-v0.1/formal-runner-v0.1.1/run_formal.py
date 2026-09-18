@@ -23,7 +23,7 @@ from typing import Any
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-IMPLEMENTATION_BASELINE = "7d6dad17cf95c2e29afdf45b97c73a07f54bc870"
+IMPLEMENTATION_BASELINE = "82dc8df570b5946fb291575a44e73755b6c3213a"
 
 FROZEN_BLOBS = {
     "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md":
@@ -233,11 +233,11 @@ def main() -> int:
     try:
         require(pytest_proc.returncode == 0, "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest failed")
         require(
-            "79 passed" in pytest_proc.stdout
+            "81 passed" in pytest_proc.stdout
             and "failed" not in pytest_proc.stdout.lower()
             and "skipped" not in pytest_proc.stdout.lower()
             and "xfailed" not in pytest_proc.stdout.lower(),
-            "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest result is not exact 79-pass clean result",
+            "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest result is not exact 81-pass clean result",
         )
     except FormalRunError as exc:
         (evidence_dir / "RUN-FAILED.txt").write_text(str(exc) + "\n", encoding="utf-8")
@@ -606,7 +606,7 @@ def main() -> int:
             "implementation_baseline": IMPLEMENTATION_BASELINE,
             "runner_head": current_head,
             "classification": classification,
-            "pytest": "79 passed / 0 failed / 0 skipped / 0 xfailed",
+            "pytest": "81 passed / 0 failed / 0 skipped / 0 xfailed",
             "final_state": jsonable(snap),
             "final_resource_line_count": after_replay,
             "c2_granted": c2.granted,
