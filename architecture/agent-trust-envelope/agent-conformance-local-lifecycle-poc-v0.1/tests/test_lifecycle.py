@@ -54,11 +54,12 @@ def test_tc01_initial_conformance_establishment(lifecycle):
 def test_tc02_initial_authorized_action(lifecycle):
     """Expected: PASS and exactly one protected-resource effect."""
     ctx = lifecycle
-    assert ctx.c1_execution_initial.granted is True
-    assert ctx.c1_execution_initial.reason == "OK"
-    assert ctx.c1_execution_initial.step == 10
-    # Exactly 1 line at the moment immediately after C1's effect.
-    assert ctx.lines_after_c1_initial == 1
+    # F1 fix: C0 (consumed at epoch N) proves normal execution.
+    assert ctx.c0_execution_initial.granted is True
+    assert ctx.c0_execution_initial.reason == "OK"
+    assert ctx.c0_execution_initial.step == 10
+    # Exactly 1 line at the moment immediately after C0's effect.
+    assert ctx.lines_after_c0_initial == 1
 
 
 # ---------------------------------------------------------------------------
@@ -138,8 +139,9 @@ def test_tc07_new_authorization_denied_while_non_conformant(invalidated_lifecycl
     """Expected: DENY — capability issuance is rejected at the gate."""
     ctx = invalidated_lifecycle
     # Subject is currently REATTESTATION_REQUIRED @ epoch 2.
-    assert ctx.harness.subject.current_state == LIFECYCLE_REATTESTATION_REQUIRED
-    assert ctx.harness.subject.state_epoch == 2
+    # F3 fix: authoritative state lives in StateStore, not on subject.
+    assert ctx.harness.state_store.current_state(ctx.harness.subject.subject_id) == LIFECYCLE_REATTESTATION_REQUIRED
+    assert ctx.harness.state_store.state_epoch(ctx.harness.subject.subject_id) == 2
     new_cap = ctx.harness.authorization.issue_capability(
         subject=ctx.harness.subject,
         action="WRITE_RESOURCE",
@@ -244,8 +246,9 @@ def test_tc13_r14_restoration(lifecycle):
     ctx = lifecycle
     assert ctx.r14_restored.new_state == LIFECYCLE_CONFORMANT
     assert ctx.r14_restored.state_epoch == 3
-    assert ctx.harness.subject.current_state == LIFECYCLE_CONFORMANT
-    assert ctx.harness.subject.state_epoch == 3
+    # F3 fix: read authoritative state from StateStore.
+    assert ctx.harness.state_store.current_state(ctx.harness.subject.subject_id) == LIFECYCLE_CONFORMANT
+    assert ctx.harness.state_store.state_epoch(ctx.harness.subject.subject_id) == 3
     assert ctx.harness.r14.verify(ctx.r14_restored)
 
 
@@ -308,6 +311,8 @@ def test_tc17_audit_chain_verification_and_causal_order(lifecycle):
     assert ctx.harness.audit.verify_chain()
 
     expected_sequence = [
+        "c0_issued",
+        "c0_effect",
         "c1_issued",
         "runtime_mutation",
         "trigger_observed",
@@ -320,6 +325,47 @@ def test_tc17_audit_chain_verification_and_causal_order(lifecycle):
         "c2_effect",
     ]
     assert ctx.harness.audit.verify_causal_order(expected_sequence)
+
+
+# ---------------------------------------------------------------------------
+# F1 regression: clean stale-capability proof invariants
+# ---------------------------------------------------------------------------
+
+
+def test_f1_c1_nonce_unseen_throughout_pre_mutation_window(lifecycle):
+    """F1 fix: C1's nonce MUST remain UNSEEN at every point between
+    issuance and the stale-capability attempt. C0 was the consumed
+    capability; C1 is the unconsumed stale proof."""
+    ctx = lifecycle
+    # The RunContext captures both snapshots explicitly.
+    assert ctx.cap1_nonce_before_mutation_unseen is True
+    assert ctx.cap1_nonce_unseen_at_stale_attempt is True
+
+
+def test_f1_c0_was_the_only_consumed_pre_mutation_capability(lifecycle):
+    """F1 fix: C0 is the ONLY pre-mutation capability whose nonce is
+    in the RESERVED|CONSUMED registry. C1 remains UNSEEN until the
+    stale attempt fails at step 6/7."""
+    ctx = lifecycle
+    statuses = {
+        "c0": ctx.harness.nonce_registry.status("nonce-c0"),
+        "c1": ctx.harness.nonce_registry.status("nonce-c1"),
+    }
+    assert statuses["c0"] == "CONSUMED"
+    assert statuses["c1"] is None  # unseen throughout the stale attempt
+
+
+def test_f1_c1_denial_classification_is_not_replay(lifecycle):
+    """F1 fix: the C1 denial classification must be a lifecycle check
+    (NON_CONFORMANT or STALE_EPOCH), NOT a replay denial. The replay
+    branch only fires when nonce was previously used; C1's nonce was
+    not."""
+    ctx = lifecycle
+    res = ctx.c1_execution_after_invalidation
+    assert res.granted is False
+    assert res.reason in (REASON_NON_CONFORMANT, REASON_STALE_EPOCH)
+    from conformance.executor import REASON_REPLAYED_NONCE
+    assert res.reason != REASON_REPLAYED_NONCE
 
 
 # ---------------------------------------------------------------------------

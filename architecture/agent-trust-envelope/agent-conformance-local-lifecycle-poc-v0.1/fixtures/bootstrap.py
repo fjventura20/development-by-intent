@@ -30,6 +30,7 @@ from typing import Any, Optional
 
 from conformance.audit import AuditRecorder
 from conformance.authorization import AuthorizationService
+from conformance.canonical import canonical_sha256
 from conformance.crypto import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
@@ -45,7 +46,13 @@ from conformance.models import (
     LIFECYCLE_CONFORMANT,
     QualificationFixture,
 )
-from conformance.state import LogicalClock, NonceRegistry, StateStore, SubjectState
+from conformance.state import (
+    LogicalClock,
+    NonceRegistry,
+    RuntimeObserverStore,
+    StateStore,
+    SubjectState,
+)
 from conformance.trigger import TriggerObserver
 
 
@@ -100,6 +107,13 @@ def _sign_conformance_profile(priv, profile: ConformanceProfile) -> ConformanceP
 
 
 def _sign_qual_admission(priv, fixture) -> Any:
+    """Sign a qualification/admission fixture and bind its artifact_digest.
+
+    F4: the verifier checks that fixture.artifact_digest equals the
+    canonical SHA-256 of the signing payload, so the digest must be
+    computed at signing time.
+    """
+    fixture.artifact_digest = canonical_sha256(fixture.signing_payload())
     fixture.signature = sign_ed25519(
         priv, fixture.signature_domain, fixture.signing_payload(),
     )
@@ -134,16 +148,19 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
     qa_priv, qa_pub = generate_keypair()
     ar_priv, ar_pub = generate_keypair()
 
-    # Stash the qualification/admission issuer pub on the state store
-    # so the AuthorizationService verifier can find it (frozen §10A).
-    state_store._qual_admission_issuer_pub = qa_pub  # noqa: SLF001
-    state_store._qual_admission_issuer_key_id = key_id_from_public_key(qa_pub)
+    # F4 fix: register the qualification/admission issuer authority
+    # on the state store. AuthorizationService looks it up by
+    # registered issuer identity and key_id, not by raw attribute.
+    state_store.register_qual_admission_issuer(
+        issuer_id="qual-admission-issuer-1",
+        issuer_public_key=qa_pub,
+    )
 
     observer = TriggerObserver(
         observer_id="observer-1",
         private_key=obs_priv,
         public_key=obs_pub,
-        store=__import__("conformance.state", fromlist=["RuntimeObserverStore"]).RuntimeObserverStore(),
+        store=RuntimeObserverStore(),
         clock=clock,
     )
     r13 = R13Evaluator(
@@ -157,6 +174,9 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         private_key=r14_priv,
         public_key=r14_pub,
         clock=clock,
+        state_store=state_store,
+        r13_authority=r13,           # F2: R14 verifies R13 inputs
+        trigger_authority=observer,  # F2: R14 verifies trigger inputs
     )
     authorization = AuthorizationService(
         service_id="az-1",
@@ -231,13 +251,11 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
     state_store.register_qualification_fixture(qualification)
     state_store.register_admission_fixture(admission)
 
-    # ---- subject ----
+    # ---- subject (identity-only; F3 keeps authoritative state in StateStore) ----
     subject = SubjectState(
         subject_id=SUBJECT_ID,
         role_id=ROLE_ID,
         trust_domain=TRUST_DOMAIN,
-        current_state="UNKNOWN",
-        state_epoch=0,
         current_runtime_version="v1",
     )
     state_store.add_subject(subject)

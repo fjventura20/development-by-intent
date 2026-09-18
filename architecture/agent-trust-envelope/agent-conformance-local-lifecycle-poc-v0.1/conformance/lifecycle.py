@@ -5,12 +5,27 @@ Frozen §14.3, §16, §21 + parent v0.1.2 §4.5:
   - The prior_state/new_state/epoch are all signed and immutable.
   - The subject CANNOT directly mutate lifecycle state or epoch (frozen §7).
 
-The authority exposes only `publish_transition()`, which records an
-R14 state decision derived from a valid trigger and a valid R13
-recommendation. Direct mutation of state_epoch is not exposed.
+F2 fix: before publishing or applying a transition, R14 verifies:
+  - authorized R13 signature (under the registered R13 authority);
+  - R13 subject/domain binding to the target subject;
+  - requested new_state == R13.recommended_state;
+  - prior_state == StateStore.current_state(subject_id);
+  - when a trigger is required (N->N+1 invalidation path), trigger
+    signature verifies under the registered trigger authority and
+    trigger subject/domain binding matches.
 
-Forgery tests (NS-05) substitute the signature with a key that does
-not match R14's authority; the verifier rejects it.
+F3 fix: the actual write to authoritative lifecycle state goes through
+`StateStore.apply_authoritative_state()` with the protected writer
+token, which only this class can acquire. Subject-facing code cannot
+mutate authoritative state.
+
+The authority exposes only `publish_transition()` and `publish_initial()`,
+both of which perform input verification, sign the new R14 state, and
+then atomically apply the transition.
+
+Forgery tests must hit this path directly — calling R14 with a forged
+or mismatched R13 (or trigger) must NOT produce an R14 artifact AND
+must NOT change authoritative state or epoch.
 """
 
 from __future__ import annotations
@@ -32,7 +47,18 @@ from .models import (
     LIFECYCLE_SUSPENDED,
     R14State,
 )
-from .state import LogicalClock, StateStore, SubjectState
+from .state import (
+    LogicalClock,
+    StateStore,
+    SubjectState,
+    get_authoritative_state_writer_token,
+)
+
+
+class TransitionInputError(Exception):
+    """Raised when an R14 transition is requested with inputs that fail
+    F2 verification. The R14 state is NOT published and authoritative
+    lifecycle state is NOT mutated when this is raised."""
 
 
 @dataclass
@@ -43,9 +69,121 @@ class LifecycleAuthority:
     private_key: Ed25519PrivateKey
     public_key: Ed25519PublicKey
     clock: LogicalClock
+    state_store: StateStore
+    # The registered R13 authority (for F2 verification of R13 inputs).
+    r13_authority: Optional[Any] = None
+    # The registered trigger observer authority (for F2 verification
+    # of trigger inputs when a trigger is required).
+    trigger_authority: Optional[Any] = None
 
     def __post_init__(self) -> None:
         self.key_id = key_id_from_public_key(self.public_key)
+        # Acquire the protected writer token for authoritative state
+        # mutation. This is module-local and not exposed to participants.
+        self._writer_token = get_authoritative_state_writer_token()
+
+    # ---- input verification (F2) ----
+
+    def _verify_r13(
+        self,
+        r13_evaluation: Any,
+        *,
+        subject_id: str,
+        requested_new_state: str,
+    ) -> None:
+        if r13_evaluation is None:
+            raise TransitionInputError("R13 evaluation is required")
+        # Signature under the authorized R13 key.
+        if self.r13_authority is None:
+            raise TransitionInputError(
+                "no registered R13 authority for input verification"
+            )
+        if not self.r13_authority.verify(r13_evaluation):
+            raise TransitionInputError(
+                f"R13 signature does not verify under R13 authority "
+                f"{self.r13_authority.evaluator_id!r}"
+            )
+        # Subject / domain binding.
+        if r13_evaluation.subject_id != subject_id:
+            raise TransitionInputError(
+                f"R13 subject_id {r13_evaluation.subject_id!r} does not "
+                f"match target subject {subject_id!r}"
+            )
+        # trust_domain must match — the frozen PoC has a single
+        # trust_domain; we enforce it strictly.
+        expected_td = self.state_store.get_subject(subject_id).trust_domain
+        if r13_evaluation.trust_domain != expected_td:
+            raise TransitionInputError(
+                f"R13 trust_domain {r13_evaluation.trust_domain!r} does "
+                f"not match subject trust_domain {expected_td!r}"
+            )
+        # Recommendation match.
+        if r13_evaluation.recommended_state != requested_new_state:
+            raise TransitionInputError(
+                f"R13 recommendation {r13_evaluation.recommended_state!r} "
+                f"does not match requested new_state "
+                f"{requested_new_state!r}"
+            )
+
+    def _verify_trigger(
+        self,
+        trigger_observation: Any,
+        *,
+        subject_id: str,
+        required: bool,
+    ) -> None:
+        if trigger_observation is None:
+            if required:
+                raise TransitionInputError(
+                    "trigger observation is required for this transition"
+                )
+            return
+        if self.trigger_authority is None:
+            raise TransitionInputError(
+                "no registered trigger authority for input verification"
+            )
+        if not self.trigger_authority.verify(trigger_observation):
+            raise TransitionInputError(
+                "trigger signature does not verify under trigger authority"
+            )
+        if trigger_observation.subject_id != subject_id:
+            raise TransitionInputError(
+                f"trigger subject_id {trigger_observation.subject_id!r} "
+                f"does not match target subject {subject_id!r}"
+            )
+        expected_td = self.state_store.get_subject(subject_id).trust_domain
+        if trigger_observation.trust_domain != expected_td:
+            raise TransitionInputError(
+                f"trigger trust_domain {trigger_observation.trust_domain!r} "
+                f"does not match subject trust_domain {expected_td!r}"
+            )
+
+    def _verify_prior_state(
+        self,
+        subject_id: str,
+        declared_prior_state: str,
+    ) -> None:
+        actual = self.state_store.current_state(subject_id)
+        # Initial publication goes from UNKNOWN (the harness default)
+        # to the R13-recommended state. The harness's authoritative
+        # `current_state` is "UNKNOWN" before the first publish, and
+        # the caller must declare that as the prior state.
+        # Subsequent transitions must declare the authoritative
+        # current state exactly.
+        if actual == "UNKNOWN":
+            if declared_prior_state != "UNKNOWN":
+                raise TransitionInputError(
+                    f"declared prior_state {declared_prior_state!r} does "
+                    f"not match authoritative current_state {actual!r}"
+                )
+            return
+        if actual != declared_prior_state:
+            raise TransitionInputError(
+                f"declared prior_state {declared_prior_state!r} does not "
+                f"match authoritative current_state {actual!r}"
+            )
+
+    # ---- publishing (F2 + F3) ----
 
     def publish_initial(
         self,
@@ -53,15 +191,52 @@ class LifecycleAuthority:
         subject: SubjectState,
         r13_evaluation: Any,
     ) -> R14State:
-        """Publish the first lifecycle state for a subject (epoch = 1)."""
-        return self._publish(
-            subject=subject,
-            prior_state=LIFECYCLE_SUSPENDED,
-            new_state=r13_evaluation.recommended_state,
-            rationale=f"initial conformance: {r13_evaluation.recommended_state}",
-            r13_evaluation=r13_evaluation,
-            trigger_observation=None,
+        """Publish the first lifecycle state for a subject (epoch = 1).
+
+        Verifies R13 (signature + binding + recommendation) and the
+        declared prior state (must equal authoritative UNKNOWN).
+        """
+        # F2 verification first. Any failure aborts before signing or
+        # mutating authoritative state.
+        self._verify_r13(
+            r13_evaluation,
+            subject_id=subject.subject_id,
+            requested_new_state=r13_evaluation.recommended_state,
         )
+        # Initial publish declares prior_state = "UNKNOWN" — the
+        # authoritative default before any publication.
+        self._verify_prior_state(subject.subject_id, "UNKNOWN")
+        # Initial publish does not require a trigger.
+        self._verify_trigger(None, subject_id=subject.subject_id, required=False)
+
+        new_epoch = self._next_epoch(subject.subject_id)
+
+        state = R14State(
+            artifact_id=f"r14-{subject.subject_id}-e{new_epoch}",
+            subject_id=subject.subject_id,
+            role_id=subject.role_id,
+            trust_domain=subject.trust_domain,
+            prior_state="UNKNOWN",
+            new_state=r13_evaluation.recommended_state,
+            state_epoch=new_epoch,
+            rationale=f"initial conformance: {r13_evaluation.recommended_state}",
+            r13_evaluation_id=r13_evaluation.artifact_id,
+            trigger_observation_id="",
+            logical_ts=self.clock.advance(),
+            event_sequence=self.clock.now(),
+            signature_domain="ate.conformance.r14_state.v1",
+        )
+        state.signature = sign_ed25519(
+            self.private_key, state.signature_domain, state.signing_payload(),
+        )
+        # F3: write to authoritative state via the protected path.
+        self.state_store.apply_authoritative_state(
+            subject.subject_id,
+            state.new_state,
+            state.state_epoch,
+            authorized_caller_token=self._writer_token,
+        )
+        return state
 
     def publish_transition(
         self,
@@ -73,32 +248,35 @@ class LifecycleAuthority:
         r13_evaluation: Any,
         trigger_observation: Optional[Any],
     ) -> R14State:
-        """Publish a new lifecycle state decision with monotonic epoch."""
-        return self._publish(
-            subject=subject,
-            prior_state=prior_state,
-            new_state=new_state,
-            rationale=rationale,
-            r13_evaluation=r13_evaluation,
-            trigger_observation=trigger_observation,
-        )
+        """Publish a new lifecycle state decision with monotonic epoch.
 
-    def _publish(
-        self,
-        *,
-        subject: SubjectState,
-        prior_state: str,
-        new_state: str,
-        rationale: str,
-        r13_evaluation: Any,
-        trigger_observation: Optional[Any],
-    ) -> R14State:
+        F2: verifies R13 and (when required) trigger before signing or
+        mutating anything. Raises TransitionInputError on failure —
+        no R14 artifact is produced and authoritative state is unchanged.
+        """
         if new_state not in ALL_LIFECYCLE_STATES:
             raise ValueError(f"unknown lifecycle state: {new_state}")
 
-        # Epoch is monotonic. The initial publish uses epoch 1; every
-        # subsequent publish increments by 1.
-        new_epoch = subject.state_epoch + 1
+        # F2 input verification (raises on failure — no mutation).
+        self._verify_r13(
+            r13_evaluation,
+            subject_id=subject.subject_id,
+            requested_new_state=new_state,
+        )
+        self._verify_prior_state(subject.subject_id, prior_state)
+        # A trigger is required for the runtime-mutation path
+        # (v1 -> v2 invalidation). The re-attestation / restoration
+        # path is permitted without a trigger, per frozen §16.
+        trigger_required = prior_state == LIFECYCLE_CONFORMANT and (
+            new_state == LIFECYCLE_REATTESTATION_REQUIRED
+        )
+        self._verify_trigger(
+            trigger_observation,
+            subject_id=subject.subject_id,
+            required=trigger_required,
+        )
+
+        new_epoch = self._next_epoch(subject.subject_id)
 
         state = R14State(
             artifact_id=f"r14-{subject.subject_id}-e{new_epoch}",
@@ -109,8 +287,7 @@ class LifecycleAuthority:
             new_state=new_state,
             state_epoch=new_epoch,
             rationale=rationale,
-            r13_evaluation_id=r13_evaluation.artifact_id
-                if r13_evaluation is not None else "",
+            r13_evaluation_id=r13_evaluation.artifact_id,
             trigger_observation_id=trigger_observation.artifact_id
                 if trigger_observation is not None else "",
             logical_ts=self.clock.advance(),
@@ -120,11 +297,17 @@ class LifecycleAuthority:
         state.signature = sign_ed25519(
             self.private_key, state.signature_domain, state.signing_payload(),
         )
-        # Apply to the subject state. This is the ONLY code path that
-        # advances the subject's state_epoch (frozen §7).
-        subject.current_state = new_state
-        subject.state_epoch = new_epoch
+        # F3: write to authoritative state via the protected path.
+        self.state_store.apply_authoritative_state(
+            subject.subject_id,
+            state.new_state,
+            state.state_epoch,
+            authorized_caller_token=self._writer_token,
+        )
         return state
+
+    def _next_epoch(self, subject_id: str) -> int:
+        return self.state_store.state_epoch(subject_id) + 1
 
     def verify(self, state: R14State) -> bool:
         """Return True iff the state was signed by this R14 authority."""

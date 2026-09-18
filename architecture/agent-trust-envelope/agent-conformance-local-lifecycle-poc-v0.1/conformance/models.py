@@ -322,6 +322,11 @@ class QualificationFixture(SignedArtifact):
     The fixture exposes the eight required fields per §10A. The
     authorization service MUST verify all of: fixture integrity,
     issuer validity, subject/role/domain binding, current_state == ACTIVE.
+
+    F4 fix: `artifact_digest` is bound to the canonical SHA-256 of the
+    signing payload and is checked by the verifier; `issuer` must
+    equal the registered issuer identity; `issuer_key_id` must equal
+    key_id(registered issuer public key).
     """
 
     artifact_digest: str = ""
@@ -352,7 +357,10 @@ class QualificationFixture(SignedArtifact):
 
 @dataclass
 class AdmissionFixture(SignedArtifact):
-    """Deterministic signed admission fixture (§10A)."""
+    """Deterministic signed admission fixture (§10A).
+
+    F4: same identity/key/digest binding as QualificationFixture.
+    """
 
     artifact_digest: str = ""
     subject_id: str = ""
@@ -387,7 +395,14 @@ class AdmissionFixture(SignedArtifact):
 
 @dataclass
 class ExecutionCapability(SignedArtifact):
-    """Single-use bounded execution capability (frozen §12)."""
+    """Single-use bounded execution capability (frozen §12).
+
+    F5 fix: the capability carries the STABLE artifact IDs of the
+    qualification and admission fixtures it was issued against. The
+    executor resolves the current authoritative fixture objects from
+    StateStore at step 4 (frozen §12A) — it does NOT rely on
+    caller-supplied mutable fixture objects.
+    """
 
     subject_id: str = ""
     role_id: str = ""
@@ -400,6 +415,8 @@ class ExecutionCapability(SignedArtifact):
     expires_at: int = 0
     issuer: str = ""
     issuer_key_id: str = ""
+    qualification_artifact_id: str = ""
+    admission_artifact_id: str = ""
     signature_domain: str = field(default=DOMAIN_CAPABILITY)
 
     def signing_payload(self) -> Dict[str, Any]:
@@ -417,6 +434,8 @@ class ExecutionCapability(SignedArtifact):
             "expires_at": self.expires_at,
             "issuer": self.issuer,
             "issuer_key_id": self.issuer_key_id,
+            "qualification_artifact_id": self.qualification_artifact_id,
+            "admission_artifact_id": self.admission_artifact_id,
         }
 
 

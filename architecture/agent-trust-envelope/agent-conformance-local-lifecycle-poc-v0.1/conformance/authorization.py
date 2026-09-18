@@ -14,6 +14,18 @@ signed by the capability issuer authority.
 Capability issuer keys are local to the authorization service. The
 subject-facing interface can REQUEST a capability but cannot construct
 one directly.
+
+F4 fix: the qualification/admission issuer binding now requires the
+fixture's `issuer` field to equal the registered issuer identity, and
+the fixture's `issuer_key_id` to equal the key_id of the registered
+issuer public key. The fixture also carries a stable `artifact_digest`
+which the verifier confirms matches the canonical SHA-256 of the
+signing payload.
+
+F5 fix: at issuance the capability is bound to the STABLE artifact_ids
+of the qualification and admission fixtures it was issued against.
+The executor resolves the current authoritative fixture objects from
+StateStore at step 4 — it does not rely on caller-supplied objects.
 """
 
 from __future__ import annotations
@@ -60,24 +72,16 @@ class AuthorizationService:
         role_id: str,
         trust_domain: str,
     ) -> bool:
-        """Verify all four §10A gates for the qualification fixture."""
-        # 1. integrity: signature verifies
-        if not self._verify_fixture_signature(fixture, self.store):
-            return False
-        # 2. issuer validity: key_id is registered as known issuer
-        #    (the fixture carries its issuer_key_id; we just confirm
-        #    it is non-empty and the artifact says issuer == service id)
-        if not fixture.issuer or not fixture.issuer_key_id:
-            return False
-        # 3. subject/role/domain binding
-        if (
-            fixture.subject_id != subject_id
-            or fixture.role_id != role_id
-            or fixture.trust_domain != trust_domain
+        """Verify all four §10A gates for the qualification fixture.
+
+        F4: in addition to the original four gates, requires:
+          - fixture.issuer == registered issuer identity
+          - fixture.issuer_key_id == key_id(registered issuer public key)
+          - fixture.artifact_digest == canonical SHA-256 of signing payload
+        """
+        if not self._verify_fixture_gates(
+            fixture, subject_id, role_id, trust_domain,
         ):
-            return False
-        # 4. current_state == ACTIVE
-        if fixture.current_state != FIXTURE_STATE_ACTIVE:
             return False
         return True
 
@@ -88,22 +92,58 @@ class AuthorizationService:
         role_id: str,
         trust_domain: str,
     ) -> bool:
+        """F4: same gates as qualification."""
         return self.verify_qualification(
-            # Reuse the qualification verifier; the gates are identical.
             fixture,  # type: ignore[arg-type]
             subject_id,
             role_id,
             trust_domain,
         )
 
-    def _verify_fixture_signature(self, fixture: Any, store: StateStore) -> bool:
-        """Verify the fixture's signature using the registered issuer key.
+    def _verify_fixture_gates(
+        self,
+        fixture: Any,
+        subject_id: str,
+        role_id: str,
+        trust_domain: str,
+    ) -> bool:
+        # 1. integrity: signature verifies under the registered issuer pub.
+        if not self._verify_fixture_signature(fixture, self.store):
+            return False
+        # 2. issuer validity (F4 fix): fixture.issuer must equal the
+        # registered issuer identity, and fixture.issuer_key_id must
+        # equal key_id(registered issuer public key).
+        expected_issuer_id = self.store.qual_admission_issuer_id()
+        if expected_issuer_id is None or fixture.issuer != expected_issuer_id:
+            return False
+        expected_issuer_key_id = self.store.qual_admission_issuer_key_id()
+        if (
+            expected_issuer_key_id is None
+            or fixture.issuer_key_id != expected_issuer_key_id
+        ):
+            return False
+        # 3. subject/role/domain binding.
+        if (
+            fixture.subject_id != subject_id
+            or fixture.role_id != role_id
+            or fixture.trust_domain != trust_domain
+        ):
+            return False
+        # 4. current_state == ACTIVE.
+        if fixture.current_state != FIXTURE_STATE_ACTIVE:
+            return False
+        # 5. F4 fix: stable artifact_digest must match canonical SHA-256
+        # of the signing payload. This protects against a forged
+        # artifact_digest field that doesn't correspond to the actual
+        # signed payload.
+        expected_digest = canonical_sha256(fixture.signing_payload())
+        if not fixture.artifact_digest or fixture.artifact_digest != expected_digest:
+            return False
+        return True
 
-        For the PoC we use a single well-known issuer authority
-        (the qualification/admission issuer service). Its public key
-        is held by the StateStore as `qualification_admission_issuer_pub`.
-        """
-        pub = getattr(store, "_qual_admission_issuer_pub", None)
+    def _verify_fixture_signature(self, fixture: Any, store: StateStore) -> bool:
+        """Verify the fixture's signature using the registered issuer key."""
+        pub = store.qual_admission_issuer_pub()
         if pub is None:
             return False
         return verify_ed25519(
@@ -113,7 +153,7 @@ class AuthorizationService:
             fixture.signing_payload(),
         )
 
-    # ---- capability issuance (frozen §12) ----
+    # ---- capability issuance (frozen §12, F5) ----
 
     def issue_capability(
         self,
@@ -129,7 +169,10 @@ class AuthorizationService:
     ) -> Optional[ExecutionCapability]:
         """Issue a single bounded ExecutionCapability iff all gates pass.
 
-        Returns None if any gate fails (the request is denied).
+        Returns None if any gate fails (the request is denied). The
+        capability is bound to the STABLE artifact_ids of the fixtures
+        it was issued against (F5); the executor resolves the current
+        authoritative fixture objects from StateStore at step 4.
         """
         if not self.verify_qualification(
             qualification, subject.subject_id, subject.role_id, subject.trust_domain,
@@ -139,7 +182,8 @@ class AuthorizationService:
             admission, subject.subject_id, subject.role_id, subject.trust_domain,
         ):
             return None
-        if subject.current_state != LIFECYCLE_CONFORMANT:
+        # Authoritative state check (F3 reads StateStore, not subject fields).
+        if self.store.current_state(subject.subject_id) != LIFECYCLE_CONFORMANT:
             return None
 
         action_digest = canonical_sha256({"action": action, "payload": action_payload})
@@ -150,13 +194,15 @@ class AuthorizationService:
             role_id=subject.role_id,
             trust_domain=subject.trust_domain,
             action_digest=action_digest,
-            observed_conformance_state=subject.current_state,
-            observed_state_epoch=subject.state_epoch,
+            observed_conformance_state=self.store.current_state(subject.subject_id),
+            observed_state_epoch=self.store.state_epoch(subject.subject_id),
             nonce=nonce,
             issued_at=clock_now,
             expires_at=clock_now + ttl_ticks,
             issuer=self.service_id,
             issuer_key_id=self.key_id,
+            qualification_artifact_id=qualification.artifact_id,
+            admission_artifact_id=admission.artifact_id,
             signature_domain="ate.conformance.capability.v1",
         )
         cap.signature = sign_ed25519(

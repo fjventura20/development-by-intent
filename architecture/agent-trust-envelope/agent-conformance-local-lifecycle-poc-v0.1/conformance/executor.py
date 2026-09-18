@@ -12,21 +12,30 @@ and whether the protected-resource effect occurred.
 
 Frozen §6.7, §12A.9: only the executor can obtain the protected-
 resource authority; the subject cannot.
+
+F3 fix: the executor reads authoritative current_state and state_epoch
+from `StateStore`, not from `SubjectState` fields. A direct write to
+the (now identity-only) `SubjectState` is a no-op against the
+executor.
+
+F5 fix: at step 4 the executor resolves the current authoritative
+qualification and admission fixture objects from `StateStore` using
+the `qualification_artifact_id` and `admission_artifact_id` carried
+by the capability. The executor does NOT trust caller-supplied
+fixture objects.
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from .canonical import canonical_sha256
 from .crypto import verify_ed25519
 from .models import (
-    ExecutionCapability,
     LIFECYCLE_CONFORMANT,
-    QualificationFixture,
-    AdmissionFixture,
+    ExecutionCapability,
 )
 from .state import NonceRegistry, StateStore, SubjectState
 
@@ -42,6 +51,7 @@ REASON_WRONG_ACTION = "WRONG_ACTION"
 REASON_EXPIRED = "EXPIRED"
 REASON_FIXTURE_INACTIVE = "FIXTURE_INACTIVE"
 REASON_FIXTURE_MISMATCH = "FIXTURE_MISMATCH"
+REASON_FIXTURE_UNREGISTERED = "FIXTURE_UNREGISTERED"
 REASON_NON_CONFORMANT = "NON_CONFORMANT"
 REASON_STALE_EPOCH = "STALE_EPOCH"
 REASON_REPLAYED_NONCE = "REPLAYED_NONCE"
@@ -81,13 +91,17 @@ class Executor:
         capability: ExecutionCapability,
         action: str,
         action_payload: Any,
-        qualification: QualificationFixture,
-        admission: AdmissionFixture,
         clock_now: int,
         caller_authorized: bool = True,
     ) -> ExecutionResult:
-        """Run the 12-step ordering exactly once. See frozen §12A."""
+        """Run the 12-step ordering exactly once. See frozen §12A.
 
+        F3 + F5 fix: the executor reads authoritative lifecycle state
+        from StateStore (not from subject fields) and resolves the
+        current qualification/admission fixtures from StateStore via
+        the artifact_ids carried by the capability. Caller-supplied
+        fixture objects are NOT used.
+        """
         if not caller_authorized:
             return ExecutionResult(
                 granted=False, reason=REASON_UNAUTHORIZED_CALLER, step=0,
@@ -127,41 +141,60 @@ class Executor:
                 granted=False, reason=REASON_EXPIRED, step=3,
             )
 
-        # ---- §12A.4 resolve current qualification/admission state ----
-        if qualification.current_state != "ACTIVE":
+        # ---- §12A.4 resolve current qualification/admission state
+        # (F5: from the authoritative StateStore, by artifact_id) ----
+        qualification = self.state_store.get_qualification_fixture(
+            capability.qualification_artifact_id,
+        )
+        admission = self.state_store.get_admission_fixture(
+            capability.admission_artifact_id,
+        )
+        if qualification is None:
             return ExecutionResult(
-                granted=False, reason=REASON_FIXTURE_INACTIVE, step=4,
+                granted=False, reason=REASON_FIXTURE_UNREGISTERED, step=4,
             )
-        if admission.current_state != "ACTIVE":
+        if admission is None:
             return ExecutionResult(
-                granted=False, reason=REASON_FIXTURE_INACTIVE, step=4,
+                granted=False, reason=REASON_FIXTURE_UNREGISTERED, step=4,
             )
-        if (
-            qualification.subject_id != subject.subject_id
-            or qualification.role_id != subject.role_id
-            or qualification.trust_domain != subject.trust_domain
+        # Run §10A gates against the authoritative current fixtures.
+        # Note: state_store exposes qual_admission_issuer_pub() etc.;
+        # we delegate to AuthorizationService which owns the verifier.
+        if not self.authorization.verify_qualification(
+            qualification, subject.subject_id, subject.role_id, subject.trust_domain,
         ):
+            # Distinguish inactive vs mismatch for clearer diagnostics.
+            if qualification.current_state != "ACTIVE":
+                return ExecutionResult(
+                    granted=False, reason=REASON_FIXTURE_INACTIVE, step=4,
+                )
             return ExecutionResult(
                 granted=False, reason=REASON_FIXTURE_MISMATCH, step=4,
             )
-        if (
-            admission.subject_id != subject.subject_id
-            or admission.role_id != subject.role_id
-            or admission.trust_domain != subject.trust_domain
+        if not self.authorization.verify_admission(
+            admission, subject.subject_id, subject.role_id, subject.trust_domain,
         ):
+            if admission.current_state != "ACTIVE":
+                return ExecutionResult(
+                    granted=False, reason=REASON_FIXTURE_INACTIVE, step=4,
+                )
             return ExecutionResult(
                 granted=False, reason=REASON_FIXTURE_MISMATCH, step=4,
             )
 
-        # ---- §12A.5 resolve current conformance state + epoch ----
+        # ---- §12A.5 resolve current conformance state + epoch
+        # (F3: from StateStore, not subject.current_state) ----
+        current_state = self.state_store.current_state(subject.subject_id)
+        current_epoch = self.state_store.state_epoch(subject.subject_id)
+
         # ---- §12A.6 reject if state is insufficient ----
-        if subject.current_state != LIFECYCLE_CONFORMANT:
+        if current_state != LIFECYCLE_CONFORMANT:
             return ExecutionResult(
                 granted=False, reason=REASON_NON_CONFORMANT, step=6,
             )
 
         # ---- §12A.7 reject if epoch is stale ----
-        if capability.observed_state_epoch != subject.state_epoch:
+        if capability.observed_state_epoch != current_epoch:
             return ExecutionResult(
                 granted=False, reason=REASON_STALE_EPOCH, step=7,
             )
@@ -178,8 +211,6 @@ class Executor:
         try:
             token = self.state_store.consume_protected_resource_authority()
         except PermissionError:
-            # The authority was already consumed or unavailable; this
-            # is a denial — return the reserved nonce to a failed state.
             self.nonce_registry._states[capability.nonce] = "RESERVED"  # noqa: SLF001
             return ExecutionResult(
                 granted=False, reason=REASON_UNAUTHORIZED_CALLER, step=9,
@@ -196,7 +227,7 @@ class Executor:
                 "capability_id": capability.artifact_id,
                 "action": action,
                 "payload_digest": capability.action_digest,
-                "epoch": subject.state_epoch,
+                "epoch": current_epoch,
                 "executor": self.executor_id,
             },
             separators=(",", ":"),
@@ -210,7 +241,7 @@ class Executor:
             record={
                 "capability_id": capability.artifact_id,
                 "action": action,
-                "epoch": subject.state_epoch,
+                "epoch": current_epoch,
             },
         )
 

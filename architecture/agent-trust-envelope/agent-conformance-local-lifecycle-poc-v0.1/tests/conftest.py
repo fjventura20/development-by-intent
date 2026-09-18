@@ -57,12 +57,13 @@ class RunContext:
     # Trigger
     trigger: Any
 
-    # Capabilities
+    # Capabilities (F1 fix: C0 + C1 + C2)
+    capability_c0: Any
     capability_c1: Any
     capability_c2: Any
 
     # Execution results
-    c1_execution_initial: Any
+    c0_execution_initial: Any
     c1_execution_after_invalidation: Any
     c1_execution_after_invalidation_retry: Any
     c2_execution_success: Any
@@ -80,11 +81,17 @@ class RunContext:
     frozen_profile_v2_digest: str
 
     # Mid-driver line-count snapshots (frozen §15 evidence).
-    lines_after_c1_initial: int
+    lines_after_c0_initial: int
     lines_after_c1_denied: int
     lines_after_c1_denied_retry: int
     lines_after_c2_success: int
     lines_after_c2_replay: int
+
+    # F1 invariant: C1's nonce is UNSEEN at the moment of the stale
+    # attempt. C0 was the consumed capability; C1 is the unconsumed
+    # stale proof.
+    cap1_nonce_before_mutation_unseen: bool
+    cap1_nonce_unseen_at_stale_attempt: bool
 
 
 def drive_full_lifecycle(harness, executor):
@@ -135,7 +142,47 @@ def drive_full_lifecycle(harness, executor):
         logical_ts=h.clock.now(),
     )
 
-    # ---- Step B: capability C1 issuance (TC-03) ----
+    # ---- Step B0: capability C0 issuance + execution (TC-02 setup) ----
+    # F1 fix: C0 proves normal execution at epoch N. It is the ONLY
+    # pre-mutation capability that is allowed to consume. C1 (below) is
+    # issued at epoch N and left UNCONSUMED so the stale-capability
+    # proof is not confounded with replay state.
+    cap0 = h.authorization.issue_capability(
+        subject=h.subject,
+        action="WRITE_RESOURCE",
+        action_payload=bootstrap.ACTION_PAYLOAD,
+        qualification=h.qualification,
+        admission=h.admission,
+        nonce="nonce-c0",
+        ttl_ticks=10,
+        clock_now=h.clock.now(),
+    )
+    audit.append(
+        event_kind="c0_issued",
+        payload={"artifact_id": cap0.artifact_id,
+                 "epoch": cap0.observed_state_epoch,
+                 "action_digest": cap0.action_digest},
+        logical_ts=h.clock.now(),
+    )
+
+    c0_execution_initial = e.execute(
+        subject=h.subject,
+        capability=cap0,
+        action="WRITE_RESOURCE",
+        action_payload=bootstrap.ACTION_PAYLOAD,
+        clock_now=h.clock.now(),
+    )
+    audit.append(
+        event_kind="c0_effect",
+        payload={"granted": c0_execution_initial.granted,
+                 "reason": c0_execution_initial.reason},
+        logical_ts=h.clock.now(),
+    )
+    lines_after_c0_initial = bootstrap.protected_resource_line_count(
+        h.protected_resource_path,
+    )
+
+    # ---- Step B1: capability C1 issuance (TC-03) — UNCONSUMED ----
     cap1 = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
@@ -153,25 +200,11 @@ def drive_full_lifecycle(harness, executor):
                  "action_digest": cap1.action_digest},
         logical_ts=h.clock.now(),
     )
-
-    # ---- Step C: initial authorized action (TC-02) ----
-    c1_execution_initial = e.execute(
-        subject=h.subject,
-        capability=cap1,
-        action="WRITE_RESOURCE",
-        action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
-        clock_now=h.clock.now(),
-    )
-    audit.append(
-        event_kind="c1_effect",
-        payload={"granted": c1_execution_initial.granted,
-                 "reason": c1_execution_initial.reason},
-        logical_ts=h.clock.now(),
-    )
-    lines_after_c1_initial = bootstrap.protected_resource_line_count(
-        h.protected_resource_path,
+    # Snapshot: C1's nonce MUST still be UNSEEN at the moment of the
+    # stale-capability attempt. C0 was the consumed capability; C1 is
+    # the unconsumed stale proof.
+    cap1_nonce_before_mutation_unseen = (
+        not h.nonce_registry.is_reserved_or_consumed(cap1.nonce)
     )
 
     # ---- Step D: runtime mutation (TC-04) ----
@@ -228,13 +261,15 @@ def drive_full_lifecycle(harness, executor):
     )
 
     # ---- Step G: stale C1 execution denied (TC-08) ----
+    # Snapshot: C1's nonce MUST be UNSEEN at this moment (F1 fix).
+    cap1_nonce_unseen_at_stale_attempt = (
+        not h.nonce_registry.is_reserved_or_consumed(cap1.nonce)
+    )
     c1_execution_after_invalidation = e.execute(
         subject=h.subject,
         capability=cap1,
         action="WRITE_RESOURCE",
         action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
         clock_now=h.clock.now(),
     )
     audit.append(
@@ -254,8 +289,6 @@ def drive_full_lifecycle(harness, executor):
         capability=cap1,
         action="WRITE_RESOURCE",
         action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
         clock_now=h.clock.now(),
     )
     audit.append(
@@ -353,8 +386,6 @@ def drive_full_lifecycle(harness, executor):
         capability=cap2,
         action="WRITE_RESOURCE",
         action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
         clock_now=h.clock.now(),
     )
     audit.append(
@@ -373,8 +404,6 @@ def drive_full_lifecycle(harness, executor):
         capability=cap2,
         action="WRITE_RESOURCE",
         action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
         clock_now=h.clock.now(),
     )
     audit.append(
@@ -403,9 +432,10 @@ def drive_full_lifecycle(harness, executor):
         runtime_evidence_v2_initial=runtime_evidence_v2_initial,
         runtime_evidence_v2_fresh=runtime_evidence_v2_fresh,
         trigger=trigger,
+        capability_c0=cap0,
         capability_c1=cap1,
         capability_c2=cap2,
-        c1_execution_initial=c1_execution_initial,
+        c0_execution_initial=c0_execution_initial,
         c1_execution_after_invalidation=c1_execution_after_invalidation,
         c1_execution_after_invalidation_retry=c1_execution_after_invalidation_retry,
         c2_execution_success=c2_execution_success,
@@ -415,11 +445,13 @@ def drive_full_lifecycle(harness, executor):
         audit_records=list(audit.records()),
         frozen_profile_v1_digest=frozen_profile_v1_digest,
         frozen_profile_v2_digest=frozen_profile_v2_digest,
-        lines_after_c1_initial=lines_after_c1_initial,
+        lines_after_c0_initial=lines_after_c0_initial,
         lines_after_c1_denied=lines_after_c1_denied,
         lines_after_c1_denied_retry=lines_after_c1_denied_retry,
         lines_after_c2_success=lines_after_c2_success,
         lines_after_c2_replay=lines_after_c2_replay,
+        cap1_nonce_before_mutation_unseen=cap1_nonce_before_mutation_unseen,
+        cap1_nonce_unseen_at_stale_attempt=cap1_nonce_unseen_at_stale_attempt,
     )
 
 
@@ -431,6 +463,55 @@ def lifecycle():
     ctx = drive_full_lifecycle(h, e)
     try:
         yield ctx
+    finally:
+        bootstrap.teardown(h)
+
+
+@pytest.fixture
+def harness():
+    """Yield a (harness, executor) tuple at the initial CONFORMANT state.
+
+    Used by the negative tests and the F2/F4/F5 attack regressions that
+    need a clean harness with one successful pre-mutation execution.
+    """
+    h = bootstrap.build_harness(prefix="ns")
+    e = bootstrap.attach_executor(h)
+
+    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
+    profile_v1_digest = canonical_sha256(h.profile_v1.signing_payload())
+    r13 = h.r13.evaluate(
+        subject_id=h.subject.subject_id,
+        trust_domain=h.subject.trust_domain,
+        profile=h.profile_v1,
+        profile_digest=profile_v1_digest,
+        runtime_evidence=ev_v1,
+        qualification_state="ACTIVE",
+        admission_state="ACTIVE",
+        trust_state_current=True,
+    )
+    h.r14.publish_initial(subject=h.subject, r13_evaluation=r13)
+    cap = h.authorization.issue_capability(
+        subject=h.subject,
+        action="WRITE_RESOURCE",
+        action_payload=bootstrap.ACTION_PAYLOAD,
+        qualification=h.qualification,
+        admission=h.admission,
+        nonce="ns-init",
+        ttl_ticks=10,
+        clock_now=h.clock.now(),
+    )
+    assert cap is not None
+    e.execute(
+        subject=h.subject,
+        capability=cap,
+        action="WRITE_RESOURCE",
+        action_payload=bootstrap.ACTION_PAYLOAD,
+        clock_now=h.clock.now(),
+    )
+
+    try:
+        yield h, e
     finally:
         bootstrap.teardown(h)
 
@@ -470,13 +551,12 @@ def invalidated_lifecycle():
         ttl_ticks=10,
         clock_now=h.clock.now(),
     )
+    assert cap1 is not None
     e.execute(
         subject=h.subject,
         capability=cap1,
         action="WRITE_RESOURCE",
         action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.qualification,
-        admission=h.admission,
         clock_now=h.clock.now(),
     )
     h.observer.submit_measured_runtime("v2", "rt-ev-v2")
@@ -501,16 +581,18 @@ def invalidated_lifecycle():
         trigger_observation=trig,
     )
 
-    # Build a minimal RunContext. Only the fields TC-07 needs are set;
+    # Build a minimal RunContext. Only the fields TC-07/NS-01 need are set;
     # the rest are sentinel None.
     @dataclass
     class _InvCtx:
         harness: Any
+        executor: Any
         r14_initial: Any
         r14_invalidated: Any
 
     ctx = _InvCtx(
         harness=h,
+        executor=e,
         r14_initial=r14_initial,
         r14_invalidated=r14_inv,
     )
