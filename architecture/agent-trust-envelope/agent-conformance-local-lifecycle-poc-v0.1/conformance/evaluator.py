@@ -109,6 +109,14 @@ class R13Evaluator:
             )
         runtime_evidence = authoritative_evidence
 
+        lifecycle_state = self.state_store.current_state(subject_id)
+        if lifecycle_state == "REATTESTATION_REQUIRED":
+            invalidation_sequence = self.state_store.lifecycle_decision_event_sequence(subject_id)
+            if runtime_evidence.event_sequence <= invalidation_sequence:
+                raise PermissionError(
+                    "R13 restoration evidence is not fresh after lifecycle invalidation"
+                )
+
         authoritative_qualification_state = self.state_store.qualification_state_for(subject_id)
         authoritative_admission_state = self.state_store.admission_state_for(subject_id)
         if qualification_state != authoritative_qualification_state:
