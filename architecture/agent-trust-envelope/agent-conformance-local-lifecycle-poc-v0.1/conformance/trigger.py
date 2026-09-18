@@ -20,7 +20,7 @@ not match the observer's authority; the verifier rejects it.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import Any, Dict, Optional
 
 from .canonical import canonical_sha256
@@ -40,12 +40,13 @@ class TriggerObserver:
     """Independent runtime-change trigger authority."""
 
     observer_id: str
-    private_key: Ed25519PrivateKey
+    private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     store: RuntimeObserverStore
     clock: LogicalClock
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
+        self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
 
     # ---- privileged write path (used by harness, NOT by subject) ----
@@ -72,7 +73,7 @@ class TriggerObserver:
         # Sign the runtime evidence with the observer's key (same
         # authority that signs triggers — frozen §13).
         ev.signature = sign_ed25519(
-            self.private_key, ev.signature_domain, ev.signing_payload(),
+            self.__private_key, ev.signature_domain, ev.signing_payload(),
         )
         return self.store.record_evidence(ev)
 
@@ -124,7 +125,7 @@ class TriggerObserver:
             signature_domain="ate.conformance.trigger_observation.v1",
         )
         trigger.signature = sign_ed25519(
-            self.private_key, trigger.signature_domain, trigger.signing_payload(),
+            self.__private_key, trigger.signature_domain, trigger.signing_payload(),
         )
         return trigger
 
