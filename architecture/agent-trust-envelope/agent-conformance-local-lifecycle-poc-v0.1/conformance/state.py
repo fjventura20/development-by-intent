@@ -83,8 +83,10 @@ class StateStore:
     # ---- subject ----
 
     def add_subject(self, subject: SubjectState) -> None:
-        # Authoritative identity state must not alias a participant-facing
-        # SubjectState object. Store a defensive copy.
+        # Authoritative identity is insert-only and must not alias a
+        # participant-facing SubjectState object.
+        if subject.subject_id in self._subjects:
+            raise PermissionError("subject registration is insert-only")
         self._subjects[subject.subject_id] = copy.deepcopy(subject)
         self._lifecycle.setdefault(subject.subject_id, _AuthoritativeLifecycle())
 
