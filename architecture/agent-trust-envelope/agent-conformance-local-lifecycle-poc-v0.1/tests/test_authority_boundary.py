@@ -122,3 +122,41 @@ def test_ab05_authorization_rejects_non_governed_action(harness):
         clock_now=h.clock.now(),
     )
     assert cap is None
+
+
+def test_ab06_authorization_rejects_stale_active_qualification_after_revocation(authority_harness):
+    """Old signed ACTIVE QA snapshots cannot obtain a new capability after revocation."""
+    h, _, controls = authority_harness
+    stale_active_qualification = copy.deepcopy(h.qualification)
+
+    controls.revoke_qualification(h.qualification.artifact_id)
+
+    cap = h.authorization.issue_capability(
+        subject=h.subject,
+        action="WRITE_RESOURCE",
+        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        qualification=stale_active_qualification,
+        admission=h.admission,
+        nonce="ab06-stale-active-qa",
+        ttl_ticks=10,
+        clock_now=h.clock.now(),
+    )
+    assert cap is None
+
+
+def test_ab07_authorization_rejects_mutated_participant_subject_binding(harness):
+    """Participant subject object cannot redefine authoritative role/domain binding."""
+    h, _ = harness
+    h.subject.role_id = "attacker-role"
+
+    cap = h.authorization.issue_capability(
+        subject=h.subject,
+        action="WRITE_RESOURCE",
+        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        qualification=h.qualification,
+        admission=h.admission,
+        nonce="ab07-mutated-subject",
+        ttl_ticks=10,
+        clock_now=h.clock.now(),
+    )
+    assert cap is None
