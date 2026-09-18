@@ -108,9 +108,9 @@ def drive_full_lifecycle(harness, executor, controls):
     frozen_profile_v2_digest = canonical_sha256(h.profile_v2.signing_payload())
 
     # ---- Step A: initial conformance establishment (TC-01) ----
-    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    controls.submit_measured_runtime("v1", "rt-ev-v1")
     runtime_evidence_v1 = h.observer.store.get_evidence("rt-ev-v1")
-    audit.append(
+    controls.append_audit(
         event_kind="initial_runtime_evidence",
         payload={"artifact_id": runtime_evidence_v1.artifact_id, "value": "v1"},
         logical_ts=h.clock.now(),
@@ -126,7 +126,7 @@ def drive_full_lifecycle(harness, executor, controls):
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="r13_initial_eval",
         payload={"artifact_id": r13_initial.artifact_id,
                  "recommended": r13_initial.recommended_state},
@@ -134,7 +134,7 @@ def drive_full_lifecycle(harness, executor, controls):
     )
 
     r14_initial = h.r14.publish_initial(subject=h.subject, r13_evaluation=r13_initial)
-    audit.append(
+    controls.append_audit(
         event_kind="r14_initial_published",
         payload={"artifact_id": r14_initial.artifact_id,
                  "state": r14_initial.new_state,
@@ -157,7 +157,7 @@ def drive_full_lifecycle(harness, executor, controls):
         ttl_ticks=10,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c0_issued",
         payload={"artifact_id": cap0.artifact_id,
                  "epoch": cap0.observed_state_epoch,
@@ -172,7 +172,7 @@ def drive_full_lifecycle(harness, executor, controls):
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c0_effect",
         payload={"granted": c0_execution_initial.granted,
                  "reason": c0_execution_initial.reason},
@@ -193,7 +193,7 @@ def drive_full_lifecycle(harness, executor, controls):
         ttl_ticks=10,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c1_issued",
         payload={"artifact_id": cap1.artifact_id,
                  "epoch": cap1.observed_state_epoch,
@@ -208,9 +208,9 @@ def drive_full_lifecycle(harness, executor, controls):
     )
 
     # ---- Step D: runtime mutation (TC-04) ----
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2-initial")
+    controls.submit_measured_runtime("v2", "rt-ev-v2-initial")
     runtime_evidence_v2_initial = h.observer.store.get_evidence("rt-ev-v2-initial")
-    audit.append(
+    controls.append_audit(
         event_kind="runtime_mutation",
         payload={"prior_value": "v1", "current_value": "v2",
                  "evidence_id": runtime_evidence_v2_initial.artifact_id},
@@ -219,7 +219,7 @@ def drive_full_lifecycle(harness, executor, controls):
 
     # ---- Step E: independent trigger observation (TC-05) ----
     trigger = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
-    audit.append(
+    controls.append_audit(
         event_kind="trigger_observed",
         payload={"artifact_id": trigger.artifact_id,
                  "trigger_type": trigger.trigger_type},
@@ -237,7 +237,7 @@ def drive_full_lifecycle(harness, executor, controls):
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="r13_invalidated_eval",
         payload={"artifact_id": r13_invalidated.artifact_id,
                  "recommended": r13_invalidated.recommended_state},
@@ -252,7 +252,7 @@ def drive_full_lifecycle(harness, executor, controls):
         r13_evaluation=r13_invalidated,
         trigger_observation=trigger,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="n_plus_1_published",
         payload={"artifact_id": r14_invalidated.artifact_id,
                  "state": r14_invalidated.new_state,
@@ -272,7 +272,7 @@ def drive_full_lifecycle(harness, executor, controls):
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c1_denied",
         payload={"granted": c1_execution_after_invalidation.granted,
                  "reason": c1_execution_after_invalidation.reason,
@@ -291,7 +291,7 @@ def drive_full_lifecycle(harness, executor, controls):
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c1_denied_retry",
         payload={"granted": c1_execution_after_invalidation_retry.granted,
                  "reason": c1_execution_after_invalidation_retry.reason},
@@ -308,7 +308,7 @@ def drive_full_lifecycle(harness, executor, controls):
         h.profile_v2.artifact_id,
         h.profile_v2.artifact_digest,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="profile_v2_activated",
         payload={"profile_id": h.profile_v2.artifact_id,
                  "digest": frozen_profile_v2_digest,
@@ -317,9 +317,9 @@ def drive_full_lifecycle(harness, executor, controls):
     )
 
     # ---- Step I: fresh post-change runtime evidence (TC-11) ----
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2-fresh")
+    controls.submit_measured_runtime("v2", "rt-ev-v2-fresh")
     runtime_evidence_v2_fresh = h.observer.store.get_evidence("rt-ev-v2-fresh")
-    audit.append(
+    controls.append_audit(
         event_kind="post_change_evidence",
         payload={"artifact_id": runtime_evidence_v2_fresh.artifact_id,
                  "value": "v2"},
@@ -337,7 +337,7 @@ def drive_full_lifecycle(harness, executor, controls):
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="r13_restore_eval",
         payload={"artifact_id": r13_restored.artifact_id,
                  "recommended": r13_restored.recommended_state},
@@ -353,7 +353,7 @@ def drive_full_lifecycle(harness, executor, controls):
         r13_evaluation=r13_restored,
         trigger_observation=None,
     )
-    audit.append(
+    controls.append_audit(
         event_kind="n_plus_2_published",
         payload={"artifact_id": r14_restored.artifact_id,
                  "state": r14_restored.new_state,
@@ -375,7 +375,7 @@ def drive_full_lifecycle(harness, executor, controls):
         ttl_ticks=10,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c2_issued",
         payload={"artifact_id": cap2.artifact_id,
                  "epoch": cap2.observed_state_epoch,
@@ -391,7 +391,7 @@ def drive_full_lifecycle(harness, executor, controls):
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c2_effect",
         payload={"granted": c2_execution_success.granted,
                  "reason": c2_execution_success.reason},
@@ -409,7 +409,7 @@ def drive_full_lifecycle(harness, executor, controls):
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    audit.append(
+    controls.append_audit(
         event_kind="c2_replay_denied",
         payload={"granted": c2_execution_replay.granted,
                  "reason": c2_execution_replay.reason},
@@ -480,7 +480,7 @@ def harness():
     h, controls = bootstrap.build_harness_with_controls(prefix="ns")
     e = controls.attach_executor(h)
 
-    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    controls.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
     profile_v1_digest = canonical_sha256(h.profile_v1.signing_payload())
     r13 = h.r13.evaluate(
@@ -529,7 +529,7 @@ def authority_harness():
     h, controls = bootstrap.build_harness_with_controls(prefix="auth")
     e = controls.attach_executor(h)
 
-    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    controls.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
     r13 = h.r13.evaluate(
         subject_id=h.subject.subject_id,
@@ -557,7 +557,7 @@ def invalidated_lifecycle():
     h, controls = bootstrap.build_harness_with_controls(prefix="inv")
     e = controls.attach_executor(h)
 
-    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    controls.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
     profile_v1_digest = canonical_sha256(h.profile_v1.signing_payload())
 
@@ -590,7 +590,7 @@ def invalidated_lifecycle():
         action_payload=bootstrap.ACTION_PAYLOAD,
         clock_now=h.clock.now(),
     )
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     trig = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = h.r13.evaluate(
