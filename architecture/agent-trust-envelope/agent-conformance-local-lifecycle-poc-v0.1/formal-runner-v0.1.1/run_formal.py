@@ -209,14 +209,18 @@ def main() -> int:
     # single-process formal lifecycle proof below.
     pytest_proc = sh(sys.executable, "-m", "pytest", "-q", cwd=POC_ROOT, check=False)
     (evidence_dir / "pytest-summary.txt").write_text(pytest_proc.stdout, encoding="utf-8")
-    require(pytest_proc.returncode == 0, "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest failed")
-    require(
-        "68 passed" in pytest_proc.stdout
-        and "failed" not in pytest_proc.stdout.lower()
-        and "skipped" not in pytest_proc.stdout.lower()
-        and "xfailed" not in pytest_proc.stdout.lower(),
-        "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest result is not exact 68-pass clean result",
-    )
+    try:
+        require(pytest_proc.returncode == 0, "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest failed")
+        require(
+            "68 passed" in pytest_proc.stdout
+            and "failed" not in pytest_proc.stdout.lower()
+            and "skipped" not in pytest_proc.stdout.lower()
+            and "xfailed" not in pytest_proc.stdout.lower(),
+            "CONFORMANCE_LIFECYCLE_POC_FAIL: pytest result is not exact 68-pass clean result",
+        )
+    except FormalRunError as exc:
+        (evidence_dir / "RUN-FAILED.txt").write_text(str(exc) + "\n", encoding="utf-8")
+        raise
 
     from conformance.audit import copy_and_tamper
     from fixtures import bootstrap
@@ -613,4 +617,19 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except FormalRunError as exc:
+        # Covers preflight/pytest failures that occur before the scored
+        # lifecycle exception boundary.
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(3)
+    except SystemExit:
+        raise
+    except Exception as exc:
+        print(
+            "INCONCLUSIVE_EVIDENCE_INVALID: unhandled runner error: "
+            f"{type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        raise SystemExit(4)
