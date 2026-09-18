@@ -186,9 +186,13 @@ class StateStore:
     # ---- qualification/admission fixtures ----
 
     def register_qualification_fixture(self, fixture: Any) -> None:
+        if fixture.artifact_id in self._qualification_fixtures:
+            raise PermissionError("qualification fixture registration is immutable by artifact_id")
         self._qualification_fixtures[fixture.artifact_id] = copy.deepcopy(fixture)
 
     def register_admission_fixture(self, fixture: Any) -> None:
+        if fixture.artifact_id in self._admission_fixtures:
+            raise PermissionError("admission fixture registration is immutable by artifact_id")
         self._admission_fixtures[fixture.artifact_id] = copy.deepcopy(fixture)
 
     def get_qualification_fixture(self, artifact_id: str) -> Any:
