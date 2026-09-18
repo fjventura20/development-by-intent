@@ -49,12 +49,14 @@ class SubjectState:
 class LifecycleSnapshot:
     current_state: str
     state_epoch: int
+    decision_event_sequence: int = 0
 
 
 @dataclass
 class _AuthoritativeLifecycle:
     current_state: str = "UNKNOWN"
     state_epoch: int = 0
+    decision_event_sequence: int = 0
 
 
 class StateStore:
@@ -134,18 +136,24 @@ class StateStore:
 
         rec.current_state = state.new_state
         rec.state_epoch = state.state_epoch
+        rec.decision_event_sequence = state.event_sequence
 
     def get_authoritative_state(self, subject_id: str) -> LifecycleSnapshot:
         if subject_id not in self._lifecycle:
             raise KeyError(f"unknown subject: {subject_id}")
         rec = self._lifecycle[subject_id]
-        return LifecycleSnapshot(rec.current_state, rec.state_epoch)
+        return LifecycleSnapshot(
+            rec.current_state, rec.state_epoch, rec.decision_event_sequence,
+        )
 
     def current_state(self, subject_id: str) -> str:
         return self.get_authoritative_state(subject_id).current_state
 
     def state_epoch(self, subject_id: str) -> int:
         return self.get_authoritative_state(subject_id).state_epoch
+
+    def lifecycle_decision_event_sequence(self, subject_id: str) -> int:
+        return self.get_authoritative_state(subject_id).decision_event_sequence
 
     # ---- profile registry: install exactly once, activate via bound closure ----
 
