@@ -55,17 +55,17 @@ def _profile_v1_digest(h):
 # ---------------------------------------------------------------------------
 
 
-def test_f2_forged_r13_signature_rejected_at_r14_path(harness):
+def test_f2_forged_r13_signature_rejected_at_r14_path(authority_harness):
     """F2: a forged R13 evaluation (signature by a non-R13 key) is
     rejected at the actual R14 publication path. No R14 artifact is
     produced and authoritative state is unchanged."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
     state_before = h.state_store.current_state(h.subject.subject_id)
 
     # Mutate and obtain a real R13 evaluation that recommends
     # REATTESTATION_REQUIRED.
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
 
@@ -110,7 +110,7 @@ def test_f2_r13_subject_mismatch_rejected(authority_harness):
     h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13 = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
     # Tamper subject_id and re-sign with the real R13 key so signature
@@ -129,13 +129,13 @@ def test_f2_r13_subject_mismatch_rejected(authority_harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == epoch_before
 
 
-def test_f2_r13_recommendation_mismatch_rejected(harness):
+def test_f2_r13_recommendation_mismatch_rejected(authority_harness):
     """F2: an R13 evaluation that recommends CONFORMANT but is passed
     to a transition requesting REATTESTATION_REQUIRED is rejected."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     trigger = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
@@ -153,12 +153,12 @@ def test_f2_r13_recommendation_mismatch_rejected(harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == epoch_before
 
 
-def test_f2_prior_state_mismatch_rejected(harness):
+def test_f2_prior_state_mismatch_rejected(authority_harness):
     """F2: a transition that declares the wrong prior_state is rejected."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
     # Declare prior_state = SUSPENDED (wrong; current is CONFORMANT).
@@ -174,13 +174,13 @@ def test_f2_prior_state_mismatch_rejected(harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == epoch_before
 
 
-def test_f2_forged_trigger_rejected(harness):
+def test_f2_forged_trigger_rejected(authority_harness):
     """F2: a trigger observation signed by a non-observer key is
     rejected at the R14 publication path."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
 
@@ -217,13 +217,13 @@ def test_f2_forged_trigger_rejected(harness):
     assert h.state_store.state_epoch(h.subject.subject_id) == epoch_before
 
 
-def test_f2_missing_trigger_when_required_rejected(harness):
+def test_f2_missing_trigger_when_required_rejected(authority_harness):
     """F2: the runtime-mutation path requires a trigger. Publishing
     REATTESTATION_REQUIRED without one is rejected."""
-    h, _ = harness
+    h, _, controls = authority_harness
     epoch_before = h.state_store.state_epoch(h.subject.subject_id)
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = _r13_recommends_invalidated(h, ev_v2, _profile_v1_digest(h))
     with pytest.raises(TransitionInputError):
@@ -586,7 +586,7 @@ def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(author
     from conformance.profile_registry import ProfileRegistry
 
     # Establish the real invalidated state first.
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2-h1")
+    controls.submit_measured_runtime("v2", "rt-ev-v2-h1")
     trigger = h.observer.observe_change(
         h.subject.subject_id, h.subject.trust_domain,
     )
@@ -733,7 +733,7 @@ def test_g4_mismatched_trigger_evidence_id_rejected(authority_harness):
     from conformance.models import R13Evaluation, TriggerObservation
     from conformance.lifecycle import TransitionInputError
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     # Real R13 recommendation.
     r13_inv = h.r13.evaluate(
@@ -751,7 +751,7 @@ def test_g4_mismatched_trigger_evidence_id_rejected(authority_harness):
     forged_evidence = h.observer.store.get_evidence("rt-ev-v2")  # already exists
     # Use an alternative evidence id that exists in the observer store.
     # We need a 2nd evidence; submit another measurement.
-    h.observer.submit_measured_runtime("v3", "rt-ev-v3")
+    controls.submit_measured_runtime("v3", "rt-ev-v3")
     fake_current_id = "rt-ev-v3"
     # Confirm fake_current_id resolves in the observer store.
     assert h.observer.store.get_evidence(fake_current_id) is not None
@@ -795,7 +795,7 @@ def test_g4_mismatched_trigger_value_digest_rejected(authority_harness):
     from conformance.models import TriggerObservation
     from conformance.lifecycle import TransitionInputError
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = h.r13.evaluate(
         subject_id=h.subject.subject_id,
@@ -846,7 +846,7 @@ def test_g4_unresolved_evidence_id_rejected(authority_harness):
     from conformance.models import TriggerObservation
     from conformance.lifecycle import TransitionInputError
 
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
+    controls.submit_measured_runtime("v2", "rt-ev-v2")
     ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
     r13_inv = h.r13.evaluate(
         subject_id=h.subject.subject_id,
