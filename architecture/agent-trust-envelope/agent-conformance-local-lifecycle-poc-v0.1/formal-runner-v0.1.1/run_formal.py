@@ -9,6 +9,7 @@ It does NOT modify the reviewed implementation baseline.
 
 from __future__ import annotations
 
+import argparse
 import copy
 import hashlib
 import json
@@ -164,12 +165,31 @@ def verify_copied_ledger(records: list[Any], public_key: Any) -> tuple[bool, str
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--formal",
+        action="store_true",
+        help="execute as a formal run; requires ACL_FORMAL_RUN_AUTHORIZED=YES",
+    )
+    args = parser.parse_args()
+
+    mode = "formal" if args.formal else "dry-run"
+    if args.formal:
+        require(
+            os.environ.get("ACL_FORMAL_RUN_AUTHORIZED") == "YES",
+            "STOP_BEFORE_SCORING: formal mode requires explicit authorization environment gate",
+        )
+
     # Make local implementation importable only after baseline checks.
     sys.path.insert(0, str(POC_ROOT))
 
     run_stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_id = f"{run_stamp}-acl-lifecycle-poc-v0.1.1-successor"
-    evidence_dir = POC_ROOT / "evidence" / f"formal-{run_stamp}-successor"
+    if mode == "formal":
+        run_id = f"{run_stamp}-acl-lifecycle-poc-v0.1.1-successor"
+        evidence_dir = POC_ROOT / "evidence" / f"formal-{run_stamp}-successor"
+    else:
+        run_id = f"{run_stamp}-acl-lifecycle-poc-v0.1.1-dry-run"
+        evidence_dir = POC_ROOT / "evidence" / f"dry-run-{run_stamp}-successor"
 
     # ---------- PRE-SCORING PREFLIGHT ----------
     current_head = sh("git", "rev-parse", "HEAD").stdout.strip()
@@ -195,7 +215,8 @@ def main() -> int:
     evidence_dir.mkdir(parents=True)
 
     preflight = {
-        "formal_run_id": run_id,
+        "run_id": run_id,
+        "mode": mode,
         "runner_head": current_head,
         "implementation_baseline": IMPLEMENTATION_BASELINE,
         "implementation_subtree_diff_empty": True,
@@ -228,8 +249,23 @@ def main() -> int:
     h = None
     classification = "INCONCLUSIVE_EVIDENCE_INVALID"
     try:
-        h, controls = bootstrap.build_harness_with_controls(prefix="formal-successor")
+        h, controls = bootstrap.build_harness_with_controls(prefix=f"{mode}-successor")
         e = bootstrap.attach_executor(h)
+
+        # Explicit preflight proof: exactly the two predeclared profiles are
+        # present in the installed frozen registry and profile v1 is active.
+        registry = getattr(h.state_store, "_profile_registry", None)
+        require(registry is not None, "STOP_BEFORE_SCORING: profile registry missing")
+        require(registry.frozen, "STOP_BEFORE_SCORING: profile registry not frozen")
+        require(
+            set(registry.registered_ids()) == {"profile-v1", "profile-v2"},
+            "STOP_BEFORE_SCORING: profile registry is not exactly the predeclared v1/v2 set",
+        )
+        active_preflight = h.state_store.get_active_profile()
+        require(
+            active_preflight is not None and active_preflight.artifact_id == "profile-v1",
+            "STOP_BEFORE_SCORING: profile v1 is not the initial active profile",
+        )
 
         # Persist predeclared profiles before any scored mutation.
         profiles = {
@@ -561,9 +597,14 @@ def main() -> int:
             "expected_causal_order": EXPECTED_CAUSAL_ORDER,
         })
 
-        classification = "CONFORMANCE_LIFECYCLE_POC_PASS"
+        classification = (
+            "CONFORMANCE_LIFECYCLE_POC_PASS"
+            if mode == "formal"
+            else "DEVELOPMENT_DRY_RUN_PASS"
+        )
         write_json(evidence_dir / "09_final_classification.json", {
-            "formal_run_id": run_id,
+            "run_id": run_id,
+            "mode": mode,
             "implementation_baseline": IMPLEMENTATION_BASELINE,
             "runner_head": current_head,
             "classification": classification,
@@ -587,7 +628,8 @@ def main() -> int:
                 "size_bytes": p.stat().st_size,
             })
         manifest = {
-            "formal_run_id": run_id,
+            "run_id": run_id,
+            "mode": mode,
             "implementation_baseline": IMPLEMENTATION_BASELINE,
             "runner_head": current_head,
             "classification": classification,
@@ -599,7 +641,8 @@ def main() -> int:
             f"{manifest_sha}  evidence-manifest.json\n", encoding="utf-8"
         )
 
-        print(f"FORMAL_RUN_ID={run_id}")
+        print(f"RUN_ID={run_id}")
+        print(f"MODE={mode}")
         print(f"CLASSIFICATION={classification}")
         print(f"EVIDENCE_DIR={evidence_dir}")
         print(f"EVIDENCE_MANIFEST_SHA256={manifest_sha}")
