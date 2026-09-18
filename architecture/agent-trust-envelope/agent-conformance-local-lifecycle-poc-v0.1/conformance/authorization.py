@@ -30,7 +30,7 @@ StateStore at step 4 — it does not rely on caller-supplied objects.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import Any, Optional
 
 from .canonical import canonical_sha256
@@ -56,11 +56,12 @@ class AuthorizationService:
     """Capability issuer (frozen §6.6)."""
 
     service_id: str
-    private_key: Ed25519PrivateKey
+    private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     store: StateStore
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
+        self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
 
     # ---- qualification/admission fixture verification (frozen §10A) ----
@@ -206,7 +207,7 @@ class AuthorizationService:
             signature_domain="ate.conformance.capability.v1",
         )
         cap.signature = sign_ed25519(
-            self.private_key, cap.signature_domain, cap.signing_payload(),
+            self.__private_key, cap.signature_domain, cap.signing_payload(),
         )
         return cap
 
