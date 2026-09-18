@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from .canonical import canonical_sha256
 from .crypto import verify_ed25519
@@ -77,7 +77,7 @@ class Executor:
     nonce_registry: NonceRegistry
     authorization: Any  # AuthorizationService
     protected_resource_path: str
-    protected_resource_authority_token: str
+    _consume_protected_resource_authority: Callable[[], None]
 
     def _on_protected_resource_effect(self, line: str) -> None:
         """Append one deterministic line to the protected resource."""
@@ -209,13 +209,8 @@ class Executor:
 
         # ---- §12A.9 obtain protected-resource authority ----
         try:
-            token = self.state_store.consume_protected_resource_authority()
+            self._consume_protected_resource_authority()
         except PermissionError:
-            self.nonce_registry._states[capability.nonce] = "RESERVED"  # noqa: SLF001
-            return ExecutionResult(
-                granted=False, reason=REASON_UNAUTHORIZED_CALLER, step=9,
-            )
-        if token != self.protected_resource_authority_token:
             self.nonce_registry._states[capability.nonce] = "RESERVED"  # noqa: SLF001
             return ExecutionResult(
                 granted=False, reason=REASON_UNAUTHORIZED_CALLER, step=9,
