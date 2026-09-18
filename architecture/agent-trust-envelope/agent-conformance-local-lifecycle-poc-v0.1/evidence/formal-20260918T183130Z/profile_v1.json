@@ -1,0 +1,15 @@
+{
+  "artifact_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+  "artifact_id": "profile-v1",
+  "evaluator_authority": "R13",
+  "lifecycle_state_authority": "R14",
+  "max_conformance_age": 10000,
+  "profile_id": "local-conformance-poc",
+  "profile_version": 1,
+  "required_runtime_version": "v1",
+  "role_id": "worker",
+  "signature_domain": "ate.conformance.profile.v1",
+  "signature_hex": "3cd1c9e3e6173444771130d520620e577be8aa0998330d80e2b110e66ec8f50e94a2b13383d8cbb9d8425ae5add419ba0668707bdf8799877d626d1daf4f020a",
+  "trust_domain": "local-poc",
+  "whole_role_failure": true
+}

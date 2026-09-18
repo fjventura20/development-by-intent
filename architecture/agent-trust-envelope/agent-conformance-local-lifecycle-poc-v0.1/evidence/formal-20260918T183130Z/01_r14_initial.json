@@ -1,0 +1,25 @@
+{
+  "phase": "CONFORMANT @ epoch 1 (initial)",
+  "r13_evaluation": {
+    "admission_state": "ACTIVE",
+    "artifact_id": "r13-rt-ev-v1",
+    "event_sequence": 2,
+    "logical_ts": 2,
+    "measured_runtime_version": "v1",
+    "profile_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+    "profile_id": "local-conformance-poc",
+    "profile_version": 1,
+    "qualification_state": "ACTIVE",
+    "rationale": "profile v1 requires v1; measured matches",
+    "recommended_state": "CONFORMANT",
+    "runtime_evidence_id": "rt-ev-v1",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "b5f1866b87ef45e8ac2150001d0c35ac842d8f44199014b83e1173267019c2fbed9d4025e1afb3b4ac9f7425d2bb9385737cac83e15b9ffd2e9c1772bdc36206",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r14_state_snapshot": {
+    "current_state": "CONFORMANT",
+    "state_epoch": 1
+  }
+}

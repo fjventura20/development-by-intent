@@ -1,0 +1,41 @@
+{
+  "c2_capability": {
+    "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+    "admission_artifact_id": "adm-agent-001",
+    "artifact_id": "cap-c2-restored",
+    "expires_at": 19,
+    "issued_at": 9,
+    "issuer": "az-1",
+    "issuer_key_id": "10b150fec2cd31d3c683f3e37ae02f2b4fab2e0bdc259b3b870628a5aa04479e",
+    "nonce": "c2-restored",
+    "observed_conformance_state": "CONFORMANT",
+    "observed_state_epoch": 3,
+    "qualification_artifact_id": "qual-agent-001",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "8aa5e3fae9c86b93ae0ceb34eaeb42b75e8b479310b2fae549a49753190047f24e2f71c4a2e25de349e264d42c05b645e1fd4878108fa1406d5fd96558850408",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "c2_caused_one_effect": false,
+  "c2_effect_record": {
+    "granted": false,
+    "reason": "UNAUTHORIZED_CALLER",
+    "record": {},
+    "step": 9
+  },
+  "c2_granted": false,
+  "c2_replay_denied": true,
+  "c2_replay_record": {
+    "granted": false,
+    "reason": "REPLAYED_NONCE",
+    "record": {},
+    "step": 8
+  },
+  "c2_replay_resource_lines_after": 1,
+  "c2_replay_resource_lines_before": 1,
+  "c2_replay_zero_effect": true,
+  "c2_resource_lines_after": 1,
+  "c2_resource_lines_before": 1,
+  "resource_final_line_count": 1
+}

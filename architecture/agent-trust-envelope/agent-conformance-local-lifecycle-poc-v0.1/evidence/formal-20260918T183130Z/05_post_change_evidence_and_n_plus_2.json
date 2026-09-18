@@ -1,0 +1,52 @@
+{
+  "post_change_evidence": {
+    "artifact_id": "rt-ev-v2",
+    "event_sequence": 4,
+    "logical_ts": 4,
+    "measured_runtime_version": "v2",
+    "observer_id": "observer-1",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "ff66e80d61a3afea9479571fdcf992dd61438b4d255a84a5f05c60e6fa8df2db4f33464651c9e0ff7959908201bdc327b5874f41cef51fa02394f6bf8c78e90b",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "post_change_evidence_resolves_in_observer_store": true,
+  "r13_restore": {
+    "admission_state": "ACTIVE",
+    "artifact_id": "r13-rt-ev-v2",
+    "event_sequence": 8,
+    "logical_ts": 8,
+    "measured_runtime_version": "v2",
+    "profile_digest": "9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7",
+    "profile_id": "local-conformance-poc",
+    "profile_version": 2,
+    "qualification_state": "ACTIVE",
+    "rationale": "profile v2 requires v2; measured matches",
+    "recommended_state": "CONFORMANT",
+    "runtime_evidence_id": "rt-ev-v2",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "c905da12263fd138024d068b119880e6a2678a0bc97590652d588ac0376ba08e4c8597265c56279c79983d8ad625c80d1ede642ab3a5f977797e762524d6ad08",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r14_restore": {
+    "artifact_id": "r14-agent-001-e3",
+    "event_sequence": 9,
+    "logical_ts": 9,
+    "new_state": "CONFORMANT",
+    "prior_state": "REATTESTATION_REQUIRED",
+    "r13_evaluation_id": "r13-rt-ev-v2",
+    "rationale": "attestation successful against profile v2",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "b45e63945b8ac3b21a8020278a3b28602275d0878772ed3219bcc3c7145df372d2c8707fbdd126a04021e78f5e1138d089b1c436aea9f3fe205d0d4796a69f08",
+    "state_epoch": 3,
+    "subject_id": "agent-001",
+    "trigger_observation_id": "",
+    "trust_domain": "local-poc"
+  },
+  "r14_state_snapshot": {
+    "current_state": "CONFORMANT",
+    "state_epoch": 3
+  }
+}

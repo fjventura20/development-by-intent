@@ -1,0 +1,7 @@
+{
+  "final_r14_state_snapshot": {
+    "current_state": "CONFORMANT",
+    "state_epoch": 3
+  },
+  "lifecycle_epoch_monotonic": true
+}

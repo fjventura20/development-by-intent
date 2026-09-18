@@ -1,0 +1,36 @@
+{
+  "c0_consumed": "CONSUMED",
+  "c0_effect_record": {
+    "granted": true,
+    "reason": "OK",
+    "record": {
+      "action": "WRITE_RESOURCE",
+      "capability_id": "cap-c0-normal",
+      "epoch": 1
+    },
+    "step": 10
+  },
+  "c0_granted": true,
+  "c1_capability": {
+    "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+    "admission_artifact_id": "adm-agent-001",
+    "artifact_id": "cap-c1-stale",
+    "expires_at": 13,
+    "issued_at": 3,
+    "issuer": "az-1",
+    "issuer_key_id": "10b150fec2cd31d3c683f3e37ae02f2b4fab2e0bdc259b3b870628a5aa04479e",
+    "nonce": "c1-stale",
+    "observed_conformance_state": "CONFORMANT",
+    "observed_state_epoch": 1,
+    "qualification_artifact_id": "qual-agent-001",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "9736cc2724c01cdcb3d466ea03e4aa468a39c2680a4835fc9fd43f43780adabf8a3447240da020fc2739ca5a1005a75da7da3cb89797394e475bac31c3019d01",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "c1_issued": true,
+  "c1_nonce": "c1-stale",
+  "c1_nonce_unseen_before_mutation": true,
+  "c1_state_at_issuance": null
+}

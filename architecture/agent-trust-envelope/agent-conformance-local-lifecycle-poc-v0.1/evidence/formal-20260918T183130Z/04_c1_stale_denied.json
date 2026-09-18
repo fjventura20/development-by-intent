@@ -1,0 +1,14 @@
+{
+  "c1_denial_record": {
+    "granted": false,
+    "reason": "NON_CONFORMANT",
+    "record": {},
+    "step": 6
+  },
+  "c1_denied": true,
+  "c1_zero_resource_effect": true,
+  "cap1_nonce": "c1-stale",
+  "cap1_nonce_unseen_at_stale_attempt": true,
+  "resource_lines_after": 1,
+  "resource_lines_before": 1
+}

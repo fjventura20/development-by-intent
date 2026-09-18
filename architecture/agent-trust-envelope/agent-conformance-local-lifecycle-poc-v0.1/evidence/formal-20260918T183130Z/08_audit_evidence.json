@@ -1,0 +1,12 @@
+{
+  "authoritative_chain_message": "OK",
+  "authoritative_chain_ok": true,
+  "authoritative_ledger_unmodified_after_tamper": true,
+  "causal_ordering_satisfied": true,
+  "first_record_event_sequence": 1,
+  "genesis_prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "last_record_event_sequence": 16,
+  "record_count": 16,
+  "tampered_chain_message": "payload_digest mismatch at seq 9",
+  "tampered_chain_ok": false
+}

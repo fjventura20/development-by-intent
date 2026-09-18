@@ -1,0 +1,127 @@
+FORMAL RUN RECORD — Agent Conformance Local Lifecycle PoC v0.1
+=============================================================
+
+formal_run_id         : 20260918T183130Z-acl-lifecycle-poc-v0.1
+implementation_commit : cfd85e809a541a136b478fa7605a7cf4ca798a2d
+formal_start_utc      : 2026-09-18T18:31:30Z
+worktree_path         : /home/fjventura20/devProjectsU/dbi-conformance-test
+worktree_HEAD         : cfd85e809a541a136b478fa7605a7cf4ca798a2d
+interpreter           : Python 3.12.3 (python3, system venv; pytest-9.1.1)
+main_test_command     : python3 -m pytest -v   (run twice; full suite)
+secondary_test_command: python3 -m pytest -q   (manifest capture)
+
+FROZEN ARTIFACT VERIFICATION
+----------------------------
+All 8 frozen artifacts verified byte-identical at preflight.
+  - 4faea2a16261ca9416fe8bb4eceaaff80593eb59  AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md
+  - d1da477dfaa8bb4682a01408596cd468a6e3fd64  AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FREEZE.md
+  - f8bc4464db197a58b6402e01d0378592ba7dc220  AGENT-CONFORMANCE-PROTOCOL-v0.1.2.md
+  - 62630ddc3bdbf114c7d07beffa2621737c623aaf  AGENT-CONFORMANCE-PROTOCOL-v0.1.2-FREEZE.md
+  - 28b4b0a36e7ded946686c0eb45d4ee820a35c2bf  AGENT-QUALIFICATION-AND-ADMISSION-PROTOCOL-v0.2.2.md
+  - 0a4c42c30b0914bd0c0dc660c3aa8cc80ae5cb86  ATE-REVOCATION-TRUST-STATE-MODEL-v0.1.md
+  - 154465106614f1448f9bbbca94ff7b5862bfd00a  ATE-ENFORCEMENT-PLANE-v0.1.md
+  - 82450a5d049cc1d6f53a6cc2a4f952dcb442aa8c  ATE-AUDIT-ACCOUNTABILITY-MODEL-v0.1.md
+
+PREDECLARED PROFILES (digest-locked at preflight)
+-------------------------------------------------
+profile_v1_artifact_digest = d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a
+profile_v2_artifact_digest = 9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7
+
+LIFECYCLE CAUSAL SEQUENCE (evidence: 01..07_*.json)
+---------------------------------------------------
+  CONFORMANT @ epoch 1 (initial publication)            -- 01_r14_initial.json
+  > C0 issued + consumed at epoch 1                     -- 02_c0_and_c1.json
+  > C1 issued at epoch 1, nonce UNSEEN                  -- 02_c0_and_c1.json
+  > runtime v1 -> v2 mutation                           -- 03_n_plus_1_published.json (trigger)
+  > independent trigger observation (T4)                -- 03_n_plus_1_published.json
+  > R13 recommends REATTESTATION_REQUIRED               -- 03_n_plus_1_published.json
+  > N+1 = REATTESTATION_REQUIRED @ epoch 2              -- 03_n_plus_1_published.json
+  > C1 stale attempt denied; nonce was UNSEEN at attempt; zero resource effect
+                                                       -- 04_c1_stale_denied.json
+  > predeclared profile v2 activated through trusted controls
+                                                       -- 05_post_change_evidence_and_n_plus_2.json
+  > post-change evidence rt-ev-v2 resolves in observer store
+                                                       -- 05_post_change_evidence_and_n_plus_2.json
+  > R13 positive evaluation against active profile v2   -- 05_..json
+  > N+2 = CONFORMANT @ epoch 3                          -- 05_..json
+  > C2 issued + executed (one resource line)            -- 06_c2_and_replay.json
+  > C2 replay denied; zero resource effect             -- 06_c2_and_replay.json
+
+SECURITY INVARIANTS
+-------------------
+zero unauthorized protected-resource effects  : TRUE (only C0 + C2 succeed; resource line count = 2 final)
+zero stale-capability effects                 : TRUE (C1 denied at step 7)
+zero replay effects                           : TRUE (C2 replay denied)
+lifecycle epoch strictly monotonic             : TRUE (1 -> 2 -> 3)
+participant cannot roll lifecycle backward     : TRUE (R14 writer token is module-private; rollback rejected)
+profile registry cannot be replaced after freeze: TRUE (test_h1_registry_registration_closed_after_freeze)
+no profile can be registered after freeze      : TRUE (above + test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected)
+invented correctly signed post-mutation profile cannot become authoritative: TRUE (h1 test)
+participant cannot obtain lifecycle/profile/qual-admission authority material:
+                                                  TRUE (h3, h2, g1-no-lifecycle-writer-token-api)
+qual/adm current state resolved authoritatively: TRUE (g3 test + F5 path)
+trigger evidence bound to R13 runtime evidence : TRUE (g4_mismatched_trigger_evidence_id_rejected + actual R14 path)
+trigger evidence IDs resolve in observer store: TRUE (g4_unresolved_evidence_id_rejected)
+audit chain verifies                           : TRUE (08_audit_evidence.json: authoritative_chain_ok=True)
+tampered audit copy fails verification         : TRUE (tamper_detected=True)
+authoritative ledger unmodified after tamper   : TRUE (audit.verify_chain() still True on the original)
+
+CAUSAL ORDERING (design-required sequence)
+------------------------------------------
+C1_issued < runtime_mutation < trigger_observed < N+1_published < C1_denied
+< post_change_evidence < R13_restore_eval < N+2_published < C2_issued < C2_effect
+All transitions observed in evidence 01..07 with monotonic logical_ts.
+audit.verify_causal_order(expected_order) == True (08_audit_evidence.json).
+
+PYTEST RESULTS (full suite)
+---------------------------
+passed : 68
+failed : 0
+skipped: 0
+xfailed: 0
+
+inventory:
+  test_lifecycle.py          21 (TC-01..TC-18 + 2 invariants + 3 F1 regressions)
+  test_negative.py            8 (NS-01..NS-08)
+  test_audit.py               9 (focused audit-ledger)
+  test_attack_regressions.py 30 (F2 x6, F4 x3, F5 x3, F3 x1, G1 x4, G2 x5,
+                                  G3 x3, G4 x3, H1 x2, H2 x1, H3 x1 — 30)
+  conftest fixtures            2
+  ---------------------------
+  total                     68 individual test outcomes
+
+ATTACK-PATH REGRESSIONS PASSED (subset that establishes H1/H2/H3 closure)
+-------------------------------------------------------------------------
+  test_h1_registry_registration_closed_after_freeze                  PASSED
+  test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected  PASSED
+  test_h2_no_public_qual_admission_writer_token                      PASSED
+  test_h3_no_profile_private_key_or_activation_token_on_harness      PASSED
+  test_g1_no_lifecycle_writer_token_api                              PASSED
+  test_g1_rollback_to_conformant_at_n_rejected                       PASSED
+  test_g1_forged_r14_state_cannot_mutate_store                       PASSED
+  test_g4_mismatched_trigger_evidence_id_rejected                    PASSED
+  test_g4_mismatched_trigger_value_digest_rejected                   PASSED
+  test_g4_unresolved_evidence_id_rejected                            PASSED
+  test_g3_revoke_then_caller_mutates_copy_executor_denies            PASSED
+
+CONSTRAINTS OBSERVED
+--------------------
+  local deterministic execution only   : YES (Python stdlib + cryptography only)
+  no external LLMs                     : YES (none invoked)
+  no network-dependent execution       : YES (no network calls)
+  no redesign                          : YES (no implementation changes)
+  no frozen-artifact modification      : YES (all 8 hashes verified pre/post)
+  no implementation correction during  : YES
+  no skipped tests                     : YES (zero skipped)
+  no threshold relaxation              : YES (no thresholds relaxed)
+  no merge to main                     : YES (main untouched)
+  original checkout untouched          : YES (verified post-run)
+
+EVIDENCE MANIFEST
+-----------------
+All evidence files in this run are listed in evidence-manifest.json.
+Each file's SHA-256 is recorded there.
+
+FINAL CLASSIFICATION (frozen terminology)
+-----------------------------------------
+CONFORMANCE_LIFECYCLE_POC_PASS

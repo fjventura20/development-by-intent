@@ -1,0 +1,56 @@
+FORMAL RUN PREFLIGHT — Agent Conformance Local Lifecycle PoC v0.1
+====================================================================
+
+formal_run_id        : 20260918T183130Z-acl-lifecycle-poc-v0.1
+implementation_commit: cfd85e809a541a136b478fa7605a7cf4ca798a2d
+formal_start_utc     : 2026-09-18T18:31:30Z
+worktree_path        : /home/fjventura20/devProjectsU/dbi-conformance-test
+worktree_status_pre  : clean (git status --short empty)
+worktree_HEAD        : cfd85e809a541a136b478fa7605a7cf4ca798a2d
+interpreter          : Python 3.12.3 (python3, system venv)
+pytest_version       : pytest-9.1.1
+
+FROZEN ARTIFACT VERIFICATION (byte-identical to frozen hashes)
+--------------------------------------------------------------
+AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md
+  expected = 4faea2a16261ca9416fe8bb4eceaaff80593eb59
+  actual   = 4faea2a16261ca9416fe8bb4eceaaff80593eb59  [OK]
+AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FREEZE.md
+  expected = d1da477dfaa8bb4682a01408596cd468a6e3fd64
+  actual   = d1da477dfaa8bb4682a01408596cd468a6e3fd64  [OK]
+AGENT-CONFORMANCE-PROTOCOL-v0.1.2.md
+  expected = f8bc4464db197a58b6402e01d0378592ba7dc220
+  actual   = f8bc4464db197a58b6402e01d0378592ba7dc220  [OK]
+AGENT-CONFORMANCE-PROTOCOL-v0.1.2-FREEZE.md
+  expected = 62630ddc3bdbf114c7d07beffa2621737c623aaf
+  actual   = 62630ddc3bdbf114c7d07beffa2621737c623aaf  [OK]
+AGENT-QUALIFICATION-AND-ADMISSION-PROTOCOL-v0.2.2.md
+  expected = 28b4b0a36e7ded946686c0eb45d4ee820a35c2bf
+  actual   = 28b4b0a36e7ded946686c0eb45d4ee820a35c2bf  [OK]
+ATE-REVOCATION-TRUST-STATE-MODEL-v0.1.md
+  expected = 0a4c42c30b0914bd0c0dc660c3aa8cc80ae5cb86
+  actual   = 0a4c42c30b0914bd0c0dc660c3aa8cc80ae5cb86  [OK]
+ATE-ENFORCEMENT-PLANE-v0.1.md
+  expected = 154465106614f1448f9bbbca94ff7b5862bfd00a
+  actual   = 154465106614f1448f9bbbca94ff7b5862bfd00a  [OK]
+ATE-AUDIT-ACCOUNTABILITY-MODEL-v0.1.md
+  expected = 82450a5d049cc1d6f53a6cc2a4f952dcb442aa8c
+  actual   = 82450a5d049cc1d6f53a6cc2a4f952dcb442aa8c  [OK]
+
+PRIOR FORMAL-RUN EVIDENCE
+-------------------------
+scan target = architecture/agent-trust-envelope/agent-conformance-local-lifecycle-poc-v0.1/evidence
+result      = none found (clean slate)
+
+PREDECLARED PROFILES v1 + v2 (digest-locked at preflight)
+----------------------------------------------------------
+profile_v1_artifact_digest    = d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a
+profile_v1_signing_payload    = d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a
+profile_v1_required_runtime   = v1
+profile_v2_artifact_digest    = 9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7
+profile_v2_signing_payload    = 9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7
+profile_v2_required_runtime   = v2
+profile_registry_status       = FROZEN + INSTALLED (one-time)
+profile_registry_registered    = profile-v1,profile-v2
+profile_signer_authorized     = YES (signer_key_id captured in evidence/profile_v1.json and profile_v2.json)
+verification_runs             = 3 consecutive runs returned identical digests

@@ -1,0 +1,56 @@
+{
+  "r13_inv": {
+    "admission_state": "ACTIVE",
+    "artifact_id": "r13-rt-ev-v2",
+    "event_sequence": 6,
+    "logical_ts": 6,
+    "measured_runtime_version": "v2",
+    "profile_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+    "profile_id": "local-conformance-poc",
+    "profile_version": 1,
+    "qualification_state": "ACTIVE",
+    "rationale": "profile v1 requires v1; measured is v2",
+    "recommended_state": "REATTESTATION_REQUIRED",
+    "runtime_evidence_id": "rt-ev-v2",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "abc528f6b915e81ee1e20cbe11b8d375843e9b1bf30e373fb5752caa120b53fd94263d3dde718aa25a79b5829b6cec9814b2bd48eb74f21142413c3094e79903",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r14_inv": {
+    "artifact_id": "r14-agent-001-e2",
+    "event_sequence": 7,
+    "logical_ts": 7,
+    "new_state": "REATTESTATION_REQUIRED",
+    "prior_state": "CONFORMANT",
+    "r13_evaluation_id": "r13-rt-ev-v2",
+    "rationale": "runtime v1->v2",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "c5ea4526765e05572082b8f144b672348a90c420f7e4d026a6d99834d0dd7a7efc42050367b5b479811b98770a10cdb5ca2007d5c4f4e582f78e660533a9ff01",
+    "state_epoch": 2,
+    "subject_id": "agent-001",
+    "trigger_observation_id": "trigger-rt-ev-v2",
+    "trust_domain": "local-poc"
+  },
+  "r14_state_snapshot": {
+    "current_state": "REATTESTATION_REQUIRED",
+    "state_epoch": 2
+  },
+  "trigger": {
+    "artifact_id": "trigger-rt-ev-v2",
+    "current_evidence_id": "rt-ev-v2",
+    "current_value_digest": "dfbbc6f639de2a5ddcf028261a3dd82f853a4ca0ba8c9de122695d87bc894fed",
+    "event_sequence": 5,
+    "logical_ts": 5,
+    "prior_evidence_id": "rt-ev-v1",
+    "prior_value_digest": "94285136dc8e18e8ba2ef27a03b12c3fc0efcafab0ba63e8f994271b0bb37778",
+    "severity": "MANDATORY_REATTESTATION",
+    "signature_domain": "ate.conformance.trigger_observation.v1",
+    "signature_hex": "145c18582aa89542a086a9cd82b90eac7a4cb860758915402e0d2e2e405bccba9d42a0aa0a73fb72ed5cf08f5774a949cff57ab16857cea0eee5c911b3fce904",
+    "subject_id": "agent-001",
+    "trigger_class": "T4_RUNTIME",
+    "trigger_type": "RUNTIME_VERSION_CHANGED",
+    "trust_domain": "local-poc"
+  }
+}
