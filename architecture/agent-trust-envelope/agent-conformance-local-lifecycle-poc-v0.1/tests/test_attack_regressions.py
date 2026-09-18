@@ -640,20 +640,48 @@ def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(author
             profile_digest=fake.artifact_digest,
         )
 
+    # profile-v1 remains the active profile.
     assert h.state_store.get_active_profile().artifact_id == "profile-v1"
-    r13_after = h.r13.evaluate(
+
+    # The evidence used for invalidation (rt-ev-v2-h1) is rejected as
+    # NOT FRESH for restoration — it was already evaluated against the
+    # invalidated state. R13 enforces fresh evidence for restoration.
+    with pytest.raises(PermissionError):
+        h.r13.evaluate(
+            subject_id=h.subject.subject_id,
+            trust_domain=h.subject.trust_domain,
+            runtime_evidence=ev_v2,
+            qualification_state="ACTIVE",
+            admission_state="ACTIVE",
+            trust_state_current=True,
+        )
+
+    # The attacker submits NEW observer-authoritative v2 evidence with
+    # a distinct artifact_id. Even this fresh evidence cannot restore
+    # conformance while the attacker-created fake profile exists, because
+    # the registry is frozen and the attacker-created profile was never
+    # the active profile. Profile-v1 remains the only authority.
+    controls.submit_measured_runtime("v2", "rt-ev-v2-h1-fresh")
+    ev_v2_fresh = h.observer.store.get_evidence("rt-ev-v2-h1-fresh")
+    assert ev_v2_fresh is not None
+    assert ev_v2_fresh.artifact_id != ev_v2.artifact_id
+    r13_fresh = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        runtime_evidence=ev_v2,
+        runtime_evidence=ev_v2_fresh,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    assert r13_after.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
+
+    # The attacker-created profile does not restore conformance.
+    assert r13_fresh.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
     assert h.state_store.current_state(h.subject.subject_id) == (
         LIFECYCLE_REATTESTATION_REQUIRED
     )
     assert h.state_store.state_epoch(h.subject.subject_id) == 2
+    # profile-v1 is still the active profile; the fake is rejected.
+    assert h.state_store.get_active_profile().artifact_id == "profile-v1"
 
 
 def test_h3_no_profile_private_key_or_activation_token_on_harness(harness):

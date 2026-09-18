@@ -188,6 +188,28 @@ class AuthorizationService:
         ):
             return None
 
+        # Verify the COMPLETE caller-supplied qualification fixture
+        # BEFORE resolving authoritative records. A forged or tampered
+        # caller fixture must be rejected at issuance, regardless of
+        # the authoritative record's validity. This closes:
+        #   - mismatched issuer ID acceptance
+        #   - mismatched issuer-key ID acceptance
+        #   - tampered artifact-digest acceptance
+        if not self.verify_qualification(
+            qualification,
+            authoritative_subject.subject_id,
+            authoritative_subject.role_id,
+            authoritative_subject.trust_domain,
+        ):
+            return None
+        if not self.verify_admission(
+            admission,
+            authoritative_subject.subject_id,
+            authoritative_subject.role_id,
+            authoritative_subject.trust_domain,
+        ):
+            return None
+
         # Resolve current QA fixtures by stable artifact ID before signing.
         # Caller-supplied signed snapshots may be stale after revocation.
         authoritative_qualification = self.store.get_qualification_fixture(

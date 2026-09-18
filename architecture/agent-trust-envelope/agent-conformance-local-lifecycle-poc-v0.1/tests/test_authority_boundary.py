@@ -79,6 +79,7 @@ def test_ab04_subject_and_observer_reads_are_defensive_copies(authority_harness)
     """Participant mutations of returned subject/evidence objects cannot rewrite
     the authoritative identity or observer history."""
     h, _, controls = authority_harness
+    initial_history_len = len(h.observer.store.history())
 
     authoritative_subject_before = h.state_store.get_subject(h.subject.subject_id)
     h.subject.role_id = "attacker-role"
@@ -94,15 +95,21 @@ def test_ab04_subject_and_observer_reads_are_defensive_copies(authority_harness)
         h.state_store.add_subject(replacement)
     assert h.state_store.get_subject(replacement.subject_id).role_id == "worker"
 
+    # Record observer-history length BEFORE submitting rt-ev-v1-ab04,
+    # then require the history to grow by exactly one.
     controls.submit_measured_runtime("v1", "rt-ev-v1-ab04")
+    history_after_submit = h.observer.store.history()
+    assert len(history_after_submit) == initial_history_len + 1
     evidence_copy = h.observer.store.get_evidence("rt-ev-v1-ab04")
     evidence_copy.measured_runtime_version = "forged"
     evidence_fresh = h.observer.store.get_evidence("rt-ev-v1-ab04")
     assert evidence_fresh.measured_runtime_version == "v1"
 
+    # Mutate the newly returned history record (not an assumed index zero).
     history_copy = h.observer.store.history()
-    assert len(history_copy) == 1
-    history_copy[0].measured_runtime_version = "rewritten"
+    new_record = history_copy[-1]
+    new_record.measured_runtime_version = "rewritten"
+    # A fresh authoritative read must remain unchanged.
     assert (
         h.observer.store.get_evidence("rt-ev-v1-ab04").measured_runtime_version
         == "v1"
