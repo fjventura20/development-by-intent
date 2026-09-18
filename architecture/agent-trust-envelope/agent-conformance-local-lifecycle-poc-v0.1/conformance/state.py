@@ -197,6 +197,30 @@ class StateStore:
         value = self._admission_fixtures.get(artifact_id)
         return None if value is None else copy.deepcopy(value)
 
+    def qualification_state_for(self, subject_id: str) -> str:
+        subject = self.get_subject(subject_id)
+        matches = [
+            f for f in self._qualification_fixtures.values()
+            if f.subject_id == subject.subject_id
+            and f.role_id == subject.role_id
+            and f.trust_domain == subject.trust_domain
+        ]
+        if len(matches) != 1:
+            raise RuntimeError("qualification state is not uniquely resolvable")
+        return matches[0].current_state
+
+    def admission_state_for(self, subject_id: str) -> str:
+        subject = self.get_subject(subject_id)
+        matches = [
+            f for f in self._admission_fixtures.values()
+            if f.subject_id == subject.subject_id
+            and f.role_id == subject.role_id
+            and f.trust_domain == subject.trust_domain
+        ]
+        if len(matches) != 1:
+            raise RuntimeError("admission state is not uniquely resolvable")
+        return matches[0].current_state
+
     def bind_qual_admission_state_authority(self):
         """Bind the qualification/admission state writer exactly once.
 
@@ -288,7 +312,7 @@ class RuntimeObserverStore:
         self._current: Optional[str] = None
 
     def _record_evidence_trusted(self, evidence: object) -> str:
-        self._evidence[evidence.artifact_id] = evidence
+        self._evidence[evidence.artifact_id] = copy.deepcopy(evidence)
         self._current = evidence.artifact_id
         return evidence.artifact_id
 
@@ -298,7 +322,8 @@ class RuntimeObserverStore:
         )
 
     def get_evidence(self, artifact_id: str):
-        return self._evidence.get(artifact_id)
+        value = self._evidence.get(artifact_id)
+        return None if value is None else copy.deepcopy(value)
 
     def get_current_evidence_id(self) -> Optional[str]:
         return self._current
