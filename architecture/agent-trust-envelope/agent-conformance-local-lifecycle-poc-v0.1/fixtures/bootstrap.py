@@ -244,6 +244,7 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         public_key=r13_pub,
         clock=clock,
         state_store=state_store,
+        observer_authority=observer,
     )
     r14 = create_lifecycle_authority(
         authority_id="r14-1",
