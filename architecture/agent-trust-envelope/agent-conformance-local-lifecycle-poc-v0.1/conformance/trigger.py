@@ -51,13 +51,8 @@ class TriggerObserver:
 
     # ---- privileged write path (used by harness, NOT by subject) ----
 
-    def submit_measured_runtime(self, value: str, artifact_id: str) -> str:
-        """Record a new authoritative runtime measurement.
-
-        This is the observer's authoritative write path. The harness
-        invokes it after a real mutation; the subject-facing
-        conformance APIs cannot call it.
-        """
+    def _submit_measured_runtime_trusted(self, value: str, artifact_id: str) -> str:
+        """Trusted observer write path retained outside participant APIs."""
         from .models import RuntimeEvidence
 
         ev = RuntimeEvidence(
@@ -75,7 +70,12 @@ class TriggerObserver:
         ev.signature = sign_ed25519(
             self.__private_key, ev.signature_domain, ev.signing_payload(),
         )
-        return self.store.record_evidence(ev)
+        return self.store._record_evidence_trusted(ev)  # noqa: SLF001
+
+    def submit_measured_runtime(self, *args: Any, **kwargs: Any) -> str:
+        raise PermissionError(
+            "participant-facing runtime measurement submission is unavailable"
+        )
 
     # ---- public read path ----
 
