@@ -77,7 +77,8 @@ class StateStore:
         self._qual_admission_issuer_id: Optional[str] = None
         self._qual_admission_writer_bound = False
 
-        self._protected_resource_authority: Optional[str] = None
+        self._protected_resource_authority_bound = False
+        self._protected_resource_authority_available = False
 
     # ---- subject ----
 
@@ -241,20 +242,42 @@ class StateStore:
     def qual_admission_issuer_id(self) -> Optional[str]:
         return self._qual_admission_issuer_id
 
-    # ---- protected resource authority ----
+    # ---- protected resource authority: bound closures, no public token ----
 
-    def grant_protected_resource_authority(self, token: str) -> None:
-        self._protected_resource_authority = token
+    def bind_protected_resource_authority(self):
+        """Bind protected-resource authority exactly once.
 
-    def consume_protected_resource_authority(self) -> str:
-        if self._protected_resource_authority is None:
-            raise PermissionError("protected-resource authority unavailable")
-        token = self._protected_resource_authority
-        self._protected_resource_authority = None
-        return token
+        Returns trusted grant/consume closures. The credential itself is
+        captured by the closure boundary and is never placed on StateStore or
+        the participant-facing Harness.
+        """
+        if self._protected_resource_authority_bound:
+            raise PermissionError("protected-resource authority already bound")
+        self._protected_resource_authority_bound = True
+        self._protected_resource_authority_available = True
+
+        def grant() -> None:
+            self._protected_resource_authority_available = True
+
+        def consume() -> None:
+            if not self._protected_resource_authority_available:
+                raise PermissionError("protected-resource authority unavailable")
+            self._protected_resource_authority_available = False
+
+        return grant, consume
+
+    def grant_protected_resource_authority(self, *_: Any, **__: Any) -> None:
+        raise PermissionError(
+            "participant-facing protected-resource authority grant is unavailable"
+        )
+
+    def consume_protected_resource_authority(self, *_: Any, **__: Any) -> None:
+        raise PermissionError(
+            "participant-facing protected-resource authority consumption is unavailable"
+        )
 
     def has_protected_resource_authority(self) -> bool:
-        return self._protected_resource_authority is not None
+        return self._protected_resource_authority_available
 
 
 class RuntimeObserverStore:
