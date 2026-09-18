@@ -54,6 +54,7 @@ class R13Evaluator:
     public_key: Ed25519PublicKey
     clock: LogicalClock
     state_store: Any  # G2 fix: required for profile resolution.
+    observer_authority: Any
 
     def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
         self.__private_key = private_key
@@ -77,6 +78,29 @@ class R13Evaluator:
         activated through `ProfileRegistry`). The caller does not
         pass `profile` or `profile_digest`.
         """
+        subject = self.state_store.get_subject(subject_id)
+        if trust_domain != subject.trust_domain:
+            raise PermissionError("R13 trust_domain does not match authoritative subject")
+        if runtime_evidence.subject_id != subject_id:
+            raise PermissionError("R13 runtime evidence subject mismatch")
+        if runtime_evidence.trust_domain != trust_domain:
+            raise PermissionError("R13 runtime evidence trust-domain mismatch")
+        if not self.observer_authority.verify_runtime_evidence(runtime_evidence):
+            raise PermissionError(
+                "R13 runtime evidence is not observer-authoritative"
+            )
+
+        authoritative_qualification_state = self.state_store.qualification_state_for(subject_id)
+        authoritative_admission_state = self.state_store.admission_state_for(subject_id)
+        if qualification_state != authoritative_qualification_state:
+            raise PermissionError(
+                "R13 supplied qualification state does not match authoritative state"
+            )
+        if admission_state != authoritative_admission_state:
+            raise PermissionError(
+                "R13 supplied admission state does not match authoritative state"
+            )
+
         # G2: resolve active profile from state store.
         profile = self.state_store.get_active_profile()
         if profile is None:
@@ -93,12 +117,12 @@ class R13Evaluator:
                 fromlist=["canonical_sha256"],
             ).canonical_sha256(profile.signing_payload())
         )
-        if qualification_state != FIXTURE_STATE_ACTIVE:
+        if authoritative_qualification_state != FIXTURE_STATE_ACTIVE:
             recommended = RECOMMENDED_SUSPENDED
-            rationale = f"qualification not ACTIVE ({qualification_state})"
-        elif admission_state != FIXTURE_STATE_ACTIVE:
+            rationale = f"qualification not ACTIVE ({authoritative_qualification_state})"
+        elif authoritative_admission_state != FIXTURE_STATE_ACTIVE:
             recommended = RECOMMENDED_SUSPENDED
-            rationale = f"admission not ACTIVE ({admission_state})"
+            rationale = f"admission not ACTIVE ({authoritative_admission_state})"
         elif not trust_state_current:
             recommended = RECOMMENDED_SUSPENDED
             rationale = "trust state stale"
@@ -128,8 +152,8 @@ class R13Evaluator:
             profile_digest=profile_digest,
             runtime_evidence_id=runtime_evidence.artifact_id,
             measured_runtime_version=runtime_evidence.measured_runtime_version,
-            qualification_state=qualification_state,
-            admission_state=admission_state,
+            qualification_state=authoritative_qualification_state,
+            admission_state=authoritative_admission_state,
             recommended_state=recommended,
             rationale=rationale,
             logical_ts=self.clock.advance(),
