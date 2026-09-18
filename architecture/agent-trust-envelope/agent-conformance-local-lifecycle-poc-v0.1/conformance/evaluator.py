@@ -53,8 +53,9 @@ class R13Evaluator:
     private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     clock: LogicalClock
-    state_store: Any  # G2 fix: required for profile resolution.
+    state_store: Any  # authoritative profile + qualification/admission state
     observer_authority: Any
+    runtime_evidence_store: Any
 
     def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
         self.__private_key = private_key
@@ -81,14 +82,32 @@ class R13Evaluator:
         subject = self.state_store.get_subject(subject_id)
         if trust_domain != subject.trust_domain:
             raise PermissionError("R13 trust_domain does not match authoritative subject")
-        if runtime_evidence.subject_id != subject_id:
+        # Caller evidence is only a reference to observer-authoritative state.
+        authoritative_evidence = self.runtime_evidence_store.get_evidence(
+            runtime_evidence.artifact_id,
+        )
+        if authoritative_evidence is None:
+            raise PermissionError("R13 runtime evidence is not observer-authoritative")
+        if (
+            self.runtime_evidence_store.get_current_evidence_id()
+            != authoritative_evidence.artifact_id
+        ):
+            raise PermissionError("R13 runtime evidence is not current")
+        if authoritative_evidence.subject_id != subject_id:
             raise PermissionError("R13 runtime evidence subject mismatch")
-        if runtime_evidence.trust_domain != trust_domain:
+        if authoritative_evidence.trust_domain != trust_domain:
             raise PermissionError("R13 runtime evidence trust-domain mismatch")
-        if not self.observer_authority.verify_runtime_evidence(runtime_evidence):
+        if not self.observer_authority.verify_runtime_evidence(
+            authoritative_evidence,
+        ):
             raise PermissionError(
-                "R13 runtime evidence is not observer-authoritative"
+                "R13 runtime evidence signature does not verify"
             )
+        if runtime_evidence.signing_payload() != authoritative_evidence.signing_payload():
+            raise PermissionError(
+                "R13 caller evidence does not match authoritative evidence"
+            )
+        runtime_evidence = authoritative_evidence
 
         authoritative_qualification_state = self.state_store.qualification_state_for(subject_id)
         authoritative_admission_state = self.state_store.admission_state_for(subject_id)
@@ -106,6 +125,13 @@ class R13Evaluator:
         if profile is None:
             raise RuntimeError(
                 "no active profile registered in state store (G2)"
+            )
+        if (
+            profile.trust_domain != subject.trust_domain
+            or profile.role_id != subject.role_id
+        ):
+            raise PermissionError(
+                "R13 active profile is not bound to authoritative subject"
             )
         # Compute profile_digest from the active profile.
         profile_digest = profile.artifact_digest or (
