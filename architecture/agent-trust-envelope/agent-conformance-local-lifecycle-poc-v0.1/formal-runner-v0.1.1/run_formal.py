@@ -275,7 +275,7 @@ def main() -> int:
         write_json(evidence_dir / "01_profiles.json", profiles)
 
         # Initial evidence and conformance.
-        h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+        controls.submit_measured_runtime("v1", "rt-ev-v1")
         ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
         r13_initial = h.r13.evaluate(
             subject_id=h.subject.subject_id,
@@ -288,7 +288,7 @@ def main() -> int:
         r14_initial = h.r14.publish_initial(
             subject=h.subject, r13_evaluation=r13_initial,
         )
-        h.audit.append(
+        controls.append_audit(
             event_kind="initial_conformance",
             payload={
                 "r13_id": r13_initial.artifact_id,
@@ -313,7 +313,7 @@ def main() -> int:
             clock_now=h.clock.now(),
         )
         require(cap0 is not None, "CONFORMANCE_LIFECYCLE_POC_FAIL: C0 issuance failed")
-        h.audit.append(
+        controls.append_audit(
             event_kind="c0_issued",
             payload={"capability_id": cap0.artifact_id, "epoch": cap0.observed_state_epoch},
             logical_ts=h.clock.now(),
@@ -324,7 +324,7 @@ def main() -> int:
             action_payload=bootstrap.ACTION_PAYLOAD, clock_now=h.clock.now(),
         )
         after_c0 = line_count(h.protected_resource_path)
-        h.audit.append(
+        controls.append_audit(
             event_kind="c0_effect",
             payload={"granted": c0.granted, "reason": c0.reason, "line_count": after_c0},
             logical_ts=h.clock.now(),
@@ -346,7 +346,7 @@ def main() -> int:
         require(cap1 is not None, "CONFORMANCE_LIFECYCLE_POC_FAIL: C1 issuance failed")
         require(not h.nonce_registry.is_reserved_or_consumed(cap1.nonce),
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: C1 nonce seen before mutation")
-        h.audit.append(
+        controls.append_audit(
             event_kind="c1_issued",
             payload={"capability_id": cap1.artifact_id, "epoch": cap1.observed_state_epoch,
                      "nonce": cap1.nonce},
@@ -354,16 +354,16 @@ def main() -> int:
         )
 
         # Runtime mutation and independent trigger.
-        h.observer.submit_measured_runtime("v2", "rt-ev-v2-initial")
+        controls.submit_measured_runtime("v2", "rt-ev-v2-initial")
         ev_v2_initial = h.observer.store.get_evidence("rt-ev-v2-initial")
-        h.audit.append(
+        controls.append_audit(
             event_kind="runtime_mutation",
             payload={"evidence_id": ev_v2_initial.artifact_id,
                      "measured_runtime_version": ev_v2_initial.measured_runtime_version},
             logical_ts=h.clock.now(),
         )
         trigger = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
-        h.audit.append(
+        controls.append_audit(
             event_kind="trigger_observed",
             payload={"trigger_id": trigger.artifact_id,
                      "current_evidence_id": trigger.current_evidence_id},
@@ -387,7 +387,7 @@ def main() -> int:
             r13_evaluation=r13_inv,
             trigger_observation=trigger,
         )
-        h.audit.append(
+        controls.append_audit(
             event_kind="n_plus_1_published",
             payload={"r14_id": r14_inv.artifact_id, "state": r14_inv.new_state,
                      "epoch": r14_inv.state_epoch},
@@ -402,7 +402,7 @@ def main() -> int:
             action_payload=bootstrap.ACTION_PAYLOAD, clock_now=h.clock.now(),
         )
         after_c1 = line_count(h.protected_resource_path)
-        h.audit.append(
+        controls.append_audit(
             event_kind="c1_denied",
             payload={"granted": c1.granted, "reason": c1.reason, "step": c1.step,
                      "nonce_unseen_before_attempt": nonce_unseen_at_stale,
@@ -417,7 +417,7 @@ def main() -> int:
         controls.activate_predeclared_profile(
             h.profile_v2.artifact_id, h.profile_v2.artifact_digest,
         )
-        h.audit.append(
+        controls.append_audit(
             event_kind="profile_v2_activated",
             payload={"profile_id": h.profile_v2.artifact_id,
                      "profile_digest": h.profile_v2.artifact_digest},
@@ -425,7 +425,7 @@ def main() -> int:
         )
 
         # Genuine fresh post-denial evidence.
-        h.observer.submit_measured_runtime("v2", "rt-ev-v2-fresh")
+        controls.submit_measured_runtime("v2", "rt-ev-v2-fresh")
         ev_v2_fresh = h.observer.store.get_evidence("rt-ev-v2-fresh")
         require(ev_v2_fresh.artifact_id != ev_v2_initial.artifact_id,
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: fresh evidence id reused")
@@ -433,7 +433,7 @@ def main() -> int:
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: fresh evidence logical_ts not later")
         require(ev_v2_fresh.event_sequence > ev_v2_initial.event_sequence,
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: fresh evidence sequence not later")
-        h.audit.append(
+        controls.append_audit(
             event_kind="post_change_evidence",
             payload={"evidence_id": ev_v2_fresh.artifact_id,
                      "measured_runtime_version": ev_v2_fresh.measured_runtime_version,
@@ -454,7 +454,7 @@ def main() -> int:
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: R13 restore not bound to fresh evidence")
         require(r13_restore.recommended_state == "CONFORMANT",
                 "CONFORMANCE_LIFECYCLE_POC_FAIL: R13 restore not CONFORMANT")
-        h.audit.append(
+        controls.append_audit(
             event_kind="r13_restore_eval",
             payload={"r13_id": r13_restore.artifact_id,
                      "runtime_evidence_id": r13_restore.runtime_evidence_id,
@@ -469,7 +469,7 @@ def main() -> int:
             r13_evaluation=r13_restore,
             trigger_observation=None,
         )
-        h.audit.append(
+        controls.append_audit(
             event_kind="n_plus_2_published",
             payload={"r14_id": r14_restore.artifact_id,
                      "state": r14_restore.new_state, "epoch": r14_restore.state_epoch},
@@ -494,7 +494,7 @@ def main() -> int:
             clock_now=h.clock.now(),
         )
         require(cap2 is not None, "CONFORMANCE_LIFECYCLE_POC_FAIL: C2 issuance failed")
-        h.audit.append(
+        controls.append_audit(
             event_kind="c2_issued",
             payload={"capability_id": cap2.artifact_id, "epoch": cap2.observed_state_epoch},
             logical_ts=h.clock.now(),
@@ -505,7 +505,7 @@ def main() -> int:
             action_payload=bootstrap.ACTION_PAYLOAD, clock_now=h.clock.now(),
         )
         after_c2 = line_count(h.protected_resource_path)
-        h.audit.append(
+        controls.append_audit(
             event_kind="c2_effect",
             payload={"granted": c2.granted, "reason": c2.reason,
                      "line_count": after_c2},
@@ -522,7 +522,7 @@ def main() -> int:
             action_payload=bootstrap.ACTION_PAYLOAD, clock_now=h.clock.now(),
         )
         after_replay = line_count(h.protected_resource_path)
-        h.audit.append(
+        controls.append_audit(
             event_kind="c2_replay_denied",
             payload={"granted": replay.granted, "reason": replay.reason,
                      "line_count": after_replay},
