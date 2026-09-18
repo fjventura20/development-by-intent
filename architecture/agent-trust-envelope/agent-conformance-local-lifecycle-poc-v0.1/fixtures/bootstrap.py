@@ -74,7 +74,7 @@ class Harness:
     r13: R13Evaluator
     r14: LifecycleAuthority
     authorization: AuthorizationService
-    audit: AuditRecorder
+    audit: Any
 
     qual_admission_pub: Ed25519PublicKey
     profile_registry_pub: Ed25519PublicKey
@@ -84,6 +84,24 @@ class Harness:
     profile_v2: ConformanceProfile
     qualification: QualificationFixture
     admission: AdmissionFixture
+
+
+class AuditView:
+    """Participant-facing read/verify view of the authoritative audit ledger."""
+
+    def __init__(self, recorder: AuditRecorder) -> None:
+        self.__recorder = recorder
+        self.public_key = recorder.public_key
+        self.key_id = recorder.key_id
+
+    def records(self):
+        return self.__recorder.records()
+
+    def verify_chain(self) -> bool:
+        return self.__recorder.verify_chain()
+
+    def verify_causal_order(self, expected_sequence):
+        return self.__recorder.verify_causal_order(expected_sequence)
 
 
 class TrustedControls:
@@ -103,6 +121,8 @@ class TrustedControls:
         sign_capability: Callable[[Any], Any],
         grant_protected_resource_authority: Callable[[], None],
         consume_protected_resource_authority: Callable[[], None],
+        submit_measured_runtime: Callable[[str, str], str],
+        append_audit: Callable[..., Any],
         profile_registry_pub: Ed25519PublicKey,
     ) -> None:
         self.__activate_profile = activate_profile
@@ -116,6 +136,8 @@ class TrustedControls:
         self.__sign_capability = sign_capability
         self.__grant_protected_resource_authority = grant_protected_resource_authority
         self.__consume_protected_resource_authority = consume_protected_resource_authority
+        self.__submit_measured_runtime = submit_measured_runtime
+        self.__append_audit = append_audit
         self.profile_registry_pub = profile_registry_pub
 
     def activate_predeclared_profile(self, artifact_id: str, digest: str) -> Any:
@@ -149,6 +171,14 @@ class TrustedControls:
 
     def regrant_protected_resource_authority(self) -> None:
         self.__grant_protected_resource_authority()
+
+    def submit_measured_runtime(self, value: str, artifact_id: str) -> str:
+        return self.__submit_measured_runtime(value, artifact_id)
+
+    def append_audit(self, *, event_kind: str, payload: dict, logical_ts: int):
+        return self.__append_audit(
+            event_kind=event_kind, payload=payload, logical_ts=logical_ts,
+        )
 
     def attach_executor(self, harness: Harness):
         from conformance.executor import Executor
@@ -325,7 +355,7 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         r13=r13,
         r14=r14,
         authorization=authorization,
-        audit=audit,
+        audit=AuditView(audit),
         qual_admission_pub=qa_pub,
         profile_registry_pub=pfs_pub,
         subject=subject,
@@ -347,6 +377,8 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         sign_capability=lambda a: _sign_artifact(az_priv, a),
         grant_protected_resource_authority=grant_protected_resource_authority,
         consume_protected_resource_authority=consume_protected_resource_authority,
+        submit_measured_runtime=observer._submit_measured_runtime_trusted,
+        append_audit=audit.append,
         profile_registry_pub=pfs_pub,
     )
     return harness, controls
