@@ -83,13 +83,15 @@ class StateStore:
     # ---- subject ----
 
     def add_subject(self, subject: SubjectState) -> None:
-        self._subjects[subject.subject_id] = subject
+        # Authoritative identity state must not alias a participant-facing
+        # SubjectState object. Store a defensive copy.
+        self._subjects[subject.subject_id] = copy.deepcopy(subject)
         self._lifecycle.setdefault(subject.subject_id, _AuthoritativeLifecycle())
 
     def get_subject(self, subject_id: str) -> SubjectState:
         if subject_id not in self._subjects:
             raise KeyError(f"unknown subject: {subject_id}")
-        return self._subjects[subject_id]
+        return copy.deepcopy(self._subjects[subject_id])
 
     # ---- lifecycle authority: signature-based, no secret token ----
 
@@ -343,7 +345,7 @@ class RuntimeObserverStore:
         return None
 
     def history(self):
-        return list(self._evidence.values())
+        return [copy.deepcopy(v) for v in self._evidence.values()]
 
 
 class NonceRegistry:
