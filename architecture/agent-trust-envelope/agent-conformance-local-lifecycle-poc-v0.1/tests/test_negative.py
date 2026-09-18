@@ -77,18 +77,31 @@ def test_ns01_subject_cannot_rollback_lifecycle_state(invalidated_lifecycle):
         f"{forbidden & public_methods}"
     )
 
-    # 2. Attempt the rollback attack: call apply_authoritative_state
-    # with no token (or a wrong token). Both must be rejected.
+    # 2. Attempt rollback through the public store write path using a
+    # forged R14 artifact. StateStore now authorizes by R14 signature,
+    # not by a reusable token.
+    before = h.state_store.get_authoritative_state(h.subject.subject_id)
+    forger_priv, _ = generate_keypair()
+    forged = R14State(
+        artifact_id="r14-ns01-rollback",
+        subject_id=h.subject.subject_id,
+        role_id=h.subject.role_id,
+        trust_domain=h.subject.trust_domain,
+        prior_state=before.current_state,
+        new_state="CONFORMANT",
+        state_epoch=before.state_epoch + 1,
+        rationale="subject rollback attempt",
+        r13_evaluation_id="forged",
+        trigger_observation_id="forged",
+        logical_ts=h.clock.advance(),
+        event_sequence=h.clock.now(),
+        signature_domain="ate.conformance.r14_state.v1",
+    )
+    forged.signature = sign_ed25519(
+        forger_priv, forged.signature_domain, forged.signing_payload(),
+    )
     with pytest.raises(PermissionError):
-        h.state_store.apply_authoritative_state(
-            h.subject.subject_id, "CONFORMANT", 1,
-            authorized_caller_token="",
-        )
-    with pytest.raises(PermissionError):
-        h.state_store.apply_authoritative_state(
-            h.subject.subject_id, "CONFORMANT", 1,
-            authorized_caller_token="forged-token",
-        )
+        h.state_store.apply_authoritative_state(forged)
 
     # 3. Authoritative state is unchanged after the attempted rollback.
     assert h.state_store.current_state(h.subject.subject_id) == LIFECYCLE_REATTESTATION_REQUIRED
