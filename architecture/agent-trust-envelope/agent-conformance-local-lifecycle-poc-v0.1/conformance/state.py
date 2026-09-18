@@ -326,11 +326,21 @@ class RuntimeObserverStore:
     def __init__(self) -> None:
         self._evidence: Dict[str, Any] = {}
         self._current: Optional[str] = None
+        self._writer_bound = False
 
-    def _record_evidence_trusted(self, evidence: object) -> str:
-        self._evidence[evidence.artifact_id] = copy.deepcopy(evidence)
-        self._current = evidence.artifact_id
-        return evidence.artifact_id
+    def bind_writer(self):
+        """Bind the observer-evidence writer once and return a trusted closure."""
+        if self._writer_bound:
+            raise PermissionError("observer evidence writer already bound")
+        self._writer_bound = True
+
+        def record(evidence: object) -> str:
+            stored = copy.deepcopy(evidence)
+            self._evidence[stored.artifact_id] = stored
+            self._current = stored.artifact_id
+            return stored.artifact_id
+
+        return record
 
     def record_evidence(self, *args: Any, **kwargs: Any) -> str:
         raise PermissionError(
