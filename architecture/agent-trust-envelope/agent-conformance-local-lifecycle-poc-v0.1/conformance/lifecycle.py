@@ -30,7 +30,7 @@ must NOT change authoritative state or epoch.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import Any, Optional
 
 from .crypto import (
@@ -99,7 +99,7 @@ class LifecycleAuthority:
     """
 
     authority_id: str
-    private_key: Ed25519PrivateKey
+    private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     clock: LogicalClock
     # State store is injected by the trusted factory. State mutation is
@@ -115,7 +115,8 @@ class LifecycleAuthority:
     # observer-authoritative store.
     trigger_evidence_store: Any = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
+        self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
         if self._state_store is None:
             raise PermissionError(
@@ -315,7 +316,7 @@ class LifecycleAuthority:
             signature_domain="ate.conformance.r14_state.v1",
         )
         state.signature = sign_ed25519(
-            self.private_key, state.signature_domain, state.signing_payload(),
+            self.__private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
         self._state_store.apply_authoritative_state(state)
@@ -379,7 +380,7 @@ class LifecycleAuthority:
             signature_domain="ate.conformance.r14_state.v1",
         )
         state.signature = sign_ed25519(
-            self.private_key, state.signature_domain, state.signing_payload(),
+            self.__private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
         self._state_store.apply_authoritative_state(state)
