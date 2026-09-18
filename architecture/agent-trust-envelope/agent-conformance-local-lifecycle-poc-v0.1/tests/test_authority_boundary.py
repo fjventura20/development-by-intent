@@ -106,3 +106,19 @@ def test_ab04_subject_and_observer_reads_are_defensive_copies(authority_harness)
         h.observer.store.get_evidence("rt-ev-v1-ab04").measured_runtime_version
         == "v1"
     )
+
+
+def test_ab05_authorization_rejects_non_governed_action(harness):
+    """Capability issuer cannot be used to sign an action outside the frozen PoC contract."""
+    h, _ = harness
+    cap = h.authorization.issue_capability(
+        subject=h.subject,
+        action="DELETE_RESOURCE",
+        action_payload={"target": "protected_resource.txt", "payload_digest_hex": "0" * 64},
+        qualification=h.qualification,
+        admission=h.admission,
+        nonce="ab05-non-governed-action",
+        ttl_ticks=10,
+        clock_now=h.clock.now(),
+    )
+    assert cap is None
