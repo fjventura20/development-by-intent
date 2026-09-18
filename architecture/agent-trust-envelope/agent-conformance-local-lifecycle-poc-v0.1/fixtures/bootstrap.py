@@ -98,6 +98,10 @@ class TrustedControls:
         revoke_admission: Callable[[str], None],
         sign_profile: Callable[[ConformanceProfile], ConformanceProfile],
         sign_qa_fixture: Callable[[Any], Any],
+        sign_r13: Callable[[Any], Any],
+        sign_r14: Callable[[Any], Any],
+        sign_trigger: Callable[[Any], Any],
+        sign_capability: Callable[[Any], Any],
         profile_registry_pub: Ed25519PublicKey,
     ) -> None:
         self.__activate_profile = activate_profile
@@ -105,6 +109,10 @@ class TrustedControls:
         self.__revoke_admission = revoke_admission
         self.__sign_profile = sign_profile
         self.__sign_qa_fixture = sign_qa_fixture
+        self.__sign_r13 = sign_r13
+        self.__sign_r14 = sign_r14
+        self.__sign_trigger = sign_trigger
+        self.__sign_capability = sign_capability
         self.profile_registry_pub = profile_registry_pub
 
     def activate_predeclared_profile(self, artifact_id: str, digest: str) -> Any:
@@ -123,6 +131,25 @@ class TrustedControls:
 
     def sign_qa_fixture_for_attack_test(self, fixture: Any) -> Any:
         return self.__sign_qa_fixture(fixture)
+
+    def sign_r13_for_attack_test(self, artifact: Any) -> Any:
+        return self.__sign_r13(artifact)
+
+    def sign_r14_for_attack_test(self, artifact: Any) -> Any:
+        return self.__sign_r14(artifact)
+
+    def sign_trigger_for_attack_test(self, artifact: Any) -> Any:
+        return self.__sign_trigger(artifact)
+
+    def sign_capability_for_attack_test(self, artifact: Any) -> Any:
+        return self.__sign_capability(artifact)
+
+
+def _sign_artifact(priv, artifact: Any) -> Any:
+    artifact.signature = sign_ed25519(
+        priv, artifact.signature_domain, artifact.signing_payload(),
+    )
+    return artifact
 
 
 def _sign_qa(priv, fixture: Any) -> Any:
@@ -298,6 +325,10 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         revoke_admission=revoke_admission,
         sign_profile=lambda p: sign_conformance_profile(p, pfs_priv, pfs_pub),
         sign_qa_fixture=lambda f: _sign_qa(qa_priv, f),
+        sign_r13=lambda a: _sign_artifact(r13_priv, a),
+        sign_r14=lambda a: _sign_artifact(r14_priv, a),
+        sign_trigger=lambda a: _sign_artifact(obs_priv, a),
+        sign_capability=lambda a: _sign_artifact(az_priv, a),
         profile_registry_pub=pfs_pub,
     )
     return harness, controls
