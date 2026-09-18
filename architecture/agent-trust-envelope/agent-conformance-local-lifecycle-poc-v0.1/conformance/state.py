@@ -29,6 +29,7 @@ the conformance APIs; only the executor can (frozen §6.7, §12A.9).
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import threading
 from dataclasses import dataclass, field
@@ -91,6 +92,19 @@ class SubjectState:
 # ---------------------------------------------------------------------------
 # State store (frozen §6.1, §6.2, §6.5)
 # ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class LifecycleSnapshot:
+    """Immutable snapshot of authoritative lifecycle state.
+
+    G1 fix: participants can only read these values; the underlying
+    record is not reachable. A snapshot cannot mutate authoritative
+    state.
+    """
+
+    current_state: str
+    state_epoch: int
 
 
 @dataclass
@@ -185,10 +199,17 @@ class StateStore:
         rec.current_state = new_state
         rec.state_epoch = new_epoch
 
-    def get_authoritative_state(self, subject_id: str) -> _AuthoritativeLifecycle:
+    def get_authoritative_state(self, subject_id: str) -> LifecycleSnapshot:
+        """Return an immutable snapshot of the subject's authoritative
+        lifecycle state. G1 fix: callers receive a frozen dataclass
+        that cannot mutate the underlying record."""
         if subject_id not in self._lifecycle:
             raise KeyError(f"unknown subject: {subject_id}")
-        return self._lifecycle[subject_id]
+        rec = self._lifecycle[subject_id]
+        return LifecycleSnapshot(
+            current_state=rec.current_state,
+            state_epoch=rec.state_epoch,
+        )
 
     def current_state(self, subject_id: str) -> str:
         return self.get_authoritative_state(subject_id).current_state
@@ -196,28 +217,123 @@ class StateStore:
     def state_epoch(self, subject_id: str) -> int:
         return self.get_authoritative_state(subject_id).state_epoch
 
-    # ---- profile (frozen §9) ----
+    # Direct read access to the underlying record is not exposed.
+
+    # ---- profile (frozen §9, G2 fix) ----
 
     def set_active_profile(self, profile: Any) -> None:
-        """Activate a predeclared profile. Used by the PoC harness, not the subject."""
-        self._active_profile = profile
+        """DEPRECATED by G2: arbitrary profile activation is no longer
+        permitted. Use ProfileRegistry.activate() instead. Kept as a
+        no-op stub so legacy callers see a clear error rather than
+        silently succeeding.
+
+        G2 fix: profile activation must go through the protected
+        `ProfileRegistry` path; the active profile is verified
+        against the registered signer and digest-locked before run.
+        """
+        raise PermissionError(
+            "set_active_profile() is removed by G2; use "
+            "ProfileRegistry.activate_profile(profile_id, digest)"
+        )
 
     def get_active_profile(self) -> Optional[Any]:
+        """Return the active profile object (from the registry)."""
         return self._active_profile
 
-    # ---- qualification/admission fixtures (frozen §10A) ----
+    # ---- profile registry (G2 fix) ----
+
+    def install_profile_registry(self, registry: Any) -> None:
+        """Install an authoritative predeclared profile registry.
+
+        G2 fix: only registered, signer-verified, digest-locked
+        profiles may be activated. The registry holds the
+        `ProfileActivationToken` used by `activate_profile()`.
+        """
+        self._profile_registry = registry
+
+    def activate_profile(
+        self,
+        *,
+        profile_id: str,
+        profile_digest: str,
+        authorized_caller_token: str,
+    ) -> Any:
+        """Activate a registered profile by (id, digest) through the
+        protected registry path. Raises if no registry is installed,
+        the token is wrong, the profile is not registered, the
+        signature does not verify, or the digest does not match the
+        preflight-locked value."""
+        reg = getattr(self, "_profile_registry", None)
+        if reg is None:
+            raise PermissionError(
+                "no profile registry installed — profile activation is "
+                "unavailable"
+            )
+        return reg.activate(
+            state_store=self,
+            profile_id=profile_id,
+            profile_digest=profile_digest,
+            authorized_caller_token=authorized_caller_token,
+        )
+
+    # ---- qualification/admission fixtures (frozen §10A, G3 fix) ----
 
     def register_qualification_fixture(self, fixture: Any) -> None:
-        self._qualification_fixtures[fixture.artifact_id] = fixture
+        # G3 fix: store a deep copy so the caller's reference cannot
+        # mutate authoritative state. The internal record is only
+        # mutated through the protected revoke path.
+        self._qualification_fixtures[fixture.artifact_id] = copy.deepcopy(fixture)
 
     def register_admission_fixture(self, fixture: Any) -> None:
-        self._admission_fixtures[fixture.artifact_id] = fixture
+        self._admission_fixtures[fixture.artifact_id] = copy.deepcopy(fixture)
 
     def get_qualification_fixture(self, artifact_id: str) -> Any:
-        return self._qualification_fixtures.get(artifact_id)
+        """G3 fix: return a deep copy of the authoritative record.
+        Caller mutations cannot reach the stored authoritative state."""
+        internal = self._qualification_fixtures.get(artifact_id)
+        if internal is None:
+            return None
+        return copy.deepcopy(internal)
 
     def get_admission_fixture(self, artifact_id: str) -> Any:
-        return self._admission_fixtures.get(artifact_id)
+        """G3 fix: return a deep copy of the authoritative record."""
+        internal = self._admission_fixtures.get(artifact_id)
+        if internal is None:
+            return None
+        return copy.deepcopy(internal)
+
+    def revoke_qualification(
+        self,
+        artifact_id: str,
+        *,
+        authorized_caller_token: str,
+    ) -> None:
+        """G3 fix: protected state transition. Only callable by the
+        qualification/admission issuer authority (which acquired the
+        token via `acquire_qual_admission_state_writer_token()`)."""
+        if authorized_caller_token != _QUAL_ADMISSION_STATE_WRITER_TOKEN:
+            raise PermissionError(
+                "qualification revoke requires the protected token "
+                "(acquire via acquire_qual_admission_state_writer_token)"
+            )
+        if artifact_id not in self._qualification_fixtures:
+            raise KeyError(f"unknown qualification fixture: {artifact_id}")
+        self._qualification_fixtures[artifact_id].current_state = "REVOKED"
+
+    def revoke_admission(
+        self,
+        artifact_id: str,
+        *,
+        authorized_caller_token: str,
+    ) -> None:
+        """G3 fix: protected state transition."""
+        if authorized_caller_token != _QUAL_ADMISSION_STATE_WRITER_TOKEN:
+            raise PermissionError(
+                "admission revoke requires the protected token"
+            )
+        if artifact_id not in self._admission_fixtures:
+            raise KeyError(f"unknown admission fixture: {artifact_id}")
+        self._admission_fixtures[artifact_id].current_state = "REVOKED"
 
     def register_qual_admission_issuer(
         self,
@@ -264,22 +380,42 @@ class StateStore:
 
 
 # Token that grants write access to authoritative lifecycle state.
-# It is module-private; LifecycleAuthority imports it via the
-# _AUTHORITATIVE_STATE_WRITER_TOKEN symbol. Subject-facing code
-# cannot reach it.
+# G1 fix: this is module-private and not exposed via a public
+# function. Only `LifecycleAuthority.create()` can acquire it via
+# the factory in `lifecycle.py`. Participant-facing code cannot
+# reach it.
 _AUTHORITATIVE_STATE_WRITER_TOKEN = hashlib.sha256(
     b"acl-lifecycle-authoritative-state-writer"
 ).hexdigest()
 
 
-def get_authoritative_state_writer_token() -> str:
-    """Return the process-local writer token for `LifecycleAuthority`.
+def _get_authoritative_state_writer_token_internal() -> str:
+    """Module-internal accessor used only by LifecycleAuthority.create().
 
-    Provided as a module-level function so the LifecycleAuthority can
-    acquire it on its own. The token is not exposed to subject-facing
-    code paths.
+    G1 fix: there is NO public function in this module that returns
+    this token. Subject-facing code paths cannot discover it.
     """
     return _AUTHORITATIVE_STATE_WRITER_TOKEN
+
+
+# G3 fix: protected token for qualification/admission state transitions.
+# The state writer path requires this token; it is module-private and
+# only the qual/admission issuer authority can acquire it through
+# `acquire_qual_admission_state_writer_token()`.
+_QUAL_ADMISSION_STATE_WRITER_TOKEN = hashlib.sha256(
+    b"acl-lifecycle-qual-admission-state-writer"
+).hexdigest()
+
+
+def acquire_qual_admission_state_writer_token() -> str:
+    """Return the protected token for qualification/admission state
+    transitions.
+
+    G3 fix: this is the ONLY public path to the token. The intended
+    caller is the qual/admission issuer authority (during setup),
+    which then revokes fixtures through `state_store.revoke_*`.
+    """
+    return _QUAL_ADMISSION_STATE_WRITER_TOKEN
 
 
 # ---------------------------------------------------------------------------

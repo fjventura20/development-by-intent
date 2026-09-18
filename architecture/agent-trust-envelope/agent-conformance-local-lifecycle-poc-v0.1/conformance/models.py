@@ -83,6 +83,10 @@ class ConformanceProfile(SignedArtifact):
     semantic fields. The profile also pins trust_domain, role_id,
     trigger_source, evaluator_authority, and lifecycle_state_authority
     per §9.
+
+    G2 fix: `artifact_digest` carries the canonical SHA-256 of the
+    signing payload; it is bound at signing time and checked at
+    registration.
     """
 
     profile_id: str = ""
@@ -95,6 +99,7 @@ class ConformanceProfile(SignedArtifact):
     whole_role_failure: bool = True
     evaluator_authority: str = "R13"
     lifecycle_state_authority: str = "R14"
+    artifact_digest: str = ""
     signature_domain: str = field(default=DOMAIN_PROFILE)
 
     def signing_payload(self) -> Dict[str, Any]:

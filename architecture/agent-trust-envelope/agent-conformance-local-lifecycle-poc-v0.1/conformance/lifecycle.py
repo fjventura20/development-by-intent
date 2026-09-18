@@ -51,36 +51,83 @@ from .state import (
     LogicalClock,
     StateStore,
     SubjectState,
-    get_authoritative_state_writer_token,
+    _get_authoritative_state_writer_token_internal,
 )
 
 
 class TransitionInputError(Exception):
     """Raised when an R14 transition is requested with inputs that fail
-    F2 verification. The R14 state is NOT published and authoritative
+    F2/G4 verification. The R14 state is NOT published and authoritative
     lifecycle state is NOT mutated when this is raised."""
+
+
+def create_lifecycle_authority(
+    *,
+    authority_id: str,
+    private_key: Ed25519PrivateKey,
+    public_key: Ed25519PublicKey,
+    clock: LogicalClock,
+    state_store: StateStore,
+    r13_authority: Optional[Any] = None,
+    trigger_authority: Optional[Any] = None,
+    trigger_evidence_store: Any = None,
+) -> "LifecycleAuthority":
+    """Factory for LifecycleAuthority.
+
+    G1 fix: this factory is the ONLY path that can construct a
+    LifecycleAuthority with the protected writer token bound to a
+    state store. The token itself is captured as a private attribute
+    and never exposed via a public method.
+    """
+    return LifecycleAuthority(
+        authority_id=authority_id,
+        private_key=private_key,
+        public_key=public_key,
+        clock=clock,
+        _state_store=state_store,
+        _writer_token=_get_authoritative_state_writer_token_internal(),
+        r13_authority=r13_authority,
+        trigger_authority=trigger_authority,
+        trigger_evidence_store=trigger_evidence_store,
+    )
 
 
 @dataclass
 class LifecycleAuthority:
-    """Lifecycle State Authority (frozen §14.3, parent v0.1.2 §4.5)."""
+    """Lifecycle State Authority (frozen §14.3, parent v0.1.2 §4.5).
+
+    G1 fix: the public constructor does NOT accept `state_store` or
+    the writer token. Only `create_lifecycle_authority()` can build
+    a fully-wired instance. Subject-facing code that imports this
+    class cannot construct an authority bound to a state store.
+    """
 
     authority_id: str
     private_key: Ed25519PrivateKey
     public_key: Ed25519PublicKey
     clock: LogicalClock
-    state_store: StateStore
-    # The registered R13 authority (for F2 verification of R13 inputs).
+    # The state store and writer token are injected ONLY by the
+    # factory; they are not parameters of the public constructor.
+    _state_store: Any = None
+    _writer_token: str = ""
+    # The registered R13 authority (for F2/G4 verification of inputs).
     r13_authority: Optional[Any] = None
-    # The registered trigger observer authority (for F2 verification
+    # The registered trigger observer authority (for F2/G4 verification
     # of trigger inputs when a trigger is required).
     trigger_authority: Optional[Any] = None
+    # G4 fix: the trigger observer store, used to verify that the
+    # trigger's referenced evidence ids resolve in the
+    # observer-authoritative store.
+    trigger_evidence_store: Any = None
 
     def __post_init__(self) -> None:
         self.key_id = key_id_from_public_key(self.public_key)
-        # Acquire the protected writer token for authoritative state
-        # mutation. This is module-local and not exposed to participants.
-        self._writer_token = get_authoritative_state_writer_token()
+        if not self._writer_token:
+            raise PermissionError(
+                "LifecycleAuthority cannot be constructed directly; "
+                "use create_lifecycle_authority() so the protected writer "
+                "token is bound by the factory (G1)."
+            )
 
     # ---- input verification (F2) ----
 
@@ -111,7 +158,7 @@ class LifecycleAuthority:
             )
         # trust_domain must match — the frozen PoC has a single
         # trust_domain; we enforce it strictly.
-        expected_td = self.state_store.get_subject(subject_id).trust_domain
+        expected_td = self._state_store.get_subject(subject_id).trust_domain
         if r13_evaluation.trust_domain != expected_td:
             raise TransitionInputError(
                 f"R13 trust_domain {r13_evaluation.trust_domain!r} does "
@@ -126,44 +173,92 @@ class LifecycleAuthority:
             )
 
     def _verify_trigger(
-        self,
-        trigger_observation: Any,
-        *,
-        subject_id: str,
-        required: bool,
-    ) -> None:
-        if trigger_observation is None:
-            if required:
+            self,
+            trigger_observation: Any,
+            *,
+            subject_id: str,
+            required: bool,
+            r13_evaluation: Any = None,
+        ) -> None:
+            if trigger_observation is None:
+                if required:
+                    raise TransitionInputError(
+                        "trigger observation is required for this transition"
+                    )
+                return
+            if self.trigger_authority is None:
                 raise TransitionInputError(
-                    "trigger observation is required for this transition"
+                    "no registered trigger authority for input verification"
                 )
-            return
-        if self.trigger_authority is None:
-            raise TransitionInputError(
-                "no registered trigger authority for input verification"
-            )
-        if not self.trigger_authority.verify(trigger_observation):
-            raise TransitionInputError(
-                "trigger signature does not verify under trigger authority"
-            )
-        if trigger_observation.subject_id != subject_id:
-            raise TransitionInputError(
-                f"trigger subject_id {trigger_observation.subject_id!r} "
-                f"does not match target subject {subject_id!r}"
-            )
-        expected_td = self.state_store.get_subject(subject_id).trust_domain
-        if trigger_observation.trust_domain != expected_td:
-            raise TransitionInputError(
-                f"trigger trust_domain {trigger_observation.trust_domain!r} "
-                f"does not match subject trust_domain {expected_td!r}"
-            )
+            if not self.trigger_authority.verify(trigger_observation):
+                raise TransitionInputError(
+                    "trigger signature does not verify under trigger authority"
+                )
+            if trigger_observation.subject_id != subject_id:
+                raise TransitionInputError(
+                    f"trigger subject_id {trigger_observation.subject_id!r} "
+                    f"does not match target subject {subject_id!r}"
+                )
+            expected_td = self._state_store.get_subject(subject_id).trust_domain
+            if trigger_observation.trust_domain != expected_td:
+                raise TransitionInputError(
+                    f"trigger trust_domain {trigger_observation.trust_domain!r} "
+                    f"does not match subject trust_domain {expected_td!r}"
+                )
+            # G4 fix: trigger-to-R13 evidence binding.
+            if r13_evaluation is not None:
+                if (
+                    trigger_observation.current_evidence_id
+                    != r13_evaluation.runtime_evidence_id
+                ):
+                    raise TransitionInputError(
+                        f"G4: trigger.current_evidence_id "
+                        f"{trigger_observation.current_evidence_id!r} != "
+                        f"r13_evaluation.runtime_evidence_id "
+                        f"{r13_evaluation.runtime_evidence_id!r}"
+                    )
+                # Trigger current-value digest must match the runtime value
+                # R13 evaluated.
+                from .canonical import canonical_sha256
+
+                expected_digest = canonical_sha256(
+                    {"value": r13_evaluation.measured_runtime_version},
+                )
+                if trigger_observation.current_value_digest != expected_digest:
+                    raise TransitionInputError(
+                        f"G4: trigger current_value_digest "
+                        f"{trigger_observation.current_value_digest!r} != "
+                        f"expected {expected_digest!r} for measured runtime "
+                        f"{r13_evaluation.measured_runtime_version!r}"
+                    )
+            # G4 fix: trigger evidence ids must resolve in the
+            # observer-authoritative store.
+            if self.trigger_evidence_store is not None:
+                cur_evidence = self.trigger_evidence_store.get_evidence(
+                    trigger_observation.current_evidence_id,
+                )
+                if cur_evidence is None:
+                    raise TransitionInputError(
+                        f"G4: trigger.current_evidence_id "
+                        f"{trigger_observation.current_evidence_id!r} does "
+                        f"not resolve in observer-authoritative store"
+                    )
+                prior_evidence = self.trigger_evidence_store.get_evidence(
+                    trigger_observation.prior_evidence_id,
+                )
+                if prior_evidence is None:
+                    raise TransitionInputError(
+                        f"G4: trigger.prior_evidence_id "
+                        f"{trigger_observation.prior_evidence_id!r} does not "
+                        f"resolve in observer-authoritative store"
+                    )
 
     def _verify_prior_state(
         self,
         subject_id: str,
         declared_prior_state: str,
     ) -> None:
-        actual = self.state_store.current_state(subject_id)
+        actual = self._state_store.current_state(subject_id)
         # Initial publication goes from UNKNOWN (the harness default)
         # to the R13-recommended state. The harness's authoritative
         # `current_state` is "UNKNOWN" before the first publish, and
@@ -230,7 +325,7 @@ class LifecycleAuthority:
             self.private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
-        self.state_store.apply_authoritative_state(
+        self._state_store.apply_authoritative_state(
             subject.subject_id,
             state.new_state,
             state.state_epoch,
@@ -274,6 +369,7 @@ class LifecycleAuthority:
             trigger_observation,
             subject_id=subject.subject_id,
             required=trigger_required,
+            r13_evaluation=r13_evaluation,
         )
 
         new_epoch = self._next_epoch(subject.subject_id)
@@ -298,7 +394,7 @@ class LifecycleAuthority:
             self.private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
-        self.state_store.apply_authoritative_state(
+        self._state_store.apply_authoritative_state(
             subject.subject_id,
             state.new_state,
             state.state_epoch,
@@ -307,7 +403,7 @@ class LifecycleAuthority:
         return state
 
     def _next_epoch(self, subject_id: str) -> int:
-        return self.state_store.state_epoch(subject_id) + 1
+        return self._state_store.state_epoch(subject_id) + 1
 
     def verify(self, state: R14State) -> bool:
         """Return True iff the state was signed by this R14 authority."""

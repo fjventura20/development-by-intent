@@ -39,12 +39,17 @@ from conformance.crypto import (
     sign_ed25519,
 )
 from conformance.evaluator import R13Evaluator
-from conformance.lifecycle import LifecycleAuthority
+from conformance.lifecycle import LifecycleAuthority, create_lifecycle_authority
 from conformance.models import (
     AdmissionFixture,
     ConformanceProfile,
     LIFECYCLE_CONFORMANT,
     QualificationFixture,
+)
+from conformance.profile_registry import (
+    ProfileRegistry,
+    create_profile_registry,
+    sign_conformance_profile,
 )
 from conformance.state import (
     LogicalClock,
@@ -99,6 +104,11 @@ class Harness:
     qualification: QualificationFixture
     admission: AdmissionFixture
 
+    # G2 fix: predeclared profile registry.
+    profile_registry: ProfileRegistry
+    profile_registry_pub: Ed25519PublicKey
+    profile_registry_priv: Ed25519PrivateKey
+
 
 def _sign_conformance_profile(priv, profile: ConformanceProfile) -> ConformanceProfile:
     payload = profile.signing_payload()
@@ -147,6 +157,8 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
     az_priv, az_pub = generate_keypair()
     qa_priv, qa_pub = generate_keypair()
     ar_priv, ar_pub = generate_keypair()
+    # G2: dedicated profile/policy signer key.
+    pfs_priv, pfs_pub = generate_keypair()
 
     # F4 fix: register the qualification/admission issuer authority
     # on the state store. AuthorizationService looks it up by
@@ -168,15 +180,17 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         private_key=r13_priv,
         public_key=r13_pub,
         clock=clock,
+        state_store=state_store,  # G2 fix: profile resolution source
     )
-    r14 = LifecycleAuthority(
+    r14 = create_lifecycle_authority(
         authority_id="r14-1",
         private_key=r14_priv,
         public_key=r14_pub,
         clock=clock,
         state_store=state_store,
-        r13_authority=r13,           # F2: R14 verifies R13 inputs
-        trigger_authority=observer,  # F2: R14 verifies trigger inputs
+        r13_authority=r13,                  # F2: R14 verifies R13 inputs
+        trigger_authority=observer,         # F2: R14 verifies trigger inputs
+        trigger_evidence_store=observer.store,  # G4 fix: trigger evidence resolution
     )
     authorization = AuthorizationService(
         service_id="az-1",
@@ -190,6 +204,9 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         public_key=ar_pub,
     )
 
+    # ---- predeclared profile registry (G2 fix) ----
+    profile_registry = create_profile_registry(signer_public_key=pfs_pub)
+
     # ---- predeclared profile v1 ----
     profile_v1 = ConformanceProfile(
         artifact_id="profile-v1",
@@ -201,7 +218,8 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         max_conformance_age=10_000,
         signature_domain="ate.conformance.profile.v1",
     )
-    _sign_conformance_profile(r14_priv, profile_v1)  # R14 authority signs profile updates
+    sign_conformance_profile(profile_v1, pfs_priv, pfs_pub)
+    profile_registry.register(profile_v1, signer_private_key=pfs_priv)
 
     # ---- predeclared profile v2 (signed and locked before any run) ----
     profile_v2 = ConformanceProfile(
@@ -214,10 +232,21 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         max_conformance_age=10_000,
         signature_domain="ate.conformance.profile.v1",
     )
-    _sign_conformance_profile(r14_priv, profile_v2)
+    sign_conformance_profile(profile_v2, pfs_priv, pfs_pub)
+    profile_registry.register(profile_v2, signer_private_key=pfs_priv)
 
-    # Activate profile v1 initially (frozen §10).
-    state_store.set_active_profile(profile_v1)
+    # Install registry on the state store.
+    state_store.install_profile_registry(profile_registry)
+
+    # Activate profile v1 (frozen §10) through the protected path.
+    state_store.activate_profile(
+        profile_id="profile-v1",
+        profile_digest=profile_v1.artifact_digest,
+        authorized_caller_token=__import__(
+            "conformance.profile_registry",
+            fromlist=["_get_profile_activation_token_internal"],
+        )._get_profile_activation_token_internal(),
+    )
 
     # ---- qualification + admission fixtures (frozen §10A) ----
     qualification = QualificationFixture(
@@ -285,6 +314,9 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
         profile_v2=profile_v2,
         qualification=qualification,
         admission=admission,
+        profile_registry=profile_registry,
+        profile_registry_pub=pfs_pub,
+        profile_registry_priv=pfs_priv,
     )
 
 

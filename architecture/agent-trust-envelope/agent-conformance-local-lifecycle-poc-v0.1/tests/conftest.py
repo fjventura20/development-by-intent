@@ -119,8 +119,8 @@ def drive_full_lifecycle(harness, executor):
     r13_initial = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v1,
-        profile_digest=frozen_profile_v1_digest,
+
+
         runtime_evidence=runtime_evidence_v1,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
@@ -230,8 +230,8 @@ def drive_full_lifecycle(harness, executor):
     r13_invalidated = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v1,
-        profile_digest=frozen_profile_v1_digest,
+
+
         runtime_evidence=runtime_evidence_v2_initial,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
@@ -302,7 +302,15 @@ def drive_full_lifecycle(harness, executor):
     )
 
     # ---- Step H: predeclared profile v2 activation (TC-10) ----
-    h.state_store.set_active_profile(h.profile_v2)
+    # Activate profile v2 through the registry (G2).
+    h.state_store.activate_profile(
+        profile_id="profile-v2",
+        profile_digest=h.profile_v2.artifact_digest,
+        authorized_caller_token=__import__(
+            "conformance.profile_registry",
+            fromlist=["_get_profile_activation_token_internal"],
+        )._get_profile_activation_token_internal(),
+    )
     audit.append(
         event_kind="profile_v2_activated",
         payload={"profile_id": h.profile_v2.artifact_id,
@@ -325,8 +333,8 @@ def drive_full_lifecycle(harness, executor):
     r13_restored = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v2,
-        profile_digest=frozen_profile_v2_digest,
+
+
         runtime_evidence=runtime_evidence_v2_fresh,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
@@ -483,8 +491,8 @@ def harness():
     r13 = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v1,
-        profile_digest=profile_v1_digest,
+
+
         runtime_evidence=ev_v1,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
@@ -533,8 +541,8 @@ def invalidated_lifecycle():
     r13_initial = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v1,
-        profile_digest=profile_v1_digest,
+
+
         runtime_evidence=ev_v1,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",
@@ -565,8 +573,8 @@ def invalidated_lifecycle():
     r13_inv = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
-        profile=h.profile_v1,
-        profile_digest=profile_v1_digest,
+
+
         runtime_evidence=ev_v2,
         qualification_state="ACTIVE",
         admission_state="ACTIVE",

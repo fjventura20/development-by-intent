@@ -28,6 +28,7 @@ from . import evaluator
 from . import executor
 from . import lifecycle
 from . import models
+from . import profile_registry
 from . import state
 from . import trigger
 
@@ -40,6 +41,7 @@ __all__ = [
     "executor",
     "lifecycle",
     "models",
+    "profile_registry",
     "state",
     "trigger",
 ]

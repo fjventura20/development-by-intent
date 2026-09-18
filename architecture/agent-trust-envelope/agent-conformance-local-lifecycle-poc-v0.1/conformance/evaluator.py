@@ -39,12 +39,21 @@ from .state import LogicalClock
 
 @dataclass
 class R13Evaluator:
-    """Conformance Evaluation Authority (frozen §14, parent v0.1.2 §4.5)."""
+    """Conformance Evaluation Authority (frozen §14, parent v0.1.2 §4.5).
+
+    G2 fix: the evaluator no longer accepts an arbitrary caller-
+    supplied profile + profile_digest. It resolves the active
+    authoritative profile from `state_store.get_active_profile()`
+    and uses the profile's bound `artifact_digest`. The caller
+    passes only the runtime evidence; profile identity is
+    enforced by the registry.
+    """
 
     evaluator_id: str
     private_key: Ed25519PrivateKey
     public_key: Ed25519PublicKey
     clock: LogicalClock
+    state_store: Any  # G2 fix: required for profile resolution.
 
     def __post_init__(self) -> None:
         self.key_id = key_id_from_public_key(self.public_key)
@@ -54,8 +63,6 @@ class R13Evaluator:
         *,
         subject_id: str,
         trust_domain: str,
-        profile: Any,
-        profile_digest: str,
         runtime_evidence: Any,
         qualification_state: str,
         admission_state: str,
@@ -64,13 +71,27 @@ class R13Evaluator:
     ) -> R13Evaluation:
         """Produce a signed R13 evaluation result.
 
-        Logic (frozen §14.2 + §16):
-          - if qualification != ACTIVE -> SUSPENDED
-          - elif admission != ACTIVE   -> SUSPENDED
-          - elif not trust_state_current -> SUSPENDED
-          - elif profile.requires == runtime.measured -> CONFORMANT
-          - else                                -> REATTESTATION_REQUIRED
+        G2 fix: profile is resolved from the state store's
+        authoritative active profile (which was registered and
+        activated through `ProfileRegistry`). The caller does not
+        pass `profile` or `profile_digest`.
         """
+        # G2: resolve active profile from state store.
+        profile = self.state_store.get_active_profile()
+        if profile is None:
+            raise RuntimeError(
+                "no active profile registered in state store (G2)"
+            )
+        # Compute profile_digest from the active profile.
+        profile_digest = profile.artifact_digest or (
+            # If for some reason artifact_digest wasn't bound, fall
+            # back to canonical_sha256 of the signing payload.
+            # (Registry registration would have caught this earlier.)
+            __import__(
+                "conformance.canonical",
+                fromlist=["canonical_sha256"],
+            ).canonical_sha256(profile.signing_payload())
+        )
         if qualification_state != FIXTURE_STATE_ACTIVE:
             recommended = RECOMMENDED_SUSPENDED
             rationale = f"qualification not ACTIVE ({qualification_state})"
