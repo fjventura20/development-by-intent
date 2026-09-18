@@ -900,6 +900,7 @@ def test_h4_no_public_authority_private_keys_on_participant_harness(harness):
         "r13": h.r13,
         "observer": h.observer,
         "authorization": h.authorization,
+        "audit": h.audit,
     }
     exposed = [name for name, obj in authorities.items() if hasattr(obj, "private_key")]
     assert exposed == [], f"participant-facing authorities expose private_key: {exposed}"
