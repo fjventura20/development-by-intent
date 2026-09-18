@@ -362,9 +362,7 @@ def drive_full_lifecycle(harness, executor, controls):
     )
 
     # Re-grant protected-resource authority (consumed by C1).
-    h.state_store.grant_protected_resource_authority(
-        h.protected_resource_authority_token,
-    )
+    controls.regrant_protected_resource_authority()
 
     # ---- Step L: capability C2 issuance (TC-14) ----
     cap2 = h.authorization.issue_capability(
@@ -464,7 +462,7 @@ def drive_full_lifecycle(harness, executor, controls):
 def lifecycle():
     """Yield a fully-driven RunContext; tear down on exit."""
     h, controls = bootstrap.build_harness_with_controls(prefix="tc")
-    e = bootstrap.attach_executor(h)
+    e = controls.attach_executor(h)
     ctx = drive_full_lifecycle(h, e, controls)
     try:
         yield ctx
@@ -479,8 +477,8 @@ def harness():
     Used by the negative tests and the F2/F4/F5 attack regressions that
     need a clean harness with one successful pre-mutation execution.
     """
-    h = bootstrap.build_harness(prefix="ns")
-    e = bootstrap.attach_executor(h)
+    h, controls = bootstrap.build_harness_with_controls(prefix="ns")
+    e = controls.attach_executor(h)
 
     h.observer.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
@@ -529,7 +527,7 @@ def authority_harness():
     harness; only explicit authority-boundary regressions receive it.
     """
     h, controls = bootstrap.build_harness_with_controls(prefix="auth")
-    e = bootstrap.attach_executor(h)
+    e = controls.attach_executor(h)
 
     h.observer.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
@@ -556,8 +554,8 @@ def invalidated_lifecycle():
     Used for tests that must observe the subject in a non-conformant
     state (TC-07).
     """
-    h = bootstrap.build_harness(prefix="inv")
-    e = bootstrap.attach_executor(h)
+    h, controls = bootstrap.build_harness_with_controls(prefix="inv")
+    e = controls.attach_executor(h)
 
     h.observer.submit_measured_runtime("v1", "rt-ev-v1")
     ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
