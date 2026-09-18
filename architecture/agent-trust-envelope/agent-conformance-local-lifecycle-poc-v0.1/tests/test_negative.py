@@ -276,10 +276,10 @@ def test_ns05_forged_r14_state_rejected(harness):
 # ---------------------------------------------------------------------------
 
 
-def test_ns06_capability_action_digest_substitution_rejected(harness):
+def test_ns06_capability_action_digest_substitution_rejected(authority_harness):
     """Expected: a capability bound to a different action digest is
     rejected at the executor (step 2, REASON_WRONG_ACTION)."""
-    h, e = harness
+    h, e, controls = authority_harness
     # Issue C with the correct action.
     cap = h.authorization.issue_capability(
         subject=h.subject,
@@ -301,12 +301,7 @@ def test_ns06_capability_action_digest_substitution_rejected(harness):
     # otherwise step 1 (signature) would fire first. We're testing
     # step 2 (action binding), so we must re-sign with the substituted
     # digest.
-    from conformance.crypto import sign_ed25519
-    cap.signature = sign_ed25519(
-        h.authorization.private_key,
-        cap.signature_domain,
-        cap.signing_payload(),
-    )
+    controls.sign_capability_for_attack_test(cap)
     res = e.execute(
         subject=h.subject,
         capability=cap,
@@ -323,9 +318,9 @@ def test_ns06_capability_action_digest_substitution_rejected(harness):
 # ---------------------------------------------------------------------------
 
 
-def test_ns07_capability_epoch_substitution_rejected(harness):
+def test_ns07_capability_epoch_substitution_rejected(authority_harness):
     """Expected: a capability that claims a future epoch is denied."""
-    h, e = harness
+    h, e, controls = authority_harness
     # Issue at epoch 1 normally; then try to bump observed_state_epoch
     # to a higher number and re-sign.
     cap = h.authorization.issue_capability(
@@ -341,12 +336,7 @@ def test_ns07_capability_epoch_substitution_rejected(harness):
     # Bump observed_state_epoch to 99 (a fabricated future epoch).
     cap.observed_state_epoch = 99
     cap.observed_conformance_state = "CONFORMANT"
-    from conformance.crypto import sign_ed25519
-    cap.signature = sign_ed25519(
-        h.authorization.private_key,
-        cap.signature_domain,
-        cap.signing_payload(),
-    )
+    controls.sign_capability_for_attack_test(cap)
     res = e.execute(
         subject=h.subject,
         capability=cap,
