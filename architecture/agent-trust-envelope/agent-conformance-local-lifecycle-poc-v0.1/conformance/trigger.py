@@ -129,6 +129,29 @@ class TriggerObserver:
         )
         return trigger
 
+    def verify_runtime_evidence(self, evidence: Any) -> bool:
+        """Verify signed evidence and binding to the authoritative observer store."""
+        if evidence is None:
+            return False
+        if evidence.signature_domain != "ate.conformance.runtime_evidence.v1":
+            return False
+        if evidence.observer_id != self.observer_id:
+            return False
+        if not verify_ed25519(
+            self.public_key,
+            evidence.signature,
+            evidence.signature_domain,
+            evidence.signing_payload(),
+        ):
+            return False
+        stored = self.store.get_evidence(evidence.artifact_id)
+        if stored is None:
+            return False
+        return (
+            stored.signing_payload() == evidence.signing_payload()
+            and stored.signature == evidence.signature
+        )
+
     # ---- forgery detection (frozen §13, NS-03) ----
 
     def verify(self, trigger: TriggerObservation) -> bool:
