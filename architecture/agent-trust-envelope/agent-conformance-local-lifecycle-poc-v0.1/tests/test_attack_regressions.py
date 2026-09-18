@@ -991,3 +991,57 @@ def test_h8_revoked_qualification_cannot_be_rolled_back_by_reregistration(author
 
     assert h.state_store.qualification_state_for(h.subject.subject_id) == "REVOKED"
     assert h.state_store.admission_state_for(h.subject.subject_id) == "REVOKED"
+
+
+def test_h9_r13_restoration_requires_post_invalidation_fresh_evidence(authority_harness):
+    """The evidence that caused N+1 invalidation cannot be reused for restoration."""
+    h, _, controls = authority_harness
+
+    controls.submit_measured_runtime("v2", "rt-ev-v2-initial-h9")
+    initial_v2 = h.observer.store.get_evidence("rt-ev-v2-initial-h9")
+    trigger = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
+
+    r13_inv = h.r13.evaluate(
+        subject_id=h.subject.subject_id,
+        trust_domain=h.subject.trust_domain,
+        runtime_evidence=initial_v2,
+        qualification_state="ACTIVE",
+        admission_state="ACTIVE",
+        trust_state_current=True,
+    )
+    h.r14.publish_transition(
+        subject=h.subject,
+        prior_state="CONFORMANT",
+        new_state="REATTESTATION_REQUIRED",
+        rationale="h9 invalidation",
+        r13_evaluation=r13_inv,
+        trigger_observation=trigger,
+    )
+
+    controls.activate_predeclared_profile(
+        h.profile_v2.artifact_id,
+        h.profile_v2.artifact_digest,
+    )
+
+    with pytest.raises(PermissionError):
+        h.r13.evaluate(
+            subject_id=h.subject.subject_id,
+            trust_domain=h.subject.trust_domain,
+            runtime_evidence=initial_v2,
+            qualification_state="ACTIVE",
+            admission_state="ACTIVE",
+            trust_state_current=True,
+        )
+
+    controls.submit_measured_runtime("v2", "rt-ev-v2-fresh-h9")
+    fresh_v2 = h.observer.store.get_evidence("rt-ev-v2-fresh-h9")
+    restored = h.r13.evaluate(
+        subject_id=h.subject.subject_id,
+        trust_domain=h.subject.trust_domain,
+        runtime_evidence=fresh_v2,
+        qualification_state="ACTIVE",
+        admission_state="ACTIVE",
+        trust_state_current=True,
+    )
+    assert restored.runtime_evidence_id == "rt-ev-v2-fresh-h9"
+    assert restored.recommended_state == "CONFORMANT"
