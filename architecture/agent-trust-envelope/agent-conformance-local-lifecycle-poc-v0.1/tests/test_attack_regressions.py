@@ -362,7 +362,7 @@ def test_f5_executor_reads_fixtures_by_artifact_id_from_state_store(authority_ha
 def test_f5_unregistered_qualification_artifact_id_denied(authority_harness):
     """F5: a capability bound to a qualification artifact_id that
     is NOT registered in StateStore is denied at step 4."""
-    h, e = harness
+    h, e, controls = authority_harness
 
     cap = h.authorization.issue_capability(
         subject=h.subject,
