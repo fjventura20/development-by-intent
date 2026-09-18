@@ -87,6 +87,12 @@ def test_ab04_subject_and_observer_reads_are_defensive_copies(authority_harness)
     assert authoritative_subject_after.role_id == authoritative_subject_before.role_id
     assert authoritative_subject_after.role_id == "worker"
 
+    replacement = copy.deepcopy(authoritative_subject_before)
+    replacement.role_id = "replacement-role"
+    with pytest.raises(PermissionError):
+        h.state_store.add_subject(replacement)
+    assert h.state_store.get_subject(replacement.subject_id).role_id == "worker"
+
     controls.submit_measured_runtime("v1", "rt-ev-v1-ab04")
     evidence_copy = h.observer.store.get_evidence("rt-ev-v1-ab04")
     evidence_copy.measured_runtime_version = "forged"
