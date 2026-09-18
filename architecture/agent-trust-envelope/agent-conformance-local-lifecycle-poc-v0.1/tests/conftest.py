@@ -94,7 +94,7 @@ class RunContext:
     cap1_nonce_unseen_at_stale_attempt: bool
 
 
-def drive_full_lifecycle(harness, executor):
+def drive_full_lifecycle(harness, executor, controls):
     """Run the full frozen design sequence against a fresh harness.
 
     Returns a `RunContext` with every per-step artifact attached.
@@ -302,14 +302,11 @@ def drive_full_lifecycle(harness, executor):
     )
 
     # ---- Step H: predeclared profile v2 activation (TC-10) ----
-    # Activate profile v2 through the registry (G2).
-    h.state_store.activate_profile(
-        profile_id="profile-v2",
-        profile_digest=h.profile_v2.artifact_digest,
-        authorized_caller_token=__import__(
-            "conformance.profile_registry",
-            fromlist=["_get_profile_activation_token_internal"],
-        )._get_profile_activation_token_internal(),
+    # Trusted controls retain the one-time activation closure; the
+    # participant-facing harness has no activation token/key.
+    controls.activate_predeclared_profile(
+        h.profile_v2.artifact_id,
+        h.profile_v2.artifact_digest,
     )
     audit.append(
         event_kind="profile_v2_activated",
@@ -466,9 +463,9 @@ def drive_full_lifecycle(harness, executor):
 @pytest.fixture
 def lifecycle():
     """Yield a fully-driven RunContext; tear down on exit."""
-    h = bootstrap.build_harness(prefix="tc")
+    h, controls = bootstrap.build_harness_with_controls(prefix="tc")
     e = bootstrap.attach_executor(h)
-    ctx = drive_full_lifecycle(h, e)
+    ctx = drive_full_lifecycle(h, e, controls)
     try:
         yield ctx
     finally:
@@ -520,6 +517,34 @@ def harness():
 
     try:
         yield h, e
+    finally:
+        bootstrap.teardown(h)
+
+
+@pytest.fixture
+def authority_harness():
+    """Trusted-authority fixture for tests that must simulate issuer actions.
+
+    The returned TrustedControls object is not part of the participant-facing
+    harness; only explicit authority-boundary regressions receive it.
+    """
+    h, controls = bootstrap.build_harness_with_controls(prefix="auth")
+    e = bootstrap.attach_executor(h)
+
+    h.observer.submit_measured_runtime("v1", "rt-ev-v1")
+    ev_v1 = h.observer.store.get_evidence("rt-ev-v1")
+    r13 = h.r13.evaluate(
+        subject_id=h.subject.subject_id,
+        trust_domain=h.subject.trust_domain,
+        runtime_evidence=ev_v1,
+        qualification_state="ACTIVE",
+        admission_state="ACTIVE",
+        trust_state_current=True,
+    )
+    h.r14.publish_initial(subject=h.subject, r13_evaluation=r13)
+
+    try:
+        yield h, e, controls
     finally:
         bootstrap.teardown(h)
 
