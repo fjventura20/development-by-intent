@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import pytest
 
-from conformance.audit import copy_and_tamper
+from conformance.audit import copy_and_tamper, verify_records
 from conformance.canonical import canonical_sha256
 from conformance.crypto import generate_keypair, sign_ed25519
 from conformance.executor import (
@@ -355,32 +355,21 @@ def test_ns07_capability_epoch_substitution_rejected(authority_harness):
 # ---------------------------------------------------------------------------
 
 
-def test_ns08_audit_history_mutation_detected(harness):
-    """Expected: a tampered copy of the ledger fails integrity checks;
-    the authoritative ledger still passes."""
-    h, _ = harness
-    # Append a few audit records so we have something to tamper with.
+def test_ns08_audit_history_mutation_detected(authority_harness):
+    """Expected: a tampered copy fails integrity checks while the
+    participant-facing authoritative audit view remains unchanged."""
+    h, _, controls = authority_harness
     for i in range(3):
-        h.audit.append(
+        controls.append_audit(
             event_kind=f"test_event_{i}",
             payload={"i": i},
             logical_ts=h.clock.now(),
         )
-    # Verify the authoritative ledger.
-    assert h.audit.verify_chain()
 
-    # Make a non-destructive tampered copy and verify the copy fails.
     records = h.audit.records()
+    assert verify_records(records, h.audit.public_key) is True
+
     tampered = copy_and_tamper(records, tamper_index=1)
+    assert verify_records(tampered, h.audit.public_key) is False
 
-    # Replace the recorder's internal list temporarily with the tampered
-    # copy and assert verification fails. Then restore.
-    original = h.audit._records  # noqa: SLF001
-    try:
-        h.audit._records = tampered  # noqa: SLF001
-        assert h.audit.verify_chain() is False
-    finally:
-        h.audit._records = original  # noqa: SLF001
-
-    # Authoritative ledger still passes.
-    assert h.audit.verify_chain()
+    assert h.audit.verify_chain() is True
