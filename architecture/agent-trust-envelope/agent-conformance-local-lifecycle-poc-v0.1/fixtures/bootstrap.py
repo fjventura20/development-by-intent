@@ -65,7 +65,6 @@ class Harness:
 
     tmpdir: str
     protected_resource_path: str
-    protected_resource_authority_token: str
 
     clock: LogicalClock
     state_store: StateStore
@@ -102,6 +101,8 @@ class TrustedControls:
         sign_r14: Callable[[Any], Any],
         sign_trigger: Callable[[Any], Any],
         sign_capability: Callable[[Any], Any],
+        grant_protected_resource_authority: Callable[[], None],
+        consume_protected_resource_authority: Callable[[], None],
         profile_registry_pub: Ed25519PublicKey,
     ) -> None:
         self.__activate_profile = activate_profile
@@ -113,6 +114,8 @@ class TrustedControls:
         self.__sign_r14 = sign_r14
         self.__sign_trigger = sign_trigger
         self.__sign_capability = sign_capability
+        self.__grant_protected_resource_authority = grant_protected_resource_authority
+        self.__consume_protected_resource_authority = consume_protected_resource_authority
         self.profile_registry_pub = profile_registry_pub
 
     def activate_predeclared_profile(self, artifact_id: str, digest: str) -> Any:
@@ -144,6 +147,21 @@ class TrustedControls:
     def sign_capability_for_attack_test(self, artifact: Any) -> Any:
         return self.__sign_capability(artifact)
 
+    def regrant_protected_resource_authority(self) -> None:
+        self.__grant_protected_resource_authority()
+
+    def attach_executor(self, harness: Harness):
+        from conformance.executor import Executor
+
+        return Executor(
+            executor_id="exec-1",
+            state_store=harness.state_store,
+            nonce_registry=harness.nonce_registry,
+            authorization=harness.authorization,
+            protected_resource_path=harness.protected_resource_path,
+            _consume_protected_resource_authority=self.__consume_protected_resource_authority,
+        )
+
 
 def _sign_artifact(priv, artifact: Any) -> Any:
     artifact.signature = sign_ed25519(
@@ -166,7 +184,6 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
     with open(protected_resource_path, "w", encoding="utf-8") as fh:
         fh.write("")
 
-    protected_resource_authority_token = "pr-auth-" + os.path.basename(tmpdir)
     clock = LogicalClock()
     state_store = StateStore()
     nonce_registry = NonceRegistry()
@@ -294,14 +311,13 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         current_runtime_version="v1",
     )
     state_store.add_subject(subject)
-    state_store.grant_protected_resource_authority(
-        protected_resource_authority_token,
+    grant_protected_resource_authority, consume_protected_resource_authority = (
+        state_store.bind_protected_resource_authority()
     )
 
     harness = Harness(
         tmpdir=tmpdir,
         protected_resource_path=protected_resource_path,
-        protected_resource_authority_token=protected_resource_authority_token,
         clock=clock,
         state_store=state_store,
         nonce_registry=nonce_registry,
@@ -329,6 +345,8 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         sign_r14=lambda a: _sign_artifact(r14_priv, a),
         sign_trigger=lambda a: _sign_artifact(obs_priv, a),
         sign_capability=lambda a: _sign_artifact(az_priv, a),
+        grant_protected_resource_authority=grant_protected_resource_authority,
+        consume_protected_resource_authority=consume_protected_resource_authority,
         profile_registry_pub=pfs_pub,
     )
     return harness, controls
@@ -338,19 +356,6 @@ def build_harness(*, prefix: str = "acl-poc") -> Harness:
     """Build participant-facing harness; trusted controls are discarded."""
     harness, _controls = build_harness_with_controls(prefix=prefix)
     return harness
-
-
-def attach_executor(h: Harness):
-    from conformance.executor import Executor
-
-    return Executor(
-        executor_id="exec-1",
-        state_store=h.state_store,
-        nonce_registry=h.nonce_registry,
-        authorization=h.authorization,
-        protected_resource_path=h.protected_resource_path,
-        protected_resource_authority_token=h.protected_resource_authority_token,
-    )
 
 
 def teardown(h: Harness) -> None:
