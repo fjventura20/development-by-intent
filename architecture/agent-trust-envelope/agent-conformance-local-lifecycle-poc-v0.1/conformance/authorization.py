@@ -59,6 +59,7 @@ class AuthorizationService:
     private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
     store: StateStore
+    allowed_action_digest: str
 
     def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
         self.__private_key = private_key
@@ -188,6 +189,8 @@ class AuthorizationService:
             return None
 
         action_digest = canonical_sha256({"action": action, "payload": action_payload})
+        if action_digest != self.allowed_action_digest:
+            return None
 
         cap = ExecutionCapability(
             artifact_id=f"cap-{nonce}",
