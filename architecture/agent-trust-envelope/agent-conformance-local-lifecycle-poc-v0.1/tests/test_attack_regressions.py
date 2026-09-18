@@ -904,3 +904,84 @@ def test_h4_no_public_authority_private_keys_on_participant_harness(harness):
     }
     exposed = [name for name, obj in authorities.items() if hasattr(obj, "private_key")]
     assert exposed == [], f"participant-facing authorities expose private_key: {exposed}"
+
+
+# ---------------------------------------------------------------------------
+# H5-H8 regressions: participant authority APIs and authoritative inputs
+# ---------------------------------------------------------------------------
+
+def test_h5_participant_cannot_write_observer_audit_or_resource_authority(harness):
+    """Participant-facing APIs expose reads/requests, not authority mutation."""
+    h, _ = harness
+
+    with pytest.raises(PermissionError):
+        h.observer.submit_measured_runtime("v9", "participant-forged-evidence")
+
+    with pytest.raises(PermissionError):
+        h.observer.store.record_evidence(object())
+
+    assert not hasattr(h.audit, "append")
+
+    with pytest.raises(PermissionError):
+        h.state_store.grant_protected_resource_authority("participant-token")
+
+    with pytest.raises(PermissionError):
+        h.state_store.consume_protected_resource_authority()
+
+    assert not hasattr(h, "protected_resource_authority_token")
+
+
+def test_h6_r13_rejects_mutated_runtime_evidence_copy(authority_harness):
+    """R13 signs only evidence that still matches the observer-authoritative store."""
+    h, _, controls = authority_harness
+
+    controls.submit_measured_runtime("v2", "rt-ev-v2-h6")
+    authoritative = h.observer.store.get_evidence("rt-ev-v2-h6")
+    tampered = copy.deepcopy(authoritative)
+    tampered.measured_runtime_version = "v999"
+
+    with pytest.raises(PermissionError):
+        h.r13.evaluate(
+            subject_id=h.subject.subject_id,
+            trust_domain=h.subject.trust_domain,
+            runtime_evidence=tampered,
+            qualification_state="ACTIVE",
+            admission_state="ACTIVE",
+            trust_state_current=True,
+        )
+
+    stored_again = h.observer.store.get_evidence("rt-ev-v2-h6")
+    assert stored_again.measured_runtime_version == "v2"
+
+
+def test_h7_r13_rejects_caller_lie_about_qualification_state(authority_harness):
+    """R13 must cross-check supplied QA state against StateStore."""
+    h, _, controls = authority_harness
+
+    controls.submit_measured_runtime("v1", "rt-ev-v1-h7")
+    ev = h.observer.store.get_evidence("rt-ev-v1-h7")
+    controls.revoke_qualification(h.qualification.artifact_id)
+
+    with pytest.raises(PermissionError):
+        h.r13.evaluate(
+            subject_id=h.subject.subject_id,
+            trust_domain=h.subject.trust_domain,
+            runtime_evidence=ev,
+            qualification_state="ACTIVE",
+            admission_state="ACTIVE",
+            trust_state_current=True,
+        )
+
+
+def test_h8_revoked_qualification_cannot_be_rolled_back_by_reregistration(authority_harness):
+    """A previously signed ACTIVE fixture cannot overwrite revoked authoritative state."""
+    h, _, controls = authority_harness
+    active_snapshot = copy.deepcopy(h.qualification)
+
+    controls.revoke_qualification(h.qualification.artifact_id)
+    assert h.state_store.qualification_state_for(h.subject.subject_id) == "REVOKED"
+
+    with pytest.raises(PermissionError):
+        h.state_store.register_qualification_fixture(active_snapshot)
+
+    assert h.state_store.qualification_state_for(h.subject.subject_id) == "REVOKED"
