@@ -27,7 +27,12 @@ from conformance.crypto import (
 )
 from conformance.evaluator import R13Evaluator
 from conformance.lifecycle import LifecycleAuthority, create_lifecycle_authority
-from conformance.models import AdmissionFixture, ConformanceProfile, QualificationFixture
+from conformance.models import (
+    AdmissionFixture,
+    ConformanceProfile,
+    QualificationFixture,
+    RuntimeEvidence,
+)
 from conformance.profile_registry import (
     ProfileRegistry,
     create_profile_registry,
@@ -208,6 +213,30 @@ def _sign_qa(priv, fixture: Any) -> Any:
     return fixture
 
 
+def _submit_runtime_evidence(
+    priv: Any,
+    observer: TriggerObserver,
+    clock: LogicalClock,
+    value: str,
+    artifact_id: str,
+) -> str:
+    """Trusted control-plane runtime measurement/signing path."""
+    ev = RuntimeEvidence(
+        artifact_id=artifact_id,
+        subject_id=SUBJECT_ID,
+        trust_domain=TRUST_DOMAIN,
+        measured_runtime_version=value,
+        observer_id=observer.observer_id,
+        logical_ts=clock.advance(),
+        event_sequence=clock.now(),
+        signature_domain="ate.conformance.runtime_evidence.v1",
+    )
+    ev.signature = sign_ed25519(
+        priv, ev.signature_domain, ev.signing_payload(),
+    )
+    return observer.store._record_evidence_trusted(ev)  # noqa: SLF001
+
+
 def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, TrustedControls]:
     tmpdir = tempfile.mkdtemp(prefix=prefix + "-")
     protected_resource_path = os.path.join(tmpdir, "protected_resource.txt")
@@ -379,7 +408,9 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         sign_capability=lambda a: _sign_artifact(az_priv, a),
         grant_protected_resource_authority=grant_protected_resource_authority,
         consume_protected_resource_authority=consume_protected_resource_authority,
-        submit_measured_runtime=observer._submit_measured_runtime_trusted,
+        submit_measured_runtime=lambda value, artifact_id: _submit_runtime_evidence(
+            obs_priv, observer, clock, value, artifact_id,
+        ),
         append_audit=audit.append,
         profile_registry_pub=pfs_pub,
     )
