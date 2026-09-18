@@ -217,6 +217,7 @@ def _submit_runtime_evidence(
     priv: Any,
     observer: TriggerObserver,
     clock: LogicalClock,
+    record_runtime_evidence: Callable[[Any], str],
     value: str,
     artifact_id: str,
 ) -> str:
@@ -234,7 +235,7 @@ def _submit_runtime_evidence(
     ev.signature = sign_ed25519(
         priv, ev.signature_domain, ev.signing_payload(),
     )
-    return observer.store._record_evidence_trusted(ev)  # noqa: SLF001
+    return record_runtime_evidence(ev)
 
 
 def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, TrustedControls]:
@@ -260,11 +261,13 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         issuer_public_key=qa_pub,
     )
 
+    observer_store = RuntimeObserverStore()
+    record_runtime_evidence = observer_store.bind_writer()
     observer = TriggerObserver(
         observer_id="observer-1",
         private_key=obs_priv,
         public_key=obs_pub,
-        store=RuntimeObserverStore(),
+        store=observer_store,
         clock=clock,
     )
     r13 = R13Evaluator(
@@ -409,7 +412,7 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         grant_protected_resource_authority=grant_protected_resource_authority,
         consume_protected_resource_authority=consume_protected_resource_authority,
         submit_measured_runtime=lambda value, artifact_id: _submit_runtime_evidence(
-            obs_priv, observer, clock, value, artifact_id,
+            obs_priv, observer, clock, record_runtime_evidence, value, artifact_id,
         ),
         append_audit=audit.append,
         profile_registry_pub=pfs_pub,
