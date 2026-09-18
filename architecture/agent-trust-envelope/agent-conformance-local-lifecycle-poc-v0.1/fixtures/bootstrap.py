@@ -294,6 +294,9 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         private_key=az_priv,
         public_key=az_pub,
         store=state_store,
+        allowed_action_digest=canonical_sha256(
+            {"action": ACTION, "payload": ACTION_PAYLOAD},
+        ),
     )
     audit = AuditRecorder(
         recorder_id="audit-1",
