@@ -23,7 +23,7 @@ from typing import Any
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-IMPLEMENTATION_BASELINE = "82dc8df570b5946fb291575a44e73755b6c3213a"
+IMPLEMENTATION_BASELINE = "76e0816ca729bbef3fde197970c1958352023c7f"
 
 FROZEN_BLOBS = {
     "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md":
