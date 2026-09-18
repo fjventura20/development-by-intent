@@ -16,7 +16,7 @@ recorder public key.
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
 from .canonical import canonical_sha256
@@ -40,10 +40,11 @@ class AuditRecorder:
     """Append-only audit recorder (frozen §6.8)."""
 
     recorder_id: str
-    private_key: Ed25519PrivateKey
+    private_key: InitVar[Ed25519PrivateKey]
     public_key: Ed25519PublicKey
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, private_key: Ed25519PrivateKey) -> None:
+        self.__private_key = private_key
         self.key_id = key_id_from_public_key(self.public_key)
         self._records: List[AuditRecord] = []
 
@@ -90,7 +91,7 @@ class AuditRecorder:
             signature_domain="ate.conformance.audit.v1",
         )
         rec.signature = sign_ed25519(
-            self.private_key, rec.signature_domain, rec.signing_payload(),
+            self.__private_key, rec.signature_domain, rec.signing_payload(),
         )
         self._records.append(rec)
         return rec
