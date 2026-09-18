@@ -245,17 +245,11 @@ def test_f2_missing_trigger_when_required_rejected(harness):
 # ---------------------------------------------------------------------------
 
 
-def test_f4_mismatched_issuer_id_rejected(harness):
-    """F4: a qualification fixture with an issuer id that does not
-    match the registered issuer identity is rejected at issuance."""
-    h, _ = harness
-
+def test_f4_mismatched_issuer_id_rejected(authority_harness):
+    h, _, controls = authority_harness
     bad_qual = copy.deepcopy(h.qualification)
     bad_qual.issuer = "rogue-issuer"
-    bad_qual.artifact_digest = canonical_sha256(bad_qual.signing_payload())
-    bad_qual.signature = sign_ed25519(
-        h.qual_admission_priv, bad_qual.signature_domain, bad_qual.signing_payload(),
-    )
+    controls.sign_qa_fixture_for_attack_test(bad_qual)
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
@@ -269,17 +263,11 @@ def test_f4_mismatched_issuer_id_rejected(harness):
     assert cap is None
 
 
-def test_f4_mismatched_issuer_key_id_rejected(harness):
-    """F4: a fixture with an issuer_key_id that doesn't match the
-    registered issuer pub key id is rejected."""
-    h, _ = harness
-
+def test_f4_mismatched_issuer_key_id_rejected(authority_harness):
+    h, _, controls = authority_harness
     bad_qual = copy.deepcopy(h.qualification)
-    bad_qual.issuer_key_id = "deadbeef" * 8  # wrong key id
-    bad_qual.artifact_digest = canonical_sha256(bad_qual.signing_payload())
-    bad_qual.signature = sign_ed25519(
-        h.qual_admission_priv, bad_qual.signature_domain, bad_qual.signing_payload(),
-    )
+    bad_qual.issuer_key_id = "deadbeef" * 8
+    controls.sign_qa_fixture_for_attack_test(bad_qual)
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
@@ -294,13 +282,9 @@ def test_f4_mismatched_issuer_key_id_rejected(harness):
 
 
 def test_f4_tampered_artifact_digest_rejected(harness):
-    """F4: a fixture whose `artifact_digest` does not match the
-    canonical SHA-256 of its signing payload is rejected."""
     h, _ = harness
-
     bad_qual = copy.deepcopy(h.qualification)
-    bad_qual.artifact_digest = "0" * 64  # wrong digest
-    # Signature and digest intentionally diverge.
+    bad_qual.artifact_digest = "0" * 64
     cap = h.authorization.issue_capability(
         subject=h.subject,
         action="WRITE_RESOURCE",
@@ -416,17 +400,9 @@ def test_f5_unregistered_qualification_artifact_id_denied(harness):
     assert res.reason == REASON_FIXTURE_UNREGISTERED
 
 
-def test_f5_revoked_qualification_state_denied_at_execution(harness):
-    """F5: when the authoritative qualification fixture in StateStore
-    transitions to REVOKED between issuance and execution, the
-    executor denies at step 4. G3 fix: revocation goes through the
-    protected `revoke_qualification()` path which requires the
-    qual/admission state writer token."""
-    h, e = harness
-
-    # Issue the cap with the registered (active) qualification. We
-    # fetch a fresh copy from the state store so the caller's
-    # reference and the registered record are decoupled.
+def test_f5_revoked_qualification_state_denied_at_execution(authority_harness):
+    """Executor resolves authoritative current qualification state at execution."""
+    h, e, controls = authority_harness
     qual_for_issue = h.state_store.get_qualification_fixture(
         h.qualification.artifact_id,
     )
@@ -441,22 +417,8 @@ def test_f5_revoked_qualification_state_denied_at_execution(harness):
         clock_now=h.clock.now(),
     )
     assert cap is not None
-
-    # Revoke via the protected path. The test acquires the token via
-    # the single public acquire function (which is what the
-    # qual/admission issuer authority would do during setup).
-    from conformance.state import acquire_qual_admission_state_writer_token
-    token = acquire_qual_admission_state_writer_token()
-    h.state_store.revoke_qualification(
-        h.qualification.artifact_id,
-        authorized_caller_token=token,
-    )
-
-    # G3 invariant: mutating the caller's local reference does NOT
-    # re-activate the fixture. The authoritative record is REVOKED
-    # regardless of caller mutations.
+    controls.revoke_qualification(h.qualification.artifact_id)
     h.qualification.current_state = "ACTIVE"
-
     res = e.execute(
         subject=h.subject,
         capability=cap,
@@ -469,154 +431,96 @@ def test_f5_revoked_qualification_state_denied_at_execution(harness):
 
 
 # ---------------------------------------------------------------------------
-# F3 regression: protected writer token is module-private
+# F3 / G1 regressions: lifecycle authority boundary
 # ---------------------------------------------------------------------------
 
 
 def test_f3_no_public_lifecycle_state_setters_on_state_store(harness):
-    """F3: confirm there is no public mutator for current_state or
-    state_epoch on StateStore."""
     h, _ = harness
-    public_mutators = {
+    public_methods = {
         m for m in dir(h.state_store)
-        if not m.startswith("_")
-        and callable(getattr(h.state_store, m, None))
+        if not m.startswith("_") and callable(getattr(h.state_store, m, None))
     }
     forbidden = {
-        "set_current_state", "set_state_epoch",
-        "mutate_lifecycle", "set_lifecycle_state",
-        "write_lifecycle", "update_current_state",
-        "update_state_epoch",
+        "set_current_state", "set_state_epoch", "mutate_lifecycle",
+        "set_lifecycle_state", "get_authoritative_state_writer_token",
+        "acquire_writer_token",
     }
-    assert forbidden.isdisjoint(public_mutators), (
-        f"forbidden mutators exposed: {forbidden & public_mutators}"
-    )
-
-
-# ---------------------------------------------------------------------------
-# G1 regressions: lifecycle state boundary
-# ---------------------------------------------------------------------------
+    assert forbidden.isdisjoint(public_methods)
 
 
 def test_g1_get_authoritative_state_returns_immutable_snapshot(harness):
-    """G1: get_authoritative_state() returns an immutable snapshot.
-    Caller cannot mutate authoritative state via the returned object."""
     h, _ = harness
     snapshot = h.state_store.get_authoritative_state(h.subject.subject_id)
-    # Snapshot fields are not writable.
-    with pytest.raises((AttributeError, TypeError, Exception)):
-        # Frozen dataclass assignment raises FrozenInstanceError.
-        snapshot.current_state = "REVERSE"  # type: ignore[misc]
-    # Field values remain unchanged after the failed assignment.
-    snap2 = h.state_store.get_authoritative_state(h.subject.subject_id)
-    assert snap2.current_state == LIFECYCLE_CONFORMANT
+    with pytest.raises(Exception):
+        snapshot.current_state = "CONFORMANT"  # type: ignore[misc]
+    assert h.state_store.current_state(h.subject.subject_id) == LIFECYCLE_CONFORMANT
 
 
-def test_g1_no_public_token_discovery(harness):
-    """G1: there is no public module function that returns the
-    authoritative state writer token."""
+def test_g1_no_lifecycle_writer_token_api(harness):
     h, _ = harness
-    public_funcs = {
-        n for n in dir(h.state_store)
-        if not n.startswith("_") and callable(getattr(h.state_store, n, None))
-    }
-    forbidden_funcs = {
-        "get_authoritative_state_writer_token",
-        "acquire_writer_token",
-    }
-    assert forbidden_funcs.isdisjoint(public_funcs)
-    # The qualified name `acquire_qual_admission_state_writer_token` is
-    # the only public acquirer (G3) for qual/admission state; there is
-    # no equivalent for authoritative lifecycle state writer.
+    import conformance.state as state_module
+    assert not hasattr(state_module, "get_authoritative_state_writer_token")
+    assert not hasattr(state_module, "acquire_writer_token")
+    assert not hasattr(state_module, "_get_authoritative_state_writer_token_internal")
+    # The StateStore write path accepts an R14 state artifact, not a token.
+    assert "authorized_caller_token" not in (
+        h.state_store.apply_authoritative_state.__code__.co_varnames
+    )
 
 
-def test_g1_direct_construction_of_lifecycle_authority_rejected(harness):
-    """G1: a caller that imports LifecycleAuthority cannot construct
-    one directly. Only create_lifecycle_authority() works."""
-    from conformance.lifecycle import LifecycleAuthority, create_lifecycle_authority
-    from conformance.state import _get_authoritative_state_writer_token_internal
+def test_g1_forged_r14_state_cannot_mutate_store(harness):
+    h, _ = harness
+    from conformance.models import R14State
+    from conformance.crypto import generate_keypair, sign_ed25519
 
-    # Attempt direct construction (without the protected writer token).
-    # We import only `LifecycleAuthority` — the field has no default
-    # for `state_store`, but the public constructor was modified to
-    # accept a token-less form only via the factory. The factory path
-    # requires `_state_store` and `_writer_token` set together.
-    with pytest.raises((PermissionError, TypeError, Exception)):
-        LifecycleAuthority(
-            authority_id="rogue",
-            private_key=h.r14.private_key,
-            public_key=h.r14.public_key,
-            clock=h.clock,
-        )
+    before = h.state_store.get_authoritative_state(h.subject.subject_id)
+    forger_priv, _ = generate_keypair()
+    forged = R14State(
+        artifact_id="r14-forged-store-write",
+        subject_id=h.subject.subject_id,
+        role_id=h.subject.role_id,
+        trust_domain=h.subject.trust_domain,
+        prior_state=before.current_state,
+        new_state="REATTESTATION_REQUIRED",
+        state_epoch=before.state_epoch + 1,
+        rationale="forged direct store mutation",
+        r13_evaluation_id="none",
+        trigger_observation_id="none",
+        logical_ts=h.clock.advance(),
+        event_sequence=h.clock.now(),
+        signature_domain="ate.conformance.r14_state.v1",
+    )
+    forged.signature = sign_ed25519(
+        forger_priv, forged.signature_domain, forged.signing_payload(),
+    )
+    with pytest.raises(PermissionError):
+        h.state_store.apply_authoritative_state(forged)
+    after = h.state_store.get_authoritative_state(h.subject.subject_id)
+    assert after == before
 
 
 def test_g1_rollback_to_conformant_at_n_rejected(invalidated_lifecycle):
-    """G1: the dangerous rollback bypass — after N+1 invalidation, a
-    caller mutates authoritative state to CONFORMANT @ N. The
-    authoritative record must remain N+1."""
-    from conformance.lifecycle import TransitionInputError
-
     ctx = invalidated_lifecycle
     h = ctx.harness
-    e = ctx.executor
-    # Confirm we are at REATTESTATION_REQUIRED @ epoch 2.
-    assert h.state_store.current_state(h.subject.subject_id) == LIFECYCLE_REATTESTATION_REQUIRED
-    assert h.state_store.state_epoch(h.subject.subject_id) == 2
-    epoch_before = h.state_store.state_epoch(h.subject.subject_id)
-    state_before = h.state_store.current_state(h.subject.subject_id)
+    before = h.state_store.get_authoritative_state(h.subject.subject_id)
+    assert before.current_state == LIFECYCLE_REATTESTATION_REQUIRED
+    assert before.state_epoch == 2
 
-    # Attempt every plausible rollback bypass:
-    # (a) Apply via the public apply_authoritative_state with bad tokens.
-    from conformance.state import (
-        _get_authoritative_state_writer_token_internal,
-    )
-    with pytest.raises(PermissionError):
+    # Participant has no token-based rollback surface.
+    with pytest.raises(TypeError):
         h.state_store.apply_authoritative_state(
-            h.subject.subject_id, "CONFORMANT", 1,
-            authorized_caller_token="",
+            h.subject.subject_id, "CONFORMANT", 1  # type: ignore[arg-type]
         )
-    # (b) Even with a forged token, apply is rejected.
-    with pytest.raises(PermissionError):
-        h.state_store.apply_authoritative_state(
-            h.subject.subject_id, "CONFORMANT", 1,
-            authorized_caller_token="forged-token",
-        )
-    # (c) No public LifecycleAuthority.publish_transition path exists
-    # for the subject-facing caller either: R14 is a frozen object,
-    # and a new instance cannot be constructed without the factory.
-
-    # After all attempts, authoritative state is unchanged.
-    assert h.state_store.current_state(h.subject.subject_id) == state_before
-    assert h.state_store.state_epoch(h.subject.subject_id) == epoch_before
-
-    # Issue a capability and confirm it still denies (it would be
-    # bound to epoch 1, but authoritative is epoch 2).
-    cap = h.authorization.issue_capability(
-        subject=h.subject,
-        action="WRITE_RESOURCE",
-        action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=h.state_store.get_qualification_fixture(
-            h.qualification.artifact_id,
-        ),
-        admission=h.state_store.get_admission_fixture(
-            h.admission.artifact_id,
-        ),
-        nonce="g1-rollback-cap",
-        ttl_ticks=10,
-        clock_now=h.clock.now(),
-    )
-    # Issuance is denied because subject is non-conformant.
-    assert cap is None
+    assert h.state_store.get_authoritative_state(h.subject.subject_id) == before
 
 
 # ---------------------------------------------------------------------------
-# G2 regressions: profile registry
+# G2 / H1-H3 regressions: frozen profile registry
 # ---------------------------------------------------------------------------
 
 
 def test_g2_unsigned_profile_rejected_at_registration(harness):
-    """G2: a profile whose signature is missing or unsigned cannot
-    be registered."""
     h, _ = harness
     from conformance.models import ConformanceProfile
     from conformance.profile_registry import ProfileRegistry
@@ -631,19 +535,15 @@ def test_g2_unsigned_profile_rejected_at_registration(harness):
         max_conformance_age=10_000,
         signature_domain="ate.conformance.profile.v1",
     )
-    # signature = b"" by default.
     reg = ProfileRegistry.create(signer_public_key=h.profile_registry_pub)
     with pytest.raises(ValueError):
-        reg.register(unsigned, signer_private_key=h.profile_registry_priv)
+        reg.register(unsigned)
 
 
 def test_g2_wrong_key_profile_rejected_at_registration(harness):
-    """G2: a profile signed by a key that is not the registry signer
-    cannot be registered."""
     h, _ = harness
     from conformance.models import ConformanceProfile
     from conformance.crypto import generate_keypair, sign_ed25519
-    from conformance.canonical import canonical_sha256
     from conformance.profile_registry import ProfileRegistry
 
     forged = ConformanceProfile(
@@ -663,57 +563,53 @@ def test_g2_wrong_key_profile_rejected_at_registration(harness):
     )
     reg = ProfileRegistry.create(signer_public_key=h.profile_registry_pub)
     with pytest.raises(ValueError):
-        reg.register(forged, signer_private_key=h.profile_registry_priv)
+        reg.register(forged)
 
 
-def test_g2_unregistered_profile_rejected_at_activation(harness):
-    """G2: activation of an unregistered profile_id is rejected."""
-    h, _ = harness
-    from conformance.profile_registry import (
-        _get_profile_activation_token_internal,
+def test_h1_registry_registration_closed_after_freeze(authority_harness):
+    h, _, controls = authority_harness
+    from conformance.models import ConformanceProfile
+    from conformance.profile_registry import ProfileRegistry
+
+    p = ConformanceProfile(
+        artifact_id="profile-after-freeze",
+        profile_id="local-conformance-poc",
+        profile_version=77,
+        trust_domain="local-poc",
+        role_id="worker",
+        required_runtime_version="v2",
+        max_conformance_age=10_000,
+        signature_domain="ate.conformance.profile.v1",
     )
+    controls.sign_profile_for_attack_test(p)
+    reg = ProfileRegistry.create(signer_public_key=h.profile_registry_pub)
+    reg.register(p)
+    reg.freeze()
+    with pytest.raises(PermissionError):
+        reg.register(p)
 
-    with pytest.raises(KeyError):
-        h.state_store.activate_profile(
-            profile_id="profile-not-registered",
-            profile_digest="0" * 64,
-            authorized_caller_token=_get_profile_activation_token_internal(),
-        )
 
+def test_h1_exact_correct_digest_fake_profile_replacement_attack_rejected(authority_harness):
+    """Exact final-review attack: valid signer + correct digest cannot replace registry."""
+    h, _, controls = authority_harness
+    from conformance.models import ConformanceProfile
+    from conformance.profile_registry import ProfileRegistry
 
-def test_g2_tampered_digest_rejected_at_activation(harness):
-    """G2: activation with a tampered profile_digest is rejected even
-    when the profile_id is registered."""
-    h, _ = harness
-    from conformance.profile_registry import (
-        _get_profile_activation_token_internal,
+    # Observe runtime v2 while authoritative active profile remains predeclared v1.
+    h.observer.submit_measured_runtime("v2", "rt-ev-v2-h1")
+    ev_v2 = h.observer.store.get_evidence("rt-ev-v2-h1")
+    r13_before = h.r13.evaluate(
+        subject_id=h.subject.subject_id,
+        trust_domain=h.subject.trust_domain,
+        runtime_evidence=ev_v2,
+        qualification_state="ACTIVE",
+        admission_state="ACTIVE",
+        trust_state_current=True,
     )
+    assert r13_before.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
 
-    with pytest.raises(ValueError):
-        h.state_store.activate_profile(
-            profile_id=h.profile_v1.artifact_id,
-            profile_digest="0" * 64,
-            authorized_caller_token=_get_profile_activation_token_internal(),
-        )
-
-
-def test_g2_post_mutation_invented_profile_rejected(harness):
-    """G2: a profile invented after the mutation (not predeclared) is
-    rejected. This is the restoration-bypass attempt: create a fake
-    profile requiring v2, get R13 to evaluate it, obtain a CONFORMANT
-    recommendation that R14 would otherwise accept."""
-    h, e = harness
-    from conformance.canonical import canonical_sha256
-    from conformance.crypto import sign_ed25519
-    from conformance.models import ConformanceProfile, R13Evaluation
-    from conformance.profile_registry import (
-        _get_profile_activation_token_internal,
-    )
-    from conformance.lifecycle import TransitionInputError
-
-    # Forge a v2-like profile.
-    fake_v2 = ConformanceProfile(
-        artifact_id="profile-fake-v2",
+    fake = ConformanceProfile(
+        artifact_id="profile-fake-valid-signer",
         profile_id="local-conformance-poc",
         profile_version=999,
         trust_domain="local-poc",
@@ -722,29 +618,22 @@ def test_g2_post_mutation_invented_profile_rejected(harness):
         max_conformance_age=10_000,
         signature_domain="ate.conformance.profile.v1",
     )
-    fake_v2.artifact_digest = canonical_sha256(fake_v2.signing_payload())
-    fake_v2.signature = sign_ed25519(
-        h.profile_registry_priv,
-        fake_v2.signature_domain,
-        fake_v2.signing_payload(),
-    )
+    controls.sign_profile_for_attack_test(fake)
+    fake_registry = ProfileRegistry.create(signer_public_key=h.profile_registry_pub)
+    fake_registry.register(fake)
+    fake_registry.freeze()
 
-    # Try to register after the mutation: registration should succeed
-    # (signer is correct) — but this profile was not part of the
-    # preflight digest-locked set. The activation-by-id + digest check
-    # at the registry is what protects the preflight lock. Registration
-    # alone does not re-publish the v1/v2 locked digests; the formal
-    # run's preflight (out of scope here) is what locks them. For this
-    # PoC, we confirm that an UNREGISTERED profile cannot be activated
-    # until it has been registered through the protected path with the
-    # authorized signer — and that activating it does NOT change
-    # lifecycle state in violation of the conformance gate.
+    # Correct digest is known. Replacement is rejected before activation exists.
+    with pytest.raises(PermissionError):
+        h.state_store.install_profile_registry(fake_registry)
+    with pytest.raises(PermissionError):
+        h.state_store.activate_profile(
+            profile_id=fake.artifact_id,
+            profile_digest=fake.artifact_digest,
+        )
 
-    # Mutate v1 -> v2 and obtain a real trigger + R13.
-    h.observer.submit_measured_runtime("v2", "rt-ev-v2")
-    trig = h.observer.observe_change(h.subject.subject_id, h.subject.trust_domain)
-    ev_v2 = h.observer.store.get_evidence("rt-ev-v2")
-    r13_inv = h.r13.evaluate(
+    assert h.state_store.get_active_profile().artifact_id == "profile-v1"
+    r13_after = h.r13.evaluate(
         subject_id=h.subject.subject_id,
         trust_domain=h.subject.trust_domain,
         runtime_evidence=ev_v2,
@@ -752,73 +641,32 @@ def test_g2_post_mutation_invented_profile_rejected(harness):
         admission_state="ACTIVE",
         trust_state_current=True,
     )
-    # R13 evaluates against the active profile (v1), so it
-    # recommends REATTESTATION_REQUIRED. (The forged profile is
-    # never activated, so the registry's active-profile remains v1.)
-    assert r13_inv.recommended_state == "REATTESTATION_REQUIRED"
+    assert r13_after.recommended_state == LIFECYCLE_REATTESTATION_REQUIRED
 
-    # Attempt to activate the forged profile via the registry.
-    from conformance.profile_registry import ProfileRegistry
 
-    reg2 = ProfileRegistry.create(signer_public_key=h.profile_registry_pub)
-    reg2.register(fake_v2, signer_private_key=h.profile_registry_priv)
-    # Activation requires the activation token; using the internal
-    # token still gates by (id, digest) and rejects mismatched digests.
-    h.state_store.install_profile_registry(reg2)
-    with pytest.raises(ValueError):
-        h.state_store.activate_profile(
-            profile_id=fake_v2.artifact_id,
-            profile_digest="0" * 64,  # wrong digest
-            authorized_caller_token=_get_profile_activation_token_internal(),
-        )
-    # Authoritative active profile remains the original v1.
-    assert h.state_store.get_active_profile().artifact_id == "profile-v1"
+def test_h3_no_profile_private_key_or_activation_token_on_harness(harness):
+    h, _ = harness
+    assert not hasattr(h, "profile_registry_priv")
+    import conformance.profile_registry as pr
+    assert not hasattr(pr, "_get_profile_activation_token_internal")
+    assert not hasattr(pr, "_PROFILE_ACTIVATION_TOKEN")
 
 
 # ---------------------------------------------------------------------------
-# G3 regressions: immutable fixtures + protected state transitions
+# G3 / H2 regressions: qualification/admission state authority
 # ---------------------------------------------------------------------------
 
 
 def test_g3_get_qualification_fixture_returns_immutable_snapshot(harness):
-    """G3: get_qualification_fixture() returns a deep copy. Caller
-    mutations on the returned object do not affect authoritative state."""
-    h, e = harness
-    # Issue a real cap using the registered (active) qualification.
-    qual_for_issue = h.state_store.get_qualification_fixture(
-        h.qualification.artifact_id,
-    )
-    assert qual_for_issue is not None
-    assert qual_for_issue.current_state == "ACTIVE"
-
-    cap = h.authorization.issue_capability(
-        subject=h.subject,
-        action="WRITE_RESOURCE",
-        action_payload=bootstrap.ACTION_PAYLOAD,
-        qualification=qual_for_issue,
-        admission=h.admission,
-        nonce="g3-snapshot",
-        ttl_ticks=10,
-        clock_now=h.clock.now(),
-    )
-    assert cap is not None
-
-    # Caller mutates a freshly retrieved snapshot to REVOKED.
+    h, _ = harness
     snapshot = h.state_store.get_qualification_fixture(h.qualification.artifact_id)
     snapshot.current_state = "REVOKED"
-
-    # Authoritative record remains ACTIVE.
     fresh = h.state_store.get_qualification_fixture(h.qualification.artifact_id)
     assert fresh.current_state == "ACTIVE"
 
 
-def test_g3_revoke_then_caller_mutates_copy_executor_denies(harness):
-    """G3 regression from review: authoritative qualification is
-    REVOKED via the protected path, the caller mutates a retrieved
-    copy back to ACTIVE, the executor must still deny."""
-    h, e = harness
-
-    # 1. Issue a cap while qualification is ACTIVE.
+def test_g3_revoke_then_caller_mutates_copy_executor_denies(authority_harness):
+    h, e, controls = authority_harness
     qual_for_issue = h.state_store.get_qualification_fixture(
         h.qualification.artifact_id,
     )
@@ -833,21 +681,9 @@ def test_g3_revoke_then_caller_mutates_copy_executor_denies(harness):
         clock_now=h.clock.now(),
     )
     assert cap is not None
-
-    # 2. Revoke the authoritative qualification via the protected path.
-    from conformance.state import acquire_qual_admission_state_writer_token
-
-    token = acquire_qual_admission_state_writer_token()
-    h.state_store.revoke_qualification(
-        h.qualification.artifact_id,
-        authorized_caller_token=token,
-    )
-
-    # 3. Caller mutates a retrieved copy back to ACTIVE.
+    controls.revoke_qualification(h.qualification.artifact_id)
     snapshot = h.state_store.get_qualification_fixture(h.qualification.artifact_id)
     snapshot.current_state = "ACTIVE"
-
-    # 4. Executor must still deny — the authoritative record is REVOKED.
     res = e.execute(
         subject=h.subject,
         capability=cap,
@@ -859,19 +695,16 @@ def test_g3_revoke_then_caller_mutates_copy_executor_denies(harness):
     assert res.reason == REASON_FIXTURE_INACTIVE
 
 
-def test_g3_revoke_without_token_rejected(harness):
-    """G3: revocation without the protected token is rejected."""
+def test_h2_no_public_qual_admission_writer_token(harness):
     h, _ = harness
+    import conformance.state as state_module
+    assert not hasattr(state_module, "acquire_qual_admission_state_writer_token")
+    assert not hasattr(state_module, "_QUAL_ADMISSION_STATE_WRITER_TOKEN")
+    # One-time binding was already consumed during bootstrap.
     with pytest.raises(PermissionError):
-        h.state_store.revoke_qualification(
-            h.qualification.artifact_id,
-            authorized_caller_token="",
-        )
+        h.state_store.bind_qual_admission_state_authority()
     with pytest.raises(PermissionError):
-        h.state_store.revoke_qualification(
-            h.qualification.artifact_id,
-            authorized_caller_token="forged-token",
-        )
+        h.state_store.revoke_qualification(h.qualification.artifact_id)
 
 
 # ---------------------------------------------------------------------------
