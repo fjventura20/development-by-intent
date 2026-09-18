@@ -919,8 +919,15 @@ def test_h5_participant_cannot_write_observer_audit_or_resource_authority(harnes
 
     with pytest.raises(PermissionError):
         h.observer.store.record_evidence(object())
+    assert not hasattr(h.observer.store, "_record_evidence_trusted")
+    with pytest.raises(PermissionError):
+        h.observer.store.bind_writer()
 
     assert not hasattr(h.audit, "append")
+    snapshot = h.audit.records()
+    if snapshot:
+        snapshot[0].payload["participant_tamper"] = True
+        assert h.audit.verify_chain() is True
 
     with pytest.raises(PermissionError):
         h.state_store.grant_protected_resource_authority("participant-token")
