@@ -287,10 +287,15 @@ class RuntimeObserverStore:
         self._evidence: Dict[str, Any] = {}
         self._current: Optional[str] = None
 
-    def record_evidence(self, evidence: object) -> str:
+    def _record_evidence_trusted(self, evidence: object) -> str:
         self._evidence[evidence.artifact_id] = evidence
         self._current = evidence.artifact_id
         return evidence.artifact_id
+
+    def record_evidence(self, *args: Any, **kwargs: Any) -> str:
+        raise PermissionError(
+            "participant-facing observer history mutation is unavailable"
+        )
 
     def get_evidence(self, artifact_id: str):
         return self._evidence.get(artifact_id)
