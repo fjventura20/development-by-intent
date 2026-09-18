@@ -47,12 +47,7 @@ from .models import (
     LIFECYCLE_SUSPENDED,
     R14State,
 )
-from .state import (
-    LogicalClock,
-    StateStore,
-    SubjectState,
-    _get_authoritative_state_writer_token_internal,
-)
+from .state import LogicalClock, StateStore, SubjectState
 
 
 class TransitionInputError(Exception):
@@ -74,18 +69,19 @@ def create_lifecycle_authority(
 ) -> "LifecycleAuthority":
     """Factory for LifecycleAuthority.
 
-    G1 fix: this factory is the ONLY path that can construct a
-    LifecycleAuthority with the protected writer token bound to a
-    state store. The token itself is captured as a private attribute
-    and never exposed via a public method.
+    H3 fix: the factory registers the R14 public key with StateStore. There is
+    no lifecycle writer token; StateStore accepts only valid R14-signed state artifacts.
     """
+    state_store.register_lifecycle_authority(
+        authority_id=authority_id,
+        authority_public_key=public_key,
+    )
     return LifecycleAuthority(
         authority_id=authority_id,
         private_key=private_key,
         public_key=public_key,
         clock=clock,
         _state_store=state_store,
-        _writer_token=_get_authoritative_state_writer_token_internal(),
         r13_authority=r13_authority,
         trigger_authority=trigger_authority,
         trigger_evidence_store=trigger_evidence_store,
@@ -106,10 +102,9 @@ class LifecycleAuthority:
     private_key: Ed25519PrivateKey
     public_key: Ed25519PublicKey
     clock: LogicalClock
-    # The state store and writer token are injected ONLY by the
-    # factory; they are not parameters of the public constructor.
+    # State store is injected by the trusted factory. State mutation is
+    # accepted only when the StateStore verifies this authority's R14 signature.
     _state_store: Any = None
-    _writer_token: str = ""
     # The registered R13 authority (for F2/G4 verification of inputs).
     r13_authority: Optional[Any] = None
     # The registered trigger observer authority (for F2/G4 verification
@@ -122,11 +117,9 @@ class LifecycleAuthority:
 
     def __post_init__(self) -> None:
         self.key_id = key_id_from_public_key(self.public_key)
-        if not self._writer_token:
+        if self._state_store is None:
             raise PermissionError(
-                "LifecycleAuthority cannot be constructed directly; "
-                "use create_lifecycle_authority() so the protected writer "
-                "token is bound by the factory (G1)."
+                "LifecycleAuthority cannot be constructed without a bound state store"
             )
 
     # ---- input verification (F2) ----
@@ -325,12 +318,7 @@ class LifecycleAuthority:
             self.private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
-        self._state_store.apply_authoritative_state(
-            subject.subject_id,
-            state.new_state,
-            state.state_epoch,
-            authorized_caller_token=self._writer_token,
-        )
+        self._state_store.apply_authoritative_state(state)
         return state
 
     def publish_transition(
@@ -394,12 +382,7 @@ class LifecycleAuthority:
             self.private_key, state.signature_domain, state.signing_payload(),
         )
         # F3: write to authoritative state via the protected path.
-        self._state_store.apply_authoritative_state(
-            subject.subject_id,
-            state.new_state,
-            state.state_epoch,
-            authorized_caller_token=self._writer_token,
-        )
+        self._state_store.apply_authoritative_state(state)
         return state
 
     def _next_epoch(self, subject_id: str) -> int:
