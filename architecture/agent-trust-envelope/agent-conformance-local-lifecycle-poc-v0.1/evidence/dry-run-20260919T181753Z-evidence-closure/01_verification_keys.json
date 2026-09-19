@@ -1,0 +1,92 @@
+{
+  "entries": [
+    {
+      "authority_id": "profile-signer-1",
+      "authority_role": "profile_signer",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "97d5cf3812b07ad7627826a74074c58d753936590bf925c04ba51c10e9ba5480",
+      "permitted_signing_domains": [
+        "ate.conformance.profile.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "b84acf3c49618424608d3c93c7bcb2046db6f0e3a2557c4ccc1a7d74593d900e",
+      "test_only": true
+    },
+    {
+      "authority_id": "qual-admission-issuer-1",
+      "authority_role": "qa_issuer",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "055af3b168712258fea747cd58456ebbd133b9d06380d4db2bab651be54ff595",
+      "permitted_signing_domains": [
+        "ate.conformance.qualification_fixture.v1",
+        "ate.conformance.admission_fixture.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "b6c1a0deccca1eaa5e9fc23bb844d0e14d7961f0a22876d1eb2e7cb4ae54e15a",
+      "test_only": true
+    },
+    {
+      "authority_id": "observer-1",
+      "authority_role": "runtime_observer",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "0bdbeae718994fde37cd44c7cb61157e5fc644ea410b6d47e9f13da64aca6e10",
+      "permitted_signing_domains": [
+        "ate.conformance.runtime_evidence.v1",
+        "ate.conformance.trigger_observation.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "7350224bbb1d7957a52b133c44aaa5c5e44d42b5bbeba7272735dc259339c81c",
+      "test_only": true
+    },
+    {
+      "authority_id": "r13-1",
+      "authority_role": "r13_evaluator",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "27a74f02e45352d8db315e7498d91de1467e17798e274834bf278305037ebb4b",
+      "permitted_signing_domains": [
+        "ate.conformance.r13_eval.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "4faeed614617590a6fe8a4ed358bbaf4fface7ee0a8fcb1fdfa8f6402fa20659",
+      "test_only": true
+    },
+    {
+      "authority_id": "r14-1",
+      "authority_role": "r14_authority",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "92a60b53e9bce0d5f7be4882e6ccf28956ef287b762f752b45d4a12c720df0f0",
+      "permitted_signing_domains": [
+        "ate.conformance.r14_state.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "00bc53de0e06443a9aeeb6c08b589bf8120b3c32ad85be80bd190f0e8bc33084",
+      "test_only": true
+    },
+    {
+      "authority_id": "az-1",
+      "authority_role": "authorization_service",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+      "permitted_signing_domains": [
+        "ate.conformance.capability.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "a8f0ceb583e0491de6ea1b9307a2be58b22fac1846088244b8ef5eb735fb6343",
+      "test_only": true
+    },
+    {
+      "authority_id": "audit-1",
+      "authority_role": "audit_recorder",
+      "key_algorithm": "Ed25519",
+      "key_id_sha256": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+      "permitted_signing_domains": [
+        "ate.conformance.audit.v1"
+      ],
+      "public_key_encoding": "raw-32-byte-hex",
+      "public_key_hex": "d3235d9da4fe0702b397eb92e00cd1852cc75847e854d056acdb0e1106e49a32",
+      "test_only": true
+    }
+  ],
+  "schema": "ate.test-verification-key-registry.v1",
+  "test_only": true
+}

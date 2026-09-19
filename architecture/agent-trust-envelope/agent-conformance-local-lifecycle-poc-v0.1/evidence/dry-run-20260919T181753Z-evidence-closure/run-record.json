@@ -1,0 +1,42 @@
+{
+  "behavioral_result": "DEVELOPMENT_DRY_RUN_PASS",
+  "completed_at": "2026-09-19T18:18:04.091005Z",
+  "controlling_disposition": "DEVELOPMENT_DRY_RUN_EVIDENCE_VERIFIED",
+  "design_version": "v0.1.1+formal-evidence-closure-amendment-v0.1",
+  "epoch_summary": [
+    1,
+    2,
+    3
+  ],
+  "evidence_manifest_sha256": "a612934b14175f05f18fade5b936330cf43b0c6b9de572a3c774dfe7a98f1778",
+  "final_resource_line_count": 2,
+  "final_state": {
+    "current_state": "CONFORMANT",
+    "decision_event_sequence": 10,
+    "state_epoch": 3
+  },
+  "implementation_baseline": "ffa03453818b15b3643ff3b1c77fabb446f38ea6",
+  "implementation_commit": "ffa03453818b15b3643ff3b1c77fabb446f38ea6",
+  "independent_verification_sha256": "29ca3199243590b45ef3d1dcef3a0003e65ec317d9082640f938bf9c7d24b215",
+  "independent_verification_verdict": "INDEPENDENT_EVIDENCE_VERIFICATION_PASS",
+  "mode": "dry-run",
+  "negative_cases": {
+    "passed": 8,
+    "total": 8
+  },
+  "producer_classification": "DEVELOPMENT_EVIDENCE_CANDIDATE",
+  "required_cases": {
+    "passed": 18,
+    "total": 18
+  },
+  "role_id": "worker",
+  "run_id": "20260919T181753Z-acl-lifecycle-poc-v0.1.2-evidence-closure-dry-run",
+  "run_record_core_sha256": "b6dc84ff2814dc161798492a93519d68a6fa993453742e6428069920acf6a8a9",
+  "runner_commit": "c0c26701415f501f05189503986231d37d2bccc7",
+  "runner_head": "c0c26701415f501f05189503986231d37d2bccc7",
+  "schema": "ate.run-record.v1",
+  "started_at": "2026-09-19T18:17:53.180752Z",
+  "subject_id": "agent-001",
+  "trust_domain": "local-poc",
+  "verification_key_registry_digest": "7d0ae19eccf581900150e019288dd809ca3e00e8567f322ebb2cc03062722a92"
+}

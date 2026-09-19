@@ -1,0 +1,348 @@
+[
+  {
+    "artifact_kind": "ConformanceProfile",
+    "authority_role": "profile_signer",
+    "signature_domain": "ate.conformance.profile.v1",
+    "signature_hex": "fb7c68744e51a897071cd0686a9081645df662de566da55ec1dcc3a2e73acfb71771e1b80786b24e878ff224c8cc1457bd75624691a350aa81e366e36a914300",
+    "signing_payload": {
+      "artifact_id": "profile-v1",
+      "artifact_kind": "ConformanceProfile",
+      "evaluator_authority": "R13",
+      "lifecycle_state_authority": "R14",
+      "max_conformance_age": 10000,
+      "profile_id": "local-conformance-poc",
+      "profile_version": 1,
+      "required_runtime_version": "v1",
+      "role_id": "worker",
+      "trigger_source": "local-runtime-observer",
+      "trust_domain": "local-poc",
+      "whole_role_failure": true
+    }
+  },
+  {
+    "artifact_kind": "ConformanceProfile",
+    "authority_role": "profile_signer",
+    "signature_domain": "ate.conformance.profile.v1",
+    "signature_hex": "602dada4313623969fd7715844b47efccbeab72534d1f98699a852b99eb9fcd9f57de43463f618678b01542f4bc269d2be6a97fc229ac6391f56123915e4450a",
+    "signing_payload": {
+      "artifact_id": "profile-v2",
+      "artifact_kind": "ConformanceProfile",
+      "evaluator_authority": "R13",
+      "lifecycle_state_authority": "R14",
+      "max_conformance_age": 10000,
+      "profile_id": "local-conformance-poc",
+      "profile_version": 2,
+      "required_runtime_version": "v2",
+      "role_id": "worker",
+      "trigger_source": "local-runtime-observer",
+      "trust_domain": "local-poc",
+      "whole_role_failure": true
+    }
+  },
+  {
+    "artifact_kind": "QualificationFixture",
+    "authority_role": "qa_issuer",
+    "signature_domain": "ate.conformance.qualification_fixture.v1",
+    "signature_hex": "1974b0503ebc52cb109ff82634868e7d598943546071b53f6b6ef862f843a99e47c1da15176f40ee2ba35cffdfdbb7786a6fbfc458353f2168481ccb5ca9870f",
+    "signing_payload": {
+      "artifact_id": "qual-agent-001",
+      "artifact_kind": "QualificationFixture",
+      "current_state": "ACTIVE",
+      "expires_at": 10000,
+      "issued_at": 0,
+      "issuer": "qual-admission-issuer-1",
+      "issuer_key_id": "055af3b168712258fea747cd58456ebbd133b9d06380d4db2bab651be54ff595",
+      "role_id": "worker",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "AdmissionFixture",
+    "authority_role": "qa_issuer",
+    "signature_domain": "ate.conformance.admission_fixture.v1",
+    "signature_hex": "186ed7badd0a76e00f883e1c2f1469871cd39ed352a488525f2c87e44350e4876f9a962cb4f098d4de3cae3554ef9553ce47cb19f84c0b12c96ab6d2cc548400",
+    "signing_payload": {
+      "artifact_id": "adm-agent-001",
+      "artifact_kind": "AdmissionFixture",
+      "current_state": "ACTIVE",
+      "expires_at": 10000,
+      "issued_at": 0,
+      "issuer": "qual-admission-issuer-1",
+      "issuer_key_id": "055af3b168712258fea747cd58456ebbd133b9d06380d4db2bab651be54ff595",
+      "role_id": "worker",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "RuntimeEvidence",
+    "authority_role": "runtime_observer",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "6cf1fa7e456e5ba7c5bd26b78f6d3d80c70222ed895ce3b48ba907ea763c954e5ab50d8daaca507c6dbf7745d9a4d8524318d1361e8ce4b610098084383f9305",
+    "signing_payload": {
+      "artifact_id": "rt-ev-v1",
+      "artifact_kind": "RuntimeEvidence",
+      "event_sequence": 1,
+      "logical_ts": 1,
+      "measured_runtime_version": "v1",
+      "observer_id": "observer-1",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "RuntimeEvidence",
+    "authority_role": "runtime_observer",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "25ca7cc68f8334523f908a42f6f45c9c29323e84af5593cf6ce0be3144f4365e83a500496ed0983b3f18a642815558bb78f89b3098a13f93a564faa139567a04",
+    "signing_payload": {
+      "artifact_id": "rt-ev-v2-initial",
+      "artifact_kind": "RuntimeEvidence",
+      "event_sequence": 4,
+      "logical_ts": 4,
+      "measured_runtime_version": "v2",
+      "observer_id": "observer-1",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "RuntimeEvidence",
+    "authority_role": "runtime_observer",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "3625e9f57315c456f30a26f7e1d5e5089044cebd58d620e5fe590cec5812af69273c57c5610c314872802cd5776c0e2b15903e9a04bb5f9cac71ac30f2f2760d",
+    "signing_payload": {
+      "artifact_id": "rt-ev-v2-fresh",
+      "artifact_kind": "RuntimeEvidence",
+      "event_sequence": 8,
+      "logical_ts": 8,
+      "measured_runtime_version": "v2",
+      "observer_id": "observer-1",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "TriggerObservation",
+    "authority_role": "runtime_observer",
+    "signature_domain": "ate.conformance.trigger_observation.v1",
+    "signature_hex": "86f163a9d4fafa5facf7ded5606914a223167bb77876cb5f9a2247a02bf40853f9505246b3f3dc02e9173bcee38c42e39c67b953ca01c6c166cdcbce2b5cc807",
+    "signing_payload": {
+      "artifact_id": "trigger-rt-ev-v2-initial",
+      "artifact_kind": "TriggerObservation",
+      "current_evidence_id": "rt-ev-v2-initial",
+      "current_value_digest": "dfbbc6f639de2a5ddcf028261a3dd82f853a4ca0ba8c9de122695d87bc894fed",
+      "event_sequence": 5,
+      "logical_ts": 5,
+      "prior_evidence_id": "rt-ev-v1",
+      "prior_value_digest": "94285136dc8e18e8ba2ef27a03b12c3fc0efcafab0ba63e8f994271b0bb37778",
+      "severity": "MANDATORY_REATTESTATION",
+      "subject_id": "agent-001",
+      "trigger_class": "T4_RUNTIME",
+      "trigger_type": "RUNTIME_VERSION_CHANGED",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R13Evaluation",
+    "authority_role": "r13_evaluator",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "bd5d01a4246c13cb40e82dc539a25193f8afe059ad4dcb37047870953dd3c8df33783248e882c01c78e344a0c8b8d06a028d170023dd6dd0a585b52ecec4fc03",
+    "signing_payload": {
+      "admission_state": "ACTIVE",
+      "artifact_id": "r13-rt-ev-v1",
+      "artifact_kind": "R13Evaluation",
+      "event_sequence": 2,
+      "logical_ts": 2,
+      "measured_runtime_version": "v1",
+      "profile_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+      "profile_id": "local-conformance-poc",
+      "profile_version": 1,
+      "qualification_state": "ACTIVE",
+      "rationale": "profile v1 requires v1; measured matches",
+      "recommended_state": "CONFORMANT",
+      "runtime_evidence_id": "rt-ev-v1",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R13Evaluation",
+    "authority_role": "r13_evaluator",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "f835bdfe9dbfb7c7b5cfe788081dd3ecf6435d6a28fca6e1aa5893ebe712e121d8bd0ceb9696878c0da69c83f75c022b775117e32ad7b5254a4a1f904423540e",
+    "signing_payload": {
+      "admission_state": "ACTIVE",
+      "artifact_id": "r13-rt-ev-v2-initial",
+      "artifact_kind": "R13Evaluation",
+      "event_sequence": 6,
+      "logical_ts": 6,
+      "measured_runtime_version": "v2",
+      "profile_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+      "profile_id": "local-conformance-poc",
+      "profile_version": 1,
+      "qualification_state": "ACTIVE",
+      "rationale": "profile v1 requires v1; measured is v2",
+      "recommended_state": "REATTESTATION_REQUIRED",
+      "runtime_evidence_id": "rt-ev-v2-initial",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R13Evaluation",
+    "authority_role": "r13_evaluator",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "7b5c62704b79ec7ae36ee768cab2ec24d865a2b6f3aa9b934855f1840238c036043e1ca8afc65f4f7525c44cb33188e4d4fd4df30f762e75e3862a685ab2e40e",
+    "signing_payload": {
+      "admission_state": "ACTIVE",
+      "artifact_id": "r13-rt-ev-v2-fresh",
+      "artifact_kind": "R13Evaluation",
+      "event_sequence": 9,
+      "logical_ts": 9,
+      "measured_runtime_version": "v2",
+      "profile_digest": "9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7",
+      "profile_id": "local-conformance-poc",
+      "profile_version": 2,
+      "qualification_state": "ACTIVE",
+      "rationale": "profile v2 requires v2; measured matches",
+      "recommended_state": "CONFORMANT",
+      "runtime_evidence_id": "rt-ev-v2-fresh",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R14State",
+    "authority_role": "r14_authority",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "e226c275127c191ededd03ab5e9891e9babdc8568683a80277f3775a147b8e8a1a1b50b610358c470a13f13148a6eee10612f1f14a24846a7dd42840f92faa00",
+    "signing_payload": {
+      "artifact_id": "r14-agent-001-e1",
+      "artifact_kind": "R14State",
+      "event_sequence": 3,
+      "logical_ts": 3,
+      "new_state": "CONFORMANT",
+      "prior_state": "UNKNOWN",
+      "r13_evaluation_id": "r13-rt-ev-v1",
+      "rationale": "initial conformance: CONFORMANT",
+      "role_id": "worker",
+      "state_epoch": 1,
+      "subject_id": "agent-001",
+      "trigger_observation_id": "",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R14State",
+    "authority_role": "r14_authority",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "9c3dfccda05272f1021919bbc3102d3e1fc2413b8d416bb34bcd70cdbd358e7ee222cb57a6c283f75c7f71ba07512830d94c9a3bc2a0c21394beb8a530034e0c",
+    "signing_payload": {
+      "artifact_id": "r14-agent-001-e2",
+      "artifact_kind": "R14State",
+      "event_sequence": 7,
+      "logical_ts": 7,
+      "new_state": "REATTESTATION_REQUIRED",
+      "prior_state": "CONFORMANT",
+      "r13_evaluation_id": "r13-rt-ev-v2-initial",
+      "rationale": "runtime v1->v2",
+      "role_id": "worker",
+      "state_epoch": 2,
+      "subject_id": "agent-001",
+      "trigger_observation_id": "trigger-rt-ev-v2-initial",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "R14State",
+    "authority_role": "r14_authority",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "6898bbfefccac38806522c5eeba8fdb8fd3e6b15a84d92d096d63fe0ae776a31debc4a409a393f081dedcc7c044e915a71b285f5fc4447c295382dd8751d7602",
+    "signing_payload": {
+      "artifact_id": "r14-agent-001-e3",
+      "artifact_kind": "R14State",
+      "event_sequence": 10,
+      "logical_ts": 10,
+      "new_state": "CONFORMANT",
+      "prior_state": "REATTESTATION_REQUIRED",
+      "r13_evaluation_id": "r13-rt-ev-v2-fresh",
+      "rationale": "fresh re-attestation against predeclared profile v2",
+      "role_id": "worker",
+      "state_epoch": 3,
+      "subject_id": "agent-001",
+      "trigger_observation_id": "",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "ExecutionCapability",
+    "authority_role": "authorization_service",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "12779f8d2229606a0b5ac5ec5a5872580afdf7793e9e2f28441943af41ff28c910e2cedde35bd0302bfd7d74358d2402fdef4e4ccb2ec6b90dd10ec4276ad90a",
+    "signing_payload": {
+      "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+      "admission_artifact_id": "adm-agent-001",
+      "artifact_id": "cap-c0-normal",
+      "artifact_kind": "ExecutionCapability",
+      "expires_at": 13,
+      "issued_at": 3,
+      "issuer": "az-1",
+      "issuer_key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+      "nonce": "c0-normal",
+      "observed_conformance_state": "CONFORMANT",
+      "observed_state_epoch": 1,
+      "qualification_artifact_id": "qual-agent-001",
+      "role_id": "worker",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "ExecutionCapability",
+    "authority_role": "authorization_service",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "c1f40fdaeffa0d3686f3a403fbc7374875ce49b7a5d185a2f3f3f93d682d3be93a192b9ad64560c06b45b8c1ad0e0b078e55519941fef22f2439823226843609",
+    "signing_payload": {
+      "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+      "admission_artifact_id": "adm-agent-001",
+      "artifact_id": "cap-c1-stale",
+      "artifact_kind": "ExecutionCapability",
+      "expires_at": 13,
+      "issued_at": 3,
+      "issuer": "az-1",
+      "issuer_key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+      "nonce": "c1-stale",
+      "observed_conformance_state": "CONFORMANT",
+      "observed_state_epoch": 1,
+      "qualification_artifact_id": "qual-agent-001",
+      "role_id": "worker",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  },
+  {
+    "artifact_kind": "ExecutionCapability",
+    "authority_role": "authorization_service",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "6bceede54fdc99636468ce65556e374d41faa31522e134e1840296d47d7fdcdb406d62214f0b4c300234874c82b77794d70f6e6e5ddfb1a6db3ab2dba5f34c01",
+    "signing_payload": {
+      "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+      "admission_artifact_id": "adm-agent-001",
+      "artifact_id": "cap-c2-restored",
+      "artifact_kind": "ExecutionCapability",
+      "expires_at": 20,
+      "issued_at": 10,
+      "issuer": "az-1",
+      "issuer_key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+      "nonce": "c2-restored",
+      "observed_conformance_state": "CONFORMANT",
+      "observed_state_epoch": 3,
+      "qualification_artifact_id": "qual-agent-001",
+      "role_id": "worker",
+      "subject_id": "agent-001",
+      "trust_domain": "local-poc"
+    }
+  }
+]

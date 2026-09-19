@@ -1,0 +1,34 @@
+{
+  "profile_v1": {
+    "artifact_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+    "artifact_id": "profile-v1",
+    "evaluator_authority": "R13",
+    "lifecycle_state_authority": "R14",
+    "max_conformance_age": 10000,
+    "profile_id": "local-conformance-poc",
+    "profile_version": 1,
+    "required_runtime_version": "v1",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.profile.v1",
+    "signature_hex": "fb7c68744e51a897071cd0686a9081645df662de566da55ec1dcc3a2e73acfb71771e1b80786b24e878ff224c8cc1457bd75624691a350aa81e366e36a914300",
+    "trigger_source": "local-runtime-observer",
+    "trust_domain": "local-poc",
+    "whole_role_failure": true
+  },
+  "profile_v2": {
+    "artifact_digest": "9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7",
+    "artifact_id": "profile-v2",
+    "evaluator_authority": "R13",
+    "lifecycle_state_authority": "R14",
+    "max_conformance_age": 10000,
+    "profile_id": "local-conformance-poc",
+    "profile_version": 2,
+    "required_runtime_version": "v2",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.profile.v1",
+    "signature_hex": "602dada4313623969fd7715844b47efccbeab72534d1f98699a852b99eb9fcd9f57de43463f618678b01542f4bc269d2be6a97fc229ac6391f56123915e4450a",
+    "trigger_source": "local-runtime-observer",
+    "trust_domain": "local-poc",
+    "whole_role_failure": true
+  }
+}

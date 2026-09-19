@@ -1,0 +1,102 @@
+{
+  "classification": "DEVELOPMENT_EVIDENCE_CANDIDATE",
+  "files": [
+    {
+      "name": "00_preflight.json",
+      "sha256": "98d4fd1ded73bbe32869fd30d71b975df574d9467bf3e41d6e6fcc80a4a8f67f",
+      "size_bytes": 1824
+    },
+    {
+      "name": "01_profiles.json",
+      "sha256": "7890ad04d4142098986c2b8df622b1931982c2b57e6c8c1e5adb2d54bbf7196d",
+      "size_bytes": 1415
+    },
+    {
+      "name": "01_verification_keys.json",
+      "sha256": "87b9a8d6bb8ad9f171b60de27f09a4fd02cbcff574e09173b422580b4fc4277c",
+      "size_bytes": 3464
+    },
+    {
+      "name": "02_initial_and_c0.json",
+      "sha256": "c67601a7624cee47bfe4924c42f1315d3196898fbcdf96dc3a2ce8289bac10d0",
+      "size_bytes": 2874
+    },
+    {
+      "name": "03_invalidation_and_c1.json",
+      "sha256": "040f1d542aff0d34d374a7d2ae79f62bf29a9cb1d9daa9d882b00258ba762de4",
+      "size_bytes": 3747
+    },
+    {
+      "name": "04_fresh_evidence_and_restoration.json",
+      "sha256": "d9ca8e082819f97170786acbb37d8e49783f37879241b2d53964b7735310a3d5",
+      "size_bytes": 2045
+    },
+    {
+      "name": "05_c2_and_replay.json",
+      "sha256": "6e3357a691314c199cd39daad8b7f8b26f9a05041055519ae82f0b808c987fa1",
+      "size_bytes": 1256
+    },
+    {
+      "name": "06_authoritative_ledger.json",
+      "sha256": "0212042e8ca7fad8d4dee518129706c651dcd7922f0b860f9ceb407f015dc15c",
+      "size_bytes": 10919
+    },
+    {
+      "name": "07_tampered_ledger.json",
+      "sha256": "8d5364bbea25b06153da1a90c62a807d44be9a570c31e1210e8614958f50586e",
+      "size_bytes": 10943
+    },
+    {
+      "name": "08_audit_verification.json",
+      "sha256": "1cf8e4dc97f5ef214dcc89512b7b37ab46db4587ac427e20c222ba9e7c7b6e3f",
+      "size_bytes": 516
+    },
+    {
+      "name": "09_final_classification.json",
+      "sha256": "4b0f09e713e99f03770695626cb744985372bd85215d676e6c842e21ed39ef8d",
+      "size_bytes": 652
+    },
+    {
+      "name": "authoritative-audit-ledger.json",
+      "sha256": "0212042e8ca7fad8d4dee518129706c651dcd7922f0b860f9ceb407f015dc15c",
+      "size_bytes": 10919
+    },
+    {
+      "name": "case-accounting.json",
+      "sha256": "6e6d9baa821696e48e6df091d82d3e7ce91ea0d5d64985b4d367ac761a3d8c68",
+      "size_bytes": 11288
+    },
+    {
+      "name": "pytest-results.xml",
+      "sha256": "dec78c1a9e5afe4fd41a1889b5175d0e2090d0cfad2132aa4ee094d705e607b3",
+      "size_bytes": 14327
+    },
+    {
+      "name": "pytest-summary.txt",
+      "sha256": "1e9c7bde54902a50164a97307833481dcac82d388b8266ff186c3f601431334d",
+      "size_bytes": 424
+    },
+    {
+      "name": "run-record-core.json",
+      "sha256": "b6dc84ff2814dc161798492a93519d68a6fa993453742e6428069920acf6a8a9",
+      "size_bytes": 1080
+    },
+    {
+      "name": "signature-verification.json",
+      "sha256": "fb47188431affe54755c7d12588d317938dbb2059c6d2e8715ad6caf06563464",
+      "size_bytes": 10801
+    },
+    {
+      "name": "signed-artifacts.json",
+      "sha256": "33912098d89996390ea9b93ba473ee2c333a269c20fb72d4536e4529fd5f8055",
+      "size_bytes": 14006
+    },
+    {
+      "name": "tampered-audit-ledger.json",
+      "sha256": "8d5364bbea25b06153da1a90c62a807d44be9a570c31e1210e8614958f50586e",
+      "size_bytes": 10943
+    }
+  ],
+  "run_id": "20260919T181753Z-acl-lifecycle-poc-v0.1.2-evidence-closure-dry-run",
+  "schema": "ate.evidence-manifest.v1"
+}

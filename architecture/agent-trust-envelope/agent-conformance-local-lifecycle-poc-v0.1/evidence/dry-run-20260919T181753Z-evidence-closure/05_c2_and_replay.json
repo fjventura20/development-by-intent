@@ -1,0 +1,40 @@
+{
+  "c2_capability": {
+    "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+    "admission_artifact_id": "adm-agent-001",
+    "artifact_id": "cap-c2-restored",
+    "expires_at": 20,
+    "issued_at": 10,
+    "issuer": "az-1",
+    "issuer_key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+    "nonce": "c2-restored",
+    "observed_conformance_state": "CONFORMANT",
+    "observed_state_epoch": 3,
+    "qualification_artifact_id": "qual-agent-001",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "6bceede54fdc99636468ce65556e374d41faa31522e134e1840296d47d7fdcdb406d62214f0b4c300234874c82b77794d70f6e6e5ddfb1a6db3ab2dba5f34c01",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "c2_result": {
+    "granted": true,
+    "reason": "OK",
+    "record": {
+      "action": "WRITE_RESOURCE",
+      "capability_id": "cap-c2-restored",
+      "epoch": 3
+    },
+    "step": 10
+  },
+  "replay_result": {
+    "granted": false,
+    "reason": "REPLAYED_NONCE",
+    "record": {},
+    "step": 8
+  },
+  "resource_lines_after_c2": 2,
+  "resource_lines_after_replay": 2,
+  "resource_lines_before_c2": 1,
+  "resource_lines_before_replay": 2
+}

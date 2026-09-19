@@ -1,0 +1,76 @@
+{
+  "c0_capability": {
+    "action_digest": "2f45fac57baba307ba7d5686501db910fff4228dab521bf908d32924534bf7f8",
+    "admission_artifact_id": "adm-agent-001",
+    "artifact_id": "cap-c0-normal",
+    "expires_at": 13,
+    "issued_at": 3,
+    "issuer": "az-1",
+    "issuer_key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+    "nonce": "c0-normal",
+    "observed_conformance_state": "CONFORMANT",
+    "observed_state_epoch": 1,
+    "qualification_artifact_id": "qual-agent-001",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.capability.v1",
+    "signature_hex": "12779f8d2229606a0b5ac5ec5a5872580afdf7793e9e2f28441943af41ff28c910e2cedde35bd0302bfd7d74358d2402fdef4e4ccb2ec6b90dd10ec4276ad90a",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "c0_result": {
+    "granted": true,
+    "reason": "OK",
+    "record": {
+      "action": "WRITE_RESOURCE",
+      "capability_id": "cap-c0-normal",
+      "epoch": 1
+    },
+    "step": 10
+  },
+  "ev_v1": {
+    "artifact_id": "rt-ev-v1",
+    "event_sequence": 1,
+    "logical_ts": 1,
+    "measured_runtime_version": "v1",
+    "observer_id": "observer-1",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "6cf1fa7e456e5ba7c5bd26b78f6d3d80c70222ed895ce3b48ba907ea763c954e5ab50d8daaca507c6dbf7745d9a4d8524318d1361e8ce4b610098084383f9305",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r13_initial": {
+    "admission_state": "ACTIVE",
+    "artifact_id": "r13-rt-ev-v1",
+    "event_sequence": 2,
+    "logical_ts": 2,
+    "measured_runtime_version": "v1",
+    "profile_digest": "d8df4c6cb430aa2d23cb65db6715afd7909ddbb4a792e8d9d5fa559fd98d4b7a",
+    "profile_id": "local-conformance-poc",
+    "profile_version": 1,
+    "qualification_state": "ACTIVE",
+    "rationale": "profile v1 requires v1; measured matches",
+    "recommended_state": "CONFORMANT",
+    "runtime_evidence_id": "rt-ev-v1",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "bd5d01a4246c13cb40e82dc539a25193f8afe059ad4dcb37047870953dd3c8df33783248e882c01c78e344a0c8b8d06a028d170023dd6dd0a585b52ecec4fc03",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r14_initial": {
+    "artifact_id": "r14-agent-001-e1",
+    "event_sequence": 3,
+    "logical_ts": 3,
+    "new_state": "CONFORMANT",
+    "prior_state": "UNKNOWN",
+    "r13_evaluation_id": "r13-rt-ev-v1",
+    "rationale": "initial conformance: CONFORMANT",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "e226c275127c191ededd03ab5e9891e9babdc8568683a80277f3775a147b8e8a1a1b50b610358c470a13f13148a6eee10612f1f14a24846a7dd42840f92faa00",
+    "state_epoch": 1,
+    "subject_id": "agent-001",
+    "trigger_observation_id": "",
+    "trust_domain": "local-poc"
+  },
+  "resource_lines_after_c0": 1
+}

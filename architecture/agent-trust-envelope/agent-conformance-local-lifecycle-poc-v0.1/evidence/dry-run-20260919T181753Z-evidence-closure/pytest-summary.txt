@@ -1,0 +1,4 @@
+........................................................................ [ 62%]
+...........................................                              [100%]
+- generated xml file: /workspace/scratch/545aa6e631da/.repo-cache/dbi-acl-v012-dryrun-c0c2670/architecture/agent-trust-envelope/agent-conformance-local-lifecycle-poc-v0.1/evidence/dry-run-20260919T181753Z-evidence-closure/pytest-results.xml -
+115 passed in 10.10s

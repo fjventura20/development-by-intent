@@ -1,0 +1,299 @@
+[
+  {
+    "artifact_id": "profile-v1",
+    "artifact_kind": "ConformanceProfile",
+    "authority_id": "profile-signer-1",
+    "key_id": "97d5cf3812b07ad7627826a74074c58d753936590bf925c04ba51c10e9ba5480",
+    "signature_domain": "ate.conformance.profile.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "profile-v2",
+    "artifact_kind": "ConformanceProfile",
+    "authority_id": "profile-signer-1",
+    "key_id": "97d5cf3812b07ad7627826a74074c58d753936590bf925c04ba51c10e9ba5480",
+    "signature_domain": "ate.conformance.profile.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "qual-agent-001",
+    "artifact_kind": "QualificationFixture",
+    "authority_id": "qual-admission-issuer-1",
+    "key_id": "055af3b168712258fea747cd58456ebbd133b9d06380d4db2bab651be54ff595",
+    "signature_domain": "ate.conformance.qualification_fixture.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "adm-agent-001",
+    "artifact_kind": "AdmissionFixture",
+    "authority_id": "qual-admission-issuer-1",
+    "key_id": "055af3b168712258fea747cd58456ebbd133b9d06380d4db2bab651be54ff595",
+    "signature_domain": "ate.conformance.admission_fixture.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "rt-ev-v1",
+    "artifact_kind": "RuntimeEvidence",
+    "authority_id": "observer-1",
+    "key_id": "0bdbeae718994fde37cd44c7cb61157e5fc644ea410b6d47e9f13da64aca6e10",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "rt-ev-v2-initial",
+    "artifact_kind": "RuntimeEvidence",
+    "authority_id": "observer-1",
+    "key_id": "0bdbeae718994fde37cd44c7cb61157e5fc644ea410b6d47e9f13da64aca6e10",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "rt-ev-v2-fresh",
+    "artifact_kind": "RuntimeEvidence",
+    "authority_id": "observer-1",
+    "key_id": "0bdbeae718994fde37cd44c7cb61157e5fc644ea410b6d47e9f13da64aca6e10",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "trigger-rt-ev-v2-initial",
+    "artifact_kind": "TriggerObservation",
+    "authority_id": "observer-1",
+    "key_id": "0bdbeae718994fde37cd44c7cb61157e5fc644ea410b6d47e9f13da64aca6e10",
+    "signature_domain": "ate.conformance.trigger_observation.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r13-rt-ev-v1",
+    "artifact_kind": "R13Evaluation",
+    "authority_id": "r13-1",
+    "key_id": "27a74f02e45352d8db315e7498d91de1467e17798e274834bf278305037ebb4b",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r13-rt-ev-v2-initial",
+    "artifact_kind": "R13Evaluation",
+    "authority_id": "r13-1",
+    "key_id": "27a74f02e45352d8db315e7498d91de1467e17798e274834bf278305037ebb4b",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r13-rt-ev-v2-fresh",
+    "artifact_kind": "R13Evaluation",
+    "authority_id": "r13-1",
+    "key_id": "27a74f02e45352d8db315e7498d91de1467e17798e274834bf278305037ebb4b",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r14-agent-001-e1",
+    "artifact_kind": "R14State",
+    "authority_id": "r14-1",
+    "key_id": "92a60b53e9bce0d5f7be4882e6ccf28956ef287b762f752b45d4a12c720df0f0",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r14-agent-001-e2",
+    "artifact_kind": "R14State",
+    "authority_id": "r14-1",
+    "key_id": "92a60b53e9bce0d5f7be4882e6ccf28956ef287b762f752b45d4a12c720df0f0",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "r14-agent-001-e3",
+    "artifact_kind": "R14State",
+    "authority_id": "r14-1",
+    "key_id": "92a60b53e9bce0d5f7be4882e6ccf28956ef287b762f752b45d4a12c720df0f0",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "cap-c0-normal",
+    "artifact_kind": "ExecutionCapability",
+    "authority_id": "az-1",
+    "key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+    "signature_domain": "ate.conformance.capability.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "cap-c1-stale",
+    "artifact_kind": "ExecutionCapability",
+    "authority_id": "az-1",
+    "key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+    "signature_domain": "ate.conformance.capability.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_id": "cap-c2-restored",
+    "artifact_kind": "ExecutionCapability",
+    "authority_id": "az-1",
+    "key_id": "0dd999c76a7e67b1c82c5359d685f175f89999c28e49f0b5108f045a2ae3466c",
+    "signature_domain": "ate.conformance.capability.v1",
+    "source_file": "signed-artifacts.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 1,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 2,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 3,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 4,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 5,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 6,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 7,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 8,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 9,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 10,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 11,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 12,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 13,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 14,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 15,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  },
+  {
+    "artifact_kind": "AuditRecord",
+    "audit_event_sequence": 16,
+    "authority_id": "audit-1",
+    "key_id": "c300fe8009d362ba52d362de6d1361dbb1a2185eeb2f740bd7e0394fb456c0fe",
+    "signature_domain": "ate.conformance.audit.v1",
+    "source_file": "authoritative-audit-ledger.json",
+    "verification": "PASS"
+  }
+]

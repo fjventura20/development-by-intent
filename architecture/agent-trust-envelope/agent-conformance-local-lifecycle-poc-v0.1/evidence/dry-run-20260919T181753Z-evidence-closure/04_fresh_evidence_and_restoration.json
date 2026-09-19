@@ -1,0 +1,52 @@
+{
+  "fresh_v2_evidence": {
+    "artifact_id": "rt-ev-v2-fresh",
+    "event_sequence": 8,
+    "logical_ts": 8,
+    "measured_runtime_version": "v2",
+    "observer_id": "observer-1",
+    "signature_domain": "ate.conformance.runtime_evidence.v1",
+    "signature_hex": "3625e9f57315c456f30a26f7e1d5e5089044cebd58d620e5fe590cec5812af69273c57c5610c314872802cd5776c0e2b15903e9a04bb5f9cac71ac30f2f2760d",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r13_restoration": {
+    "admission_state": "ACTIVE",
+    "artifact_id": "r13-rt-ev-v2-fresh",
+    "event_sequence": 9,
+    "logical_ts": 9,
+    "measured_runtime_version": "v2",
+    "profile_digest": "9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7",
+    "profile_id": "local-conformance-poc",
+    "profile_version": 2,
+    "qualification_state": "ACTIVE",
+    "rationale": "profile v2 requires v2; measured matches",
+    "recommended_state": "CONFORMANT",
+    "runtime_evidence_id": "rt-ev-v2-fresh",
+    "signature_domain": "ate.conformance.r13_eval.v1",
+    "signature_hex": "7b5c62704b79ec7ae36ee768cab2ec24d865a2b6f3aa9b934855f1840238c036043e1ca8afc65f4f7525c44cb33188e4d4fd4df30f762e75e3862a685ab2e40e",
+    "subject_id": "agent-001",
+    "trust_domain": "local-poc"
+  },
+  "r14_restoration": {
+    "artifact_id": "r14-agent-001-e3",
+    "event_sequence": 10,
+    "logical_ts": 10,
+    "new_state": "CONFORMANT",
+    "prior_state": "REATTESTATION_REQUIRED",
+    "r13_evaluation_id": "r13-rt-ev-v2-fresh",
+    "rationale": "fresh re-attestation against predeclared profile v2",
+    "role_id": "worker",
+    "signature_domain": "ate.conformance.r14_state.v1",
+    "signature_hex": "6898bbfefccac38806522c5eeba8fdb8fd3e6b15a84d92d096d63fe0ae776a31debc4a409a393f081dedcc7c044e915a71b285f5fc4447c295382dd8751d7602",
+    "state_epoch": 3,
+    "subject_id": "agent-001",
+    "trigger_observation_id": "",
+    "trust_domain": "local-poc"
+  },
+  "state_snapshot": {
+    "current_state": "CONFORMANT",
+    "decision_event_sequence": 10,
+    "state_epoch": 3
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "frozen_blob_verification": {
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md": "4faea2a16261ca9416fe8bb4eceaaff80593eb59",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FORMAL-EVIDENCE-CLOSURE-AMENDMENT-v0.1-ADVERSARIAL-REVIEW.md": "82c18420aa7028f00742644eab7926199d934bcd",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FORMAL-EVIDENCE-CLOSURE-AMENDMENT-v0.1.md": "551847bb96a0ca109d803479462c60a363962687",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FREEZE.md": "d1da477dfaa8bb4682a01408596cd468a6e3fd64",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-PROTOCOL-v0.1.2-FREEZE.md": "62630ddc3bdbf114c7d07beffa2621737c623aaf",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-PROTOCOL-v0.1.2.md": "f8bc4464db197a58b6402e01d0378592ba7dc220",
+    "architecture/agent-trust-envelope/AGENT-QUALIFICATION-AND-ADMISSION-PROTOCOL-v0.2.2.md": "28b4b0a36e7ded946686c0eb45d4ee820a35c2bf",
+    "architecture/agent-trust-envelope/ATE-AUDIT-ACCOUNTABILITY-MODEL-v0.1.md": "82450a5d049cc1d6f53a6cc2a4f952dcb442aa8c",
+    "architecture/agent-trust-envelope/ATE-ENFORCEMENT-PLANE-v0.1.md": "154465106614f1448f9bbbca94ff7b5862bfd00a",
+    "architecture/agent-trust-envelope/ATE-REVOCATION-TRUST-STATE-MODEL-v0.1.md": "0a4c42c30b0914bd0c0dc660c3aa8cc80ae5cb86"
+  },
+  "implementation_baseline": "ffa03453818b15b3643ff3b1c77fabb446f38ea6",
+  "implementation_subtree_diff_empty": true,
+  "mode": "dry-run",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "run_id": "20260919T181753Z-acl-lifecycle-poc-v0.1.2-evidence-closure-dry-run",
+  "runner_head": "c0c26701415f501f05189503986231d37d2bccc7",
+  "worktree_clean_before_run": true
+}

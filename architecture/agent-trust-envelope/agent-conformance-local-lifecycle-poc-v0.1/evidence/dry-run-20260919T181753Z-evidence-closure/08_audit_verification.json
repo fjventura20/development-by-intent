@@ -1,0 +1,20 @@
+{
+  "authoritative_chain_message": "OK",
+  "authoritative_chain_ok": true,
+  "authoritative_ledger_unmodified_after_tamper": true,
+  "causal_ordering_satisfied": true,
+  "expected_causal_order": [
+    "c1_issued",
+    "runtime_mutation",
+    "trigger_observed",
+    "n_plus_1_published",
+    "c1_denied",
+    "post_change_evidence",
+    "r13_restore_eval",
+    "n_plus_2_published",
+    "c2_issued",
+    "c2_effect"
+  ],
+  "tampered_chain_message": "payload_digest mismatch at seq 6",
+  "tampered_chain_ok": false
+}

@@ -1,0 +1,343 @@
+{
+  "cases": [
+    {
+      "assertion_summary": "initial conformance establishment is proved by the named test and persisted evidence.",
+      "case_id": "TC-01",
+      "case_kind": "required",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc01_initial_conformance_establishment"
+      ],
+      "title": "initial conformance establishment"
+    },
+    {
+      "assertion_summary": "initial authorized action is proved by the named test and persisted evidence.",
+      "case_id": "TC-02",
+      "case_kind": "required",
+      "evidence_refs": [
+        "02_initial_and_c0.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc02_initial_authorized_action"
+      ],
+      "title": "initial authorized action"
+    },
+    {
+      "assertion_summary": "pre-mutation capability issuance is proved by the named test and persisted evidence.",
+      "case_id": "TC-03",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc03_capability_issuance_before_mutation"
+      ],
+      "title": "pre-mutation capability issuance"
+    },
+    {
+      "assertion_summary": "runtime mutation is proved by the named test and persisted evidence.",
+      "case_id": "TC-04",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc04_runtime_mutation"
+      ],
+      "title": "runtime mutation"
+    },
+    {
+      "assertion_summary": "independent trigger observation is proved by the named test and persisted evidence.",
+      "case_id": "TC-05",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc05_independent_trigger_observation"
+      ],
+      "title": "independent trigger observation"
+    },
+    {
+      "assertion_summary": "lifecycle invalidation is proved by the named test and persisted evidence.",
+      "case_id": "TC-06",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc06_lifecycle_invalidation"
+      ],
+      "title": "lifecycle invalidation"
+    },
+    {
+      "assertion_summary": "authorization denial while non-conformant is proved by the named test and persisted evidence.",
+      "case_id": "TC-07",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc07_new_authorization_denied_while_non_conformant"
+      ],
+      "title": "authorization denial while non-conformant"
+    },
+    {
+      "assertion_summary": "stale C1 denial is proved by the named test and persisted evidence.",
+      "case_id": "TC-08",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc08_stale_c1_execution_denied"
+      ],
+      "title": "stale C1 denial"
+    },
+    {
+      "assertion_summary": "stale C1 retry denial is proved by the named test and persisted evidence.",
+      "case_id": "TC-09",
+      "case_kind": "required",
+      "evidence_refs": [
+        "03_invalidation_and_c1.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc09_stale_c1_retry_denied"
+      ],
+      "title": "stale C1 retry denial"
+    },
+    {
+      "assertion_summary": "predeclared profile v2 activation is proved by the named test and persisted evidence.",
+      "case_id": "TC-10",
+      "case_kind": "required",
+      "evidence_refs": [
+        "04_fresh_evidence_and_restoration.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc10_predeclared_profile_v2_activation"
+      ],
+      "title": "predeclared profile v2 activation"
+    },
+    {
+      "assertion_summary": "fresh post-change evidence is proved by the named test and persisted evidence.",
+      "case_id": "TC-11",
+      "case_kind": "required",
+      "evidence_refs": [
+        "04_fresh_evidence_and_restoration.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc11_fresh_post_change_runtime_evidence"
+      ],
+      "title": "fresh post-change evidence"
+    },
+    {
+      "assertion_summary": "R13 positive re-evaluation is proved by the named test and persisted evidence.",
+      "case_id": "TC-12",
+      "case_kind": "required",
+      "evidence_refs": [
+        "04_fresh_evidence_and_restoration.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc12_r13_positive_reevaluation"
+      ],
+      "title": "R13 positive re-evaluation"
+    },
+    {
+      "assertion_summary": "R14 restoration is proved by the named test and persisted evidence.",
+      "case_id": "TC-13",
+      "case_kind": "required",
+      "evidence_refs": [
+        "04_fresh_evidence_and_restoration.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc13_r14_restoration"
+      ],
+      "title": "R14 restoration"
+    },
+    {
+      "assertion_summary": "new C2 capability issuance is proved by the named test and persisted evidence.",
+      "case_id": "TC-14",
+      "case_kind": "required",
+      "evidence_refs": [
+        "05_c2_and_replay.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc14_new_capability_c2_issuance"
+      ],
+      "title": "new C2 capability issuance"
+    },
+    {
+      "assertion_summary": "restored execution is proved by the named test and persisted evidence.",
+      "case_id": "TC-15",
+      "case_kind": "required",
+      "evidence_refs": [
+        "05_c2_and_replay.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc15_restored_execution"
+      ],
+      "title": "restored execution"
+    },
+    {
+      "assertion_summary": "C2 replay denial is proved by the named test and persisted evidence.",
+      "case_id": "TC-16",
+      "case_kind": "required",
+      "evidence_refs": [
+        "05_c2_and_replay.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc16_replay_c2"
+      ],
+      "title": "C2 replay denial"
+    },
+    {
+      "assertion_summary": "audit integrity and causal order is proved by the named test and persisted evidence.",
+      "case_id": "TC-17",
+      "case_kind": "required",
+      "evidence_refs": [
+        "authoritative-audit-ledger.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc17_audit_chain_verification_and_causal_order"
+      ],
+      "title": "audit integrity and causal order"
+    },
+    {
+      "assertion_summary": "historical preservation is proved by the named test and persisted evidence.",
+      "case_id": "TC-18",
+      "case_kind": "required",
+      "evidence_refs": [
+        "authoritative-audit-ledger.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_lifecycle.py::test_tc18_historical_preservation"
+      ],
+      "title": "historical preservation"
+    },
+    {
+      "assertion_summary": "subject rollback rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-01",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "authoritative-audit-ledger.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns01_subject_cannot_rollback_lifecycle_state"
+      ],
+      "title": "subject rollback rejected"
+    },
+    {
+      "assertion_summary": "direct resource mutation rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-02",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "05_c2_and_replay.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns02_subject_cannot_mutate_protected_resource_directly"
+      ],
+      "title": "direct resource mutation rejected"
+    },
+    {
+      "assertion_summary": "forged trigger rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-03",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns03_forged_trigger_rejected"
+      ],
+      "title": "forged trigger rejected"
+    },
+    {
+      "assertion_summary": "forged R13 evaluation rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-04",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns04_forged_r13_evaluation_rejected"
+      ],
+      "title": "forged R13 evaluation rejected"
+    },
+    {
+      "assertion_summary": "forged R14 state rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-05",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns05_forged_r14_state_rejected"
+      ],
+      "title": "forged R14 state rejected"
+    },
+    {
+      "assertion_summary": "capability action substitution rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-06",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns06_capability_action_digest_substitution_rejected"
+      ],
+      "title": "capability action substitution rejected"
+    },
+    {
+      "assertion_summary": "capability epoch substitution rejected is proved by the named test and persisted evidence.",
+      "case_id": "NS-07",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "signed-artifacts.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns07_capability_epoch_substitution_rejected"
+      ],
+      "title": "capability epoch substitution rejected"
+    },
+    {
+      "assertion_summary": "audit history mutation detected is proved by the named test and persisted evidence.",
+      "case_id": "NS-08",
+      "case_kind": "negative",
+      "evidence_refs": [
+        "tampered-audit-ledger.json"
+      ],
+      "outcome": "PASS",
+      "pytest_node_ids": [
+        "tests/test_negative.py::test_ns08_audit_history_mutation_detected"
+      ],
+      "title": "audit history mutation detected"
+    }
+  ],
+  "schema": "ate.case-accounting.v1"
+}

@@ -1,0 +1,241 @@
+[
+  {
+    "event_kind": "trust_material_established",
+    "event_sequence": 1,
+    "logical_ts": 0,
+    "payload": {
+      "authority_count": 7,
+      "registry_schema": "ate.test-verification-key-registry.v1",
+      "verification_key_registry_digest": "7d0ae19eccf581900150e019288dd809ca3e00e8567f322ebb2cc03062722a92"
+    },
+    "payload_digest": "942d50a621c81902de7fba48bdf008b2525608fbab21ce675e2aa4ade5e61b58",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "record_hash": "1c8de3d2f29c036a68052417d5543a8c0593832b9a3d5011ca40587fd2303fb1",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "09226fe6e4581f12277aa541730cfd4158189037a33fd5e68e32e1c68f8e6d64a743dce04229c8a819e98bc7dcb6b6e4e2d166d47c96dfeaede8b9ba6c4c8504"
+  },
+  {
+    "event_kind": "initial_conformance",
+    "event_sequence": 2,
+    "logical_ts": 3,
+    "payload": {
+      "epoch": 1,
+      "r13_id": "r13-rt-ev-v1",
+      "r14_id": "r14-agent-001-e1",
+      "state": "CONFORMANT"
+    },
+    "payload_digest": "1ee07f1275ef220821e20c163b52974cbb8610c8076c516573ce6da655785566",
+    "prev_hash": "1c8de3d2f29c036a68052417d5543a8c0593832b9a3d5011ca40587fd2303fb1",
+    "record_hash": "0b69cfc4ba444919842fcc93ec1b69e96dacdb2a444fc3bb0ff313166b6c50cf",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "bdc3035865544e6af18e2e3017f9ff98e9c10632a49d7065b8d1d15c021e22d34e96b59f8c8ac78fb8e33b3c565436cbaf0f2c82e1c747f867617d45b1a87700"
+  },
+  {
+    "event_kind": "c0_issued",
+    "event_sequence": 3,
+    "logical_ts": 3,
+    "payload": {
+      "capability_id": "cap-c0-normal",
+      "epoch": 1
+    },
+    "payload_digest": "802ee84e2388bc1f6de0c7fb9239e847053b0820a65e4bbda72cfea0f3bd8c5e",
+    "prev_hash": "0b69cfc4ba444919842fcc93ec1b69e96dacdb2a444fc3bb0ff313166b6c50cf",
+    "record_hash": "d80230f063b0703e778ec81a3646ddc97cb4cb9aa93b44bca54dfced29881e4d",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "fc2c4b76e7af30a82f1c3d73e1e8a41b6178ef21275483bb6396bcbed6716a9332045ee349f784e1823b928f9536fd2d31bf6deaa415652d3be1d1a31f892a08"
+  },
+  {
+    "event_kind": "c0_effect",
+    "event_sequence": 4,
+    "logical_ts": 3,
+    "payload": {
+      "granted": true,
+      "line_count": 1,
+      "reason": "OK"
+    },
+    "payload_digest": "e5299776aaae7d3fa9ca9431306dbcbdd0c857b913fa19e79bb189f403055731",
+    "prev_hash": "d80230f063b0703e778ec81a3646ddc97cb4cb9aa93b44bca54dfced29881e4d",
+    "record_hash": "343a936b995c291444a6cfa6e309327288112e04dce559635d358b946bbcc658",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "4bd54764e931005729ba3ee99ff466ae9f66a8c64240bca6bf92960ffb9820cf3ef79fcc13837ac173d0daa9b50997109e16785f2ee4a38d4257ab340eba850c"
+  },
+  {
+    "event_kind": "c1_issued",
+    "event_sequence": 5,
+    "logical_ts": 3,
+    "payload": {
+      "capability_id": "cap-c1-stale",
+      "epoch": 1,
+      "nonce": "c1-stale"
+    },
+    "payload_digest": "7915611debaf46d97d7f15bd1970e4b9f19a9fee362dce3f7f5328069ebf4604",
+    "prev_hash": "343a936b995c291444a6cfa6e309327288112e04dce559635d358b946bbcc658",
+    "record_hash": "a2b6b4819f2992fb91a26a90ce0bc93839371e0ef2942e368b20115044f16f6a",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "6c41089ef1b8d9773a47199fc0fcb91b97d79def16b84e383770b8963885482fe7c940e65dc20b4445b552494a6de6c5cbe938b60c34949bc955c4568c04160e"
+  },
+  {
+    "event_kind": "runtime_mutation",
+    "event_sequence": 6,
+    "logical_ts": 4,
+    "payload": {
+      "evidence_id": "rt-ev-v2-initial",
+      "measured_runtime_version": "v2"
+    },
+    "payload_digest": "90b999e311599c8d25cfe815336273c74a4312a7e6929a3294188faca81136af",
+    "prev_hash": "a2b6b4819f2992fb91a26a90ce0bc93839371e0ef2942e368b20115044f16f6a",
+    "record_hash": "fdc31aad3417bd7177df7daa33b9c4b4c8afdf4ae4bca2afc0a21a6c3a8e4166",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "0f749621227b3f88b0de538ae6dd163342c1eb76e85bc9b7012490c0ace611b4131c663a68e1d628d718912596f0d35a33409ed35bae73910dd1ebdd527b420d"
+  },
+  {
+    "event_kind": "trigger_observed",
+    "event_sequence": 7,
+    "logical_ts": 5,
+    "payload": {
+      "current_evidence_id": "rt-ev-v2-initial",
+      "trigger_id": "trigger-rt-ev-v2-initial"
+    },
+    "payload_digest": "85cab6a98ef11ae293d456889d7af444baba7716ecd3311870dfc5b43bbe98ea",
+    "prev_hash": "fdc31aad3417bd7177df7daa33b9c4b4c8afdf4ae4bca2afc0a21a6c3a8e4166",
+    "record_hash": "935571489e757fe34a586376d496dc4357fcd1d0d8f8352e1755b46d3588e22f",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "b2e40c302d42f9d460157b4ec76a248e51f583a2cbed78a97a62875c303b6449d33c149fc925d1715f6d4f1ab2d2465ff524d46183b67cb096d1e4bbf283f706"
+  },
+  {
+    "event_kind": "n_plus_1_published",
+    "event_sequence": 8,
+    "logical_ts": 7,
+    "payload": {
+      "epoch": 2,
+      "r14_id": "r14-agent-001-e2",
+      "state": "REATTESTATION_REQUIRED"
+    },
+    "payload_digest": "9f107f160204b1a6b34f51a64cc1163a222efee863d40cd32a23f6bdec031dbb",
+    "prev_hash": "935571489e757fe34a586376d496dc4357fcd1d0d8f8352e1755b46d3588e22f",
+    "record_hash": "bb68b972a397a0ce40877d324114d348671449eaf030c3ed3a297490aca4b6c2",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "1325c5f9226cbd5e47b40d25db6e1fe7533a9b5e08281b866632931418a264d7306bf3fc82dfc5e79e68bbe66ffd08c19ec8900309171bd742ad31bbbef13e04"
+  },
+  {
+    "event_kind": "c1_denied",
+    "event_sequence": 9,
+    "logical_ts": 7,
+    "payload": {
+      "granted": false,
+      "line_count": 1,
+      "nonce_unseen_before_attempt": true,
+      "reason": "NON_CONFORMANT",
+      "step": 6
+    },
+    "payload_digest": "ef6712412c12eab2bf33f127454b7c0e223ebbd791a786a72c333647c803d6ba",
+    "prev_hash": "bb68b972a397a0ce40877d324114d348671449eaf030c3ed3a297490aca4b6c2",
+    "record_hash": "e6fb3edb51ec74e42861b7b5363a490da1eec297d89becacbe38af36cc30a137",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "f7eb4d7f3038db5d1501066c148a2257110f25f7aaae4adab19cd30fcd899cc4d13327efbc01748cff393e18fc4751b30b023f84042a14201df433da91d8930b"
+  },
+  {
+    "event_kind": "profile_v2_activated",
+    "event_sequence": 10,
+    "logical_ts": 7,
+    "payload": {
+      "profile_digest": "9812b05d23846e4c81a0c1ee4c66b3af8075aa6dabb2dc0fd27a6dd68b8fedb7",
+      "profile_id": "profile-v2"
+    },
+    "payload_digest": "9be2518ad51fe0c6c7cf71ccc0ca2279dfbf350d0961e69bd77d3319077b284f",
+    "prev_hash": "e6fb3edb51ec74e42861b7b5363a490da1eec297d89becacbe38af36cc30a137",
+    "record_hash": "8832b82747f6346f8961a26ab72e57cae745a3d1efbec929b7a22e7af39cf35d",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "e80f15b169f0c147a08767a6b7243216e4cddc70d4b69c6fbb355f2881def6ae8e66421a91d6d3fafa5440db9fda2fc395d177f82552054f956ff9e0016b0604"
+  },
+  {
+    "event_kind": "post_change_evidence",
+    "event_sequence": 11,
+    "logical_ts": 8,
+    "payload": {
+      "event_sequence": 8,
+      "evidence_id": "rt-ev-v2-fresh",
+      "logical_ts": 8,
+      "measured_runtime_version": "v2"
+    },
+    "payload_digest": "edf539ee1407ec05102c551977ae90a49813193cc8df8429bd9a5df382bf80cc",
+    "prev_hash": "8832b82747f6346f8961a26ab72e57cae745a3d1efbec929b7a22e7af39cf35d",
+    "record_hash": "9abc0eca2199433ce64b5597ca7fdb76cb11867837638f58d6eda8361890f3b7",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "d95cc9eecef794cd29726e553a7aa39665e24b5e47064b6a8e0cfbe6836edc1c6c329407df5699a79bf4af2fc59473e3beb17be308547055b83e1cefb4f8e703"
+  },
+  {
+    "event_kind": "r13_restore_eval",
+    "event_sequence": 12,
+    "logical_ts": 9,
+    "payload": {
+      "r13_id": "r13-rt-ev-v2-fresh",
+      "recommended": "CONFORMANT",
+      "runtime_evidence_id": "rt-ev-v2-fresh"
+    },
+    "payload_digest": "f7c6f59d63b8705cfc9598ed37557893cd1c744f8660ffc91d876548100ccc57",
+    "prev_hash": "9abc0eca2199433ce64b5597ca7fdb76cb11867837638f58d6eda8361890f3b7",
+    "record_hash": "26003b3793a74c0e8a48701486368053a4ae81323e2946c6b249def36b0caa1c",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "1bdd3614cd83c3721685699cfe0e2dcebbb686dfa05a22bb1d2d0f9453684531d52ea34006f9b6834eb2475c7f48d4f74e163278de9d542d936d80e713d31d04"
+  },
+  {
+    "event_kind": "n_plus_2_published",
+    "event_sequence": 13,
+    "logical_ts": 10,
+    "payload": {
+      "epoch": 3,
+      "r14_id": "r14-agent-001-e3",
+      "state": "CONFORMANT"
+    },
+    "payload_digest": "e08a603a6d7930571ba56b1dcb0cc7d5b21006097a68e8147befb7e899749878",
+    "prev_hash": "26003b3793a74c0e8a48701486368053a4ae81323e2946c6b249def36b0caa1c",
+    "record_hash": "265d1eea8a6d4a6b1ddc253cd35165254e8b29d98f1588ea1b487ea1adaaaa0e",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "38386cee8d46e1e24dcf631b4d3d150fc3f5ca687d50300d60b0010d8420cdc4d167f133cf02ed897b4a07b5078718a33e8da30c623e07aa59c1d8b8684cdd0e"
+  },
+  {
+    "event_kind": "c2_issued",
+    "event_sequence": 14,
+    "logical_ts": 10,
+    "payload": {
+      "capability_id": "cap-c2-restored",
+      "epoch": 3
+    },
+    "payload_digest": "e857e9845d51109117f0d45710428914b8bf6dcd3b893c04f2fecde4bf79b38f",
+    "prev_hash": "265d1eea8a6d4a6b1ddc253cd35165254e8b29d98f1588ea1b487ea1adaaaa0e",
+    "record_hash": "5f4df269c0bf3cab239a7f19576225b4ef684e45430eb6e81facaff43a793542",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "057123aca2fe103040a68a2f561ac13b301d701ec23cc21ef4e5c9858404a514a3c54214ab82886cb94fe3b02ddc6c32261b969b9f3f49f40f115a9ac8ae960b"
+  },
+  {
+    "event_kind": "c2_effect",
+    "event_sequence": 15,
+    "logical_ts": 10,
+    "payload": {
+      "granted": true,
+      "line_count": 2,
+      "reason": "OK"
+    },
+    "payload_digest": "0ded0cd8ecba37fee4aabe478b2852e26cab95a49eb95e8ccd1823d818143c22",
+    "prev_hash": "5f4df269c0bf3cab239a7f19576225b4ef684e45430eb6e81facaff43a793542",
+    "record_hash": "4949ec33c31b451f1b50a3da7bb76664d806fe0836868aa71bd19698cf306df0",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "4d5139a654c386dc278156cb2269f6b0cc4a3450547ca981bc805a51610dedbb5c0041da86a02599e1ae29d77df1348f825c01a375baae78207dbdb8396bda01"
+  },
+  {
+    "event_kind": "c2_replay_denied",
+    "event_sequence": 16,
+    "logical_ts": 10,
+    "payload": {
+      "granted": false,
+      "line_count": 2,
+      "reason": "REPLAYED_NONCE"
+    },
+    "payload_digest": "f5eab8781e2617b769ac9ca5ac129da16252c5a3e1e9b6eb7389ddcf2afaddd6",
+    "prev_hash": "4949ec33c31b451f1b50a3da7bb76664d806fe0836868aa71bd19698cf306df0",
+    "record_hash": "b9af7a80bb90394dad3e1f1522280435abda60cd8463006ae697fa6da3d0ec21",
+    "signature_domain": "ate.conformance.audit.v1",
+    "signature_hex": "f9172557e7f0ad80123ec9b56a2f70ae32c576aad8c836a8fcdccf6f947e209f85f334659980bcf2fbbc41dd2ed64db7df6eaf07f1d4e99c79200f65a3681f07"
+  }
+]
