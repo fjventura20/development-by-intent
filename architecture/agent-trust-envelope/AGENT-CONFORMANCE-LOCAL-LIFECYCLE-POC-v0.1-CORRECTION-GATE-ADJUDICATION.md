@@ -1,6 +1,6 @@
 # Gate Adjudication — Original 76 passed / 5 failed
 
-formal_run_id         : 20260918T183130Z-acl-lifecycle-poc-v0.1 (formal PASS already persisted)
+formal_run_id         : 20260918T183130Z-acl-lifecycle-poc-v0.1 (original claimed PASS preserved at d225399; subsequently invalidated by independent closeout 8d9f7b3; controlling disposition INCONCLUSIVE_EVIDENCE_INVALID)
 candidate_run         : PoC development suite at HEAD = 6ffd97b7c3fac825ac535e203f0c04177a20d08d
 tester                : python3 -m pytest -q
 pytest exit code      : 1
