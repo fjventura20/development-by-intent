@@ -6,7 +6,6 @@ These seeds MUST NOT protect real resources.
 
 from __future__ import annotations
 
-import hashlib
 from types import MappingProxyType
 from typing import Mapping
 
@@ -41,11 +40,19 @@ _AUTHORITY_METADATA = {
     "audit_recorder": ("audit-1", ("ate.conformance.audit.v1",)),
 }
 
+_TEST_ONLY_SEED_HEX = {
+    "profile_signer": "ffbe9bc4ffe40839dca552978873015ef3a6d533aa11bb4e2dd830d7f824300b",
+    "qa_issuer": "6dcb88636b2ad538ad7131cada238adeff89a95abdfe64da74f3c2ec63ca4ab0",
+    "runtime_observer": "b063d6a12e54a794fda803fc2a7f5c1a656c77475866ea0a612f2418ce61e0e4",
+    "r13_evaluator": "64cb2cfe1bf15ce2745f71e5c60c8646a51a9644bb373b84f119804329146b6a",
+    "r14_authority": "4a95c391a69f00f031d0a4763154f0b6fe1d6a3eb7543027676ba6027044e9e1",
+    "authorization_service": "6c4e955a93ef032658dc9003fd6fc9e58b150efc8bc1e1c577cd1ea2fe7bfec8",
+    "audit_recorder": "e72b7a66a49ac35b7c4342df36079841d252d746f1b4a340b45a064fb9100003",
+}
+
 
 def _seed(label: str) -> bytes:
-    return hashlib.sha256(
-        ("TEST-ONLY/acl-local-lifecycle/v0.1.2/" + label).encode("ascii")
-    ).digest()
+    return bytes.fromhex(_TEST_ONLY_SEED_HEX[label])
 
 
 def load_test_authorities() -> Mapping[str, tuple[Ed25519PrivateKey, object]]:

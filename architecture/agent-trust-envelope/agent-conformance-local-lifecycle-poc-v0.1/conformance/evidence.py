@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import stat
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
@@ -258,14 +259,34 @@ REQUIRED_ARTIFACT_COUNTS = {
 }
 
 PRIMARY_REQUIRED = {
+    "00_preflight.json",
     "01_verification_keys.json",
+    "02_initial_and_c0.json",
+    "03_invalidation_and_c1.json",
+    "04_fresh_evidence_and_restoration.json",
+    "05_c2_and_replay.json",
+    "09_final_classification.json",
     "signed-artifacts.json",
     "signature-verification.json",
     "authoritative-audit-ledger.json",
     "tampered-audit-ledger.json",
     "case-accounting.json",
     "pytest-results.xml",
+    "pytest-summary.txt",
     "run-record-core.json",
+}
+
+EXPECTED_FROZEN_BLOBS = {
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FORMAL-EVIDENCE-CLOSURE-AMENDMENT-v0.1.md": "551847bb96a0ca109d803479462c60a363962687",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FORMAL-EVIDENCE-CLOSURE-AMENDMENT-v0.1-ADVERSARIAL-REVIEW.md": "82c18420aa7028f00742644eab7926199d934bcd",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-DESIGN.md": "4faea2a16261ca9416fe8bb4eceaaff80593eb59",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FREEZE.md": "d1da477dfaa8bb4682a01408596cd468a6e3fd64",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-PROTOCOL-v0.1.2.md": "f8bc4464db197a58b6402e01d0378592ba7dc220",
+    "architecture/agent-trust-envelope/AGENT-CONFORMANCE-PROTOCOL-v0.1.2-FREEZE.md": "62630ddc3bdbf114c7d07beffa2621737c623aaf",
+    "architecture/agent-trust-envelope/AGENT-QUALIFICATION-AND-ADMISSION-PROTOCOL-v0.2.2.md": "28b4b0a36e7ded946686c0eb45d4ee820a35c2bf",
+    "architecture/agent-trust-envelope/ATE-REVOCATION-TRUST-STATE-MODEL-v0.1.md": "0a4c42c30b0914bd0c0dc660c3aa8cc80ae5cb86",
+    "architecture/agent-trust-envelope/ATE-ENFORCEMENT-PLANE-v0.1.md": "154465106614f1448f9bbbca94ff7b5862bfd00a",
+    "architecture/agent-trust-envelope/ATE-AUDIT-ACCOUNTABILITY-MODEL-v0.1.md": "82450a5d049cc1d6f53a6cc2a4f952dcb442aa8c",
 }
 
 
@@ -397,9 +418,18 @@ def verify_key_registry(registry: dict) -> tuple[dict[str, dict], str]:
         _fail("REGISTRY_SCHEMA", "unsupported verification-key registry schema")
     if registry.get("test_only") is not True:
         _fail("REGISTRY_SCOPE", "registry must be TEST-ONLY material")
-    forbidden = {"private_key", "private_key_hex", "private_seed", "seed", "seed_hex"}
-    if forbidden.intersection(registry):
-        _fail("REGISTRY_PRIVATE_MATERIAL", "registry contains a private-material field")
+    def reject_private_fields(value: Any) -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                normalized = str(key).lower().replace("-", "_")
+                if "private" in normalized or "seed" in normalized:
+                    _fail("REGISTRY_PRIVATE_MATERIAL", f"registry contains forbidden field {key!r}")
+                reject_private_fields(child)
+        elif isinstance(value, list):
+            for child in value:
+                reject_private_fields(child)
+
+    reject_private_fields(registry)
     entries = registry.get("entries")
     if not isinstance(entries, list) or len(entries) != 7:
         _fail("REGISTRY_CARDINALITY", "exactly seven authorities are required")
@@ -407,8 +437,6 @@ def verify_key_registry(registry: dict) -> tuple[dict[str, dict], str]:
     seen_key_ids = set()
     seen_authority_ids = set()
     for entry in entries:
-        if forbidden.intersection(entry):
-            _fail("REGISTRY_PRIVATE_MATERIAL", "registry entry contains a private-material field")
         role = entry.get("authority_role")
         if role in by_role or role not in EXPECTED_ROLES:
             _fail("REGISTRY_ROLE", f"invalid or duplicate role: {role!r}")
@@ -684,6 +712,9 @@ def verify_case_accounting(
             _fail("CASE_OUTCOME", f"{case.get('case_id')}: missing passed pytest evidence")
         if len(nodes) != len(set(nodes)) or not all(isinstance(node, str) and "::test_" in node for node in nodes):
             _fail("CASE_NODE_IDS", f"{case.get('case_id')}: invalid pytest node ids")
+        expected_definition = CASE_DEFINITIONS[case["case_id"]]
+        if any(case.get(key) != value for key, value in expected_definition.items()):
+            _fail("CASE_MAPPING", f"{case['case_id']}: differs from reviewed explicit mapping")
         all_nodes.extend(nodes)
         if evidence_directory is not None:
             for ref in refs:
@@ -701,6 +732,7 @@ def verify_case_accounting(
         except (OSError, ElementTree.ParseError) as exc:
             _fail("PYTEST_XML", str(exc))
         passed = set()
+        testcases = list(root.iter("testcase"))
         for item in root.iter("testcase"):
             if any(item.find(tag) is not None for tag in ("failure", "error", "skipped")):
                 continue
@@ -721,6 +753,152 @@ def verify_case_accounting(
             for tag in ("failure", "error", "skipped")
         ):
             _fail("PYTEST_NOT_CLEAN", "pytest XML contains failure, error, or skipped cases")
+        suites = list(root.iter("testsuite"))
+        declared_tests = sum(int(suite.get("tests", "0")) for suite in suites)
+        declared_failures = sum(int(suite.get("failures", "0")) for suite in suites)
+        declared_errors = sum(int(suite.get("errors", "0")) for suite in suites)
+        declared_skipped = sum(int(suite.get("skipped", "0")) for suite in suites)
+        if (
+            declared_tests != len(testcases)
+            or declared_failures != 0
+            or declared_errors != 0
+            or declared_skipped != 0
+        ):
+            _fail("PYTEST_AGGREGATE", "pytest XML aggregate counts are inconsistent or not clean")
+        summary_path = pytest_xml.with_name("pytest-summary.txt")
+        try:
+            summary = summary_path.read_text(encoding="utf-8").lower()
+        except OSError as exc:
+            _fail("PYTEST_SUMMARY", str(exc))
+        if (
+            f"{declared_tests} passed" not in summary
+            or any(word in summary for word in (" failed", " skipped", " xfailed", " xpassed"))
+        ):
+            _fail("PYTEST_SUMMARY", "human-readable summary disagrees with pytest XML")
+
+
+def verify_cross_file_consistency(
+    directory: Path,
+    manifest: dict,
+    artifacts: list,
+    core: dict,
+) -> None:
+    """Bind run metadata, signed IDs, lifecycle results, and resource effects."""
+    if manifest.get("schema") != "ate.evidence-manifest.v1":
+        _fail("MANIFEST_SCHEMA", "unsupported evidence-manifest schema")
+    if (
+        manifest.get("run_id") != core.get("run_id")
+        or manifest.get("classification") != core.get("classification")
+    ):
+        _fail("MANIFEST_CORE_BINDING", "manifest run identity/classification mismatch")
+    preflight = load_json(directory / "00_preflight.json")
+    if (
+        preflight.get("run_id") != core.get("run_id")
+        or preflight.get("mode") != core.get("mode")
+        or preflight.get("implementation_baseline") != core.get("implementation_commit")
+        or preflight.get("runner_head") != core.get("runner_commit")
+        or preflight.get("implementation_subtree_diff_empty") is not True
+        or preflight.get("worktree_clean_before_run") is not True
+        or preflight.get("frozen_blob_verification") != EXPECTED_FROZEN_BLOBS
+    ):
+        _fail("PREFLIGHT_CORE_BINDING", "preflight and run-record core disagree")
+    by_id = {
+        envelope["signing_payload"].get("artifact_id"): envelope["signing_payload"]
+        for envelope in artifacts
+    }
+    initial = load_json(directory / "02_initial_and_c0.json")
+    invalidation = load_json(directory / "03_invalidation_and_c1.json")
+    restoration = load_json(directory / "04_fresh_evidence_and_restoration.json")
+    replay = load_json(directory / "05_c2_and_replay.json")
+    final = load_json(directory / "09_final_classification.json")
+    signed_refs = (
+        initial.get("ev_v1"),
+        initial.get("r13_initial"),
+        initial.get("r14_initial"),
+        initial.get("c0_capability"),
+        invalidation.get("c1_capability"),
+        invalidation.get("initial_v2_evidence"),
+        invalidation.get("trigger"),
+        invalidation.get("r13_invalidation"),
+        invalidation.get("r14_invalidation"),
+        restoration.get("fresh_v2_evidence"),
+        restoration.get("r13_restoration"),
+        restoration.get("r14_restoration"),
+        replay.get("c2_capability"),
+    )
+    for value in signed_refs:
+        if not isinstance(value, dict) or value.get("artifact_id") not in by_id:
+            _fail("SIGNED_RESULT_BINDING", "lifecycle result references an absent signed artifact")
+        signed = by_id[value["artifact_id"]]
+        for key, signed_value in signed.items():
+            if key == "artifact_kind":
+                continue
+            if key in value and value[key] != signed_value:
+                _fail("SIGNED_RESULT_BINDING", f"{value['artifact_id']}: field {key} differs")
+    if not (
+        initial.get("c0_result", {}).get("granted") is True
+        and initial.get("resource_lines_after_c0") == 1
+        and invalidation.get("c1_result", {}).get("granted") is False
+        and invalidation.get("c1_nonce_unseen_at_stale_attempt") is True
+        and invalidation.get("resource_lines_before_c1") == 1
+        and invalidation.get("resource_lines_after_c1") == 1
+        and restoration.get("state_snapshot", {}).get("current_state") == "CONFORMANT"
+        and restoration.get("state_snapshot", {}).get("state_epoch") == 3
+        and replay.get("c2_result", {}).get("granted") is True
+        and replay.get("resource_lines_before_c2") == 1
+        and replay.get("resource_lines_after_c2") == 2
+        and replay.get("replay_result", {}).get("granted") is False
+        and replay.get("replay_result", {}).get("reason") == "REPLAYED_NONCE"
+        and replay.get("resource_lines_before_replay") == 2
+        and replay.get("resource_lines_after_replay") == 2
+    ):
+        _fail("RESOURCE_EFFECT_CONSISTENCY", "lifecycle action/effect invariants do not hold")
+    fresh_id = restoration["fresh_v2_evidence"]["artifact_id"]
+    restore_id = restoration["r13_restoration"]["runtime_evidence_id"]
+    expected_behavior = (
+        "CONFORMANCE_LIFECYCLE_POC_PASS"
+        if core["mode"] == "formal"
+        else "DEVELOPMENT_DRY_RUN_PASS"
+    )
+    if (
+        final.get("run_id") != core.get("run_id")
+        or final.get("mode") != core.get("mode")
+        or final.get("implementation_baseline") != core.get("implementation_commit")
+        or final.get("runner_head") != core.get("runner_commit")
+        or final.get("classification") != expected_behavior
+        or core.get("behavioral_result") != expected_behavior
+        or final.get("final_resource_line_count") != 2
+        or core.get("final_resource_line_count") != 2
+        or final.get("c2_granted") is not True
+        or final.get("c2_replay_denied") is not True
+        or final.get("fresh_evidence_id") != fresh_id
+        or final.get("r13_restore_evidence_id") != restore_id
+        or fresh_id != restore_id
+        or final.get("final_state") != core.get("final_state")
+        or final.get("final_state") != restoration.get("state_snapshot")
+    ):
+        _fail("FINAL_RESULT_BINDING", "final classification is inconsistent across evidence")
+    subjects = {
+        payload.get("subject_id")
+        for payload in by_id.values()
+        if "subject_id" in payload
+    }
+    roles = {
+        payload.get("role_id")
+        for payload in by_id.values()
+        if "role_id" in payload
+    }
+    domains = {
+        payload.get("trust_domain")
+        for payload in by_id.values()
+        if "trust_domain" in payload
+    }
+    if (
+        subjects != {core.get("subject_id")}
+        or roles != {core.get("role_id")}
+        or domains != {core.get("trust_domain")}
+    ):
+        _fail("CORE_IDENTITY_BINDING", "core identity does not match signed artifacts")
 
 
 def _safe_primary_name(name: str) -> bool:
@@ -780,7 +958,10 @@ def verify_primary_bundle(directory: Path) -> dict:
             _fail("MANIFEST_PATH", f"unsafe or reserved primary path: {name!r}")
         path = directory / name
         try:
-            size = path.stat().st_size
+            metadata = path.lstat()
+            if not stat.S_ISREG(metadata.st_mode):
+                _fail("MANIFEST_FILE_TYPE", f"{name}: not a regular file")
+            size = metadata.st_size
         except OSError as exc:
             _fail("MANIFEST_FILE_MISSING", f"{name}: {exc}")
         if item.get("size_bytes") != size or item.get("sha256") != sha256_file(path):
@@ -854,6 +1035,7 @@ def verify_primary_bundle(directory: Path) -> dict:
         or core["negative_cases"] != {"passed": 8, "total": 8}
     ):
         _fail("CORE_COUNTS", "epoch or case summary mismatch")
+    verify_cross_file_consistency(directory, manifest, artifacts, core)
     return {
         "schema": "ate.independent-evidence-verification.v1",
         "verdict": "INDEPENDENT_EVIDENCE_VERIFICATION_PASS",

@@ -17,8 +17,10 @@ from conformance.evidence import (
     CASE_DEFINITIONS,
     CASE_NODE_IDS,
     EvidenceVerificationError,
+    EXPECTED_FROZEN_BLOBS,
     artifact_envelope,
     audit_record_json,
+    jsonable,
     signature_verification_rows,
     verify_complete_bundle,
     verify_key_registry,
@@ -85,13 +87,50 @@ def _build_primary(directory: Path):
             artifacts, records, harness.verification_key_registry
         ),
     )
-    for name in (
-        "02_initial_and_c0.json",
-        "03_invalidation_and_c1.json",
-        "04_fresh_evidence_and_restoration.json",
-        "05_c2_and_replay.json",
-    ):
-        _write_json(directory / name, {"test_fixture": True})
+    _write_json(directory / "00_preflight.json", {
+        "run_id": "bounded-implementation-test",
+        "mode": "dry-run",
+        "implementation_baseline": "0" * 40,
+        "runner_head": "0" * 40,
+        "implementation_subtree_diff_empty": True,
+        "worktree_clean_before_run": True,
+        "frozen_blob_verification": EXPECTED_FROZEN_BLOBS,
+    })
+    _write_json(directory / "02_initial_and_c0.json", {
+        "ev_v1": jsonable(context.runtime_evidence_v1),
+        "r13_initial": jsonable(context.r13_initial),
+        "r14_initial": jsonable(context.r14_initial),
+        "c0_capability": jsonable(context.capability_c0),
+        "c0_result": jsonable(context.c0_execution_initial),
+        "resource_lines_after_c0": context.lines_after_c0_initial,
+    })
+    _write_json(directory / "03_invalidation_and_c1.json", {
+        "c1_capability": jsonable(context.capability_c1),
+        "initial_v2_evidence": jsonable(context.runtime_evidence_v2_initial),
+        "trigger": jsonable(context.trigger),
+        "r13_invalidation": jsonable(context.r13_invalidated),
+        "r14_invalidation": jsonable(context.r14_invalidated),
+        "c1_result": jsonable(context.c1_execution_after_invalidation),
+        "c1_nonce_unseen_at_stale_attempt": context.cap1_nonce_unseen_at_stale_attempt,
+        "resource_lines_before_c1": context.lines_after_c0_initial,
+        "resource_lines_after_c1": context.lines_after_c1_denied,
+    })
+    snapshot = harness.state_store.get_authoritative_state(harness.subject.subject_id)
+    _write_json(directory / "04_fresh_evidence_and_restoration.json", {
+        "fresh_v2_evidence": jsonable(context.runtime_evidence_v2_fresh),
+        "r13_restoration": jsonable(context.r13_restored),
+        "r14_restoration": jsonable(context.r14_restored),
+        "state_snapshot": jsonable(snapshot),
+    })
+    _write_json(directory / "05_c2_and_replay.json", {
+        "c2_capability": jsonable(context.capability_c2),
+        "c2_result": jsonable(context.c2_execution_success),
+        "resource_lines_before_c2": context.lines_after_c1_denied,
+        "resource_lines_after_c2": context.lines_after_c2_success,
+        "replay_result": jsonable(context.c2_execution_replay),
+        "resource_lines_before_replay": context.lines_after_c2_success,
+        "resource_lines_after_replay": context.lines_after_c2_replay,
+    })
     cases = [
         {"case_id": case_id, "outcome": "PASS", **definition}
         for case_id, definition in CASE_DEFINITIONS.items()
@@ -104,9 +143,13 @@ def _build_primary(directory: Path):
         f'<testcase file="{node.split("::")[0]}" name="{node.split("::")[1]}"/>'
         for nodes in CASE_NODE_IDS.values() for node in nodes
     )
+    case_count = len(CASE_NODE_IDS)
     (directory / "pytest-results.xml").write_text(
-        f'<?xml version="1.0"?><testsuites><testsuite>{testcase_xml}</testsuite></testsuites>',
+        f'<?xml version="1.0"?><testsuites><testsuite tests="{case_count}" failures="0" errors="0" skipped="0">{testcase_xml}</testsuite></testsuites>',
         encoding="utf-8",
+    )
+    (directory / "pytest-summary.txt").write_text(
+        f"{case_count} passed\n", encoding="utf-8"
     )
     _write_json(directory / "run-record-core.json", {
         "schema": "ate.run-record-core.v1",
@@ -124,6 +167,22 @@ def _build_primary(directory: Path):
         "epoch_summary": [1, 2, 3],
         "required_cases": {"passed": 18, "total": 18},
         "negative_cases": {"passed": 8, "total": 8},
+        "final_state": jsonable(snapshot),
+        "final_resource_line_count": 2,
+        "behavioral_result": "DEVELOPMENT_DRY_RUN_PASS",
+    })
+    _write_json(directory / "09_final_classification.json", {
+        "run_id": "bounded-implementation-test",
+        "mode": "dry-run",
+        "implementation_baseline": "0" * 40,
+        "runner_head": "0" * 40,
+        "classification": "DEVELOPMENT_DRY_RUN_PASS",
+        "final_state": jsonable(snapshot),
+        "final_resource_line_count": 2,
+        "c2_granted": True,
+        "c2_replay_denied": True,
+        "fresh_evidence_id": context.runtime_evidence_v2_fresh.artifact_id,
+        "r13_restore_evidence_id": context.r13_restored.runtime_evidence_id,
     })
     return harness
 
@@ -340,3 +399,31 @@ def test_formal_mode_rejected_before_reviewed_dry_run_gate():
         module.require_formal_authorization(
             True, {"ACL_FORMAL_RUN_AUTHORIZED": "YES"}
         )
+
+
+@pytest.mark.parametrize(
+    ("filename", "mutate"),
+    (
+        ("00_preflight.json", lambda value: value.update(runner_head="1" * 40)),
+        ("05_c2_and_replay.json", lambda value: value.update(resource_lines_after_c2=3)),
+        ("09_final_classification.json", lambda value: value.update(final_resource_line_count=3)),
+        ("run-record-core.json", lambda value: value.update(subject_id="substituted-subject")),
+    ),
+)
+def test_cross_file_substitution_is_rejected(closed_bundle, filename, mutate):
+    _mutate_json(closed_bundle, filename, mutate)
+    with pytest.raises(EvidenceVerificationError):
+        verify_complete_bundle(closed_bundle)
+
+
+def test_manifest_run_identity_substitution_is_rejected(closed_bundle):
+    manifest_path = closed_bundle / "evidence-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["run_id"] = "substituted-run"
+    _write_json(manifest_path, manifest)
+    digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    (closed_bundle / "evidence-manifest.sha256").write_text(
+        f"{digest}  evidence-manifest.json\n", encoding="ascii"
+    )
+    with pytest.raises(EvidenceVerificationError):
+        verify_complete_bundle(closed_bundle)
