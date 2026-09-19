@@ -23,9 +23,9 @@ from typing import Any
 POC_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-# Deliberately fail-closed until this bounded implementation receives an
-# independent review and is rebound to that reviewed implementation commit.
-IMPLEMENTATION_BASELINE = "PIN_AFTER_INDEPENDENT_REVIEW"
+# Independently reviewed bounded implementation candidate. Changing any file
+# under IMPLEMENTATION_PATHS requires a new review and a new binding.
+IMPLEMENTATION_BASELINE = "ffa03453818b15b3643ff3b1c77fabb446f38ea6"
 
 FROZEN_BLOBS = {
     "architecture/agent-trust-envelope/AGENT-CONFORMANCE-LOCAL-LIFECYCLE-POC-v0.1.1-FORMAL-EVIDENCE-CLOSURE-AMENDMENT-v0.1.md":
