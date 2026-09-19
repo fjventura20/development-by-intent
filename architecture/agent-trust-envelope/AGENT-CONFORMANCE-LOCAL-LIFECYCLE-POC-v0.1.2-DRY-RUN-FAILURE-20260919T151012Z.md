@@ -1,14 +1,14 @@
 # Agent Conformance Local Lifecycle PoC v0.1.2
 ## Development Dry-Run Environment Failure Record — 20260919T151012Z
 
-**Controlling disposition:** `STOP_BEFORE_SCORING`  
-**Raw runner message:** `CONFORMANCE_LIFECYCLE_POC_FAIL: pytest failed`  
-**Runner commit:** `fd39cce365a09119cc20d1630ff75137a3008121`  
-**Reviewed implementation baseline:** `ffa03453818b15b3643ff3b1c77fabb446f38ea6`  
-**Mode requested:** default development dry-run  
-**Formal mode:** not requested and not authorized  
-**Runner invocations:** exactly one  
-**Retry performed:** no  
+**Controlling disposition:** `STOP_BEFORE_SCORING`
+**Raw runner message:** `CONFORMANCE_LIFECYCLE_POC_FAIL: pytest failed`
+**Runner commit:** `fd39cce365a09119cc20d1630ff75137a3008121`
+**Reviewed implementation baseline:** `ffa03453818b15b3643ff3b1c77fabb446f38ea6`
+**Mode requested:** default development dry-run
+**Formal mode:** not requested and not authorized
+**Runner invocations:** exactly one
+**Retry performed:** no
 **Hermes used:** no
 
 ---
