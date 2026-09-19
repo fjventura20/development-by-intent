@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import importlib.util
 import json
 import os
 import subprocess
@@ -90,6 +91,14 @@ def require_formal_authorization(formal: bool, environ: dict[str, str]) -> None:
     require(
         environ.get("ACL_REVIEWED_DRY_RUN_GATE") == "YES",
         "STOP_BEFORE_SCORING: formal mode requires an accepted reviewed dry-run gate",
+    )
+
+
+def require_test_environment() -> None:
+    """Reject an ineligible runner environment before creating run evidence."""
+    require(
+        importlib.util.find_spec("pytest") is not None,
+        "STOP_BEFORE_SCORING: pytest dependency unavailable",
     )
 
 
@@ -195,6 +204,7 @@ def main() -> int:
 
     mode = "formal" if args.formal else "dry-run"
     require_formal_authorization(args.formal, os.environ)
+    require_test_environment()
 
     # Make local implementation importable only after baseline checks.
     sys.path.insert(0, str(POC_ROOT))
