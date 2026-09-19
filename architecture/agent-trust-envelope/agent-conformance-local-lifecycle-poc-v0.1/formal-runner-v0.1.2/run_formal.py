@@ -274,15 +274,15 @@ def main() -> int:
         (evidence_dir / "RUN-FAILED.txt").write_text(str(exc) + "\n", encoding="utf-8")
         raise
 
-        from conformance.audit import copy_and_tamper
-        from conformance.evidence import (
-            CASE_DEFINITIONS,
-            CASE_NODE_IDS,
-            artifact_envelope,
-            audit_record_json,
-            signature_verification_rows,
-        )
-        from fixtures import bootstrap
+    from conformance.audit import copy_and_tamper
+    from conformance.evidence import (
+        CASE_DEFINITIONS,
+        CASE_NODE_IDS,
+        artifact_envelope,
+        audit_record_json,
+        signature_verification_rows,
+    )
+    from fixtures import bootstrap
 
     h = None
     classification = "INCONCLUSIVE_EVIDENCE_INVALID"
