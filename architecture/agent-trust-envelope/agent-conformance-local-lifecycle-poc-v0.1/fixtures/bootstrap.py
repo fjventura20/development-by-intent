@@ -21,7 +21,6 @@ from conformance.authorization import AuthorizationService
 from conformance.canonical import canonical_sha256
 from conformance.crypto import (
     Ed25519PublicKey,
-    generate_keypair,
     key_id_from_public_key,
     sign_ed25519,
 )
@@ -46,6 +45,11 @@ from conformance.state import (
     SubjectState,
 )
 from conformance.trigger import TriggerObserver
+from fixtures.test_keys import (
+    load_test_authorities,
+    public_key_registry,
+    public_key_registry_digest,
+)
 
 SUBJECT_ID = "agent-001"
 ROLE_ID = "worker"
@@ -83,6 +87,7 @@ class Harness:
 
     qual_admission_pub: Ed25519PublicKey
     profile_registry_pub: Ed25519PublicKey
+    verification_key_registry: dict
 
     subject: SubjectState
     profile_v1: ConformanceProfile
@@ -248,13 +253,16 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
     state_store = StateStore()
     nonce_registry = NonceRegistry()
 
-    obs_priv, obs_pub = generate_keypair()
-    r13_priv, r13_pub = generate_keypair()
-    r14_priv, r14_pub = generate_keypair()
-    az_priv, az_pub = generate_keypair()
-    qa_priv, qa_pub = generate_keypair()
-    ar_priv, ar_pub = generate_keypair()
-    pfs_priv, pfs_pub = generate_keypair()
+    # Public, reproducible TEST-ONLY authority material. Private key objects
+    # remain captured inside trusted controls and never enter Harness.
+    authorities = load_test_authorities()
+    obs_priv, obs_pub = authorities["runtime_observer"]
+    r13_priv, r13_pub = authorities["r13_evaluator"]
+    r14_priv, r14_pub = authorities["r14_authority"]
+    az_priv, az_pub = authorities["authorization_service"]
+    qa_priv, qa_pub = authorities["qa_issuer"]
+    ar_priv, ar_pub = authorities["audit_recorder"]
+    pfs_priv, pfs_pub = authorities["profile_signer"]
 
     state_store.register_qual_admission_issuer(
         issuer_id="qual-admission-issuer-1",
@@ -302,6 +310,16 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         recorder_id="audit-1",
         private_key=ar_priv,
         public_key=ar_pub,
+    )
+    key_registry = public_key_registry()
+    audit.append(
+        event_kind="trust_material_established",
+        payload={
+            "verification_key_registry_digest": public_key_registry_digest(),
+            "registry_schema": key_registry["schema"],
+            "authority_count": len(key_registry["entries"]),
+        },
+        logical_ts=clock.now(),
     )
 
     registry = create_profile_registry(signer_public_key=pfs_pub)
@@ -395,6 +413,7 @@ def build_harness_with_controls(*, prefix: str = "acl-poc") -> tuple[Harness, Tr
         audit=AuditView(audit),
         qual_admission_pub=qa_pub,
         profile_registry_pub=pfs_pub,
+        verification_key_registry=copy.deepcopy(key_registry),
         subject=subject,
         profile_v1=copy.deepcopy(profile_v1),
         profile_v2=copy.deepcopy(profile_v2),
