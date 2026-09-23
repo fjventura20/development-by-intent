@@ -1,0 +1,16 @@
+=== ATE v0.3.1 diagnostic runner output ===
+executed_at_utc=1789480138.2423344
+trust_decide_purity=True
+case_a.verdict=TRUST_GRANTED
+case_a.reason=GX_OK
+case_a.gate_results=['PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS']
+case_a.execution={'executed': True, 'envelope_nonce': 'ate-v031-nonce-caseA-001', 'operation': 'WRITE_SCOPED', 'target': 'filesystem:/home/agent/proj/file.txt', 'executed_at_state': 'NONSE_AUTHORIZED', 'resulting_nonce_state': 'NONCE_CONSUMED'}
+case_a.replay_verdict=TRUST_DENIED
+case_a.replay_reason=GX_NONCE_PREVIOUSLY_CONSUMED
+case_b.verdict=TRUST_DENIED
+case_b.reason=GX_VA_POLICY_INCOMPATIBLE
+case_b.gate_results=['PASS', 'PASS']
+case.c.verdict=TRUST_DENIED
+case.c.reason=GX_COA_SESSION_MISMATCH
+case.c.gate_results=['PASS']
+nonce_snapshot_final={'ate-v031-nonce-caseA-001': 'NONCE_CONSUMED', 'ate-v031-nonce-caseC-001': 'NONCE_UNSEEN'}

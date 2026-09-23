@@ -1,0 +1,1 @@
+Mechanism check initialization. Reply with one short sentence acknowledging that the session started, then stop. Do not use any tools.

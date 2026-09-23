@@ -1,0 +1,55 @@
+title: "[Architecture] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Development by Intent — Architectural Questions
+        Use this category to examine architectural claims about AI-native application development.
+
+        The goal is constructive technical debate: separate observations from hypotheses, identify failure modes, and propose evidence or tests that could change the conclusion.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question or proposition
+      description: State the architectural question or claim as precisely as possible.
+      placeholder: What is the correct human-machine development boundary when the execution environment itself is intelligent?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reasoning
+    attributes:
+      label: Why this may matter
+      description: Explain the reasoning and the architectural consequence if the proposition is correct.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence, observation, or example
+      description: Distinguish demonstrated results and direct observations from inference or hypothesis.
+    validations:
+      required: true
+
+  - type: textarea
+    id: counterargument
+    attributes:
+      label: Strongest counterargument or failure mode
+      description: Identify where the proposition may break down, especially for production, security, reliability, scale, or determinism.
+    validations:
+      required: true
+
+  - type: textarea
+    id: falsification
+    attributes:
+      label: What evidence would change the conclusion?
+      description: Suggest a test, measurement, counterexample, or experiment that could strengthen, narrow, or falsify the proposition.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        Debate the architecture, not the person. Strong disagreement and contrary evidence are welcome.

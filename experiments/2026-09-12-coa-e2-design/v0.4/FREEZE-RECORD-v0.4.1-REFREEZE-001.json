@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Protocol-compliant re-freeze record for the COA-E2 v0.4.1 design package. Records a NEW re-freeze that incorporates the now-satisfied pre-freeze mechanism-check requirement (PROTOCOL-DRAFT-v0.4.1.md Scope section). The 33 candidate artifacts at frozen-candidate commit 64f9a80771558c50edf6dd0d5c3dd21da625d51a remain byte-identical; this record does not modify any of them. The original FREEZE-RECORD-v0.4.1.json and FREEZE-SUPERSESSION-v0.4.1-001.json are preserved unchanged as historical evidence.",
+  "supersedes_chain": {
+    "previous_freeze_record_id": "20260914T061440Z-coa-e2-v0.4.1-freeze-001",
+    "previous_freeze_commit_sha": "916c9a91486172acf572462bcd8df8edaead3525",
+    "supersession_record_id": "20260914T061440Z-coa-e2-v0.4.1-freeze-001 (superseded)",
+    "supersession_commit_sha": "86889edf...",
+    "rationale_for_supersession": "Original freeze occurred without the protocol-required pre-freeze mechanism check. The supersession record classified this as FREEZE_SUPERSEDED_PRECHECK_ORDERING_DEFECT (procedural sequencing defect, not artifact-integrity failure). The mechanism check has now completed with MECHANISM_CHECK_PASS, satisfying the protocol requirement.",
+    "historical_records_preserved": true,
+    "historical_records_modified": false
+  },
+  "package": {
+    "name": "COA-E2 v0.4.1",
+    "design_directory": "experiments/2026-09-12-coa-e2-design/v0.4",
+    "package_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4",
+    "branch": "feature/coa-e2-persistent-session-binding",
+    "candidate_commit_sha": "64f9a80771558c50edf6dd0d5c3dd21da625d51a",
+    "status": "FROZEN_PROTOCOL_COMPLIANT"
+  },
+  "re_freeze": {
+    "freeze_decision": "RE-FREEZE GO",
+    "freeze_decision_authority": "Frank-as-PI",
+    "re_freeze_timestamp": "2026-09-14T10:22:48Z",
+    "re_freeze_record_id": "20260914T062248Z-coa-e2-v0.4.1-refreeze-001",
+    "controlling_pre_freeze_requirement": "PROTOCOL-DRAFT-v0.4.1.md Scope section: 'A separately authorized short mechanism check — one initialization and one resume — must pass before freeze.'",
+    "requirement_satisfied_by": "MECHANISM-CHECK-v0.4.1-001.json",
+    "requirement_evidence_commit_sha": "ff6dda02c5ce40d814ccf1bc8470c890d4c325de",
+    "requirement_result": "MECHANISM_CHECK_PASS",
+    "requirement_evidence_summary": "Hermes Agent v0.21.2; fresh isolated test profile coa-e2-mechcheck-001; initialization session ID 20260914_061915_b69d5b; resume session ID 20260914_061915_b69d5b (identical); single SessionDB session row across init+resume with parent_session_id=NULL; message count grew 2 -> 4 with init messages preserved verbatim; 0 child/forked sessions; frozen parser in runner/run_pilot.py accepted the observed real CLI footer channel exactly without modification."
+  },
+  "frozen_artifacts": {
+    "freeze_manifest": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/runner/freeze-manifest-DRAFT.json",
+      "sha256": "053dc3d33dd7d5b410dc4bf227c7b82e25627bb046a497a0e8abc1f4054ab372",
+      "entry_count": 33,
+      "self_reference_excluded": true,
+      "internal_status_field": "DRAFT_NOT_FROZEN",
+      "note": "Internal 'status' field retained as DRAFT_NOT_FROZEN per design convention; the manifest itself is frozen at this SHA-256 across the original freeze, the supersession, and this re-freeze. Filename retains -DRAFT.json for verifier compatibility; rename would change frozen hashes and is not required."
+    },
+    "protocol": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/PROTOCOL-DRAFT-v0.4.1.md",
+      "sha256": "4e118a78c9a3818230c533f5852c11884e56a8493cd4a587dd21a6ea79ad6a54"
+    },
+    "runtime_manifest_template": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/runner/runtime-manifest-DRAFT.json",
+      "sha256": "e16d5d3708c95a8626714a191f278328e70d91c9eb5836e0c12f47eb12f81830",
+      "nonce_state": "six null values; final nonce generation is not authorized by the re-freeze step and is gated on a separate execution-preparation/execution GO-NO-GO decision"
+    }
+  },
+  "post_re_freeze_verification": {
+    "verifier_command": "cd /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4/runner && python3 verify_manifest.py --manifest freeze-manifest-DRAFT.json --package-root /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4 --output /tmp/coa-e2-v041-refreeze-verify.json",
+    "expected_overall": "PASS",
+    "expected_checked": 33,
+    "expected_failed_paths": 0,
+    "required_rerun": true
+  },
+  "re_freeze_procedure": {
+    "type": "external re-freeze-record (non-disruptive)",
+    "rationale": "Re-freeze is recorded in a NEW file at the package root (FREEZE-RECORD-v0.4.1-REFREEZE-001.json) that is NOT listed in freeze-manifest-DRAFT.json. The 33 listed files remain byte-identical to candidate commit 64f9a80771558c50edf6dd0d5c3dd21da625d51a, preserving their frozen hashes. Original FREEZE-RECORD-v0.4.1.json and FREEZE-SUPERSESSION-v0.4.1-001.json are preserved unchanged as historical evidence of the procedural sequence.",
+    "hash_impact": {
+      "manifest_sha256_unchanged": true,
+      "protocol_sha256_unchanged": true,
+      "runtime_manifest_sha256_unchanged": true,
+      "files_added": ["FREEZE-RECORD-v0.4.1-REFREEZE-001.json (new)"],
+      "files_modified": [],
+      "files_deleted": []
+    }
+  },
+  "boundaries_unchanged": [
+    "no_experimental_nonce_generation",
+    "no_runtime_manifest_sealing",
+    "no_experimental_profile_creation",
+    "no_experimental_arm_execution",
+    "no_U2_U3_U5_execution",
+    "no_response_scoring",
+    "no_evaluator_engagement"
+  ],
+  "next_gate": "Separate execution-preparation / execution GO-NO-GO decision by Frank-as-PI"
+}

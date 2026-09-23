@@ -1,0 +1,81 @@
+{
+  "architecture/experimental/TRUSTED-GOVERNANCE-ESTABLISHMENT-v0.2.1.md": {
+    "kind": "spec",
+    "size": 18557,
+    "sha256": "fa8823492060c582b8106da803097ce7473e0a37d367b43aed05ce0fe2efc0d7"
+  },
+  "architecture/experimental/tge-poc/CLOSEOUT.md": {
+    "kind": "tge-poc",
+    "size": 6784,
+    "sha256": "8f5855c8d0da0e2fe0616a439f3c6787326120b394e9b14ac2fb1278fd97644a"
+  },
+  "architecture/experimental/tge-poc/README.md": {
+    "kind": "tge-poc",
+    "size": 1471,
+    "sha256": "0d4c98fef56764d92def53e08b0513a8db9ddf4536417ba716872113b0aa61d5"
+  },
+  "architecture/experimental/tge-poc/attestation.py": {
+    "kind": "tge-poc",
+    "size": 4696,
+    "sha256": "fb9de8b0f451d89c9fc9578d733169d777efbcf3de1a8f40c8a3e6b5f955dab8"
+  },
+  "architecture/experimental/tge-poc/canonicalization.py": {
+    "kind": "tge-poc",
+    "size": 4106,
+    "sha256": "f0075ac81bf043bcd004e93eae819545db212f6196bac70c263a9e25905dcadd"
+  },
+  "architecture/experimental/tge-poc/cases.py": {
+    "kind": "tge-poc",
+    "size": 15867,
+    "sha256": "385f79df2619fa8d0a2c05ef5eb25c97a624aa008d9c6fe3d9e810e9a7dbd454"
+  },
+  "architecture/experimental/tge-poc/crypto_utils.py": {
+    "kind": "tge-poc",
+    "size": 1856,
+    "sha256": "eb30e632676ba8d005f41a263cab4f0244ba85ade0a7224c671650068cf0dbd4"
+  },
+  "architecture/experimental/tge-poc/evidence/poc_evidence.json": {
+    "kind": "tge-poc",
+    "size": 6714,
+    "sha256": "be1e905e5107ed638697254d8321e8c31d5f4984e1eec54ecbfefe4860a157c9"
+  },
+  "architecture/experimental/tge-poc/issuer.py": {
+    "kind": "tge-poc",
+    "size": 3227,
+    "sha256": "73c39924fabab8ee562a2007e7a71ef3066fe64c09547d4fc23ea1f9a3fc3b4f"
+  },
+  "architecture/experimental/tge-poc/run.py": {
+    "kind": "tge-poc",
+    "size": 6981,
+    "sha256": "a12a7a16597a45fbf52b52f008935b74ae59ffa2664e5c084ab79d7bc3586ddb"
+  },
+  "architecture/experimental/tge-poc/runtime.py": {
+    "kind": "tge-poc",
+    "size": 7768,
+    "sha256": "7b9f4455b9443aba2c61dbc678d345b8036ccf97e4cd2eeae970bc1959f9f8bb"
+  },
+  "architecture/experimental/tge-poc/verifier.py": {
+    "kind": "tge-poc",
+    "size": 17523,
+    "sha256": "35a29e3c63f32efc1588af35dc95efbc533db518ac25c729dff71247aa4cd3d6"
+  },
+  "_environment": {
+    "python_version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "python_executable": "/home/fjventura20/bin/python3",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "host": "aegisnexus",
+    "os_release": "7.0.0-28-generic",
+    "kernel": "7.0.0-28-generic",
+    "crypto_library": "cryptography 41.0.7",
+    "signature_algorithms": [
+      "Ed25519 (RFC 8032)"
+    ],
+    "attestation_substrate": "fixture (Python module producing fixture-shape quotes)",
+    "tpm_invoked": false,
+    "swtpm_invoked": false,
+    "manufacturer_root_invoked": false,
+    "remote_attestation_service_invoked": false,
+    "participant_invoked": false,
+    "model_invoked": false
+  }
+}

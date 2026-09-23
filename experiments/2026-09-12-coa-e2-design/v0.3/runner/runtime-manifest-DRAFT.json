@@ -1,0 +1,15 @@
+{
+  "status": "DRAFT_TEMPLATE",
+  "repository_root": "<declared at freeze time>",
+  "nonces": {
+    "coa-s1": null,
+    "coa-s2": null,
+    "coa-s3": null,
+    "control-s1": null,
+    "control-s2": null,
+    "control-s3": null
+  },
+  "files": [],
+  "self_reference": "excluded",
+  "note": "Final nonces are not generated under the current PI authorization. At freeze time this file is populated with six unique runtime nonces and hashes for every controlling v0.3 file except itself; its external SHA-256 is recorded in the freeze record."
+}

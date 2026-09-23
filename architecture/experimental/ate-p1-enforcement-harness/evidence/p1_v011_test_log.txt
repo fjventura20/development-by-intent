@@ -1,0 +1,86 @@
+ATE P1 v0.1.1 — Local Enforcement Harness — Test Log
+====================================================
+Run date: 2026-09-15
+Controlling design commit: 6ca3a5624f501f9b184f1b06fd7f42a73c31e5d4
+Upstream frozen ATE baseline: f903478154e2b484f8a49295ba0692d0a5a4f260
+
+Final result: 11 pass, 0 fail out of 11 tests.
+
+Per-test summary:
+  T0 — Valid authorized execution: PASS
+        verdict=EXECUTED, mutation_count_after=1, audit_chain_len=1,
+        nonce_state=CONSUMED, anchor_final_seq=1, audit_chain_verify=True
+  T1 — Direct bypass denial: PASS
+        forged request signature -> DENIED PX_REQUEST_SIGNATURE_INVALID,
+        mutation_count=0, audit_chain_len=0, no nonce row.
+  T2 — Cross-process credential separation: PASS
+        requester module exposes NO resource credential handle, NO audit
+        HMAC key handle, NO DB write handle. Subprocess boundary verified.
+  T3 — Restart-durable nonce: PASS
+        first execution EXECUTED, replay after restart DENIED
+        PX_NONCE_REPLAY_OR_BUSY. mutation_count=1 (not incremented by
+        replay). audit_chain_len=1 (no audit event for replay).
+  T4 — Revocation serialized before use: PASS
+        revocation staged before worker run -> DENIED
+        PX_AUTHORITY_REVOKED. mutation_count=0. No audit event.
+  T5 — Concurrent replay: PASS
+        16 subprocesses concurrently attempted the same nonce.
+        Exactly 1 EXECUTED, 15 DENIED PX_NONCE_REPLAY_OR_BUSY.
+        mutation_count=2 (1 stage + 1 concurrent winner).
+        audit_chain_len=2. nonce_state=CONSUMED.
+  T6 — Transaction rollback on audit failure: PASS
+        barrier raised mid-transaction -> DENIED PX_REVERIFICATION_FAILED.
+        mutation_count=0. No nonce row (uncommitted). audit_chain_len=0.
+        anchor_final_seq=0.
+  T7 — Audit tamper detection: PASS
+        4-record audit chain built. Untouched control verifies.
+        All 6 tamper variants FAIL verification: field mutation,
+        middle deletion, reorder, insertion, tail truncation,
+        anchor MAC tamper.
+  T8 — Stable resource identity: PASS
+        Authorized request presented a different immutable resource_id
+        (matching display path) -> DENIED PX_TARGET_BINDING_MISMATCH.
+        Neither resource mutated.
+  T9 — Startup audit-integrity gate: PASS
+        First execution EXECUTED. Audit record tampered (operation
+        field changed). Restart worker: startup integrity gate fires
+        PX_AUDIT_INTEGRITY_FAILURE, executor locked. Replay attempt
+        returns DENIED PX_AUDIT_INTEGRITY_FAILURE.
+  T10 — Crash/rollback consistency: PASS
+        SystemExit raised mid-transaction (simulated crash). On
+        restart: mutation_count=0, no nonce row (uncommitted),
+        audit_chain_len=0, anchor_final_seq=0. State fully consistent
+        with pre-transaction committed state.
+
+Evidence JSON SHA-256: see p1_v011_evidence.json (computed at commit).
+
+Notes on design judgments:
+  - Used 16 subprocesses for T5 cross-process boundary (per v0.1.1
+    §C4). Each subprocess is a real OS process; the requester has no
+    DB handle, no audit key, no resource credential. The privilege
+    boundary is enforced by the executor's sole possession of those
+    materials (verified in T2 by inspection).
+  - T6 (transaction rollback) used a deterministic barrier that
+    raises an exception between nonce reservation and audit append,
+    exercising the C1 rollback property.
+  - T9 tampered the audit chain by directly UPDATEing the audit_records
+    row's operation field; the worker's startup integrity check
+    re-verifies the MAC chain and detects the inconsistency.
+  - The empty-audit-chain case (verified in startup before any
+    execution) is treated as a valid empty chain. The schema initializer
+    inserts an anchor row with empty digest/empty MAC; verify_audit_chain
+    accepts this when records=[].
+  - Resource credential model: each resource_id has a 32-byte random
+    credential held only by the executor (in config.resource_credentials).
+    The mutation path requires presenting this credential. The
+    requester cannot reconstruct it. (T1 + T2 verify this.)
+  - Revocation model: revocations are stored in the revocations table
+    inside the same authority DB. The executor reads revocations
+    inside the transaction (E5) and after the barrier (re-verification).
+    A revocation committed before the transaction begins is observed
+    at E5 and denies execution.
+  - Schema choice: protected_resources, nonces, revocations, audit_records,
+    audit_anchor, decision_signatures, executor_state all in one SQLite
+    file. WAL mode + BEGIN IMMEDIATE provides atomicity.
+
+Final classification: ATE_P1_LOCAL_ENFORCEMENT_ESTABLISHED

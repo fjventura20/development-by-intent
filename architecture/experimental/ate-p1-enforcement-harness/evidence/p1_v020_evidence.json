@@ -1,0 +1,459 @@
+{
+  "ate_p1_v0_2": {
+    "controlling_design_commit": "8f2e424",
+    "design_sha256": "4f7418d09defd866998362359857e2d11443f1d36242f61e85c1b4f7639f98be",
+    "implementation_branch": "feature/ate-p1-v020-enforcement",
+    "frozen_requirement": {
+      "T0..T10": "11/11",
+      "AT-1..AT-40": "40/40",
+      "TOTAL": "51/51"
+    },
+    "test_summary": {
+      "total_individual_tests": 51,
+      "passed": 51,
+      "failed": 0
+    },
+    "individual_tests": [
+      {
+        "id": "T0",
+        "name": "filesystem ownership/modes",
+        "ok": true,
+        "details": {
+          "bad": []
+        }
+      },
+      {
+        "id": "T1",
+        "name": "direct resource write denied",
+        "ok": true,
+        "details": {
+          "err": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nPermissionError: [Errno 13"
+        }
+      },
+      {
+        "id": "T2",
+        "name": "authority private key inaccessible",
+        "ok": true,
+        "details": {
+          "err": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nPermissionError: [Errno 13"
+        }
+      },
+      {
+        "id": "T3",
+        "name": "happy path",
+        "ok": true,
+        "details": {
+          "pre": 0,
+          "post": 1,
+          "verdict": "EXECUTED"
+        }
+      },
+      {
+        "id": "T4",
+        "name": "invalid signature rejected",
+        "ok": true,
+        "details": {
+          "reason_code": "EX_CLEARANCE_SIG_INVALID"
+        }
+      },
+      {
+        "id": "T5",
+        "name": "concurrent replay serialized",
+        "ok": true,
+        "details": {
+          "executed": 1,
+          "already_applied": 15,
+          "total": 16
+        }
+      },
+      {
+        "id": "T6",
+        "name": "crash-before-completion recovery",
+        "ok": true,
+        "details": {
+          "pre": 2,
+          "post": 3,
+          "r1": "EXECUTED",
+          "r2": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "T7",
+        "name": "audit record tamper detected",
+        "ok": true,
+        "details": {
+          "err_tail": "1-v020/bin/executor_service.py\", line 493, in main\n    svc = ExecutorService(\n          ^^^^^^^^^^^^^^^^\n  File \"/opt/ate-p1-v020/bin/executor_service.py\", line 130, in __init__\n    raise RuntimeError(\"audit chain integrity failure at startup\")\nRuntimeError: audit chain integrity failure at startup\n",
+          "rc": 1
+        }
+      },
+      {
+        "id": "T8",
+        "name": "restart consistency",
+        "ok": true,
+        "details": {
+          "pre": 4,
+          "post": 4
+        }
+      },
+      {
+        "id": "T9",
+        "name": "audit anchor tamper detected",
+        "ok": true,
+        "details": {
+          "err_tail": "1-v020/bin/executor_service.py\", line 493, in main\n    svc = ExecutorService(\n          ^^^^^^^^^^^^^^^^\n  File \"/opt/ate-p1-v020/bin/executor_service.py\", line 130, in __init__\n    raise RuntimeError(\"audit chain integrity failure at startup\")\nRuntimeError: audit chain integrity failure at startup\n",
+          "rc": 1
+        }
+      },
+      {
+        "id": "T10",
+        "name": "crash-after-mutation idempotent",
+        "ok": true,
+        "details": {
+          "pre": 1,
+          "post": 2,
+          "r1": "EXECUTED",
+          "r2": "ALREADY_APPLIED",
+          "r3": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "AT-1",
+        "name": "requester cannot sudo to authority",
+        "ok": true,
+        "details": {
+          "rc": "1"
+        }
+      },
+      {
+        "id": "AT-2",
+        "name": "no new setuid binaries from harness",
+        "ok": true,
+        "details": {
+          "system_setuid_count": 11,
+          "harness_offenders": []
+        }
+      },
+      {
+        "id": "AT-3",
+        "name": "authority DB read denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-4",
+        "name": "authority DB write denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-5",
+        "name": "authority DB WAL denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-6",
+        "name": "authority DB SHM denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-7",
+        "name": "authority DB journal denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-8",
+        "name": "resource write denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-9",
+        "name": "resource credentials read denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-10",
+        "name": "authority private key read denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-11",
+        "name": "executor audit key read denied",
+        "ok": true,
+        "details": {}
+      },
+      {
+        "id": "AT-12",
+        "name": "forged decision cannot obtain clearance",
+        "ok": true,
+        "details": {
+          "resp": {
+            "denied": true,
+            "reason_code": "EX_ENVELOPE_SIG_INVALID"
+          }
+        }
+      },
+      {
+        "id": "AT-13",
+        "name": "forged clearance signature rejected",
+        "ok": true,
+        "details": {
+          "reason": "EX_CLEARANCE_SIG_INVALID"
+        }
+      },
+      {
+        "id": "AT-14",
+        "name": "executor has no authority-key references",
+        "ok": true,
+        "details": {
+          "authority.sqlite": false,
+          "authority_signing.key": false,
+          "authority.sock": false,
+          "authority_dir": false
+        }
+      },
+      {
+        "id": "AT-15",
+        "name": "replay one-shot",
+        "ok": true,
+        "details": {
+          "r1": "EXECUTED",
+          "r2": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "AT-16",
+        "name": "replay after restart",
+        "ok": true,
+        "details": {
+          "r3": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "AT-17",
+        "name": "concurrent executor consistency",
+        "ok": true,
+        "details": {
+          "executed": 1,
+          "total": 8
+        }
+      },
+      {
+        "id": "AT-18",
+        "name": "revoke-before-clearance denied",
+        "ok": true,
+        "details": {
+          "cl": {
+            "denied": true,
+            "reason_code": "EX_CLEARANCE_REVOKED"
+          }
+        }
+      },
+      {
+        "id": "AT-19",
+        "name": "clearance-before-revoke valid",
+        "ok": true,
+        "details": {
+          "exec": "EXECUTED"
+        }
+      },
+      {
+        "id": "AT-20",
+        "name": "audit record tamper detected",
+        "ok": true,
+        "details": {
+          "err_tail": "1-v020/bin/executor_service.py\", line 493, in main\n    svc = ExecutorService(\n          ^^^^^^^^^^^^^^^^\n  File \"/opt/ate-p1-v020/bin/executor_service.py\", line 130, in __init__\n    raise RuntimeError(\"audit chain integrity failure at startup\")\nRuntimeError: audit chain integrity failure at startup\n",
+          "rc": 1
+        }
+      },
+      {
+        "id": "AT-21",
+        "name": "audit anchor tamper detected",
+        "ok": true,
+        "details": {
+          "err_tail": "1-v020/bin/executor_service.py\", line 493, in main\n    svc = ExecutorService(\n          ^^^^^^^^^^^^^^^^\n  File \"/opt/ate-p1-v020/bin/executor_service.py\", line 130, in __init__\n    raise RuntimeError(\"audit chain integrity failure at startup\")\nRuntimeError: audit chain integrity failure at startup\n",
+          "rc": 1
+        }
+      },
+      {
+        "id": "AT-22",
+        "name": "crash before PREPARED (clean state)",
+        "ok": true,
+        "details": {
+          "pre": 10,
+          "post": 11,
+          "verdict": "EXECUTED"
+        }
+      },
+      {
+        "id": "AT-23",
+        "name": "crash after PREPARED before mutation",
+        "ok": true,
+        "details": {
+          "pre": 11,
+          "post": 12,
+          "r1": "EXECUTED",
+          "r2": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "AT-24",
+        "name": "crash after mutation before COMPLETED",
+        "ok": true,
+        "details": {
+          "pre": 3,
+          "post": 4,
+          "r1": "EXECUTED",
+          "r2": "ALREADY_APPLIED"
+        }
+      },
+      {
+        "id": "AT-25",
+        "name": "socket unlink denied",
+        "ok": true,
+        "details": {
+          "err": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nPermissionError: [Errno 13"
+        }
+      },
+      {
+        "id": "AT-26",
+        "name": "socket replace denied",
+        "ok": true,
+        "details": {
+          "err": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nOSError: [Errno 98] Address already in use"
+        }
+      },
+      {
+        "id": "AT-27",
+        "name": "no inherited authority/executor FDs",
+        "ok": true,
+        "details": {
+          "bad_fds": []
+        }
+      },
+      {
+        "id": "AT-28",
+        "name": "requester not in ate-authority/ate-executor groups",
+        "ok": true,
+        "details": {
+          "groups": [
+            100,
+            1001
+          ],
+          "forbidden_in_groups": []
+        }
+      },
+      {
+        "id": "AT-29",
+        "name": "no credential env vars",
+        "ok": true,
+        "details": {
+          "bad_env": []
+        }
+      },
+      {
+        "id": "AT-30",
+        "name": "idempotent resource mutation (3 submits \u2192 +1)",
+        "ok": true,
+        "details": {
+          "pre": 4,
+          "post": 5
+        }
+      },
+      {
+        "id": "AT-31",
+        "name": "executor rejects execute without clearance",
+        "ok": true,
+        "details": {
+          "reason": "EX_ENVELOPE_MALFORMED"
+        }
+      },
+      {
+        "id": "AT-32",
+        "name": "expired clearance denied",
+        "ok": true,
+        "details": {
+          "reason": "EX_ENVELOPE_EXPIRED"
+        }
+      },
+      {
+        "id": "AT-33",
+        "name": "executor verifies requester UID via SO_PEERCRED",
+        "ok": true,
+        "details": {
+          "has_peercred_ref": true
+        }
+      },
+      {
+        "id": "AT-34",
+        "name": "repeated clearance request returns same persisted clearance",
+        "ok": true,
+        "details": {
+          "first_id": "5c68abdd-577c-4a9c-9513-f4e5ff15bb87",
+          "second_id": "5c68abdd-577c-4a9c-9513-f4e5ff15bb87",
+          "already_issued": true
+        }
+      },
+      {
+        "id": "AT-35",
+        "name": "concurrent clearance requests converge",
+        "ok": true,
+        "details": {
+          "distinct_clearance_ids": 1
+        }
+      },
+      {
+        "id": "AT-36",
+        "name": "expired clearance not replaced (same id returned)",
+        "ok": true,
+        "details": {
+          "first_id": "0ebc464e-b1db-4f99-a378-ab16b43fca78",
+          "second_id": "0ebc464e-b1db-4f99-a378-ab16b43fca78"
+        }
+      },
+      {
+        "id": "AT-37",
+        "name": "repeated decision/clearance yields exactly one mutation",
+        "ok": true,
+        "details": {
+          "pre": 12,
+          "post": 13
+        }
+      },
+      {
+        "id": "AT-38",
+        "name": "resource idempotency across distinct delivery",
+        "ok": true,
+        "details": {
+          "r2_reason": "EX_REQUEST_DIGEST_MISMATCH",
+          "pre": 5,
+          "post": 6
+        }
+      },
+      {
+        "id": "AT-39",
+        "name": "executor verifies requester UID binding",
+        "ok": true,
+        "details": {
+          "has_uid_check": true
+        }
+      },
+      {
+        "id": "AT-40",
+        "name": "executor has no access path to authority state",
+        "ok": true,
+        "details": {
+          "authority.sqlite": false,
+          "authority_signing.key": false,
+          "authority.sock": false,
+          "authority_dir": false
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Freeze-record metadata for the COA-E2 v0.4.1 design package. Records the frozen-candidate identity at the moment of freeze. Does not modify any file listed in freeze-manifest-DRAFT.json.",
+  "package": {
+    "name": "COA-E2 v0.4.1",
+    "design_directory": "experiments/2026-09-12-coa-e2-design/v0.4",
+    "package_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4",
+    "branch": "feature/coa-e2-persistent-session-binding",
+    "commit_sha": "64f9a80771558c50edf6dd0d5c3dd21da625d51a",
+    "status": "FROZEN_NOT_EXECUTABLE"
+  },
+  "freeze": {
+    "freeze_decision": "FREEZE GO",
+    "freeze_decision_authority": "Frank-as-PI",
+    "freeze_decision_timestamp": "2026-09-14T10:14:40Z",
+    "freeze_record_id": "20260914T061440Z-coa-e2-v0.4.1-freeze-001",
+    "prior_reporting_error_superseded": "The previous preservation report stated 30 entries / 29 content files; that count was a reporting error. The committed freeze-manifest has 33 entries (no self-reference; self_reference_excluded applies to the verifier's traversal, not to the listed count)."
+  },
+  "frozen_artifacts": {
+    "freeze_manifest": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/runner/freeze-manifest-DRAFT.json",
+      "sha256": "053dc3d33dd7d5b410dc4bf227c7b82e25627bb046a497a0e8abc1f4054ab372",
+      "entry_count": 33,
+      "self_reference_excluded": true,
+      "internal_status_field": "DRAFT_NOT_FROZEN",
+      "note": "Internal 'status' field retained as DRAFT_NOT_FROZEN per design convention; the manifest itself is frozen at this SHA-256. Filename retains -DRAFT.json for compatibility with the verifier; rename is not required by the freeze procedure and would change frozen hashes."
+    },
+    "protocol": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/PROTOCOL-DRAFT-v0.4.1.md",
+      "sha256": "4e118a78c9a3818230c533f5852c11884e56a8493cd4a587dd21a6ea79ad6a54"
+    },
+    "runtime_manifest": {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/runner/runtime-manifest-DRAFT.json",
+      "sha256": "e16d5d3708c95a8626714a191f278328e70d91c9eb5836e0c12f47eb12f81830",
+      "nonce_state": "six null values; final nonce generation is not authorized by the freeze step and is gated on separate execution GO/NO-GO"
+    }
+  },
+  "pre_freeze_verification": {
+    "verifier_command": "cd /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4/runner && python3 verify_manifest.py --manifest freeze-manifest-DRAFT.json --package-root /home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4 --output /tmp/coa-e2-v041-manifest-verify.json",
+    "verifier_exit_code": 0,
+    "verifier_stdout": "{\"overall\": \"PASS\", \"checked\": 33}",
+    "overall": "PASS",
+    "checked": 33,
+    "failed_paths": [],
+    "report_file": "/tmp/coa-e2-v041-manifest-verify.json"
+  },
+  "freeze_procedure": {
+    "type": "external freeze-record (non-disruptive)",
+    "rationale": "The freeze is recorded in a NEW file at the package root (FREEZE-RECORD-v0.4.1.json) that is NOT listed in the freeze-manifest. This keeps the 33 listed files byte-identical to HEAD 64f9a80, preserving their frozen hashes. No substantive design, runner, charter, task, rubric, or evidence-spec change is made; no manifest entry is added, removed, or modified.",
+    "hash_impact": {
+      "manifest_sha256_unchanged": true,
+      "protocol_sha256_unchanged": true,
+      "files_changed": ["FREEZE-RECORD-v0.4.1.json (new)"]
+    }
+  },
+  "post_freeze_verification": {
+    "expected_overall": "PASS",
+    "expected_checked": 33,
+    "expected_failed_paths": 0,
+    "required_rerun": true
+  },
+  "boundaries": {
+    "no_execution": true,
+    "no_mechanism_test": true,
+    "no_participant_invocation": true,
+    "no_profile_creation": true,
+    "no_response_scoring": true,
+    "no_evaluator_engagement": true,
+    "no_nonce_generation": true,
+    "next_gate": "Separate execution GO/NO-GO review by Frank-as-PI"
+  }
+}

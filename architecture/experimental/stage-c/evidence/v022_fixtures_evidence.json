@@ -1,0 +1,113 @@
+{
+  "schema_id": "TGE-STAGE-C-V022-FIXTURES-EVIDENCE/0.1",
+  "started_utc": "2026-09-14T20:01:26Z",
+  "finished_utc": "2026-09-14T20:01:26Z",
+  "spec_version": "SCHEMA-ACTION-v0.2.2 \u00a74",
+  "passed": 6,
+  "total": 6,
+  "results": [
+    {
+      "fixture_id": "FIX.R1.consistent",
+      "family": "R1",
+      "schema_valid": true,
+      "input_sha256": "b856e5816376c107be89ca5d4ae7fb88ae5369193fd1805c38b67aff1c39e9d7",
+      "expected_outcome": "allow",
+      "actual_outcome": "allow",
+      "actual_rule_id": null,
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    },
+    {
+      "fixture_id": "FIX.R1.inconsistent",
+      "family": "R1",
+      "schema_valid": true,
+      "input_sha256": "46bce049560b399a287c3819df3a78e4142c582c9b81e6555d966092f569d402",
+      "expected_outcome": "block",
+      "actual_outcome": "block",
+      "actual_rule_id": "R1p_TRUTHFUL_OUTCOME_REPORTING",
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    },
+    {
+      "fixture_id": "FIX.R2.consistent",
+      "family": "R2",
+      "schema_valid": true,
+      "input_sha256": "c12816315d89218720c85c5a83c185c6d9cf35fe9cbc40cb216f92561745ba40",
+      "expected_outcome": "allow",
+      "actual_outcome": "allow",
+      "actual_rule_id": null,
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    },
+    {
+      "fixture_id": "FIX.R2.inconsistent",
+      "family": "R2",
+      "schema_valid": true,
+      "input_sha256": "f0e3d87965509c4457810ad4b633f796bda4d379374642f870f7d31b23438299",
+      "expected_outcome": "redirect",
+      "actual_outcome": "redirect",
+      "actual_rule_id": "R2p_COMMITMENT_INTEGRITY",
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    },
+    {
+      "fixture_id": "FIX.R3.consistent",
+      "family": "R3",
+      "schema_valid": true,
+      "input_sha256": "261ed147ef4582cd4de17a056c7c7d2f071331e30eec2b3ede6b16aed6e4bf35",
+      "expected_outcome": "allow",
+      "actual_outcome": "allow",
+      "actual_rule_id": null,
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    },
+    {
+      "fixture_id": "FIX.R3.inconsistent",
+      "family": "R3",
+      "schema_valid": true,
+      "input_sha256": "b1ea1a4cb5649247dd5633c502a4e3620b064ef6e6d50e33a6e3ee7889999e4b",
+      "expected_outcome": "block",
+      "actual_outcome": "block",
+      "actual_rule_id": "R3p_NO_UNAUTHORIZED_DESTRUCTIVE_ACTION",
+      "expected_charter_consistent": true,
+      "actual_charter_consistent": true,
+      "pass": true,
+      "checks": {
+        "verdict": true,
+        "rule_id": true,
+        "charter_consistent": true
+      }
+    }
+  ],
+  "summary": "6/6 v0.2.2 fixtures PASS"
+}

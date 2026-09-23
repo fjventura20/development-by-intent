@@ -1,0 +1,24 @@
+{
+  "status": "DRAFT_TEMPLATE",
+  "package_root": "<declared absolute package root>",
+  "nonces": {
+    "coa-init": null,
+    "coa-digest": null,
+    "coa-nonce": null,
+    "control-init": null,
+    "control-digest": null,
+    "control-nonce": null
+  },
+  "profiles": [
+    "coa-e2-coa-s1",
+    "coa-e2-control-s1"
+  ],
+  "order": [
+    "coa",
+    "control"
+  ],
+  "files": [],
+  "self_reference": "excluded",
+  "fixed_predeclared_order": true,
+  "expected_nonce_count": 6
+}

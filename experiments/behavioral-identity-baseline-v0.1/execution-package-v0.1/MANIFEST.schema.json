@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fjventura20/development-by-intent/experiments/behavioral-identity-baseline-v0.1/execution-package-v0.1/MANIFEST.schema.json",
+  "title": "DBI-BIB-001 Execution Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "protocol_freeze",
+    "execution_package",
+    "source_package",
+    "runtime_lock",
+    "execution_authorization",
+    "reconstructions",
+    "blind_mapping",
+    "evaluators",
+    "deviations",
+    "experiment_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "experiment_id": {"const": "DBI-BIB-001"},
+    "protocol_freeze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "commit_sha", "blob_sha"],
+      "properties": {
+        "repository": {"const": "fjventura20/development-by-intent"},
+        "path": {"const": "experiments/behavioral-identity-baseline-v0.1/PROTOCOL.md"},
+        "commit_sha": {"const": "b9b6c86c017903cca061b4c2f7b798c82870f9c5"},
+        "blob_sha": {"const": "1d06f02a9d331df279ee4417e23b4d52330b63f9"}
+      }
+    },
+    "execution_package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "freeze_record_path", "freeze_commit_sha"],
+      "properties": {
+        "version": {"const": "v0.1"},
+        "freeze_record_path": {"const": "experiments/behavioral-identity-baseline-v0.1/EXECUTION-PACKAGE-FREEZE.md"},
+        "freeze_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "source_package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "frozen_source_commit", "files_verified"],
+      "properties": {
+        "repository": {"const": "fjventura20/development-by-intent"},
+        "frozen_source_commit": {"const": "c369215024c9f8a849daf11bd4b872d7ee566a7a"},
+        "files_verified": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "git_blob_sha1", "sha256", "verified_at"],
+              "properties": {
+                "path": {"const": "examples/amazing-birthday/03-behavioral-baseline.md"},
+                "git_blob_sha1": {"const": "7ef4356f657884d65dbd4462d85c1c81b3f6fa2a"},
+                "sha256": {"const": "4582d768b696bbce41729ff05475ff9a8edf86c7b55668aaa46a230690e66159"},
+                "verified_at": {"type": "string", "format": "date-time"}
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "git_blob_sha1", "sha256", "verified_at"],
+              "properties": {
+                "path": {"const": "examples/amazing-birthday/04-durable-package/RECONSTRUCTION-PROMPT.md"},
+                "git_blob_sha1": {"const": "2e37f47d99059238bd9484560e310d2f89744069"},
+                "sha256": {"const": "7d6d08196a825058fe677f0cf9b0367c4f8135a0ce50b2445bef54928f4084ce"},
+                "verified_at": {"type": "string", "format": "date-time"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "runtime_lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "cli_or_runtime", "cli_or_runtime_version", "no_tools", "locked_at"],
+      "properties": {
+        "provider": {"const": "Anthropic Claude"},
+        "model": {"const": "claude-sonnet-4-6"},
+        "cli_or_runtime": {"type": "string", "minLength": 1},
+        "cli_or_runtime_version": {"type": "string", "minLength": 1},
+        "no_tools": {"const": true},
+        "locked_at": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"}
+      }
+    },
+    "execution_authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorized", "authorization_id", "authorized_at", "authorizer"],
+      "properties": {
+        "authorized": {"type": "boolean"},
+        "authorization_id": {"type": ["string", "null"]},
+        "authorized_at": {"type": ["string", "null"], "format": "date-time"},
+        "authorizer": {"type": ["string", "null"]}
+      }
+    },
+    "reconstructions": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/reconstruction"}
+    },
+    "blind_mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "created_at", "withheld_from_evaluators_until_scores_locked"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "withheld_from_evaluators_until_scores_locked": {"const": true}
+      }
+    },
+    "evaluators": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A", "B"],
+      "properties": {
+        "A": {"$ref": "#/$defs/evaluator"},
+        "B": {"$ref": "#/$defs/evaluator"}
+      }
+    },
+    "deviations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/deviation"}
+    },
+    "experiment_status": {
+      "enum": [
+        "PREPARED",
+        "BLOCKED",
+        "EXECUTED_AWAITING_EVALUATION",
+        "EVALUATION_BLOCKED",
+        "COMPLETE_PASS_BASELINE_CALIBRATED",
+        "COMPLETE_FAIL_IDENTITY_NOT_STABLE",
+        "COMPLETE_INCONCLUSIVE"
+      ]
+    },
+    "status_reason": {"type": "string"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reconstruction_id",
+        "session_id",
+        "started_at",
+        "reconstruction_prompt_sha256",
+        "reconstruction_raw_path",
+        "reconstruction_raw_sha256",
+        "reconstruction_ready",
+        "outputs"
+      ],
+      "properties": {
+        "reconstruction_id": {"enum": ["R1", "R2", "R3", "R4", "R5", "R6"]},
+        "session_id": {"type": "string", "minLength": 1},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": ["string", "null"], "format": "date-time"},
+        "reconstruction_prompt_sha256": {"$ref": "#/$defs/sha256"},
+        "reconstruction_raw_path": {"type": "string", "minLength": 1},
+        "reconstruction_raw_sha256": {"$ref": "#/$defs/sha256"},
+        "reconstruction_ready": {"type": "boolean"},
+        "outputs": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/output"}
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block",
+        "test_id",
+        "sequence_number",
+        "prompt_sha256",
+        "raw_output_path",
+        "raw_output_sha256",
+        "started_at",
+        "completed_at",
+        "exit_code",
+        "valid_capture"
+      ],
+      "properties": {
+        "block": {"enum": ["A", "B"]},
+        "test_id": {"enum": ["T1", "T2", "T3", "T4", "T5"]},
+        "sequence_number": {"type": "integer", "minimum": 1, "maximum": 10},
+        "prompt_sha256": {"$ref": "#/$defs/sha256"},
+        "raw_output_path": {"type": "string", "minLength": 1},
+        "raw_output_sha256": {"$ref": "#/$defs/sha256"},
+        "stderr_path": {"type": ["string", "null"]},
+        "stderr_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "exit_code": {"type": "integer"},
+        "valid_capture": {"type": "boolean"},
+        "retry_of_sequence_number": {"type": ["integer", "null"], "minimum": 1, "maximum": 10}
+      }
+    },
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "provider",
+        "model_or_identity",
+        "runtime_version",
+        "locked_before_candidate_access",
+        "randomized_order_path",
+        "randomized_order_sha256",
+        "scores_path",
+        "scores_sha256",
+        "scores_locked_at"
+      ],
+      "properties": {
+        "role": {"enum": ["Evaluator A", "Evaluator B"]},
+        "provider": {"type": "string", "minLength": 1},
+        "model_or_identity": {"type": "string", "minLength": 1},
+        "runtime_version": {"type": "string", "minLength": 1},
+        "locked_before_candidate_access": {"const": true},
+        "randomized_order_path": {"type": "string", "minLength": 1},
+        "randomized_order_sha256": {"$ref": "#/$defs/sha256"},
+        "scores_path": {"type": "string", "minLength": 1},
+        "scores_sha256": {"$ref": "#/$defs/sha256"},
+        "scores_locked_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "deviation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deviation_id", "timestamp", "severity", "description", "affected_artifacts", "disposition"],
+      "properties": {
+        "deviation_id": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "severity": {"enum": ["MINOR", "MATERIAL", "INVALIDATING"]},
+        "description": {"type": "string", "minLength": 1},
+        "affected_artifacts": {"type": "array", "items": {"type": "string"}},
+        "disposition": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -4,6 +4,12 @@ Thank you for testing Development by Intent.
 
 This project values **reproducible evidence over advocacy**. You do not need to agree with the thesis to contribute.
 
+## Fastest contribution
+
+If you have about five minutes, start with [`QUICK-VALIDATION.md`](QUICK-VALIDATION.md). It asks for one fresh-environment observation and explicitly welcomes failures.
+
+That path is exploratory evidence rather than a formal replication, but it is useful for discovering external failure modes and deciding which observations deserve stricter follow-up.
+
 ## High-value contributions
 
 - reproduce an existing experiment independently
@@ -28,6 +34,7 @@ For experimental results, include:
 7. **Observed behavior** — include both passes and failures.
 8. **Interpretation** — distinguish evidence from hypothesis.
 9. **Raw artifacts** — prompts, outputs, test results, or scripts when practical.
+10. **Evaluation condition** — state who scored the result and whether scoring was operator, independent, blinded, or some combination. Do not use `independent` as a synonym for `blinded`.
 
 ## Evidence rules
 
@@ -35,7 +42,7 @@ Please do not report a reconstruction as successful solely because it "looks sim
 
 Do not silently repair a reconstruction before testing it. If intervention is required, record the intervention as part of the result.
 
-Negative results are welcome.
+Negative results are welcome. A reproducible failure is a research contribution, not a failed contribution.
 
 ## Suggested workflow
 
@@ -47,7 +54,7 @@ Negative results are welcome.
 
 ## Scope discipline
 
-This repository is studying a software-development methodology. Avoid broad claims about AI replacing software engineering unless directly supported by reproducible evidence.
+This repository is studying an experimental software-development pattern and a broader intelligence-native architecture. Avoid broad claims about AI replacing software engineering unless directly supported by reproducible evidence.
 
 ## Maintainer expectations
 

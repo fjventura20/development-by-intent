@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Non-destructive supersession/erratum record for the 2026-09-14 v0.4.1 freeze. Records that the freeze is SUPERSEDED due to a procedural sequencing defect, NOT an artifact-integrity failure. The 33 candidate artifacts at frozen-candidate commit 64f9a80771558c50edf6dd0d5c3dd21da625d51a remain byte-identical; this record does not modify any of them.",
+  "supersedes": {
+    "freeze_record_id": "20260914T061440Z-coa-e2-v0.4.1-freeze-001",
+    "freeze_commit_sha": "916c9a91486172acf572462bcd8df8edaead3525",
+    "frozen_candidate_commit_sha": "64f9a80771558c50edf6dd0d5c3dd21da625d51a",
+    "supersession_timestamp": "2026-09-14T10:14:40Z (the original freeze timestamp; this record corrects the procedural classification, not the freeze itself)"
+  },
+  "classification": "FREEZE_SUPERSEDED_PRECHECK_ORDERING_DEFECT",
+  "defect_description": "PROTOCOL-DRAFT-v0.4.1.md Scope section requires a separately authorized short mechanism check — one initialization plus one resume — to PASS BEFORE freeze. The 2026-09-14 freeze occurred without that mechanism check having been performed. The frozen protocol is therefore not protocol-compliant as the execution freeze, even though the 33 candidate artifacts are byte-identical to the verified state at HEAD 64f9a80.",
+  "artifact_integrity_status": "INTACT",
+  "rationale": "This is a procedural sequencing defect, not an artifact-integrity failure. The 33 candidate artifacts at HEAD 64f9a80771558c50edf6dd0d5c3dd21da625d51a retain their verified byte identities: manifest SHA-256 053dc3d33dd7d5b410dc4bf227c7b82e25627bb046a497a0e8abc1f4054ab372, protocol SHA-256 4e118a78c9a3818230c533f5852c11884e56a8493cd4a587dd21a6ea79ad6a54, runtime-manifest SHA-256 e16d5d3708c95a8626714a191f278328e70d91c9eb5836e0c12f47eb12f81830. None were modified.",
+  "remediation": "Per Frank-as-PI corrective authorization 2026-09-14: perform the protocol-defined mechanism check next (Hermes Agent v0.21.2, one fresh isolated test profile, one initialization, capture the CLI footer/session-ID channel, one resume of that exact session ID, verify SessionDB continuity). Compare the observed real CLI session-ID/footer structure with the frozen parser in runner/run_pilot.py. Do not re-freeze until mechanism check passes.",
+  "re_freeze_state": "BLOCKED_PENDING_MECHANISM_CHECK",
+  "next_gate": "Mechanism-check PASS/FAIL evidence → separate PI decision on whether to (a) re-freeze the same 64f9a80 candidate, (b) require a narrowly revised candidate, or (c) halt",
+  "boundaries_unchanged": [
+    "no_execution",
+    "no_mechanism_test_yet (about to run)",
+    "no_participant_invocation",
+    "no_profile_creation_for_experimental_arms",
+    "no_response_scoring",
+    "no_evaluator_engagement",
+    "no_nonce_generation"
+  ]
+}

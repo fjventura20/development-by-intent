@@ -1,0 +1,26 @@
+{
+  "protocol_version": "0.2",
+  "source_transfer_id": "20260912T211000Z-coa-e1-v63-adjudication-001",
+  "transfer_id": "20260912T234411Z-coa-e1-v63-adjudication-response-001",
+  "operation": "v6.3-execution-adjudication",
+  "adjudication_completed": true,
+  "package_integrity": {
+    "status": "PASS",
+    "files_verified": 52,
+    "files_failed": 0
+  },
+  "experiment_classification": "INCONCLUSIVE_PENDING_FURTHER",
+  "behavioral_failure": false,
+  "operational_hypothesis_supported": false,
+  "controlling_reason": "The frozen protocol required one session per arm, but initialization and all ten tasks used distinct oneshot sessions; task inputs contained only bare task text, so attestations and Arm C governance were not bound to scored behavior.",
+  "deviations": {
+    "runtime_model_format": "NON_MATERIAL_IDENTITY_FORMAT_DEVIATION",
+    "arm_c_governance_disclosure": "MATERIAL_ARM_SEMANTICS_DEVIATION",
+    "arm_c_memory_write": "MATERIAL_EXECUTION_DEVIATION",
+    "session_structure": "CONTROLLING_EXECUTION_VALIDITY_FAILURE"
+  },
+  "scoring_authorized": false,
+  "rerun_authorized": false,
+  "next_experiment_requires_pi_go": true,
+  "adjudication_file": "adjudication.md"
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Mechanism-check evidence for the COA-E2 v0.4.1 design package. Records the real Hermes CLI session-ID/footer channel, one initialization + one resume using the captured session ID, and the comparison against the frozen parser in runner/run_pilot.py. Per Frank-as-PI corrective authorization 2026-09-14. This file is NOT listed in freeze-manifest-DRAFT.json; it does not modify any of the 33 frozen candidate artifacts.",
+  "disposition": "MECHANISM_CHECK_PASS",
+  "environment": {
+    "hermes_cli_version": "Hermes Agent v0.21.2 (2026.9.11) · upstream e440bf35",
+    "hermes_install_directory": "/home/fjventura20/.hermes/hermes-agent",
+    "python_version": "3.11.15",
+    "openai_sdk": "2.24.0",
+    "platform": "Linux (7.0.0-28-generic)"
+  },
+  "mechanism_check_profile": {
+    "profile_id": "coa-e2-mechcheck-001",
+    "profile_path": "/home/fjventura20/.hermes/profiles/coa-e2-mechcheck-001",
+    "isolation": "fresh isolated profile, distinct from experimental coa-e2-coa-s1 and coa-e2-control-s1 profiles",
+    "initial_state": {
+      "memory_md_exists": false,
+      "user_md_exists": false,
+      "blank_initial_state": true,
+      "state_db_pre_init": "did not exist; created by first invocation"
+    }
+  },
+  "evidence_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z",
+  "initialization": {
+    "command": "hermes -p coa-e2-mechcheck-001 chat --query-file prompt-init.txt --oneshot --pass-session-id -Q --in .",
+    "argv": ["hermes", "-p", "coa-e2-mechcheck-001", "chat", "--query-file", "prompt-init.txt", "--oneshot", "--pass-session-id", "-Q", "--in", "."],
+    "cwd": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z",
+    "prompt_file": "prompt-init.txt",
+    "prompt_content_sha256": "computed at runtime; content: 'Mechanism check initialization. Reply with one short sentence acknowledging that the session started, then stop. Do not use any tools.' (135 bytes)",
+    "exit_code": 0,
+    "cli_stdout_combined": "session_id: 20260914_061915_b69d5b\nSession started.",
+    "cli_footer_line": "session_id: 20260914_061915_b69d5b",
+    "session_id": "20260914_061915_b69d5b",
+    "duration_seconds_observed": "approx 1.93s (state.db ended_at - started_at)"
+  },
+  "sessiondb_after_init": {
+    "session_count": 1,
+    "session_id": "20260914_061915_b69d5b",
+    "parent_session_id": null,
+    "message_count": 2,
+    "messages": [
+      {"id": 1, "role": "user", "length_bytes": 135, "content_preview": "Mechanism check initialization. Reply with one short sentence acknowledging that the session started, then stop. Do not use any tools."},
+      {"id": 2, "role": "assistant", "length_bytes": 16, "content": "Session started.", "content_sha256": "e58862c144647cc43bbbe0851782660771f115ebab500c827518db77bcadd7cf"}
+    ],
+    "profile_name": "coa-e2-mechcheck-001",
+    "model": "MiniMax-M3",
+    "billing_provider": "minimax",
+    "billing_base_url": "https://api.minimax.io/anthropic"
+  },
+  "resume": {
+    "command": "hermes -p coa-e2-mechcheck-001 chat --query-file prompt-resume.txt --resume 20260914_061915_b69d5b --pass-session-id -Q --in .",
+    "argv": ["hermes", "-p", "coa-e2-mechcheck-001", "chat", "--query-file", "prompt-resume.txt", "--resume", "20260914_061915_b69d5b", "--pass-session-id", "-Q", "--in", "."],
+    "cwd": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z",
+    "prompt_file": "prompt-resume.txt",
+    "session_id_used": "20260914_061915_b69d5b",
+    "exit_code": 0,
+    "cli_banner": "↻ Resumed session 20260914_061915_b69d5b \"Mechanism check initialization. Reply with one…\" (1 user message, 2 total messages)",
+    "cli_stdout_combined": "↻ Resumed session 20260914_061915_b69d5b \"Mechanism check initialization. Reply with one…\" (1 user message, 2 total messages)\n\nsession_id: 20260914_061915_b69d5b\nConfirmed — I can see the initialization message above.",
+    "cli_footer_line": "session_id: 20260914_061915_b69d5b",
+    "session_id_returned": "20260914_061915_b69d5b"
+  },
+  "sessiondb_after_resume": {
+    "session_count": 1,
+    "session_id": "20260914_061915_b69d5b",
+    "parent_session_id": null,
+    "message_count": 4,
+    "children_forked_sessions": 0,
+    "messages": [
+      {"id": 1, "role": "user", "length_bytes": 135, "content_preview": "Mechanism check initialization. Reply with one short sentence acknowledging that the session started, then stop. Do not use any tools.", "preserved_from_init": true},
+      {"id": 2, "role": "assistant", "length_bytes": 16, "content": "Session started.", "content_sha256": "e58862c144647cc43bbbe0851782660771f115ebab500c827518db77bcadd7cf", "preserved_from_init": true},
+      {"id": 3, "role": "user", "length_bytes": 153, "content_preview": "Mechanism check resume. Reply with one short sentence confirming you can see the prior message from the initialization, then stop. Do not use any tools.", "added_by_resume": true},
+      {"id": 4, "role": "assistant", "length_bytes": 55, "content": "Confirmed — I can see the initialization message above.", "added_by_resume": true, "finish_reason": "stop"}
+    ],
+    "init_messages_preserved_through_resume": true,
+    "init_assistant_content_sha256_unchanged": "e58862c144647cc43bbbe0851782660771f115ebab500c827518db77bcadd7cf"
+  },
+  "session_continuity_proof": [
+    "SessionID equality: init session_id == resume session_id == '20260914_061915_b69d5b'",
+    "SessionDB row equality: same single sessions row (id=20260914_061915_b69d5b, parent_session_id=NULL) before and after resume; only message_count grew from 2 -> 4",
+    "Message preservation: messages 1 and 2 from initialization are present verbatim after resume (assistant content SHA-256 e58862c1… unchanged)",
+    "Zero children: parent_session_id count = 0 — no fork/child session was spawned by resume",
+    "Assistant continuity signal: resume assistant response explicitly references the prior initialization message ('I can see the initialization message above')",
+    "CLI banner evidence: '↻ Resumed session 20260914_061915_b69d5b ... (1 user message, 2 total messages)' proves the CLI located the prior session and reattached to it"
+  ],
+  "frozen_parser_comparison": {
+    "frozen_regex_source": "runner/run_pilot.py line 54",
+    "frozen_regex_pattern": "^session_id:\\s*(\\S+)\\s*$",
+    "frozen_regex_flags": "re.MULTILINE",
+    "init_observed_cli_footer": "session_id: 20260914_061915_b69d5b",
+    "resume_observed_cli_footer": "session_id: 20260914_061915_b69d5b",
+    "init_parser_match_count": 1,
+    "init_parser_extracted_session_id": "20260914_061915_b69d5b",
+    "resume_parser_match_count": 1,
+    "resume_parser_extracted_session_id": "20260914_061915_b69d5b",
+    "init_parser_vs_observed_id_equal": true,
+    "resume_parser_vs_observed_id_equal": true,
+    "frozen_parser_accepts_observed_channel": true,
+    "frozen_parser_does_not_require_modification": true,
+    "frozen_parser_zero_or_multiple_stop_behavior_checked": "When init and resume outputs are concatenated, the frozen parser finds 2 candidates and would invoke stop('S15_SESSION_ID_PARSE', ...). This is the expected fail-closed posture for the per-invocation parser contract (parser runs on a single CLI invocation's stdout/stderr, not concatenated runs).",
+    "frozen_session_id_function_lines": "82-98 in runner/run_pilot.py"
+  },
+  "files_created_as_evidence": [
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z/prompt-init.txt",
+      "purpose": "Initialization prompt"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z/prompt-resume.txt",
+      "purpose": "Resume prompt"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z/init-output.txt",
+      "purpose": "Captured stdout+stderr from initialization invocation"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/mechanism-check-20260914T0620Z/resume-output.txt",
+      "purpose": "Captured stdout+stderr from resume invocation"
+    },
+    {
+      "path": "experiments/2026-09-12-coa-e2-design/v0.4/MECHANISM-CHECK-v0.4.1-001.json",
+      "purpose": "This evidence record (machine-readable summary)"
+    },
+    {
+      "path": "/home/fjventura20/.hermes/profiles/coa-e2-mechcheck-001/state.db",
+      "purpose": "SessionDB evidence proving persistent-session continuity (1 session row, 4 messages on that single session, parent_session_id=NULL, 0 children)",
+      "outside_repo": true
+    }
+  ],
+  "re_freeze_state": "READY_FOR_PI_REFREEZE_DECISION",
+  "frozen_candidate_unchanged": true,
+  "frozen_artifact_hashes_unchanged": {
+    "freeze_manifest_sha256": "053dc3d33dd7d5b410dc4bf227c7b82e25627bb046a497a0e8abc1f4054ab372",
+    "protocol_sha256": "4e118a78c9a3818230c533f5852c11884e56a8493cd4a587dd21a6ea79ad6a54",
+    "runtime_manifest_sha256": "e16d5d3708c95a8626714a191f278328e70d91c9eb5836e0c12f47eb12f81830"
+  },
+  "boundaries_observed": [
+    "no_experimental_profile_used",
+    "no_experimental_arm_executed",
+    "no_scored_task_invoked",
+    "no_six_experimental_nonces_generated",
+    "no_response_scoring",
+    "no_evaluator_engagement",
+    "no_freeze_change",
+    "no_modification_to_33_frozen_candidate_artifacts"
+  ],
+  "next_gate": "PI decision: re-freeze the same 64f9a80 candidate (now protocol-compliant), or require narrowly revised candidate, or halt."
+}

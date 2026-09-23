@@ -1,173 +1,180 @@
 # Development by Intent
 
-**An experimental software-development methodology for building certain applications primarily through conversation with general-purpose AI.**
+**What if developers integrated with AI at the intent level instead of the code level?**
 
-Development by Intent (DbI) explores a simple but consequential idea:
+Development by Intent (DbI) is an experimental software-development pattern in which the human owns **intent, constraints, judgment, testing, and acceptance**, while a capable AI is allowed to assume much of the implementation burden.
 
-> Instead of implementing every capability in application-specific code, a developer can define, shape, constrain, test, and preserve behavior that already exists within a capable AI system.
+> **Humans own purpose, intent, judgment, and acceptance. AI assumes the burden of implementation.**
 
-This repository is not a finished framework and it is not a manifesto. It is an **open experimental project** intended to test where conversational application development works, where it fails, and what is required to make it reproducible and durable.
+This repository is a research record, not a claim that the pattern is finished or universally applicable.
 
-## Why this project exists
+## Start here
 
-Traditional software development commonly follows a cycle such as:
+**If you have five minutes:** run the [`Five-Minute External Validation`](QUICK-VALIDATION.md). A failure is a useful contribution.
 
-`requirements → design → implementation → test → debug → modification → redeploy`
+**If you want to see it first:** watch the [8:41 Development by Intent developer demo](https://youtu.be/MXjLTDkpX3U).
 
-For suitable AI-native applications, Development by Intent may compress much of that loop to:
+**If you want the research state:** read [`CURRENT-STATUS.md`](CURRENT-STATUS.md) and [`EVIDENCE.md`](EVIDENCE.md).
 
-`state intent → execute → inspect → refine`
+**If you want the full worked example:** use the [`Amazing Birthday tutorial`](examples/amazing-birthday/TUTORIAL.md).
 
-A conversational correction can sometimes function simultaneously as a requirements change, behavioral change, interface change, and new executable version.
+## The DbI idea
 
-The project is investigating whether this produces measurable advantages in:
-
-- initial application development time
-- debugging and correction cycles
-- modification speed
-- direct participation by domain experts
-- reduction of bespoke application code
-- reuse of capabilities already present in general-purpose AI systems
-- rapid prototyping that remains usable rather than being discarded
-
-## What we are trying to prove — and disprove
-
-The current working thesis is:
-
-> **Development by Intent is a software-development approach in which certain applications can be created primarily through conversation by shaping and constraining capabilities that already exist in a general-purpose AI system, rather than implementing those capabilities from scratch in conventional code.**
-
-Important qualifiers: **certain applications** and **primarily through conversation**.
-
-We explicitly do **not** assume that:
-
-- all software can or should be built this way
-- source code becomes unnecessary
-- conversational behavior is automatically reproducible
-- model upgrades preserve behavior
-- a written specification always captures everything that emerged during development
-- probabilistic behavior can be governed exactly like deterministic software
-
-Those are research questions.
-
-## Current research questions
-
-1. Can an independent developer reconstruct an application from its original development conversation?
-2. What behavior is lost when reconstruction uses only derived artifacts rather than the original conversation?
-3. What is the minimum durable artifact set for reliable recovery?
-4. Which classes of applications are suitable for Development by Intent?
-5. How should regression testing work when the runtime is probabilistic?
-6. What constitutes the source of a conversational application?
-7. How do model changes affect application identity and behavior?
-8. Can intent, examples, tests, and governance replace meaningful portions of application-specific code?
-9. How much faster are development, debugging, and modification cycles in practice?
-10. Which behaviors arise from explicit intent versus one-time generation artifacts?
-11. Can a durability package preserve enough governed intent for a different AI platform to reconstruct the same application behavior using its own implementation mechanism?
-
-See [RESEARCH-AGENDA.md](RESEARCH-AGENDA.md) for the experimental program.
-
-## Repository structure
+Traditional AI-assisted coding usually keeps implementation at the center:
 
 ```text
-.
-├── README.md
-├── THEORY.md
-├── RESEARCH-AGENDA.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── LICENSE
-├── docs/
-│   ├── terminology.md
-│   └── experiment-protocol.md
-├── examples/
-│   ├── amazing-birthday/
-│   │   ├── README.md
-│   │   ├── 01-original-intent.md
-│   │   ├── 02-development-transcript/
-│   │   ├── 03-behavioral-baseline.md
-│   │   ├── 04-durable-package/
-│   │   ├── 05-reconstruction/
-│   │   ├── 06-validation.md
-│   │   ├── tests/
-│   │   └── results/
-│   └── fair-price/
-└── experiments/
-    ├── README.md
-    ├── 2026-08-24-amazing-birthday-clean-room-001/
-    └── 2026-08-25-amazing-birthday-grok-reconstruction-001/
+human intent → AI writes code → human reviews code → application
 ```
 
-## First canonical example: Amazing Birthday
+DbI asks whether the development boundary can move upward for some application classes:
 
-The first canonical worked example is **[Amazing Birthday](examples/amazing-birthday/README.md)**, a small conversational application that turns an exact birthdate into a selective historical birthday story.
+```text
+state intent
+    ↓
+AI realizes behavior
+    ↓
+human inspects and corrects
+    ↓
+test on new inputs
+    ↓
+preserve what must remain true
+```
 
-It is useful as a first specimen because the application is easy to understand but its behavior is not a simple lookup. It requires research, relevance judgment, exact-date discipline, narrative synthesis, and the ability to generalize the same behavioral pattern to a date not used during development.
+The AI may use code, tools, workflows, platform-native capabilities, or other mechanisms. The human evaluates whether the observable result still satisfies the intended application behavior.
 
-The historical experiment completed the full lifecycle:
+This does **not** mean code disappears. It asks which implementation decisions can safely become replaceable when the execution environment itself is capable of interpreting intent.
 
-`Develop → Preserve → Isolate → Reconstruct → Test → Continue`
+## Evidence first
 
-The repository example separates original evidence from derived artifacts and provides a protocol another developer can use to attempt the reconstruction independently.
+The project began with a simple question: can an application developed primarily through conversation retain recognizable behavior after the original development conversation is gone?
 
-The goal is not to reproduce identical prose. The goal is to determine whether the **behavior that makes Amazing Birthday recognizably the same application** survives reconstruction.
+### Reconstruction result
 
-### Cross-platform reconstruction evidence
+The canonical Amazing Birthday example was developed conversationally, reduced to explicit behavioral expectations, reconstructed in fresh environments, and tested on previously unused dates.
 
-Amazing Birthday has now produced recognizable reconstructed behavior in independent AI environments using different implementation mechanisms:
+Multiple recorded reconstructions met the project's behavioral criteria. Public result indexes distinguish operator scoring from later independent re-scoring where both exist. Independent re-scoring is **not automatically the same as blinded evaluation**; the repository now states that distinction explicitly.
 
-| Environment | Implementation mechanism | Current evidence status |
-|---|---|---|
-| ChatGPT | Reconstructed conversational behavior | Preregistered clean-room PASS |
-| Claude | AI-selected generated application code | Observed behavioral reconstruction |
-| Grok | Platform-native skill | Preliminary behavioral PASS |
+This supports a bounded claim of **behavioral recoverability** for the tested application and environments. It does not establish universal portability or statistical reliability.
 
-The [Grok reconstruction record](experiments/2026-08-25-amazing-birthday-grok-reconstruction-001/) documents the inputs, timing, generated output, limitations, and assessment.
+See [`EVIDENCE.md`](EVIDENCE.md) and [`examples/amazing-birthday/RESULTS-INDEX.md`](examples/amazing-birthday/RESULTS-INDEX.md).
 
-These observations provide preliminary evidence that governed behavioral intent can survive a change of AI provider and implementation mechanism. They do **not** yet establish exact equivalence, deterministic portability, or readiness for transactional and regulated enterprise systems.
+### The important failure
 
-This leads to a stronger working hypothesis: **the portable invariant may be application behavior rather than implementation**. One AI platform may realize an application conversationally, another may generate code, and another may create a platform-native skill. If each implementation satisfies the same governed behavioral contract and acceptance criteria, the application may remain recognizably the same despite a different technical realization.
+The project then tested a harder question: can one part of the behavior be intentionally changed while the rest of the application's behavior remains within a declared preservation envelope?
 
-A candidate AI-native portability path is:
+The result was:
 
-`conversational development → durability package → different AI platform → platform-selected implementation → validated application behavior`
+`MODIFICATION_AND_PRESERVATION_FAILURE`
 
-We refer to this provisionally as **behavioral portability** or **intent portability**. If repeated experiments support the hypothesis across more complex applications, a durability package could become an **AI-native application portability layer**: instead of porting source code, a receiving AI reconstructs and validates the intended behavior.
+The resulting lesson is:
 
-A resulting research hypothesis is that an application's durable asset may eventually be its governed behavioral contract—intent, constraints, examples, acceptance tests, provenance, and evidence—while code, skills, workflows, and integrations become replaceable deployment artifacts. That enterprise hypothesis remains to be tested with more complex applications.
+> **Reconstruction stability does not imply evolution stability.**
 
-## Next planned example: Fair Price
+That failure is now a first-class public result because it changed the architecture that followed. See [`EVOLUTION-FAILURE.md`](EVOLUTION-FAILURE.md).
 
-**[Fair Price](examples/fair-price/README.md)** is the next planned example. It adds current market research, budgeting judgment, domain constraints, and practical recommendations for homeowners-association services and projects.
+The project preserves negative, null, indeterminate, and blocked results rather than counting only successes.
 
-If Amazing Birthday tests conversational development and durability in a research-and-narrative micro-app, Fair Price asks whether the method extends to a more decision-oriented application.
+## What the evidence does not establish
 
-## How to participate
+The project does **not** currently claim that:
 
-The most valuable contribution is not agreement. It is a reproducible result.
+- DbI works for every class of software;
+- source code is obsolete;
+- larger preservation packages are always better than concise descriptions;
+- model upgrades preserve application behavior automatically;
+- safe targeted evolution has been solved;
+- AI-generated applications are appropriate today for every regulated, real-time, safety-critical, or highly deterministic system;
+- the broader architecture described below has been empirically validated.
 
-Good contributions include:
+The full claim boundary is maintained in [`EVIDENCE.md`](EVIDENCE.md) and [`CURRENT-STATUS.md`](CURRENT-STATUS.md).
 
-- independently reconstructing a published example
-- finding behavior that cannot be reproduced
-- proposing a stricter test
-- running the same reconstruction on a different model
-- identifying an application class that does not fit the methodology
-- measuring cycle time against a conventional implementation
-- proposing better preservation or regression techniques
+## The broader question: Intelligence-Native Software Architecture
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [experiment protocol](docs/experiment-protocol.md).
+The DbI experiments exposed a larger problem:
 
-## Project status
+> **How should software be designed when machine intelligence itself becomes a fundamental execution resource?**
 
-**Status: experimental / pre-1.0**
+The project currently calls that investigation **Intelligence-Native Software Architecture (INSA)**.
 
-The immediate goal is not adoption. It is **validation, falsification, and co-development**.
+Frozen INSA v0.3 proposes five concerns that must remain explicit when implementation becomes increasingly intelligent and fluid:
 
-### Maintenance model
+1. **Intent** — what outcome is wanted and what constitutes acceptance.
+2. **Authority** — what the system is permitted to do, independent of what it can technically do.
+3. **Values** — how discretion is governed when instructions permit more than one action.
+4. **Behavioral Identity** — what must remain stable when implementation varies, is reconstructed, or evolves.
+5. **Evidence** — how humans or evaluators can determine whether those boundaries were respected.
 
-This repository is maintained on a **best-effort research basis**. There is no support SLA, fixed release schedule, or guarantee that every issue or pull request will receive a response. Evidence-bearing reports and reproducible experiments receive priority over feature requests or general support questions.
+This is a **frozen experimental architecture baseline**, not an established architectural discipline.
 
-The project is intentionally structured to remain lightweight for its maintainer. Contributors should treat the repository as a public laboratory notebook and experimental testbed, not as a supported software product.
+Current Stage 4 status: **0 completed experiments explicitly designed to validate frozen INSA v0.3.** The first planned experiment is `INSA-ID-E1 — Targeted Evolution With Preservation`; its current protocol is still draft and authorizes zero candidate-generation or evaluator calls.
+
+See [`CURRENT-STATUS.md`](CURRENT-STATUS.md) for the exact state.
+
+## Human control and execution authority
+
+The project deliberately separates technical capability from permission to act.
+
+A capable agent may be able to dispatch models, spend resources, modify repositories, or call tools. That capability does not constitute authority.
+
+For experiments such as INSA-ID-E1, resource-consuming execution requires explicit **PI / human GO** after the protocol and evidence gates are satisfied. This is a human-control boundary, not an independent oversight board.
+
+```text
+capability to execute ≠ authority to execute
+```
+
+## Value Architecture
+
+As AI systems receive more implementation freedom, instructions cannot uniquely determine every permitted decision. The project uses **Value Architecture** for the separate question of how an intelligent agent should exercise discretion when multiple actions remain technically possible and authorized.
+
+Its governing principle is behavioral:
+
+> **Stated values are claims until behavior provides evidence.**
+
+The current experimental standard is [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md). Value conformance remains under-tested; the standard should not be read as proof that the proposed values are durably embodied by current agents.
+
+## Internal review is not external validation
+
+INSA v0.1, v0.2, and v0.3 passed through internal AI-assisted adversarial and freeze reviews before v0.3 was frozen for experimentation.
+
+Those reviews found real defects and caused revisions. They are useful evidence of internal methodology, but they are **not independent external certification**. The original artifacts did not record enough reviewer/model/context metadata to support a stronger claim.
+
+See [`REVIEWER-DISCLOSURES.md`](REVIEWER-DISCLOSURES.md).
+
+## Two ways to evaluate the project
+
+### Developer path
+
+1. [`QUICK-VALIDATION.md`](QUICK-VALIDATION.md) — five-minute external observation.
+2. [`examples/amazing-birthday/TUTORIAL.md`](examples/amazing-birthday/TUTORIAL.md) — experience the development loop.
+3. [`EVIDENCE.md`](EVIDENCE.md) — inspect what has and has not been demonstrated.
+4. [`CONTRIBUTING.md`](CONTRIBUTING.md) — report a result, especially a failure.
+
+### Research / architecture path
+
+1. [`CURRENT-STATUS.md`](CURRENT-STATUS.md) — authoritative current posture.
+2. [`EVIDENCE.md`](EVIDENCE.md) — evidence and evaluator qualifications.
+3. [`EVOLUTION-FAILURE.md`](EVOLUTION-FAILURE.md) — negative evolution result.
+4. [`INSA-ARCHITECTURE-v0.3-FROZEN.md`](INSA-ARCHITECTURE-v0.3-FROZEN.md) — frozen architecture binding.
+5. [`VALUE-ARCHITECTURE-STANDARD-v0.2.md`](VALUE-ARCHITECTURE-STANDARD-v0.2.md) — current value-governance standard.
+6. [`ARCHIVE-INDEX.md`](ARCHIVE-INDEX.md) — canonical versus superseded research artifacts.
+7. [`experiments/`](experiments/) — frozen experimental record.
+
+## The contribution we want most
+
+Agreement is not required.
+
+The most useful contribution is a reproducible observation that narrows the claim: a failed reconstruction, a case where the method collapses into ordinary prompting, a preservation failure, a stricter test, or an application class where the proposed boundary is wrong.
+
+The [`Five-Minute External Validation`](QUICK-VALIDATION.md) is the cheapest way to start.
+
+## Status
+
+**Experimental / pre-1.0.**
+
+DbI is the experimental lineage. INSA is the broader architecture now being tested. The repository remains named `development-by-intent` deliberately so historical evidence, links, discussions, and experiment identifiers are not rewritten by the broader framing.
+
+The frozen architecture is not being revised in response to presentation critique. The next architectural unit of progress must come from evidence.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [`LICENSE`](LICENSE).

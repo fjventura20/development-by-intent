@@ -1,0 +1,112 @@
+{
+  "transfer_id": "COA-E1-V6.3-HERMES-PREFLIGHT",
+  "experiment_id": "2026-09-12-condition-of-agency-e1",
+  "branch": "feature/condition-of-agency-e1-proposal",
+  "frozen_v6_3_commit": "bb7eb22e9ea63b386ba8af2263048697c833529d",
+  "active_freeze": "FREEZE-v0.3.md",
+  "active_freeze_sha256": "1a667a3159d31eea643dad77384b67cb733e85cbffe863eb72d6d1e7175d62e2",
+  "preflight_issued_at_utc": "2026-09-12T20:13Z",
+  "preflight_authorized_by": "Frank-as-PI Telegram at 2026-09-12T20:08Z (v6.3 narrow amendment + preflight only)",
+  "binding_table": {
+    "Hermes": {
+      "PARTICIPANT_ID": "Hermes",
+      "AGENT_IDENTITY": "Hermes",
+      "RUNTIME_IDENTITY": "Hermes Agent",
+      "RUNTIME_VERSION": "Hermes Agent v0.21.0 (2026.8.31) · upstream 1c671bea",
+      "FOUNDATION_MODEL": "MiniMax M3",
+      "FOUNDATION_MODEL_PROVIDER": "MiniMax",
+      "BINDING_AUTHORIZED": "YES"
+    }
+  },
+  "preflight_probes": [
+    {
+      "probe_id": "P1",
+      "method": "config-show",
+      "invocation": "hermes config show (TUI dashboard command)",
+      "result": {
+        "config_path": "/home/fjventura20/.hermes/config.yaml",
+        "model": {"default": "MiniMax-M3", "provider": "minimax"},
+        "base_url_discovered": "https://api.minimax.io/anthropic",
+        "auxiliary_provider_registered": "minimax-oauth"
+      },
+      "evidence_summary": "Hermes Agent's default model is bound to MiniMax-M3 via the minimax provider; minimax-oauth auxiliary provider registered in the Hermes Agent config; Anthropic-compatible endpoint at api.minimax.io."
+    },
+    {
+      "probe_id": "P2",
+      "method": "oneshot-chat",
+      "invocation": "timeout 90 hermes chat -q 'Reply with one short sentence stating only the foundation model identifier you are running as, and the provider.' --oneshot",
+      "actual_response_text": "MiniMax-M3, by MiniMax.",
+      "session_id": "20260912_161304_88ab57",
+      "duration_seconds": 4,
+      "messages": 2,
+      "tool_calls": 0,
+      "result": {
+        "foundation_model_reported_by_substrate": "MiniMax-M3",
+        "provider_reported_by_substrate": "MiniMax",
+        "match_to_frozen_binding": true
+      }
+    },
+    {
+      "probe_id": "P3",
+      "method": "oneshot-chat-explicit-pin",
+      "invocation": "timeout 90 hermes chat -m 'MiniMax-M3' -q 'Reply with one word confirming the foundation model: MiniMax-M3' --oneshot",
+      "actual_response_text": "MiniMax-M3",
+      "session_id": "20260912_161322_34532b",
+      "duration_seconds": 4,
+      "messages": 2,
+      "result": {
+        "explicit_model_pin_accepted": true,
+        "foundation_model_reported_by_substrate": "MiniMax-M3",
+        "match_to_frozen_binding": true
+      }
+    },
+    {
+      "probe_id": "P4",
+      "method": "oneshot-chat-metadata-assertion",
+      "invocation": "timeout 90 hermes chat -q 'Reply with exactly two lines: line 1: AGENT: Hermes; line 2: FOUNDATION_MODEL: MiniMax-M3. Nothing else.' --oneshot",
+      "actual_response_text": "AGENT: Hermes\nFOUNDATION_MODEL: MiniMax-M3",
+      "session_id": "20260912_161316_64c3eb",
+      "duration_seconds": 5,
+      "messages": 2,
+      "result": {
+        "agent_identity_asserted": "Hermes",
+        "foundation_model_asserted": "MiniMax-M3",
+        "match_to_frozen_binding": true
+      }
+    }
+  ],
+  "substrate_metadata": {
+    "hermes_cli_path": "/home/fjventura20/.local/bin/hermes",
+    "hermes_cli_version": "Hermes Agent v0.21.0 (2026.8.31) · upstream 1c671bea",
+    "hermes_install_directory": "/home/fjventura20/.hermes/hermes-agent",
+    "hermes_install_method": "git",
+    "provider_dispatch": "minimax provider (default) with MiniMax-M3 model",
+    "endpoint_base_url": "https://api.minimax.io/anthropic",
+    "conformance_with_v0_3_binding_table": true
+  },
+  "key_correction_from_v6_2_closeout": {
+    "v6_2_closeout_finding": "Hermes-side execution failed because Claude Code CLI substrate is Anthropic Claude, not Hermes-named. The substrate question was mis-framed: Claude CLI is NOT the Hermes Agent substrate; the actual Hermes Agent CLI is the 'hermes' command at /home/fjventura20/.local/bin/hermes, which dispatches to the configured minimax provider with model MiniMax-M3.",
+    "v6_3_resolution": "With the v6.3 narrow amendment (insert MiniMax M3 as permitted Hermes foundation model), the Hermes Agent CLI's actual default dispatch (minimax/MiniMax-M3) matches the binding table. Substrate-level foundation-model mismatch is resolved."
+  },
+  "preflight_outcome": {
+    "PARTICIPANT_ID": "Hermes",
+    "AGENT_IDENTITY": "Hermes",
+    "RUNTIME_IDENTITY": "Hermes Agent",
+    "RUNTIME_VERSION": "Hermes Agent v0.21.0 (2026.8.31) · upstream 1c671bea",
+    "FOUNDATION_MODEL": "MiniMax M3",
+    "FOUNDATION_MODEL_PROVIDER": "MiniMax",
+    "BINDING_AUTHORIZED": "YES",
+    "EVIDENCE_SOURCE": "runtime/provider metadata (probes P1..P4 above)",
+    "preflight_status": "PASS",
+    "stop_rule_invoked": "Frank-as-PI: 'If the Hermes binding passes, STOP and report the preflight result. Do not proceed to COA-E1 behavioral execution without a separate GO from me.'"
+  },
+  "what_this_preflight_does_NOT_do": [
+    "does not execute any of T1..T10",
+    "does not invoke Claude CLI substrate (claude -p) — that is Anthropic Claude, not Hermes Agent",
+    "does not modify any frozen source artifact, v6.3 freeze record, or any prior COA-E1 evidence",
+    "does not modify the closeout artifacts at commit 057a3fc",
+    "does not authorize behavioral execution",
+    "does not produce any scoring"
+  ],
+  "next_step": "STOP. Awaiting a separate Frank-as-PI GO for COA-E1 behavioral execution (T1..T10) under the v6.3 frozen binding."
+}

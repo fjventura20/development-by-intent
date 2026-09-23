@@ -1,0 +1,37 @@
+{
+  "experiment": "live-provenance-poc-v0.2.1-two-turn",
+  "started_at_utc": 1789474153.0,
+  "stopped_at_utc": 1789474194.3127189,
+  "stop_reason": "STOPPED_BEFORE_DETERMINATION",
+  "stop_condition": "Configured provider/model endpoint returns HTTP 404. Endpoint: https://api.minimax.io/anthropic. Provider: minimax. Model: MiniMax-M3. Turn A and Turn B both failed with HTTP 404 after 3 retries. No real model response was ever received. The lifecycle hook at agent/turn_response_check.py:142 did NOT fire for either turn (model-response provenance could not be established). Per PI directive: 'Stop immediately on any ambiguity involving model-response provenance' and 'Do not repair, rerun, reinterpret, or weaken a requirement after observing a failure'.",
+  "model_provider_requested": "minimax/MiniMax-M3",
+  "model_provider_endpoint": "https://api.minimax.io/anthropic",
+  "model_response_received_turn_a": false,
+  "model_response_received_turn_b": false,
+  "lifecycle_hook_fired_turn_a": false,
+  "lifecycle_hook_fired_turn_b": false,
+  "session_acceptance_issued": false,
+  "signed_candidate_action_issued": false,
+  "negative_control_simulated_rejected": true,
+  "negative_control_rejection_reason": "acceptance_requires_lifecycle_event_source:HERMES_MODEL_RESPONSE; got:'SIMULATED_TEST_RESPONSE'",
+  "raw_request_dump_turn_a": "/home/fjventura20/.hermes/sessions/request_dump_20260915_080913_65c6f9_20260915_080930_405233.json",
+  "errors": {
+    "turn_a": "API call failed after 3 retries: HTTP 404: 404 page not found",
+    "turn_b": "API call failed after 3 retries: HTTP 404: 404 page not found",
+    "session_acceptance_issuance": "acceptance_issuance_requires_state:ACCEPTANCE_PENDING; got:SESSION_STARTED",
+    "signed_candidate_action_issuance": "action_issuance_requires_state:ACTION_PENDING; got:SESSION_STARTED"
+  },
+  "notes": [
+    "The runtime enforcement (event_source separation) WAS demonstrated:",
+    "  - record_simulated_test_response correctly produced",
+    "    event_source=SIMULATED_TEST_RESPONSE.",
+    "  - issue_session_acceptance refused with the expected error.",
+    "  - This is partial evidence: it confirms the runtime's refusal",
+    "    behavior but does NOT demonstrate that the lifecycle hook binds",
+    "    to real model responses.",
+    "No real model response was received for either turn.",
+    "The session acceptance fingerprint, signed acceptance artifact,",
+    "signed candidate action artifact, and live-provenance verification",
+    "of real artifacts were NOT produced."
+  ]
+}

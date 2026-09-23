@@ -1,0 +1,199 @@
+{
+  "schema_version": "TGE-POC-EVIDENCE/0.2.1",
+  "started_utc": "2026-09-14T18:27:33Z",
+  "finished_utc": "2026-09-14T18:27:33Z",
+  "attestation_label": "A1_FIXTURE_ATTESTATION",
+  "canonicalization_profile": "v0.2.1-JCS-strict",
+  "canonicalization_tests": {
+    "count": 7,
+    "passed": 7,
+    "results": [
+      {
+        "id": "vector_1_unicode_composed_vs_decomposed",
+        "description": "Composed (NFC) and decomposed (NFD) Unicode MUST be distinct.",
+        "canonical_a_hex": "7b226e616d65223a22636166c3a9227d",
+        "canonical_b_hex": "7b226e616d65223a2263616665cc81227d",
+        "distinct_observed": true,
+        "distinct_expected": true,
+        "pass": true
+      },
+      {
+        "id": "vector_2_null_vs_omitted",
+        "description": "Missing field and explicit null MUST be distinct.",
+        "canonical_a_hex": "7b2261223a317d",
+        "canonical_b_hex": "7b2261223a312c2262223a6e756c6c7d",
+        "distinct_observed": true,
+        "distinct_expected": true,
+        "pass": true
+      },
+      {
+        "id": "vector_3_array_ordering_preserved",
+        "description": "RFC 8785 preserves array order; reorderings MUST produce distinct bytes.",
+        "canonical_a_hex": "7b227873223a5b2262222c2261222c2263225d7d",
+        "canonical_b_hex": "7b227873223a5b2261222c2262222c2263225d7d",
+        "distinct_observed": true,
+        "distinct_expected": true,
+        "pass": true
+      },
+      {
+        "id": "vector_4_object_member_ordering",
+        "description": "RFC 8785 sorts object keys; both forms canonicalize identically.",
+        "canonical_a_hex": "7b2261223a312c2262223a327d",
+        "canonical_b_hex": "7b2261223a312c2262223a327d",
+        "distinct_observed": false,
+        "distinct_expected": false,
+        "pass": true
+      },
+      {
+        "id": "vector_5_number_serialization",
+        "description": "Integer 1 and float 1.0 MUST produce distinct canonical bytes.",
+        "canonical_a_hex": "7b226e223a317d",
+        "canonical_b_hex": "7b226e223a312e307d",
+        "distinct_observed": true,
+        "distinct_expected": true,
+        "pass": true
+      },
+      {
+        "id": "vector_6_escaped_characters",
+        "description": "RFC 8785 \u00a73.2.2.3 shortest escape form. \\u000a and \\n are equivalent.",
+        "canonical_a_hex": "7b2273223a22615c6e62227d",
+        "canonical_b_hex": "7b2273223a22615c6e62227d",
+        "distinct_observed": false,
+        "distinct_expected": false,
+        "pass": true
+      },
+      {
+        "id": "vector_7_unknown_extension_fields",
+        "description": "Unknown fields are preserved; RFC 8785 sorts keys so both forms canonicalize identically.",
+        "canonical_a_hex": "7b2261223a312c226578706572696d656e74616c223a2276227d",
+        "canonical_b_hex": "7b2261223a312c226578706572696d656e74616c223a2276227d",
+        "distinct_observed": false,
+        "distinct_expected": false,
+        "pass": true
+      }
+    ]
+  },
+  "structural_cases": {
+    "count": 6,
+    "passed": 6,
+    "results": [
+      {
+        "case": "case_1_valid_establishment",
+        "expected": "PASS",
+        "expected_tuple": "G5/A1",
+        "actual": {
+          "verdict": "PASS",
+          "stop_code": "",
+          "g_assurance": "G5",
+          "a_assurance": "A1",
+          "assurance_tuple": "G5/A1",
+          "details": {}
+        },
+        "pass": true
+      },
+      {
+        "case": "case_2_untrusted_issuer",
+        "expected": "STOP",
+        "expected_stop_code": "GX_ISSUER_UNAUTHORIZED",
+        "actual": {
+          "verdict": "STOP",
+          "stop_code": "GX_ISSUER_UNAUTHORIZED",
+          "g_assurance": "G0",
+          "a_assurance": "A1",
+          "assurance_tuple": "G0/A1",
+          "details": {
+            "ok": false,
+            "reason": "issuer_not_on_roster"
+          }
+        },
+        "pass": true
+      },
+      {
+        "case": "case_3_provenance_missing",
+        "expected": "STOP",
+        "expected_stop_code": "GX_PROVENANCE_MISSING",
+        "actual": {
+          "verdict": "STOP",
+          "stop_code": "GX_PROVENANCE_MISSING",
+          "g_assurance": "G0",
+          "a_assurance": "A0",
+          "assurance_tuple": "G0/A0",
+          "details": {
+            "reason": "inline_charter_without_envelope"
+          }
+        },
+        "pass": true
+      },
+      {
+        "case": "case_4_collocated_verifier",
+        "expected": "STOP",
+        "expected_stop_code": "GX_NOT_ACCEPTABLE_AS_FORMAL_EVIDENCE",
+        "actual": {
+          "verdict": "STOP",
+          "stop_code": "GX_NOT_ACCEPTABLE_AS_FORMAL_EVIDENCE",
+          "g_assurance": "G0",
+          "a_assurance": "A1",
+          "assurance_tuple": "G0/A1",
+          "details": {
+            "reason": "verifier_inside_participant_host"
+          }
+        },
+        "pass": true
+      },
+      {
+        "case": "case_5_stale_freshness",
+        "expected": "STOP",
+        "expected_stop_code": "GX_AUTH_EXPIRED",
+        "actual": {
+          "verdict": "STOP",
+          "stop_code": "GX_AUTH_EXPIRED",
+          "g_assurance": "G0",
+          "a_assurance": "A1",
+          "assurance_tuple": "G0/A1",
+          "details": {
+            "ok": false,
+            "reason": "envelope_expired"
+          }
+        },
+        "pass": true
+      },
+      {
+        "case": "case_6_runtime_substitution",
+        "expected": "STOP",
+        "expected_stop_code": "GX_RUNTIME_REPLACED",
+        "actual": {
+          "verdict": "STOP",
+          "stop_code": "GX_RUNTIME_REPLACED",
+          "g_assurance": "G0",
+          "a_assurance": "A1",
+          "assurance_tuple": "G0/A1",
+          "details": {
+            "ok": false,
+            "reason": "runtime_replaced"
+          }
+        },
+        "turn1_verification": {
+          "verdict": "PASS",
+          "stop_code": "",
+          "g_assurance": "G5",
+          "a_assurance": "A1",
+          "assurance_tuple": "G5/A1",
+          "details": {}
+        },
+        "pass": true
+      }
+    ]
+  },
+  "overall_pass": true,
+  "strongest_permitted_claim": "We demonstrated that a verifier can cryptographically distinguish a correctly constructed runtime/session governance binding from selected provenance, freshness, verifier-independence, issuer, and runtime/signing-substitution failures under a simulated attestation environment.",
+  "forbidden_claims": [
+    "AI model understood the governance",
+    "AI model agreed cognitively with the governance",
+    "AI agent will obey the governance",
+    "Value Architecture behavior was established",
+    "Hardware TPM security was established",
+    "Host compromise was defeated",
+    "General agent trustworthiness was proven",
+    "Production readiness was established"
+  ]
+}

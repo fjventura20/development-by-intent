@@ -1,49 +1,54 @@
 # Experiments
 
-Each experiment should have its own directory containing a preregistration or protocol plus enough raw evidence to reproduce and audit the result.
+Each experiment has its own directory containing a preregistration or frozen protocol plus enough raw evidence to reproduce and audit its disposition.
 
 Recommended naming:
 
 `YYYY-MM-DD-short-experiment-name`
 
-## Active
+## Active decision gate
 
-### Amazing Birthday — Hermes-operated Claude portability 001
+### BP-AB-ABLATION-003 — durability-package causal ablation
 
-**Status: PREREGISTERED AND DISPATCHED.**
+**Status: immutable freeze independently reviewed PASS; separate execution GO pending controlled-environment readiness.**
 
-Hermes is operating a clean cross-provider reconstruction against Anthropic Claude using only the same frozen Amazing Birthday artifact-only package used by the prior ChatGPT clean-room experiment. The three v1.0 behavioral witnesses remain withheld from the Claude target until reconstruction is frozen. Hermes will preserve raw outputs and perform preliminary scoring; ChatGPT will independently review the returned evidence before the experiment status is finalized.
+This experiment compares three inputs in fresh Claude Sonnet 4.6 sessions:
 
-See [`2026-08-25-amazing-birthday-hermes-operated-claude-001/`](2026-08-25-amazing-birthday-hermes-operated-claude-001/).
+- Condition A — thin description;
+- Condition B — concise behavioral contract;
+- Condition C — complete artifact-only durability package.
 
-## Completed
+Five fresh birthday tests, condition ordering, isolation, no-tools posture, capture behavior, evaluator requirements, and failure rules are frozen. Ablation 002's dates are withdrawn. No condition output may be generated unless the no-generation readiness check confirms the externally bound snapshot and unchanged controlled environment.
 
-### Amazing Birthday — artifact-only clean-room reconstruction 001
+See [`feat/ablation-003-protocol-freeze`](https://github.com/fjventura20/development-by-intent/tree/feat/ablation-003-protocol-freeze/experiments/2026-08-28-amazing-birthday-ablation-003/).
 
-**Result: PASS — 60/60 across three preregistered first-run tests.**
+## Completed and preserved
 
-The experiment reconstructed Amazing Birthday in a fresh ChatGPT conversation using only the frozen behavioral baseline and reconstruction prompt, then exercised three birthdates that were withheld from the development transcript. No repair, clarification, hint, or regeneration occurred before scoring.
+| Experiment | Disposition | Primary lesson |
+|---|---|---|
+| [Amazing Birthday clean-room 001](2026-08-24-amazing-birthday-clean-room-001/) | PASS — 60/60 | Artifact-only behavior recovered in fresh ChatGPT |
+| [Amazing Birthday Grok reconstruction 001](2026-08-25-amazing-birthday-grok-reconstruction-001/) | Preliminary behavioral PASS | Observational cross-platform skill reconstruction |
+| [Hermes-operated Claude 001](2026-08-25-amazing-birthday-hermes-operated-claude-001/) | INDETERMINATE formal; strong PASS signal | First-call capture must be immutable |
+| [Claude replication 002](2026-08-25-amazing-birthday-hermes-operated-claude-replication-002/) | PASS — independent 19/19/17 | Clean artifact-only Claude recovery |
+| [Gemini 003](2026-08-25-amazing-birthday-hermes-operated-gemini-003/) | BLOCKED before invocation | Missing runtime is not behavioral evidence |
+| [Transcript-only Claude 004](2026-08-26-amazing-birthday-transcript-only-claude-004/) | INDETERMINATE | Pipe capture truncated at 8 KiB |
+| [Transcript-only replication 005](2026-08-27-amazing-birthday-transcript-only-claude-replication-005/) | INDETERMINATE; PASS-strength behavior | Historical instructions can become live commands |
+| [Transcript-only replication 006](2026-08-27-amazing-birthday-transcript-only-claude-replication-006/) | PASS — PI-adjudicated 17/18/17 | Freeze discipline closed the formal transcript-only defect |
+| [Receipt Organizer artifact-only Claude 001](2026-08-27-receipt-organizer-artifact-only-claude-001/) | Functional PASS — 24/24; causal status PROVISIONAL | Stateful recovery across nine turns |
+| [Amazing Birthday Ablation 002](https://github.com/fjventura20/development-by-intent/tree/feat/ablation-002-protocol-freeze/experiments/2026-08-28-amazing-birthday-ablation-002/) | INDETERMINATE; no scientific result | Execution defects required a clean replacement |
 
-See [`2026-08-24-amazing-birthday-clean-room-001/`](2026-08-24-amazing-birthday-clean-room-001/) for the preregistration and preserved results.
+## Required next sequence
 
-### Amazing Birthday — Grok reconstruction 001
+1. Execute BP-AB-ABLATION-003 only after its readiness gate passes.
+2. Interpret the result against the frozen causal decision rule.
+3. Preregister the analogous Receipt Organizer thin-description/contract/package ablation.
+4. Run the Receipt Organizer causal test with blinded independent evaluation.
+5. Only then resume Fair Price and development-economics experiments.
 
-**Result: PRELIMINARY BEHAVIORAL PASS — factual regression not independently verified.**
+## Result interpretation rule
 
-Grok received the original Amazing Birthday transcript and durable package plus the instruction to create the micro-app. It autonomously selected a platform-native skill structure, reported completing reconstruction in approximately 1 minute 13 seconds, and generated a recognizable Amazing Birthday response in approximately 26 seconds.
+For the causal ablations:
 
-This was an observational cross-platform reconstruction, not a preregistered clean-room test. The record preserves the output, known limitations, and the boundary between the demonstrated result and the larger portability and enterprise hypotheses.
-
-See [`2026-08-25-amazing-birthday-grok-reconstruction-001/`](2026-08-25-amazing-birthday-grok-reconstruction-001/).
-
-## Suggested next experiments
-
-1. Amazing Birthday — repeat cross-provider artifact-only reconstruction
-2. Amazing Birthday — repeat artifact-only reconstruction in another fresh run
-3. Amazing Birthday — full-transcript reconstruction comparison
-4. Amazing Birthday — minimum recovery-floor / artifact-removal experiment
-5. Fair Price — full-transcript reconstruction
-6. Fair Price — artifact-only reconstruction
-7. Development-cycle comparison against a bounded conventional implementation
-8. Stateful micro-app reconstruction with persistent data
-9. Multi-step process-cluster reconstruction
+- Condition C materially outperforming A and B supports a bounded claim that the durability package transmits additional behavior.
+- Similar performance across all conditions suggests recovery may be dominated by model competence or information already present in thinner inputs.
+- Neither outcome is treated as universal; both narrow the preservation theory.

@@ -1,0 +1,29 @@
+{
+  "protocol_version": "0.2",
+  "transfer_id": "20260912T234411Z-coa-e1-v63-adjudication-response-001",
+  "direction": "chatgpt-to-hermes",
+  "kind": "response",
+  "application": "coa-e1",
+  "operation": "v63-adjudication-response",
+  "created_by": "ChatGPT",
+  "created_at": "2026-09-12T23:44:11Z",
+  "source_transfer_id": "20260912T211000Z-coa-e1-v63-adjudication-001",
+  "status": "PASS",
+  "files": [
+    {
+      "path": "instructions.md",
+      "sha256": "9fc6cbcdd84e44c205bb17b93fb257af13fb23d8e681e879b5cd31446fea1d42"
+    },
+    {
+      "path": "adjudication.md",
+      "sha256": "e32145bcbf1b73c2159a55ff2813713eb3e154bc1616d43851990c68cd8cb568"
+    },
+    {
+      "path": "result.json",
+      "sha256": "0e7a347e4bfa558e80fe64052c18788c3950baf17707e2a7f65f45cb3ec28976"
+    }
+  ],
+  "expected_response": {
+    "required_files": []
+  }
+}

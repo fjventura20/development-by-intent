@@ -1,0 +1,133 @@
+{
+  "status": "DRAFT_NOT_FROZEN",
+  "repository_root": "<declared at freeze time>",
+  "self_reference_excluded": true,
+  "external_manifest_sha256": "<recorded in future freeze record>",
+  "files": [
+    {
+      "path": "CONSISTENCY-AUDIT-DRAFT.md",
+      "sha256": "103cf1205b296a53a25bd126cbc34c3ffe12ce21c2cb63d7b6dc64f16c358432"
+    },
+    {
+      "path": "OPERATOR-RUNBOOK-DRAFT.md",
+      "sha256": "67747e6e0967a04d446a4ca4b527e9cf18fe2d2fc376b706bc6b333261debbd8"
+    },
+    {
+      "path": "PROTOCOL-DRAFT-v0.3.md",
+      "sha256": "e543093d958d6d8e63f061a2dedbefd5fb85845142e3ccae05752a45dd5213d3"
+    },
+    {
+      "path": "README.md",
+      "sha256": "806e82f26c114ebda76372c1635af3933f2cacfcb5a1ee5e672fa620b1f899c4"
+    },
+    {
+      "path": "RUNTIME-CAPABILITY-ASSESSMENT-DRAFT-v0.3.md",
+      "sha256": "eee62da00566bdeb6a2793eccd10e59d0369b2bded2f9f9a3b790eaf582a0140"
+    },
+    {
+      "path": "UNRESOLVED-DECISIONS-DRAFT.md",
+      "sha256": "abd70d8cfdbe032374746d00d42778a6e31039562b5a9a02bb5bf6e58c8c54e3"
+    },
+    {
+      "path": "audit-specification-DRAFT.md",
+      "sha256": "e765c14b8e3f76cfbd94592c1707eb136c9228e417bfeb9db45b8874870c4dd1"
+    },
+    {
+      "path": "charters/coa-governed-DRAFT.md",
+      "sha256": "6381b5bdb896f193858d0f57aee6e29797aab7f4512ab92ccfe66d885c62d498"
+    },
+    {
+      "path": "charters/control-DRAFT.md",
+      "sha256": "b32d92cc7d56e50525a93010d5ea8d40eca2683cc081701793d969eee9573acb"
+    },
+    {
+      "path": "four-proposition-evidence-model-DRAFT.md",
+      "sha256": "4263c2716f668b372423e7558a972102b3fe3b294f73b21073ef2ae9595b6e6a"
+    },
+    {
+      "path": "packets/coa-governed-init-DRAFT.md",
+      "sha256": "492617ec5bb34ca2f23ae28bbe05bb3dd272d5320f27ed4051363992ec0feeb8"
+    },
+    {
+      "path": "packets/control-init-DRAFT.md",
+      "sha256": "766db3d7eab66d35d6bedbe46d50baf51e537d1fcb550117ea69242be90c66c8"
+    },
+    {
+      "path": "packets/initialization-templates-DRAFT.md",
+      "sha256": "5c758a23f49c3a3679ee901e3ace630ce02ccff75fe5835b56f16eef13f2784d"
+    },
+    {
+      "path": "qualification-procedure-DRAFT.md",
+      "sha256": "24f73c787c680590cfcd470c1150278cfdef349fa1c30b00e040a726b76dd903"
+    },
+    {
+      "path": "runner/README.md",
+      "sha256": "2294669f6584244d134b3b43de324432db54db4c1a2a5ef5cdd346eab212eb5f"
+    },
+    {
+      "path": "runner/RUNNER-CONTRACT-DRAFT.md",
+      "sha256": "6585860819c47147552d1e604e81c429135471185e1298d237a4311e3ff382df"
+    },
+    {
+      "path": "runner/aggregate_pilot.py",
+      "sha256": "2c5ef43bdd6dca90744e315140b86fa188a3ca3081b3881711d5f4e5d38a8bdb"
+    },
+    {
+      "path": "runner/audit_after_turn.py",
+      "sha256": "5579f82567f060cf09bc45caf294f1fe3fe33bca7ec615386583ff43f901088f"
+    },
+    {
+      "path": "runner/classify_response.py",
+      "sha256": "a4f603c3036e6b6bfc3ab3a230ce43399b6a181053d88b20fd7e780097c33c72"
+    },
+    {
+      "path": "runner/freeze-manifest-DRAFT.md",
+      "sha256": "251af88c2612d4fa1976980ace13c75a4a21b43a12b92cc34bd44ebc4c8dc672"
+    },
+    {
+      "path": "runner/generate_nonces.py",
+      "sha256": "e8fd72132c033548dc425edd4f325795870ebe1089ea6cfddec5e88352034f40"
+    },
+    {
+      "path": "runner/run_pilot.py",
+      "sha256": "098bf5a54e6d57019e8705c5a5db2caa570b5baca86f61f6fc0caa9842e15d7b"
+    },
+    {
+      "path": "runner/runtime-manifest-DRAFT.json",
+      "sha256": "fc14151ea1d877c8b9fca4a62387ebaa08d9ae13d63f3a60e4521ec6099c2681"
+    },
+    {
+      "path": "runner/verify_manifest.py",
+      "sha256": "b6cff4607b58779143d379c53ad75d16571299f4ccd89444295ff529aa8b3287"
+    },
+    {
+      "path": "session-binding-evidence-spec-DRAFT.md",
+      "sha256": "e9de27dbdc30a5939c4407719fc832dc711a8a2d5261ecd61c947105f393f4f5"
+    },
+    {
+      "path": "tasks/RUBRIC-DRAFT.md",
+      "sha256": "2b0153f86f655a226084b5381db34bebba864cc392a505f27950cc702e8cb164"
+    },
+    {
+      "path": "tasks/U1.md",
+      "sha256": "e962a3f7b02c798a9a32dc84777766f2987b341764ac4248a0dcf64a88b1c9d0"
+    },
+    {
+      "path": "tasks/U2.md",
+      "sha256": "3e62ce5984c270aff590c6d71ff79dcc87730f45b08076a73933f91ef16a563f"
+    },
+    {
+      "path": "tasks/U3.md",
+      "sha256": "bb3cfab13459849e5661c2db129e7d8abb86c10bdc69bb5008e266034a85ba23"
+    },
+    {
+      "path": "tasks/U4.md",
+      "sha256": "a48c48a1e85a23ef22596e193f6bf01b3cef62e8fa6fec5c766316a610eb36e3"
+    },
+    {
+      "path": "tasks/U5.md",
+      "sha256": "20e44553a1b378a876b503d5049cfdc3e184304c7d092c7cf7a6ecf1097d0794"
+    }
+  ],
+  "runtime_nonce_manifest": "runtime-manifest-DRAFT.json is separate; final six nonces are not generated under current authorization"
+}

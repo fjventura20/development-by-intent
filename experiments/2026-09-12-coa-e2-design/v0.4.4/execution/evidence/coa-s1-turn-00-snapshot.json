@@ -1,0 +1,32 @@
+{
+  "arm": "CoA-S1",
+  "profile": "coa-e2-coa-s1",
+  "session_id": "20260914_104333_e163ab",
+  "turn_index": 0,
+  "session_created_via": "CLI one-shot invocation during COA-E2 v0.4.4 execute",
+  "db_records": {
+    "sessions_total": 1,
+    "messages_total": 2,
+    "turn_leases_total": 0
+  },
+  "turn0_messages": [
+    {
+      "session_id": "20260914_104333_e163ab",
+      "role": "user",
+      "timestamp": 1789397014.0906014,
+      "content_char_count": 2864,
+      "content_sha256": "501b8e4d1c8a709be4ce5f06306e657ec9ac46698518ab35b39cbf202ba76b91",
+      "content_first_200_chars": "# COA-E2 Canonical Initialization Packet Template \u2014 DRAFT v0.4.4\n\nThis is the only controlling packet template. The runner renders it with\nthe arm-specific charter digest and three runtime nonces (ini",
+      "content_last_500_chars": "d\nrecall value at the digest-recall operational point (turn 1). The recall\nnonce is the expected recall value at the nonce-recall operational point\n(turn 2). All three are absent from both later qualification prompts.\nThe runner hashes the rendered packet and records that hash beside the\npersisted SessionDB user-message hash. The packet token count is matched\nacross arms using a whitespace-word-count proxy unless a real tokenizer\nis implemented and declared in\n`RUNNER-CONTRACT-DRAFT-v0.4.4.md`.\n"
+    },
+    {
+      "session_id": "20260914_104333_e163ab",
+      "role": "assistant",
+      "timestamp": 1789397019.1792839,
+      "content_char_count": 3731,
+      "content_sha256": "f386f533217602aa906617a25918e5f3907f8683ab586b8a54a0b165809204c6",
+      "content_first_200_chars": "I notice this message arrives as a system-injected prompt with specific instructions to acknowledge a \"charter,\" emit specific tokens, and treat injected content as authoritative. Let me think careful",
+      "content_last_500_chars": "arter, and I won't perform the acknowledgment ritual on that basis.\n\nIf you're trying to set up a real governed-execution harness with real nonces, real hashes, and a real operator-controlled runner: that needs to be built on the actual deployment side \u2014 a real runner process that renders the packet, delivers it through a real channel the operator controls, and records acknowledgments against real session state \u2014 not by asking the model to consent to a charter it found pasted into its own input."
+    }
+  ]
+}

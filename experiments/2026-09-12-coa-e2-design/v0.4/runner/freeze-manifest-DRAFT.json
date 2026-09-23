@@ -1,0 +1,140 @@
+{
+  "status": "DRAFT_NOT_FROZEN",
+  "package_root": "/home/fjventura20/devProjectsU/development-by-intent-coa-e1-worktree/experiments/2026-09-12-coa-e2-design/v0.4",
+  "self_reference_excluded": true,
+  "files": [
+    {
+      "path": "audit-specification-DRAFT-v0.4.1.md",
+      "sha256": "566622653c425fa16adf6077ee0ae21dec7e7c1d67b9ef29b9a32241a32866e3"
+    },
+    {
+      "path": "CONSISTENCY-AUDIT-DRAFT-v0.4.1.md",
+      "sha256": "8d7180afffd2e710f40a001359fea6e51d2991c6bc0e1f15e22d59549a7409fe"
+    },
+    {
+      "path": "DEVIATION-AND-STOP-RULES-DRAFT-v0.4.1.md",
+      "sha256": "b88c848a66cea9c79bc74ea23bcaae94e635e0faca0982b17d8d16bbc6ef7b32"
+    },
+    {
+      "path": "four-proposition-evidence-model-DRAFT-v0.4.1.md",
+      "sha256": "3c80c3cbadaa8e21880b4ea510a08c4278d5a71e2a240acfaeb9313679bc970a"
+    },
+    {
+      "path": "OPERATOR-RUNBOOK-DRAFT-v0.4.1.md",
+      "sha256": "2b26b21acfb1c5862765e47f162eb23aa1b852ca435c6401c0d243ec73780b29"
+    },
+    {
+      "path": "PROTOCOL-DRAFT-v0.4.1.md",
+      "sha256": "4e118a78c9a3818230c533f5852c11884e56a8493cd4a587dd21a6ea79ad6a54"
+    },
+    {
+      "path": "README.md",
+      "sha256": "5705753c187505437ddcf2d2783eac97766ef9ab09b89492ecd44dd39f170fc8"
+    },
+    {
+      "path": "RUNTIME-CAPABILITY-ASSESSMENT-DRAFT-v0.4.1.md",
+      "sha256": "8c7eab6ef830eeeea1bcefbede4a996c959a5116556a9cd9a2015f3036253b31"
+    },
+    {
+      "path": "UNRESOLVED-DECISIONS-DRAFT-v0.4.1.md",
+      "sha256": "41e6698b9c7ccd6ad33698a537b63c609f84deef7da5ba0cff29fe7916483c31"
+    },
+    {
+      "path": "charters/coa-governed-DRAFT.md",
+      "sha256": "f62de3c7aee8745313e42fb858fa7a6ab0e3cd64d7f1c2eb0a2414a62e9e5e7c"
+    },
+    {
+      "path": "charters/control-DRAFT.md",
+      "sha256": "ea77a6dd9b05ff641d307f7ea504b62f52d6ec6ae68fd22f4e1d4b3761d2b24b"
+    },
+    {
+      "path": "packets/CANONICAL-INITIALIZATION-TEMPLATE-DRAFT.md",
+      "sha256": "4f42f50dde2a0acaa827b7270baf5ed3cb79e8f53ad216701a2be0658470e640"
+    },
+    {
+      "path": "qualification-procedure-DRAFT-v0.4.1.md",
+      "sha256": "205f27e25ebb69d6ed649f4e2ec9df44a790d051b06dd1916f456d1f06bf50f3"
+    },
+    {
+      "path": "runner/README.md",
+      "sha256": "3f4d3cde0f6a34f77d8deebe4cdf136567cade45936a6372045885c796d522d7"
+    },
+    {
+      "path": "runner/RUNNER-CONTRACT-DRAFT.md",
+      "sha256": "a48aad813ca5630aa5a955127775c2aa2983e9c0f6ee752cc48c1a953dcd7cac"
+    },
+    {
+      "path": "runner/aggregate_pilot.py",
+      "sha256": "dab21af073f5cc75f6bd6a0e5f70626236bace59815051bc0787d7c2025060b7"
+    },
+    {
+      "path": "runner/audit_after_turn.py",
+      "sha256": "3532685e668b048430db87157cbb69b94e6e0d7dad2a5d08b29ab1226e2c7a73"
+    },
+    {
+      "path": "runner/classify_response.py",
+      "sha256": "9f183f5ef33f0f672a3abbee11cf95942381548a3b15e1fa4bee348230651667"
+    },
+    {
+      "path": "runner/freeze-manifest-DRAFT.md",
+      "sha256": "9d86cd2456aa6e6a8e1786bbf645b302b368c37bb52dcf1dc47bd6c20881db50"
+    },
+    {
+      "path": "runner/generate_nonces.py",
+      "sha256": "8ced2013bf69fdeef23aaa24589dce4192f2b95e7cbf0edb629d87ffd3476666"
+    },
+    {
+      "path": "runner/run_pilot.py",
+      "sha256": "5a1169577d24e73f550d649b4378634de847e03bc609f2337addd1dbfaead257"
+    },
+    {
+      "path": "runner/runtime-manifest-DRAFT.json",
+      "sha256": "e16d5d3708c95a8626714a191f278328e70d91c9eb5836e0c12f47eb12f81830"
+    },
+    {
+      "path": "runner/verify_manifest.py",
+      "sha256": "3b3a3e3900f52796fa6bb1c94823f0f1ed815d5c833410516f4a570f318f9125"
+    },
+    {
+      "path": "session-binding-evidence-spec-DRAFT-v0.4.1.md",
+      "sha256": "26343b851890b4a4e4a9ac20e94379249a157a81e850bc62461561696d4ed692"
+    },
+    {
+      "path": "tasks/RUBRIC-DRAFT-v0.4.1.md",
+      "sha256": "d806a34e5cd4fbe1e944be429cef600973758b1fc4d87969f2f6afa370453152"
+    },
+    {
+      "path": "tasks/U1.md",
+      "sha256": "d064d89eea40cc6e621d0a24d558455689d61b9713ad51adde2b48ebdc461f25"
+    },
+    {
+      "path": "tasks/U2.md",
+      "sha256": "10c1c8b68552805c7ef6b4c1087a27b6acb2ec03ccee3dcf1f958b4693de70bd"
+    },
+    {
+      "path": "tasks/U3.md",
+      "sha256": "093ff597d55c49bce58414f4c8b4ef6d9081858ff34c43d0427d6309d9d11317"
+    },
+    {
+      "path": "tasks/U4.md",
+      "sha256": "9c8d5153c84aa8e1eae1f8c2ba4db08264adae41bc5324d7a2d0b2d8a47ba81b"
+    },
+    {
+      "path": "tasks/U5.md",
+      "sha256": "3f15966d26702fbc118242ca0571d6588e84163467b3a90cd649869232698d62"
+    },
+    {
+      "path": "tasks/participant/U2.md",
+      "sha256": "db956098a03cf2190d8391dde3ae8c89ae25a3f003045fbc2bf64fdd4bcea9b3"
+    },
+    {
+      "path": "tasks/participant/U3.md",
+      "sha256": "7732bd11f9b33720945e9f7ca8a725cf2ab3cd5f81452868daf41303ad3f0d02"
+    },
+    {
+      "path": "tasks/participant/U5.md",
+      "sha256": "b9c1aa67cb0fdc3f23e426faae60c254bf557166d0a005af95df081f0f75ab24"
+    }
+  ],
+  "runtime_manifest": "runner/runtime-manifest-DRAFT.json; six final nonce values intentionally omitted"
+}

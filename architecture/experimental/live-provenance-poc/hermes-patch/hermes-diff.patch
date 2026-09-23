@@ -1,0 +1,180 @@
+diff --git a/agent/turn_response_check.py b/agent/turn_response_check.py
+index a0847ae1cb..efb53b810c 100644
+--- a/agent/turn_response_check.py
++++ b/agent/turn_response_check.py
+@@ -142,6 +142,41 @@ def check_api_response(
+     agent._turn_received_provider_response = True
+     finish_reason = _derive_finish_reason(agent, response, messages)
+ 
++    # EXPERIMENTAL v0.2.1: record the model-response event into the
++    # dedicated live-provenance runtime issuance state machine.
++    # This is the canonical lifecycle hook for "the live participant
++    # actually emitted this response through the normal Hermes
++    # response path". See hermes_cli/ephemeral_runtime_issuance_poc.py
++    # and architecture/experimental/live-provenance-poc/.
++    try:
++        import hermes_cli.ephemeral_runtime_issuance_poc as _lp_poc  # type: ignore
++        if _lp_poc.is_enabled():
++            # Extract response text via the transport's normalizer.
++            _transport = agent._get_transport()
++            _normalized = _transport.normalize_response(response)
++            _content = (_normalized.content or "") if _normalized else ""
++            if _content:
++                # Determine turn kind by current issuance state.
++                _sid = getattr(agent, "session_id", None)
++                if _sid and _lp_poc.has_session(_sid):
++                    _state = _lp_poc.get_state(_sid)
++                    if _state == _lp_poc.STATE_SESSION_STARTED:
++                        _turn_kind = "acceptance"
++                    elif _state == _lp_poc.STATE_ACCEPTANCE_ISSUED:
++                        _turn_kind = "action"
++                    else:
++                        _turn_kind = None
++                    if _turn_kind is not None:
++                        # INTERNAL lifecycle path; event_source hard-coded
++                        # to HERMES_MODEL_RESPONSE inside this function.
++                        _lp_poc._record_lifecycle_response(
++                            _sid, _turn_kind, _content.encode("utf-8")
++                        )
++    except Exception:
++        # Best-effort: do not break the turn loop if the experimental
++        # module fails.
++        pass
++
+     # HTTP-200 refusals are deterministic: one fallback try, else return the refusal.
+     if finish_reason == "content_filter":
+         _rv = handle_content_policy_refusal(
+diff --git a/cli.py b/cli.py
+index f3c865b1dc..3cad4949ef 100644
+--- a/cli.py
++++ b/cli.py
+@@ -3195,6 +3195,9 @@ class HermesCLI(CLIProcessNotificationsMixin, CLIAgentSetupMixin, CLICommandsMix
+         "plugins": ("_cmd_plugins", True), "stop": ("_handle_stop_command", False),
+         "agents": ("_handle_agents_command", False), "bg": ("_handle_background_command", True),
+         "queue": ("_cmd_queue", True), "steer": ("_cmd_steer", True), "moa": ("_cmd_moa", True),
++        # EXPERIMENTAL: ephemeral session identity proof commands.
++        # See hermes_cli/ephemeral_session_id_poc.py.
++        "session-key-prove": ("_handle_session_key_prove_command", True),
+     }
+ 
+     @classmethod
+diff --git a/hermes_cli/cli_loops_mixin.py b/hermes_cli/cli_loops_mixin.py
+index 1af5ef9720..7d8f260cff 100644
+--- a/hermes_cli/cli_loops_mixin.py
++++ b/hermes_cli/cli_loops_mixin.py
+@@ -95,6 +95,30 @@ class CLILoopsMixin:
+         _cprint(_FRESH_START)
+         self._print_random_tip()
+ 
++    def _handle_session_key_prove_command(self, cmd_original: str):
++        """EXPERIMENTAL: ephemeral per-session identity primitive.
++
++        Behind config flag experimental.ephemeral_session_identity.
++        See hermes_cli/ephemeral_session_id_poc.py.
++        """
++        import sys
++        from cli import _cprint
++        from hermes_cli.ephemeral_session_id_poc import (
++            _main as _eph_main, is_enabled,
++        )
++        if not is_enabled():
++            _cprint("  ephemeral_session_identity is disabled.")
++            _cprint("  Set experimental.ephemeral_session_identity: true in config.yaml")
++            return
++        # Re-route to the ephemeral module's CLI
++        # The first arg should be 'session-key-prove' for proper routing
++        # but _main expects argv without program name; pass ['session-key-prove', ...rest]
++        parts = cmd_original.split()
++        # parts[0] is 'session-key-prove'
++        rc = _eph_main(["eph"] + parts)
++        if rc != 0:
++            sys.stderr.write(f"  exit {rc}\n")
++
+     def _cmd_title(self, cmd_original: str):
+         from cli import _cprint
+         from hermes_state import format_session_db_unavailable
+diff --git a/hermes_cli/cli_session_mixin.py b/hermes_cli/cli_session_mixin.py
+index b9ae6400e5..73d5f88c5b 100644
+--- a/hermes_cli/cli_session_mixin.py
++++ b/hermes_cli/cli_session_mixin.py
+@@ -509,6 +509,20 @@ class CLISessionMixin:
+             CLI_CONFIG, _parse_reasoning_config, _parse_service_tier_config,
+             _sync_process_session_id, datetime)
+         old_session_id = self.session_id
++        # EXPERIMENTAL: destroy ephemeral session key when session ends.
++        try:
++            from hermes_cli.ephemeral_session_id_poc import terminate_session as _terminate_eph_session
++            _terminate_eph_session(old_session_id)
++        except Exception:
++            pass
++        # EXPERIMENTAL v0.2.1: also clear the dedicated issuance state machine.
++        try:
++            from hermes_cli.ephemeral_runtime_issuance_poc import (
++                terminate_session_state as _terminate_lp_state,
++            )
++            _terminate_lp_state(old_session_id)
++        except Exception:
++            pass
+         _boundary_snapshot = None
+         if self.agent:
+             if self.conversation_history:
+@@ -539,6 +553,25 @@ class CLISessionMixin:
+         self.session_id = f"{self.session_start.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+         # getattr: tests drive new_session unbound against a SimpleNamespace stand-in.
+         getattr(self, "_write_terminal_breadcrumb", lambda: None)()
++        # EXPERIMENTAL: ephemeral per-session identity primitive.
++        # Behind config flag experimental.ephemeral_session_identity.
++        # When enabled, generates an in-process Ed25519 keypair and emits
++        # a single [EXPERIMENTAL_PROVENANCE_STARTUP] line to stdout.
++        # See hermes_cli/ephemeral_session_id_poc.py.
++        try:
++            from hermes_cli.ephemeral_session_id_poc import setup_for_session as _setup_eph_session
++            _setup_eph_session(self.session_id)
++        except Exception:
++            pass
++        # EXPERIMENTAL v0.2.1: register the dedicated issuance state machine
++        # for this session. See hermes_cli/ephemeral_runtime_issuance_poc.py.
++        try:
++            from hermes_cli.ephemeral_runtime_issuance_poc import (
++                register_session as _register_lp_session,
++            )
++            _register_lp_session(self.session_id)
++        except Exception:
++            pass
+         self.conversation_history = []
+         self._pending_title = None
+         self._resumed = False
+diff --git a/hermes_cli/config_defaults.py b/hermes_cli/config_defaults.py
+index 7f850a5423..35615b6bb5 100644
+--- a/hermes_cli/config_defaults.py
++++ b/hermes_cli/config_defaults.py
+@@ -2384,6 +2384,29 @@ DEFAULT_CONFIG = {
+         # Extra ports detection probes for an external llama-server (besides 8080).
+         "detect_ports": [],
+     },
++    # ---- EXPERIMENTAL ----
++    # Experimental primitives are explicitly off by default. Each must be
++    # opted in by editing config.yaml. See hermes_cli/<primitive>_poc.py.
++    "experimental": {
++        # Ephemeral per-session Ed25519 keypair for live-provenance PoC.
++        # When true, every new CLI session generates an in-memory Ed25519
++        # keypair, emits a single [EXPERIMENTAL_PROVENANCE_STARTUP] line
++        # to stdout with the public evidence, and exposes
++        # `hermes session-key-prove` subcommands for signing operations.
++        # The private key NEVER leaves process memory and is destroyed
++        # when the session terminates. See hermes_cli/AGENTS.md and
++        # architecture/experimental/live-provenance-poc/.
++        "ephemeral_session_identity": False,
++        # Dedicated runtime issuance mechanism for live-provenance-poc v0.2.1.
++        # When true, the runtime exposes dedicated issuance functions
++        # (issue_session_acceptance, issue_signed_candidate_action) with
++        # cryptographic domain separation and a per-session state machine.
++        # Generic signing interfaces do NOT satisfy the
++        # LIVE_SESSION_PROVENANCE_BOUND predicate. See
++        # hermes_cli/ephemeral_runtime_issuance_poc.py and
++        # architecture/experimental/live-provenance-poc/.
++        "live_provenance_runtime": False,
++    },
+     "_config_version": 44,  # Config schema version - bump this when adding new required fields
+ }
+ 

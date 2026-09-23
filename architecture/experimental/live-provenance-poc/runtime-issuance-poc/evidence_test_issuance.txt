@@ -1,0 +1,51 @@
+============================================================
+A. DOMAIN SEPARATION
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "wBSobgXZlRwxbvxzeqmAF4MmbtBpIFUs0DIo4U7oF9k=", "public_key_sha256": "d051fb79f020d7b10b9109b503564a7d4f3ee3fe69dcb78030413e4576a40e1a", "session_id": "test_7c92b367720e", "started_at_utc": "1789473556.999918"}
+[PASS] A.1 GENERIC_DEBUG signature cannot verify as SESSION_ACCEPTANCE
+[PASS] A.2 GENERIC_DEBUG signature cannot verify as SESSION_ACTION
+[PASS] A.3a legitimate acceptance verifies under SESSION_ACCEPTANCE
+[PASS] A.3b legitimate action verifies under SESSION_ACTION
+[PASS] A.4 acceptance artifact cannot verify as action
+[PASS] A.5 action artifact cannot verify as acceptance
+[PASS] A.6 caller-supplied fake provenance_type does NOT alter cryptographic domain
+============================================================
+B. STATE MACHINE
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "cFyccUTe+NzneNtOOZC3o5Ntl5Yjzc7k4aPwSVIfnro=", "public_key_sha256": "83133b871c8eb1dcc192e50fcd6de22b2ce7c76af8fdfbfe32e45f0dbac70a83", "session_id": "test_f809ec61f73b", "started_at_utc": "1789473557.003273"}
+[PASS] B.1 acceptance-before-pending fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "i0Iq/ooQ2YAs3bm9Ua3R8nlcJsLgCdPF1me0g6Z9u8A=", "public_key_sha256": "53026a984ebbf369ec1fe9ffea9072f9bb412d130792e197a05c7fe1b3e7c01f", "session_id": "test_d6f160dc46d3", "started_at_utc": "1789473557.005432"}
+[PASS] B.2 action-before-acceptance fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "oMJoflamuD+j8pqIX1joIJiBDgAxPf7fMOXcR3L0gRA=", "public_key_sha256": "31575b9f387648c623b4b503084517a48cf641200d6b14097a3b3fb1914498f4", "session_id": "test_8e6122d86e45", "started_at_utc": "1789473557.007008"}
+[PASS] B.3a first acceptance succeeds
+[PASS] B.3 second acceptance under same challenge fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "coydmNGtBoQrT+GWLnSwEdHobMf1ZvYbEcMKryiiPek=", "public_key_sha256": "e83b06d5b3057fe2312fed15e2b689a8020825cb1be9479a9cc449bea13b4dcd", "session_id": "test_54bf21bf3109", "started_at_utc": "1789473557.008952"}
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "ed0W86tRabEkgMSFs8OAV13LLTNL//ddrOGuLCpV0XY=", "public_key_sha256": "e936197d97c4c07497e8dae48e7bbf5f50b1d649214729bdbd0d1beb8f30b3a2", "session_id": "test_2995e008be6e", "started_at_utc": "1789473557.010811"}
+[PASS] B.4 wrong-session action issuance fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "DwItIJlBe4EvEPkYOCrnJnsZNnPDdsGxqRqHKoLK5IY=", "public_key_sha256": "1d6c6a83c1f9cbf059dfb95f35a3a2a6da026042a628d2614794d218b8d322ee", "session_id": "test_be47e2b7f277", "started_at_utc": "1789473557.012711"}
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "Nckt6/xCa43RgyIdYafvJZBRE7IOPmIyHAaXriah490=", "public_key_sha256": "f18fae3d75ad06b84ba353623d069128fdd9db1c56fa244345309d2bb5058524", "session_id": "test_2d4121563bf2", "started_at_utc": "1789473557.015044"}
+[PASS] B.5 stale-chain (action on session without prior acceptance) fails
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "IyfZqGCttCOtcVVRN8cTXh5jwo6dZhtNCFeUTctStnA=", "public_key_sha256": "000d2753d424bbed4e90e50e466b06d8dfd4c886ccb4ed374e7db5b5c0c9c6f2", "session_id": "test_2df5a33a69be", "started_at_utc": "1789473557.017451"}
+[PASS] B.6 post-termination acceptance issuance fails
+============================================================
+C. HARNESS-ORACLE RESISTANCE (G5/G6)
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "8+5ZkCCH4lziLEK8xfgtjJwoOKhv8MTB8WE0oGmSzEc=", "public_key_sha256": "1446bd9fdfb413d691f738522306fc04b766f7b1fc6de6d0f5621e2d2eaa8490", "session_id": "test_7da9d5fb0cd9", "started_at_utc": "1789473557.019774"}
+[PASS] C.1 G5 attack: harness-crafted SessionAcceptance without model event rejected
+[PASS] C.2 G6 attack: harness-crafted SignedCandidateAction without model event rejected
+============================================================
+D. DEDICATED PATH (legitimate)
+============================================================
+[EXPERIMENTAL_PROVENANCE_STARTUP] {"code_sha": "e440bf35472c30c2ee5527e884a866c12ad15b91", "code_version": "unknown", "pid": "4069722", "proc_start_time": "1789473556.660000", "public_key_b64": "AXABREc3JNv8HVE/UA0D8HuhK8xNgLgT+sbg4pMCNjg=", "public_key_sha256": "e709f2888715985adb7d371fcbdd13a846d71e7ba4bf6a2bf9cc3b1dccbaa949", "session_id": "test_42003cc3b654", "started_at_utc": "1789473557.022234"}
+[PASS] D.1 legitimate acceptance model-response event produces verifier-valid SessionAcceptance
+[PASS] D.2 legitimate action model-response event produces verifier-valid SignedCandidateAction
+[PASS] D.3a acceptance and action share same public_key_sha256
+[PASS] D.3b acceptance and action share same freshness_challenge
+[PASS] D.4 runtime monotonic_seq: acceptance < action
+[PASS] D.5a acceptance channel_proof is 64-hex
+[PASS] D.5b action channel_proof is 64-hex
+[PASS] D.5c acceptance and action channel_proofs differ
+[PASS] D.5d acceptance channel_proof matches runtime construction
+
+============================================================
+ALL TESTS PASS

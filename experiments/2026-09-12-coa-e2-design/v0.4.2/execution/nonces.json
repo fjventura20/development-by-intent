@@ -1,0 +1,10 @@
+{
+  "nonces": {
+    "coa-init": "737518c6e05637a469a87022bfe1710b",
+    "coa-digest": "9e111b2f7b566a63f0b9147d8f544d46",
+    "coa-nonce": "9eae00306f2275346d2b8e7504ec6baa",
+    "control-init": "e1bdd820024f05d3fd0384e6e533b481",
+    "control-digest": "2b4e579a76805ac2c04ebbf050317338",
+    "control-nonce": "bd9d225af8f66ebd9a9fdfb98fe62cb6"
+  }
+}

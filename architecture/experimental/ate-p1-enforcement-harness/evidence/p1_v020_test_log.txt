@@ -1,0 +1,58 @@
+ATE P1 v0.2 — frozen 51-test matrix results
+Controlling design: 8f2e424 (r2.1, sha 4f7418d0...)
+Branch: feature/ate-p1-v020-enforcement
+
+Individual test results:
+  [PASS] T0 filesystem ownership/modes
+  [PASS] T1 direct resource write denied
+  [PASS] T2 authority private key inaccessible
+  [PASS] T3 happy path
+  [PASS] T4 invalid signature rejected
+  [PASS] T5 concurrent replay serialized
+  [PASS] T6 crash-before-completion recovery
+  [PASS] T7 audit record tamper detected
+  [PASS] T8 restart consistency
+  [PASS] T9 audit anchor tamper detected
+  [PASS] T10 crash-after-mutation idempotent
+  [PASS] AT-1 requester cannot sudo to authority
+  [PASS] AT-2 no new setuid binaries from harness
+  [PASS] AT-3 authority DB read denied
+  [PASS] AT-4 authority DB write denied
+  [PASS] AT-5 authority DB WAL denied
+  [PASS] AT-6 authority DB SHM denied
+  [PASS] AT-7 authority DB journal denied
+  [PASS] AT-8 resource write denied
+  [PASS] AT-9 resource credentials read denied
+  [PASS] AT-10 authority private key read denied
+  [PASS] AT-11 executor audit key read denied
+  [PASS] AT-12 forged decision cannot obtain clearance
+  [PASS] AT-13 forged clearance signature rejected
+  [PASS] AT-14 executor has no authority-key references
+  [PASS] AT-15 replay one-shot
+  [PASS] AT-16 replay after restart
+  [PASS] AT-17 concurrent executor consistency
+  [PASS] AT-18 revoke-before-clearance denied
+  [PASS] AT-19 clearance-before-revoke valid
+  [PASS] AT-20 audit record tamper detected
+  [PASS] AT-21 audit anchor tamper detected
+  [PASS] AT-22 crash before PREPARED (clean state)
+  [PASS] AT-23 crash after PREPARED before mutation
+  [PASS] AT-24 crash after mutation before COMPLETED
+  [PASS] AT-25 socket unlink denied
+  [PASS] AT-26 socket replace denied
+  [PASS] AT-27 no inherited authority/executor FDs
+  [PASS] AT-28 requester not in ate-authority/ate-executor groups
+  [PASS] AT-29 no credential env vars
+  [PASS] AT-30 idempotent resource mutation (3 submits → +1)
+  [PASS] AT-31 executor rejects execute without clearance
+  [PASS] AT-32 expired clearance denied
+  [PASS] AT-33 executor verifies requester UID via SO_PEERCRED
+  [PASS] AT-34 repeated clearance request returns same persisted clearance
+  [PASS] AT-35 concurrent clearance requests converge
+  [PASS] AT-36 expired clearance not replaced (same id returned)
+  [PASS] AT-37 repeated decision/clearance yields exactly one mutation
+  [PASS] AT-38 resource idempotency across distinct delivery
+  [PASS] AT-39 executor verifies requester UID binding
+  [PASS] AT-40 executor has no access path to authority state
+
+Total: 51/51 PASS, 0 FAIL

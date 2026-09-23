@@ -1,5 +1,15 @@
 # Research Agenda
 
+## Current ordered program — 2026-08-28
+
+1. Complete the Amazing Birthday three-condition causal ablation (thin description vs concise contract vs durability package).
+2. Use its result as the design gate for the Receipt Organizer causal ablation.
+3. Test the same preservation question on stateful Receipt Organizer behavior with blinded independent evaluation.
+4. Resume Fair Price only after those causal gates close.
+5. Measure development economics only after the preservation mechanism is characterized well enough to compare like with like.
+
+This order prevents additional successful reconstructions from being mistaken for evidence that a particular preservation package caused the success.
+
 ## Phase 1 — Reproducibility
 
 Goal: determine whether independently operated AI sessions can reproduce a conversationally developed application's behavior.
@@ -12,6 +22,7 @@ Core experiments:
 4. **Cross-model reconstruction** — repeat the same procedure with multiple frontier models.
 5. **Cross-platform behavioral portability** — provide the same durability package to different AI providers and allow each platform to choose its own implementation mechanism; compare validated behavior rather than implementation similarity.
 6. **Repeatability test** — reconstruct multiple times with the same model and compare variance.
+7. **Causal preservation ablation** — compare a thin description, concise behavioral contract, and full durability package under held-constant generation and evaluation conditions.
 
 For cross-platform experiments, preserve the receiving platform's implementation choices as evidence. A reconstruction may be conversational, code-generating, skill-based, workflow-based, or use another platform-native mechanism. The central question is whether the application retains its behavioral identity under the same acceptance criteria.
 
@@ -28,6 +39,8 @@ Questions:
 - How should intentionally changed behavior be distinguished from drift?
 - What minimum artifact set supports behavioral portability across AI providers?
 - Which parts of a durability package are platform-independent, and which must remain platform-specific?
+- What behavior does the full package transmit that is absent from a thin description or concise contract?
+- Does the package contribution change when the application is stateful and data-producing?
 
 ## Phase 3 — Development economics
 
@@ -46,6 +59,8 @@ Candidate metrics:
 - number of regressions introduced per change
 
 Where possible, compare with a small conventional implementation of the same bounded application.
+
+Development-economics work is deferred until the Amazing Birthday and Receipt Organizer causal preservation experiments close; otherwise package-construction overhead and model competence would confound the comparison.
 
 ## Phase 4 — Applicability boundary
 
