@@ -1,0 +1,143 @@
+{
+  "experiment_id": "BP-AB-TRANSCRIPT-CLAUDE-004",
+  "transfer_in": "20260826T204100Z-behavioral-portability-transcript-only-claude-004",
+  "protocol_version": "v0.1.1",
+  "protocol_amendment": {
+    "date": "2026-08-27",
+    "reason": "v0.1 protocol recorded 64-char hex values labeled 'SHA-256' that did not match the canonical content of the two withheld-test files at the frozen source commit. v0.1.1 supersedes with the correct content SHA-256s. No target invocation occurred before the amendment.",
+    "audit_trail": "results/preflight-BLOCKED-2026-08-27.md + results/preflight-PASS-v0.1.1-2026-08-27.md + README.md § 'Protocol amendment: v0.1.1, 2026-08-27'"
+  },
+  "operator": {
+    "agent": "Hermes Agent",
+    "model": "MiniMax-M3",
+    "provider": "minimax",
+    "session": "telegram:hermes-workstreams:279",
+    "date_utc": "2026-08-27"
+  },
+  "frozen_source": {
+    "commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+    "transcript_blob_sha1_git": "bab34913805c625b9bae46b54169b6decc447cd6",
+    "withheld_validation_sha256_content": "cb3299e4bf4ab110b8b88dd67127586f16f5b53a21a6c60e4dd88cba23fd223d",
+    "withheld_behavioral_tests_sha256_content": "35d87d8725f30a620e2a97ff14a51cc38a31453a18aa6a8dea889ed6a90a26a1"
+  },
+  "target_environment": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model_pinned": "claude-sonnet-4-6",
+    "model_pinned_via": "claude --model claude-sonnet-4-6 on every turn",
+    "session_id": "eec5da0c-ede0-4777-9bd6-29c367fd24e1",
+    "session_lifecycle": "fresh session-id at turn 1; --resume for turns 2-4",
+    "isolation": "--allowedTools '' on every turn (denies Read, Write, Bash, WebFetch, WebSearch)",
+    "auth": "claude.ai, apiProvider=firstParty, email=fjventura20@gmail.com",
+    "no_repair": true,
+    "no_model_fallback": true,
+    "no_provider_fallback": true,
+    "no_reissue_for_evidence_capture": true
+  },
+  "captures": [
+    {
+      "turn": 1,
+      "role": "reconstruction",
+      "user_prompt": "Reconstruct the application per the system prompt. When you are ready, state that you are ready.",
+      "raw_file": "/tmp/portability-004/operator/reconstruction-raw.json",
+      "raw_file_bytes": 1993,
+      "raw_file_sha256": "5373a43e3e58c536fd3d888462c21dc5985d3fa8f620c5dcf8f6f7344de35367",
+      "extracted_output_file": "results/reconstruction-output.md",
+      "result_text_length_chars": 529,
+      "duration_ms": 46828,
+      "ttft_ms": 12213,
+      "output_tokens": 1662,
+      "cost_usd": 0.114634,
+      "truncated": false,
+      "stop_reason": "end_turn"
+    },
+    {
+      "turn": 2,
+      "role": "withheld_test_1",
+      "user_prompt": "Birthdate November 9, 1989",
+      "raw_file": "/tmp/portability-004/operator/test-1-raw.json",
+      "raw_file_bytes": 7616,
+      "raw_file_sha256": "58ce1cef023f99a16295c1c24003ec706ed6118f2d5288250a132d84b198db7f",
+      "extracted_output_file": "results/test-1-output.md",
+      "result_text_length_chars": 6184,
+      "duration_ms": 71425,
+      "ttft_ms": 39558,
+      "output_tokens": 3461,
+      "cost_usd": 0.089894,
+      "truncated": false,
+      "stop_reason": "end_turn"
+    },
+    {
+      "turn": 3,
+      "role": "withheld_test_2",
+      "user_prompt": "Birthdate February 29, 1960",
+      "raw_file": "/tmp/portability-004/operator/test-2-raw.json",
+      "raw_file_bytes": 8192,
+      "raw_file_sha256": "c8340c77c9bafb9a535c4eb672d22ad861fa013a0d8252076983562413d2c893",
+      "extracted_output_file": "results/test-2-output.md",
+      "result_text_length_chars_visible": 7815,
+      "duration_ms": 91169,
+      "ttft_ms": 55493,
+      "output_tokens": 4529,
+      "cost_usd": 0.087146,
+      "truncated": true,
+      "truncation_note": "Mid-envelope clip at 8192 bytes; assistant-text content present up through closing prose; JSON parser fails on unterminated string at byte 8107",
+      "stop_reason": "end_turn"
+    },
+    {
+      "turn": 4,
+      "role": "withheld_test_3",
+      "user_prompt": "Birthdate June 23, 1956",
+      "raw_file": "/tmp/portability-004/operator/test-3-raw.json",
+      "raw_file_bytes": 8192,
+      "raw_file_sha256": "8dfca78f3681b5228c7b15ff934e51783461c335aeeb509f4cacb0578c1ba5ff",
+      "extracted_output_file": "results/test-3-output.md",
+      "result_text_length_chars_visible": 7794,
+      "duration_ms": 91725,
+      "ttft_ms": 52233,
+      "output_tokens": "see-truncation-note",
+      "cost_usd": 0.091788,
+      "truncated": true,
+      "truncation_note": "Mid-envelope clip at 8192 bytes; assistant-text content present up through closing prose; JSON parser fails on unterminated string at byte 8107",
+      "stop_reason": "end_turn"
+    }
+  ],
+  "total_cost_usd": 0.383462,
+  "total_wall_seconds": 303.42,
+  "operator_score": {
+    "test_1_score_x_of_20": 20,
+    "test_1_critical_reqs_met": true,
+    "test_2_score_x_of_20": 20,
+    "test_2_critical_reqs_met": true,
+    "test_3_score_x_of_20": 20,
+    "test_3_critical_reqs_met": true,
+    "operator_disposition_on_visible_content": "PASS",
+    "operator_formal_disposition": "INDETERMINATE (per protocol § Freeze / first-call / no-repair rules; evidence-capture defect on tests 2 and 3)"
+  },
+  "independent_review": {
+    "reviewer": "ChatGPT",
+    "via": "Frank-as-relay (per Hermes → ChatGPT exchange protocol)",
+    "expected_score_file": "results/score-independent.md",
+    "status": "pending"
+  },
+  "files_in_results": [
+    "preflight-BLOCKED-2026-08-27.md",
+    "preflight-PASS-v0.1.1-2026-08-27.md",
+    "environment.md",
+    "artifact-record.md",
+    "reconstruction-output.md",
+    "test-1-output.md",
+    "test-2-output.md (NOTED: test-2-raw.json truncation)",
+    "test-3-output.md (NOTED: test-3-raw.json truncation)",
+    "failures.md",
+    "score-operator.md",
+    "score-independent.md (pending)",
+    "interpretation.md"
+  ],
+  "raw_capture_index": {
+    "reconstruction-raw.json": "5373a43e3e58c536fd3d888462c21dc5985d3fa8f620c5dcf8f6f7344de35367",
+    "test-1-raw.json": "58ce1cef023f99a16295c1c24003ec706ed6118f2d5288250a132d84b198db7f",
+    "test-2-raw.json": "c8340c77c9bafb9a535c4eb672d22ad861fa013a0d8252076983562413d2c893",
+    "test-3-raw.json": "8dfca78f3681b5228c7b15ff934e51783461c335aeeb509f4cacb0578c1ba5ff"
+  }
+}

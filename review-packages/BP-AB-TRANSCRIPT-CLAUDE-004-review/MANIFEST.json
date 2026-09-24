@@ -1,0 +1,78 @@
+{
+  "protocol_version": "v0.2",
+  "experiment_id": "BP-AB-TRANSCRIPT-CLAUDE-004",
+  "transfer_timestamp": "20260923T155000Z",
+  "origin": {
+    "repository": "/home/fjventura20/devProjectsU/development-by-intent/experiments",
+    "experiment_name": "2026-08-26-amazing-birthday-transcript-only-claude-004",
+    "commit": "HEAD"
+  },
+  "operator": "Hermes Agent",
+  "status": "AWAITING_INDEPENDENT_REVIEW",
+  "files": [
+    {
+      "path": "test-2-raw.json",
+      "sha256": "c8340c77c9bafb9a535c4eb672d22ad861fa013a0d8252076983562413d2c893"
+    },
+    {
+      "path": "test-3-output.md",
+      "sha256": "54bdc34f97d4f3ae57ddf739fd0ee03bfee82d078dcbd8b6874c51e0290fd25e"
+    },
+    {
+      "path": "score-operator.md",
+      "sha256": "4ce85ce4401327f50997f2646c32503ac3c959371f5d322945aa38e13126bdbf"
+    },
+    {
+      "path": "test-1-output.md",
+      "sha256": "134826b6c42ef72b64b59abbee6a28f352493882ba37606342161c91f14b6e6c"
+    },
+    {
+      "path": "environment.md",
+      "sha256": "9c88a8b6eb86cd981f41a305dcb48af749d1365c00840c4352302fff07fe5f06"
+    },
+    {
+      "path": "reconstruction-output.md",
+      "sha256": "cc9b24111c7d97763e00ddcad64abe312bcda0d428f6bafbbb4bbc55d34a7f83"
+    },
+    {
+      "path": "test-2-output.md",
+      "sha256": "deb62ba38feb00d1aee21f07a6f634861d06e0372337519982a799b00da329de"
+    },
+    {
+      "path": "failures.md",
+      "sha256": "a038f2e44bc3e394b3293798ef66a2c9fc8a0137f80606d0a98ad0810e5abc72"
+    },
+    {
+      "path": "interpretation.md",
+      "sha256": "321bbec164d4f783cfb01c66ac0f31e91d7b1cb70e0fa3f360f76772018aeaa2"
+    },
+    {
+      "path": "preflight-PASS-v0.1.1-2026-08-27.md",
+      "sha256": "8fa28fdbe36b8263b069ff298ecc83712c73c12215d491930a99215c434f0e0d"
+    },
+    {
+      "path": "hermes-manifest.json",
+      "sha256": "6328c00cf5616ae3cea6b93804cfac75f334f45a1053b5373e9f584ddc6e7c01"
+    },
+    {
+      "path": "test-1-raw.json",
+      "sha256": "58ce1cef023f99a16295c1c24003ec706ed6118f2d5288250a132d84b198db7f"
+    },
+    {
+      "path": "artifact-record.md",
+      "sha256": "f75dc4da668082c3b6e4dad1f7ac8990311433dc915dbf224d02967a1b220ec9"
+    },
+    {
+      "path": "reconstruction-raw.json",
+      "sha256": "5373a43e3e58c536fd3d888462c21dc5985d3fa8f620c5dcf8f6f7344de35367"
+    },
+    {
+      "path": "preflight-BLOCKED-2026-08-27.md",
+      "sha256": "eb7ae6f90714bc0dee2b330da8b78523354ae3655e88fa78528eec561ae0be25"
+    },
+    {
+      "path": "test-3-raw.json",
+      "sha256": "8dfca78f3681b5228c7b15ff934e51783461c335aeeb509f4cacb0578c1ba5ff"
+    }
+  ]
+}

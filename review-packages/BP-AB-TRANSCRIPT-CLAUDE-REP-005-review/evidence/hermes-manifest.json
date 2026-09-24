@@ -1,0 +1,88 @@
+{
+  "experiment_id": "BP-AB-TRANSCRIPT-CLAUDE-REP-005",
+  "transfer": "20260827T081500Z-behavioral-portability-transcript-only-claude-replication-005",
+  "operator": "Hermes Agent",
+  "operator_model": "MiniMax-M3",
+  "operator_provider": "minimax",
+  "session": "telegram:hermes-workstreams:279",
+  "date_utc": "2026-08-27",
+  "frozen_source_commit": "c369215024c9f8a849daf11bd4b872d7ee566a7a",
+  "transcript_blob_sha1_git": "bab34913805c625b9bae46b54169b6decc447cd6",
+  "withheld_validation_sha256_content": "cb3299e4bf4ab110b8b88dd67127586f16f5b53a21a6c60e4dd88cba23fd223d",
+  "withheld_behavioral_tests_sha256_content": "35d87d8725f30a620e2a97ff14a51cc38a31453a18aa6a8dea889ed6a90a26a1",
+  "system_prompt_sha256": "d71958298bdb0541f5de03c1e3d9dde5b9cd4806a44c8d36b8ec981cd5cf5de4",
+  "target": {
+    "provider": "Anthropic Claude",
+    "cli": "Claude Code 2.1.170",
+    "model_pinned": "claude-sonnet-4-6",
+    "model_pinned_via": "claude --model claude-sonnet-4-6 on every turn",
+    "session_id": "28a3e235-5490-4799-8eb1-27a17b85cae3",
+    "session_lifecycle": "fresh --session-id at turn 1; --resume for turns 2-4",
+    "isolation": "--allowedTools '' on every turn (denies Read, Write, Bash, WebFetch, WebSearch)",
+    "auth_method": "claude.ai firstParty",
+    "no_repair": true,
+    "no_model_fallback": true,
+    "no_provider_fallback": true,
+    "no_reissue_for_evidence_capture": true,
+    "capture_discipline": "v0.2 shell-redirected capture per protocol/capture-discipline-v0.2.md; per-turn gate (jq empty && size>1KB && size%8192!=0 && sha256sum)"
+  },
+  "capture_discipline_v02": {
+    "primary": "claude [flags] > FILE 2>stderr; post-call jq . FILE && jq empty FILE && size>1KB && size%8192!=0 && sha256sum FILE",
+    "audit_chain": "experiments/2026-08-26-amazing-birthday-transcript-only-claude-004/results/failures.md (parent defect); 005 changes only this discipline",
+    "v02_capture_results": {
+      "reconstruction-raw.json": {"bytes": 29744, "jq_empty": "PASS", "size>1KB": "PASS", "size%8192!=0": "PASS", "sha256": "caff4af6568f2ac68238983d7d0c4d4d54321809a7c4f0ed7bba44b85493d708"},
+      "test-1-raw.json": {"bytes": 7486, "jq_empty": "PASS", "size>1KB": "PASS", "size%8192!=0": "PASS", "sha256": "f40ac763bdaa2ef41c69db8d27f9cfdad2ee1b1c113c04e82281c7a33c910176"},
+      "test-2-raw.json": {"bytes": 8615, "jq_empty": "PASS", "size>1KB": "PASS", "size%8192!=0": "PASS", "sha256": "21cff2a5637490e7dcccedc2838355315421290b709640e4d1a4104865db9d2b"},
+      "test-3-raw.json": {"bytes": 8689, "jq_empty": "PASS", "size>1KB": "PASS", "size%8192!=0": "PASS", "sha256": "a481c50011aafe4d9dc4f1bc0554a1a488704ae004173dd05507eec666f02fe8"}
+    }
+  },
+  "turns": [
+    {"turn": 1, "role": "reconstruction", "user_prompt": "Reconstruct the application per the system prompt. When you are ready, state that you are ready.", "result_text_length_chars": 177, "cost_usd": 0.2771, "modelUsage": "claude-sonnet-4-6: inputTokens=6, outputTokens=1993, cacheReadInputTokens=176, cacheCreationInputTokens=27871"},
+    {"turn": 2, "role": "withheld_test_1", "user_prompt": "Birthdate November 9, 1989", "result_text_length_chars": 6048, "cost_usd": 0.0934, "modelUsage": "claude-sonnet-4-6: inputTokens=3, outputTokens=3461, cacheReadInputTokens=23913, cacheCreationInputTokens=0"},
+    {"turn": 3, "role": "withheld_test_2", "user_prompt": "Birthdate February 29, 1960", "result_text_length_chars": 7166, "cost_usd": 0.0705, "modelUsage": "claude-sonnet-4-6: inputTokens=3, outputTokens=4529, cacheReadInputTokens=20581, cacheCreationInputTokens=0"},
+    {"turn": 4, "role": "withheld_test_3", "user_prompt": "Birthdate June 23, 1956", "result_text_length_chars": 7250, "cost_usd": 0.0792, "modelUsage": "claude-sonnet-4-6 (recovered from envelope, exact token count pending)"}
+  ],
+  "total_cost_usd": 0.5202,
+  "operator_score": {
+    "test_1_score_x_of_20": 20,
+    "test_1_critical_reqs_met": true,
+    "test_2_score_x_of_20": 20,
+    "test_2_critical_reqs_met": true,
+    "test_3_score_x_of_20": 20,
+    "test_3_critical_reqs_met": true,
+    "operator_disposition": "PASS"
+  },
+  "experiment_level_disposition": "PASS",
+  "comparator_paired_with_replication_002_and_004": {
+    "replication_002_input": "artifact-only (Phase A: 03-behavioral-baseline.md + RECONSTRUCTION-PROMPT.md)",
+    "replication_002_chatgpt_independent_score": [19, 19, 17],
+    "replication_002_final_disposition": "PASS",
+    "004_input": "transcript-only (Phase A: 02-development-transcript/transcript.txt)",
+    "004_operator_score_on_visible_content": [20, 20, 20],
+    "004_final_disposition": "INDETERMINATE (evidence-capture defect on tests 2 and 3)",
+    "005_input": "transcript-only (Phase A: 02-development-transcript/transcript.txt)",
+    "005_operator_score_clean_capture": [20, 20, 20],
+    "005_final_disposition": "PASS",
+    "pairing_question": "Does the canonical transcript alone preserve enough behavioral identity to pass the frozen v1.0 withheld tests that the two-artifact durability package passed at 19/19/17 (replication 002)?"
+  },
+  "independent_review": {
+    "reviewer": "ChatGPT",
+    "via": "Frank-as-relay (per Hermes → ChatGPT exchange protocol)",
+    "expected_score_file": "results/score-independent.md",
+    "status": "pending"
+  },
+  "files_in_results": [
+    "preflight-PASS-v0.2-2026-08-27.md (pending)",
+    "environment.md",
+    "artifact-record.md",
+    "failures.md",
+    "reconstruction-output.md + reconstruction-raw.json",
+    "test-1-output.md + test-1-raw.json",
+    "test-2-output.md + test-2-raw.json",
+    "test-3-output.md + test-3-raw.json",
+    "score-operator.md",
+    "score-independent.md (pending ChatGPT review)",
+    "interpretation.md",
+    "hermes-manifest.json"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "protocol_version": "v0.2",
+  "experiment_id": "BP-AB-TRANSCRIPT-CLAUDE-REP-005",
+  "transfer_timestamp": "20260923T155000Z",
+  "origin": {
+    "repository": "/home/fjventura20/devProjectsU/development-by-intent/experiments",
+    "experiment_name": "2026-08-27-amazing-birthday-transcript-only-claude-replication-005",
+    "commit": "HEAD"
+  },
+  "operator": "Hermes Agent",
+  "status": "AWAITING_INDEPENDENT_REVIEW",
+  "paired_experiment": "BP-AB-TRANSCRIPT-CLAUDE-004",
+  "files": [
+    {
+      "path": "test-2-raw.json",
+      "sha256": "21cff2a5637490e7dcccedc2838355315421290b709640e4d1a4104865db9d2b"
+    },
+    {
+      "path": "test-3-output.md",
+      "sha256": "b4b40ce54f46edf32099a73c767cd55c1fc73cd5a2bce4ae0b074476274a1205"
+    },
+    {
+      "path": "score-operator.md",
+      "sha256": "a569545d74de4fca4b151ec871bdb0b202e9eefb896b08cb1d0f4c5767f90e2d"
+    },
+    {
+      "path": "preflight-PASS-v0.2-2026-08-27.md",
+      "sha256": "921201aa0f26b98794d3a389165607197125982578659b0d049df59334b76398"
+    },
+    {
+      "path": "test-1-output.md",
+      "sha256": "0f378668b9d6b1d1cc259af4fd141cb2dabd42bf4d8453716231ba8c7d01264b"
+    },
+    {
+      "path": "environment.md",
+      "sha256": "8b145db7f94596529e9170577c41c5bde02fb6195831d1fea5ca33ffa304211d"
+    },
+    {
+      "path": "reconstruction-output.md",
+      "sha256": "ee745cbbf8dba6335dc1eca798299a8e0662070a82c0739609dcfb176cdd1955"
+    },
+    {
+      "path": "test-2-output.md",
+      "sha256": "a3e517976f9cf1e8bc493c0f9d13aaf362cd6f7b508a950a71631804f58babd2"
+    },
+    {
+      "path": "failures.md",
+      "sha256": "8927f5a378dbb5a539b3e4239a090e8f1241055fd27de95ccee4fb986fe68476"
+    },
+    {
+      "path": "interpretation.md",
+      "sha256": "9ac57c2621cff0dd1be370afe185d4dc67955ab2f75fd2892da5ccf18dd74c78"
+    },
+    {
+      "path": "hermes-manifest.json",
+      "sha256": "d443d252b09f33513796c42c227e47da453f5fe94643cc9674f15e254f9a1873"
+    },
+    {
+      "path": "test-1-raw.json",
+      "sha256": "f40ac763bdaa2ef41c69db8d27f9cfdad2ee1b1c113c04e82281c7a33c910176"
+    },
+    {
+      "path": "artifact-record.md",
+      "sha256": "17d95f6085d662a47d9c1fbb9a889f49e9fc996a5b67f0538572046aed3ef547"
+    },
+    {
+      "path": "reconstruction-raw.json",
+      "sha256": "caff4af6568f2ac68238983d7d0c4d4d54321809a7c4f0ed7bba44b85493d708"
+    },
+    {
+      "path": "score-independent.md",
+      "sha256": "c0722e92706bdd9039c19faf8cd26727c4bbb5a5e400d8c6911c25b00bce41d8"
+    },
+    {
+      "path": "test-3-raw.json",
+      "sha256": "a481c50011aafe4d9dc4f1bc0554a1a488704ae004173dd05507eec666f02fe8"
+    }
+  ]
+}
